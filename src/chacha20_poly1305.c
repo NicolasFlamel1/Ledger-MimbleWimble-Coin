@@ -1,0 +1,282 @@
+// Header files
+#include <os_io_seproxyhal.h>
+#include <string.h>
+#include "chacha20_poly1305.h"
+#include "common.h"
+
+
+// Constants
+
+// ChaCha20 nonce size
+const size_t CHACHA20_NONCE_SIZE = 12;
+
+// Poly1305 tag size
+const size_t POLY1305_TAG_SIZE = 16;
+
+// ChaCha20 state constant
+static const char CHACHA20_STATE_CONSTANT[] = "expand 32-byte k";
+
+// ChaCha20 state block counter index
+static const size_t CHACHA20_BLOCK_COUNTER_INDEX = 12;
+
+// Poly1305 block size size
+static const size_t POLY1305_BLOCK_SIZE = 16;
+
+// Poly1305 p
+static const uint8_t POLY1305_P[] = {0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFB};
+		
+
+
+// Function prototypes
+
+// Quarter round
+static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
+
+// Rotate left
+static void rotateLeft(uint32_t *value, size_t bits);
+
+// Initialize ChaCha20 current state
+static void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
+
+// Update Poly1305 accumulator
+static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength);
+
+
+// Supporting function implementation
+
+// Initialize ChaCha20 Poly1305
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength) {
+
+	// Set additional authenticated data length
+	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
+	
+	// Set the data length to zero
+	chaCha20Poly1305State->dataLength = 0;
+
+	// Initialize ChaCha20 original state
+	chaCha20Poly1305State->chaCha20OriginalState[0] = *(uint32_t *)CHACHA20_STATE_CONSTANT;
+	chaCha20Poly1305State->chaCha20OriginalState[1] = *(uint32_t *)&CHACHA20_STATE_CONSTANT[sizeof(uint32_t) * 1];
+	chaCha20Poly1305State->chaCha20OriginalState[2] = *(uint32_t *)&CHACHA20_STATE_CONSTANT[sizeof(uint32_t) * 2];
+	chaCha20Poly1305State->chaCha20OriginalState[3] = *(uint32_t *)&CHACHA20_STATE_CONSTANT[sizeof(uint32_t) * 3];
+	chaCha20Poly1305State->chaCha20OriginalState[4] = *(uint32_t *)key;
+	chaCha20Poly1305State->chaCha20OriginalState[5] = *(uint32_t *)&key[sizeof(uint32_t) * 1];
+	chaCha20Poly1305State->chaCha20OriginalState[6] = *(uint32_t *)&key[sizeof(uint32_t) * 2];
+	chaCha20Poly1305State->chaCha20OriginalState[7] = *(uint32_t *)&key[sizeof(uint32_t) * 3];
+	chaCha20Poly1305State->chaCha20OriginalState[8] = *(uint32_t *)&key[sizeof(uint32_t) * 4];
+	chaCha20Poly1305State->chaCha20OriginalState[9] = *(uint32_t *)&key[sizeof(uint32_t) * 5];
+	chaCha20Poly1305State->chaCha20OriginalState[10] = *(uint32_t *)&key[sizeof(uint32_t) * 6];
+	chaCha20Poly1305State->chaCha20OriginalState[11] = *(uint32_t *)&key[sizeof(uint32_t) * 7];
+	chaCha20Poly1305State->chaCha20OriginalState[12] = 0;
+	chaCha20Poly1305State->chaCha20OriginalState[13] = *(uint32_t *)nonce;
+	chaCha20Poly1305State->chaCha20OriginalState[14] = *(uint32_t *)&nonce[sizeof(uint32_t) * 1];
+	chaCha20Poly1305State->chaCha20OriginalState[15] = *(uint32_t *)&nonce[sizeof(uint32_t) * 2];
+	
+	// Initialize ChaCha20 current state
+	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
+	
+	// Get the Poly1305 key from the ChaCha20 current state
+	const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
+	
+	// Set Poly1305 r to the first part of the ChaCha20 current state
+	memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
+	chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
+	
+	// Clamp Poly1305 r
+	chaCha20Poly1305State->poly1305R[3] &= 15;
+	chaCha20Poly1305State->poly1305R[7] &= 15;
+	chaCha20Poly1305State->poly1305R[11] &= 15;
+	chaCha20Poly1305State->poly1305R[15] &= 15;
+	chaCha20Poly1305State->poly1305R[4] &= 252;
+	chaCha20Poly1305State->poly1305R[8] &= 252;
+	chaCha20Poly1305State->poly1305R[12] &= 252;
+	
+	// Convert Poly1305 r to big endian
+	swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
+	
+	// Set Poly1305 s to the second part of the ChaCha20 current state
+	memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
+	chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
+	
+	// Convert Poly1305 s to big endian
+	swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305S));
+	
+	// Set Poly1305 accumulator to zero
+	explicit_bzero(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+	
+	// Update Poly1305 accumulator with the additional authenticated data
+	updatePoly1305Accumulator(chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+}
+
+// Encrypt ChaCha20 Poly1305 data
+void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+
+	// Check if data length will overflow
+	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+
+	// Increment the ChaCha20 original state's block counter
+	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_BLOCK_COUNTER_INDEX];
+	
+	// Initialize ChaCha20 current state
+	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
+	
+	// Go through all bytes in the data block
+	for(size_t i = 0; i < dataBlockLength; ++i) {
+	
+		// Encrypt the byte with the ChaCha20 current state
+		encryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+	}
+	
+	// Update Poly1305 accumulator with the encrypted data block
+	updatePoly1305Accumulator(chaCha20Poly1305State, encryptedDataBlock, dataBlockLength);
+	
+	// Update the data length
+	chaCha20Poly1305State->dataLength += dataBlockLength;
+}
+
+// Decrypt ChaCha20 Poly1305 data
+void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+
+	// Check if data length will overflow
+	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+
+	// Increment the ChaCha20 original state's block counter
+	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_BLOCK_COUNTER_INDEX];
+	
+	// Initialize ChaCha20 current state
+	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
+	
+	// Go through all bytes in the data block
+	for(size_t i = 0; i < dataBlockLength; ++i) {
+	
+		// Decrypt the byte with the ChaCha20 current state
+		decryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+	}
+	
+	// Update Poly1305 accumulator with the data block
+	updatePoly1305Accumulator(chaCha20Poly1305State, dataBlock, dataBlockLength);
+	
+	// Update the data length
+	chaCha20Poly1305State->dataLength += dataBlockLength;
+}
+
+// Get ChaCha20 Poly1305 tag
+void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *tag) {
+
+	// Append additional authenticated data length and encrypted data length
+	uint8_t lengths[sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength) + sizeof(chaCha20Poly1305State->dataLength)];
+	memcpy(lengths, (uint8_t *)&chaCha20Poly1305State->additionalAuthenticatedDataLength, sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength));
+	memcpy(&lengths[sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength)], (uint8_t *)&chaCha20Poly1305State->dataLength, sizeof(chaCha20Poly1305State->dataLength));
+
+	// Update Poly1305 accumulator with the lengths
+	updatePoly1305Accumulator(chaCha20Poly1305State, lengths, sizeof(lengths));
+	
+	// Add Poly1305 s to the Poly1305 accumulator
+	cx_math_add(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+	
+	// Convert the Poly1305 accumulator to little endian
+	swapEndianness(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+	
+	// Set tag to the Poly1305 accumulator
+	memcpy(tag, chaCha20Poly1305State->poly1305Accumulator, POLY1305_TAG_SIZE);
+}
+
+// Quarter round
+void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d) {
+
+	// Perform quarter round
+	*a += *b;
+	*d ^= *a;
+	rotateLeft(d, 16);
+	
+	*c += *d;
+	*b ^= *c;
+	rotateLeft(b, 12);
+	
+	*a += *b;
+	*d ^= *a;
+	rotateLeft(d, 8);
+	
+	*c += *d;
+	*b ^= *c;
+	rotateLeft(b, 7);
+}
+
+// Rotate left
+void rotateLeft(uint32_t *value, size_t bits) {
+
+	// Rotate value left by number of bits
+	*value = (*value << bits) | (*value >> (sizeof(*value) * BITS_IN_A_BYTE - bits));
+}
+
+// Initialize ChaCha20 current state
+void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState) {
+
+	// Set ChaCha20 current state as the ChaCha20 original state
+	memcpy(chaCha20CurrentState, chaCha20Poly1305State->chaCha20OriginalState, sizeof(chaCha20Poly1305State->chaCha20OriginalState));
+	
+	// Go through ten iterations
+	for(uint8_t i = 0; i < 10; ++i) {
+	
+		// Perform two rounds on the ChaCha20 current state
+		quarterRound(&chaCha20CurrentState[0], &chaCha20CurrentState[4], &chaCha20CurrentState[8], &chaCha20CurrentState[12]);
+		quarterRound(&chaCha20CurrentState[1], &chaCha20CurrentState[5], &chaCha20CurrentState[9], &chaCha20CurrentState[13]);
+		quarterRound(&chaCha20CurrentState[2], &chaCha20CurrentState[6], &chaCha20CurrentState[10], &chaCha20CurrentState[14]);
+		quarterRound(&chaCha20CurrentState[3], &chaCha20CurrentState[7], &chaCha20CurrentState[11], &chaCha20CurrentState[15]);
+		quarterRound(&chaCha20CurrentState[0], &chaCha20CurrentState[5], &chaCha20CurrentState[10], &chaCha20CurrentState[15]);
+		quarterRound(&chaCha20CurrentState[1], &chaCha20CurrentState[6], &chaCha20CurrentState[11], &chaCha20CurrentState[12]);
+		quarterRound(&chaCha20CurrentState[2], &chaCha20CurrentState[7], &chaCha20CurrentState[8], &chaCha20CurrentState[13]);
+		quarterRound(&chaCha20CurrentState[3], &chaCha20CurrentState[4], &chaCha20CurrentState[9], &chaCha20CurrentState[14]);
+	}
+	
+	// Go through all parts of the ChaCha20 current state
+	for(size_t i = 0; i < ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState); ++i) {
+	
+		// Add ChaCha20 original state part to the ChaCha20 current state part
+		chaCha20CurrentState[i] += chaCha20Poly1305State->chaCha20OriginalState[i];
+	}
+}
+
+// Update Poly1305 accumulator
+void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength) {
+
+	// Go through all blocks in the value
+	for(size_t i = 0; i <= valueLength / POLY1305_BLOCK_SIZE; ++i) {
+	
+		// Get current block size
+		const size_t currentBlockSize = MIN(MAX(valueLength - POLY1305_BLOCK_SIZE * i, 0), POLY1305_BLOCK_SIZE);
+		
+		// Check if the current block isn't empty
+		if(currentBlockSize) {
+		
+			// Copy current block to block
+			uint8_t block[POLY1305_NUMBER_SIZE];
+			memcpy(block, &value[i * POLY1305_BLOCK_SIZE], currentBlockSize);
+			
+			// Pad the block
+			explicit_bzero(&block[currentBlockSize], sizeof(block) - currentBlockSize - 1);
+			
+			// Set highest block byte to one
+			block[sizeof(block) - 1] = 1;
+			
+			// Convert block to big endian
+			swapEndianness(block, sizeof(block));
+			
+			// Add block to the Poly1305 accumulator
+			cx_math_add(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, block, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+			
+			// Multiply the Poly1305 accumulator by the Poly1305 r and modulo it by the Poly1305 p
+			cx_math_multm(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305R, POLY1305_P, sizeof(chaCha20Poly1305State->poly1305Accumulator));	
+		}
+	}
+}

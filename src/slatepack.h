@@ -1,0 +1,73 @@
+// Header guard
+#ifndef SLATEPACK_H
+#define SLATEPACK_H
+
+
+// Header files
+#include <stdint.h>
+#include "chacha20_poly1305.h"
+
+
+// Definitions
+
+// Slatepack data session key size
+#define SLATEPACK_DATA_SESSION_KEY_SIZE 16
+
+
+// Constants
+
+// Slatepack shared private key size
+extern const size_t SLATEPACK_SHARED_PRIVATE_KEY_SIZE;
+
+// Slatepack data state
+enum SlatepackDataState {
+
+	// Inactive Slatepack data state
+	INACTIVE_SLATEPACK_DATA_STATE,
+	
+	// Ready Slatepack data state
+	READY_SLATEPACK_DATA_STATE,
+	
+	// Active Slatepack data state
+	ACTIVE_SLATEPACK_DATA_STATE,
+	
+	// Complete Slatepack data state
+	COMPLETE_SLATEPACK_DATA_STATE
+};
+
+
+// Structures
+
+// Slatepack data
+struct SlatepackData {
+
+	// Encrypting state
+	enum SlatepackDataState encryptingState;
+	
+	// Decrypting state
+	enum SlatepackDataState decryptingState;
+
+	// Session key
+	uint8_t sessionKey[SLATEPACK_DATA_SESSION_KEY_SIZE];
+	
+	// Chacha20 Poly1305 state
+	struct ChaCha20Poly1305State chaCha20Poly1305State;
+};
+
+
+// Global variables
+
+// Slatepack data
+extern struct SlatepackData slatepackData;
+
+
+// Function prototypes
+
+// Reset Slatepack data
+void resetSlatepackData(void);
+
+// Create Slatepack shared private key
+void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const uint8_t *publicKey);
+
+
+#endif
