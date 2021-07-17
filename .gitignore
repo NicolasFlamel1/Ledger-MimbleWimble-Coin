@@ -3,3 +3,5 @@ debug
 dep
 obj
 src/secp256k1-zkp-master
+src/glyphs.c
+src/glyphs.h
