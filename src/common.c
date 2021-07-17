@@ -12,7 +12,7 @@
 const uint16_t ERROR_TYPE_MASK = 0xF000;
 
 // Ellipsis
-const char ELLIPSIS[] = {"..."};
+const char ELLIPSIS[] = "...";
 
 // First printable character
 static const char FIRST_PRINTABLE_CHARACTER = ' ';
