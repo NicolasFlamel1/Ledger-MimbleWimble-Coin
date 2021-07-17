@@ -62,7 +62,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publ
 			// Otherwise
 			#else
 			
-				// TODO test this on real hardware to see if it is necessary
+				// TODO test this on real hardware to see if the extra four zero bytes are necessary
 				
 				// Get shared private key from the tweaked public key and salt
 				uint8_t temp[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + sizeof("\x00\x00\x00\x00") - sizeof((char)'\0')];
@@ -83,4 +83,13 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publ
 	
 	// End try
 	END_TRY;
+}
+
+// Is valid MQS address
+bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length) {
+
+	// TODO implement verifying the address
+
+	// Return true
+	return true;
 }

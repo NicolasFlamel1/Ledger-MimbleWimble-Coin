@@ -9,13 +9,13 @@
 // Definitions
 
 // Currency information name length
-#define CURRENCY_INFORMATION_NAME_LENGTH (20 + sizeof((char)'\0'))
+#define CURRENCY_INFORMATION_NAME_LENGTH sizeof("MimbleWimble Coin")
 
 // Currency information abbreviation length
-#define CURRENCY_INFORMATION_ABBREVIATION_LENGTH (4 + sizeof((char)'\0'))
+#define CURRENCY_INFORMATION_ABBREVIATION_LENGTH sizeof("GRIN")
 
 // Currency information version length
-#define CURRENCY_INFORMATION_VERSION_LENGTH (10 + sizeof((char)'\0'))
+#define CURRENCY_INFORMATION_VERSION_LENGTH sizeof("0.0.1")
 
 // Currency information icon colors length
 #define CURRENCY_INFORMATION_ICON_COLORS_LENGTH 2

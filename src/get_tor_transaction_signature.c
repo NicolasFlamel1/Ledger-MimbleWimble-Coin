@@ -80,19 +80,9 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, un
 			
 			// Get address public key from address private key
 			cx_ecfp_public_key_t addressPublicKey;
-			cx_ecfp_generate_pair(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+			getTorPublicKey(&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
 			
 			// Check if the address public key is in the payment proof message
-			if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Compress the address public key
-			cx_edwards_compress_point(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len);
-			
-			// Check if the compressed address public key is in the payment proof message
 			if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
 			
 				// Throw invalid parameters error

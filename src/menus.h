@@ -27,7 +27,7 @@
 #define REQUESTOR_LINE_BUFFER_LENGTH (LINE_CHARACTER_LENGTH * 2 + sizeof((char)'\0'))
 
 // Time line buffer length
-#define TIME_LINE_BUFFER_LENGTH sizeof("hh:mm:ss on YYYYYY-MM-DD UTC")
+#define TIME_LINE_BUFFER_LENGTH sizeof("HH:MM:SS on YYYYYY-mm-dd ZZZ")
 
 // Tor public key line buffer length
 #define TOR_PUBLIC_KEY_LINE_BUFFER_LENGTH (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))

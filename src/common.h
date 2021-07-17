@@ -13,11 +13,11 @@
 // Hexadecimal character size
 #define HEXADECIMAL_CHARACTER_SIZE (sizeof("FF") - sizeof((char)'\0'))
 
+// Bits in a byte
+#define BITS_IN_A_BYTE 8
+
 
 // Constants
-
-// Bits in a byte
-static const uint8_t BITS_IN_A_BYTE = 8;
 
 // Error type mask
 extern const uint16_t ERROR_TYPE_MASK;
@@ -26,7 +26,7 @@ extern const uint16_t ERROR_TYPE_MASK;
 #ifndef TARGET_NANOX
 
 	// Ellipsis
-	static const char ELLIPSIS[] = "...";
+	extern const char ELLIPSIS[sizeof("...")];
 #endif
 
 // Error
@@ -68,6 +68,9 @@ bool willResponseOverflow(unsigned short currentLength, size_t change);
 
 // Is printable character
 bool isPrintableCharacter(char character);
+
+// To uppercase
+char toUppercase(char character);
 
 // Is zero array
 bool isZeroArray(const uint8_t *array, size_t length);

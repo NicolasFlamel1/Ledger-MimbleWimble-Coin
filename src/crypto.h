@@ -139,5 +139,8 @@ bool commitmentIsValid(const uint8_t *commitment);
 // Calculate bulletproof
 void calculateBulletproof(volatile uint8_t *bulletproof, volatile size_t *bulletproofLength, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
+// Is valid Ed25519 public key
+bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
+
 
 #endif

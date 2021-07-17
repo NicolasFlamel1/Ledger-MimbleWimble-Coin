@@ -11,6 +11,9 @@
 // Error type mask
 const uint16_t ERROR_TYPE_MASK = 0xF000;
 
+// Ellipsis
+const char ELLIPSIS[] = {"..."};
+
 // First printable character
 static const char FIRST_PRINTABLE_CHARACTER = ' ';
 
@@ -64,6 +67,24 @@ bool isPrintableCharacter(char character) {
 
 	// Return if character is printable
 	return character >= FIRST_PRINTABLE_CHARACTER && character <= LAST_PRINTABLE_CHARACTER;
+}
+
+// To uppercase
+char toUppercase(char character) {
+
+	// Check if character is lowercase
+	if(character >= 'a' && character <= 'z') {
+	
+		// Return character as uppercase
+		return character -= 'a' - 'A';
+	}
+	
+	// Otherwise
+	else {
+	
+		// Return character
+		return character;
+	}
 }
 
 // Is zero array

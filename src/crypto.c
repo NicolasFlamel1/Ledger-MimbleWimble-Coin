@@ -777,6 +777,12 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 			
 			// Return payment proof message length
 			return sizeof(value) + COMMITMENT_SIZE + senderAddressLength;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 }
 
@@ -795,7 +801,12 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				// MQS address length
 				case MQS_ADDRESS_LENGTH:
 				
-					// TODO verify that sender MQS address is a valid address
+					// Check if sender address isn't a valid MQS address
+					if(!isValidMqsAddress(senderAddress, senderAddressLength)) {
+					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
 				
 					// Break
 					break;
@@ -803,7 +814,12 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				// Tor address length
 				case TOR_ADDRESS_LENGTH:
 				
-					// TODO verify that sender Tor address is a valid address
+					// Check if sender address isn't a valid Tor address
+					if(!isValidTorAddress(senderAddress, senderAddressLength)) {
+					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
 				
 					// Break
 					break;
@@ -824,8 +840,13 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 		// Grin ID
 		case GRIN_ID:
 		
-			// TODO verify that sender address is a valid address
-		
+			// Check if the sender address isn't a valid Ed25519 public key
+			if(!isValidEd25519PublicKey(senderAddress, senderAddressLength)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
 			// Convert value to big endian
 			swapEndianness((uint8_t *)&value, sizeof(value));
 			
@@ -930,3 +951,46 @@ void calculateBulletproof(volatile uint8_t *bulletproof, volatile size_t *bullet
 	END_TRY;
 }
 
+// Is valid Ed25519 public key
+bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != ED25519_PUBLIC_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Uncompress the public key
+			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
+			
+			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		}
+		
+		// Catch all errors
+		CATCH_ALL {
+			
+			// Return false
+			return false;
+		}
+		
+		// Finally
+		FINALLY {
+		
+		}
+	}
+	
+	// End try
+	END_TRY;
+	
+	// Return true
+	return true;
+}
