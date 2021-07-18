@@ -7,13 +7,14 @@
 #include "continue_decrypting_slatepack_data.h"
 #include "continue_encrypting_mqs_data.h"
 #include "continue_encrypting_slatepack_data.h"
+#include "continue_transaction_get_offset.h"
+#include "continue_transaction_get_public_key.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
 #include "finish_decrypting_mqs_data.h"
 #include "finish_decrypting_slatepack_data.h"
 #include "finish_encrypting_mqs_data.h"
 #include "finish_encrypting_slatepack_data.h"
-#include "finish_transaction_get_public_key.h"
 #include "finish_transaction_get_signature.h"
 #include "get_application_information.h"
 #include "get_bulletproof.h"
@@ -297,11 +298,20 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Finish transaction get public key instruction
-				case FINISH_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION:
+				// Continue transaction get offset instruction
+				case CONTINUE_TRANSACTION_GET_OFFSET_INSTRUCTION:
 				
-					// Process finish transaction get public key request
-					processFinishTransactionGetPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process continue transaction get offset request
+					processContinueTransactionGetOffsetRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					
+					// Break
+					break;
+				
+				// Continue transaction get public key instruction
+				case CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION:
+				
+					// Process continue transaction get public key request
+					processContinueTransactionGetPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;

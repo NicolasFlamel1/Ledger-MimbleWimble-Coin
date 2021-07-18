@@ -142,5 +142,11 @@ void calculateBulletproof(volatile uint8_t *bulletproof, volatile size_t *bullet
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
 
+// Is valid secp256k1 private key
+bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length);
+
+// Is valid secp256k1 public key
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length);
+
 
 #endif

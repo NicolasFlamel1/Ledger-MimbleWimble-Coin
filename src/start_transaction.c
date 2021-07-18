@@ -111,6 +111,9 @@ void processStartTransactionUserInteraction(unsigned short *responseLength) {
 	// Set that transaction has been started
 	transaction.started = true;
 	
+	// Set transaction's includes input to if the input value exists
+	transaction.includesInput = transaction.inputValue;
+	
 	// Throw success
 	THROW(SWO_SUCCESS);
 }

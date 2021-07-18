@@ -24,9 +24,6 @@ static const uint8_t ADDRESS_VERSION = 3;
 // Address checksum seed
 static const uint8_t ADDRESS_CHECKSUM_SEED[] = {'.', 'o', 'n', 'i', 'o', 'n', ' ', 'c', 'h', 'e', 'c', 'k', 's', 'u', 'm'};
 
-// SHA3-256 size
-static const size_t SHA3_256_SIZE = 256 / BITS_IN_A_BYTE;
-
 
 // Supporting function implementation
 
@@ -73,9 +70,9 @@ bool isValidTorAddress(const uint8_t *torAddress, size_t length) {
 	
 	// Get checksum as a hash of the checksum data
 	cx_sha3_t hash;
-	cx_sha3_init(&hash, SHA3_256_SIZE * BITS_IN_A_BYTE);
+	cx_sha3_init(&hash, CX_SHA256_SIZE * BITS_IN_A_BYTE);
 	
-	uint8_t checksum[SHA3_256_SIZE];
+	uint8_t checksum[CX_SHA256_SIZE];
 	cx_hash(&hash.header, CX_LAST, checksumData, sizeof(checksumData), checksum, sizeof(checksum));
 	
 	// Check if decoded Tor address's checksum is invalid

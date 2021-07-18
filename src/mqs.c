@@ -1,5 +1,6 @@
 // Header files
 #include <string.h>
+#include "base58.h"
 #include "common.h"
 #include "crypto.h"
 #include "mqs.h"
@@ -24,6 +25,9 @@ const size_t MQS_SHARED_PRIVATE_KEY_SALT_SIZE = 8;
 
 // MQS shared private key number of iterations
 const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
+
+// Version length
+static const size_t VERSION_LENGTH = 2;
 
 
 // Supporting function implementation
@@ -88,7 +92,31 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publ
 // Is valid MQS address
 bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length) {
 
-	// TODO implement verifying the address
+	// Get decoded MQS address length
+	const size_t decodedMqsAddressLength = getBase58DecodedLengthWithChecksum(mqsAddress, length);
+	
+	// Check if decoded MQS address length is invalid
+	if(decodedMqsAddressLength != VERSION_LENGTH + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Check if decoding MQS address failed
+	uint8_t decodedMqsAddress[decodedMqsAddressLength];
+	
+	if(!base58DecodeWithChecksum(decodedMqsAddress, mqsAddress, length)) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Check if decoded MQS address is invalid
+	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], sizeof(decodedMqsAddress) - (VERSION_LENGTH + BASE58_CHECKSUM_SIZE))) {
+	
+		// Return false
+		return false;
+	}
 
 	// Return true
 	return true;

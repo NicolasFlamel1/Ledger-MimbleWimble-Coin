@@ -223,11 +223,18 @@ Continue transaction include input
 	Command: printf "\xC7\x18\x00\x00\x1A\x03\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: N/A
 
-Finish transaction get public key
+Continue transaction get offset
+	Details: Returns a random offset applied to the transaction
+	Parameters: N/A
+	Response: offset (32 bytes)
+	Command: printf "\xC7\x19\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Result: changes due to random offset
+
+Continue transaction get public key
 	Details: Returns public key for the transaction
 	Parameters: N/A
 	Response: Compressed secp256k1 public key (33 bytes)
-	Command: printf "\xC7\x19\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x1A\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 0283871ba8a6d5ca7ccddc7ccf3d00ac331b166a11af42fa217d4aedead8f58bd1
 
 Finish transaction get signature
@@ -236,5 +243,5 @@ Finish transaction get signature
 	Public Key: 03c1aa1fe1698ac85c309b0f80a367af56afa0f3aa09e40e4c10cdf32e73e73382
 	Kernel Information: 01
 	Response: Compact signature (64 bytes)
-	Command: printf "\xC7\x1A\x00\x00\x22\x03\xc1\xaa\x1f\xe1\x69\x8a\xc8\x5c\x30\x9b\x0f\x80\xa3\x67\xaf\x56\xaf\xa0\xf3\xaa\x09\xe4\x0e\x4c\x10\xcd\xf3\x2e\x73\xe7\x33\x82\01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x1B\x00\x00\x22\x03\xc1\xaa\x1f\xe1\x69\x8a\xc8\x5c\x30\x9b\x0f\x80\xa3\x67\xaf\x56\xaf\xa0\xf3\xaa\x09\xe4\x0e\x4c\x10\xcd\xf3\x2e\x73\xe7\x33\x82\01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: changes due to random seed (039172a3dc31c8d65251cd3b20fd2ef33b31fc34455c07e99a8e79ca8c84a4174960c5e68db491a9e7daf86e7e18b5ea310e84dd965a939709a5210e1c4862ff with test seed A672F811B8943AEC6632BEF32C6895E4B3676AB6C11149D8D04071A169EDA810)

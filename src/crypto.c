@@ -144,6 +144,9 @@ static const size_t NUMBER_OF_GENERATORS = 256;
 // Scratch space size
 static const size_t SCRATCH_SPACE_SIZE = 17612;
 
+// Secp256k1 private key size
+static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
+
 
 // Supporting function implementation
 
@@ -993,4 +996,55 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 	
 	// Return true
 	return true;
+}
+
+// Is valid secp256k1 private key
+bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != SECP256k1_PRIVATE_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+
+	// Create context
+	uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_NONE)];
+	secp256k1_context *context = secp256k1_context_preallocated_create(contextBuffer, SECP256K1_CONTEXT_NONE);
+	
+	// Set result to if private key is a valid secp256k1 private key
+	bool result = secp256k1_ec_seckey_verify(context, privateKey);
+	
+	// Destroy context
+	secp256k1_context_preallocated_destroy(context);
+	explicit_bzero(contextBuffer, sizeof(contextBuffer));
+	
+	// Return result
+	return result;
+}
+
+// Is valid secp256k1 public key
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != COMPRESSED_PUBLIC_KEY_SIZE && length != UNCOMPRESSED_PUBLIC_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+
+	// Create context
+	uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_NONE)];
+	secp256k1_context *context = secp256k1_context_preallocated_create(contextBuffer, SECP256K1_CONTEXT_NONE);
+	
+	// Set result to if public key is a valid secp256k1 public key
+	secp256k1_pubkey publicKeyData;
+	bool result = secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, length);
+	
+	// Destroy context
+	secp256k1_context_preallocated_destroy(context);
+	explicit_bzero(contextBuffer, sizeof(contextBuffer));
+	
+	// Return result
+	return result;
 }

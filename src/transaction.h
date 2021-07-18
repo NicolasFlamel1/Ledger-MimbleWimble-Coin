@@ -16,6 +16,12 @@ struct Transaction {
 	// Started
 	bool started;
 	
+	// Includes input
+	bool includesInput;
+	
+	// Offset created
+	bool offsetCreated;
+	
 	// Output value
 	uint64_t outputValue;
 	

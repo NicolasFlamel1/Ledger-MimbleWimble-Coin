@@ -6,8 +6,8 @@
 
 // Constants
 
-// Invalid base32 length
-const size_t INVALID_BASE32_LENGTH = SIZE_MAX;
+// Invalid base32 size
+const size_t INVALID_BASE32_SIZE = SIZE_MAX;
 
 // Characters
 static const uint8_t CHARACTER[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
@@ -157,8 +157,8 @@ size_t getBase32DecodedLength(const uint8_t *data, size_t length) {
 		// Check if padding isn't a padding character
 		if(*i != PADDING_CHARACTER) {
 		
-			// Return invalid base32 length
-			return INVALID_BASE32_LENGTH;
+			// Return invalid base32 size
+			return INVALID_BASE32_SIZE;
 		}
 	}
 	
@@ -168,8 +168,8 @@ size_t getBase32DecodedLength(const uint8_t *data, size_t length) {
 	// Check if the number of padding bytes is invalid
 	if(getNumberOfPaddingBytes(numberOfBytes) != (size_t)(startOfPadding ? data + length - startOfPadding : 0)) {
 	
-		// Return invalid base32 length
-		return INVALID_BASE32_LENGTH;
+		// Return invalid base32 size
+		return INVALID_BASE32_SIZE;
 	}
 	
 	// Go through all non-padding bytes
@@ -178,8 +178,8 @@ size_t getBase32DecodedLength(const uint8_t *data, size_t length) {
 		// Check if byte isn't a valid character
 		if(!memchr(CHARACTER, toUppercase(data[i]), sizeof(CHARACTER))) {
 		
-			// Return invalid base32 length
-			return INVALID_BASE32_LENGTH;
+			// Return invalid base32 size
+			return INVALID_BASE32_SIZE;
 		}
 	}
 	

@@ -2,14 +2,14 @@
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
-#include "finish_transaction_get_public_key.h"
+#include "continue_transaction_get_public_key.h"
 #include "transaction.h"
 
 
 // Supporting function implementation
 
-// Process finish transaction get public key request
-void processFinishTransactionGetPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+// Process continue transaction get public key request
+void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -34,7 +34,7 @@ void processFinishTransactionGetPublicKeyRequest(unsigned short *responseLength,
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction isn't finished
+	// Check if transaction still has output or input values
 	if(transaction.outputValue || transaction.inputValue) {
 	
 		// Throw invalid state error

@@ -10,8 +10,8 @@
 
 // Constants
 
-// Invalid base32 length
-extern const size_t INVALID_BASE32_LENGTH;
+// Invalid base32 size
+extern const size_t INVALID_BASE32_SIZE;
 
 
 // Function prototypes

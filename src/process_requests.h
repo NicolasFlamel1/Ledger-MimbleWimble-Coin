@@ -88,8 +88,11 @@ enum Instruction {
 	// Continue transaction include input instruction
 	CONTINUE_TRANSACTION_INCLUDE_INPUT_INSTRUCTION,
 	
-	// Finish transaction get public key instruction
-	FINISH_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
+	// Continue transaction get offset instruction
+	CONTINUE_TRANSACTION_GET_OFFSET_INSTRUCTION,
+	
+	// Continue transaction get public key instruction
+	CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
 	
 	// Finish transaction get signature instruction
 	FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION

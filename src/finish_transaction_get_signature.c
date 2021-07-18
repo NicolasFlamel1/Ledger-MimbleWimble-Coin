@@ -43,6 +43,8 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// TODO accept an optional secret nonce of size NONCE_SIZE, verify payment proof when sending, and requrie user approval when sending
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength < COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
@@ -219,7 +221,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction isn't finished
+	// Check if transaction still has output or input values
 	if(transaction.outputValue || transaction.inputValue) {
 	
 		// Throw invalid state error
