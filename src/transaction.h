@@ -22,6 +22,9 @@ struct Transaction {
 	// Offset applied
 	bool offsetApplied;
 	
+	// Account
+	uint32_t account;
+	
 	// Output value
 	uint64_t outputValue;
 	

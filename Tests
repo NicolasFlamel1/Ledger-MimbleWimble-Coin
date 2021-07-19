@@ -15,71 +15,78 @@ Get application information
 	
 Get root public key
 	Details: Returns the wallet's root public key
-	Parameters: requestor (any length)
+	Parameters: account (little endian 4 bytes), requestor (any length)
+	Account: 0
 	Requestor: AAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	Response: compressed root public key (33 bytes)
-	Command: printf "\xC7\x01\x00\x00\x1CAAAAAAAAAAAAAAAAAAAAAAAAAAAA" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x01\x00\x00\x20\x00\x00\x00\x00AAAAAAAAAAAAAAAAAAAAAAAAAAAA" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 02cc4773277f41e7e10e1e28c1cc6a7e70d857e15cd677c5c8b65d98893d441c83
 
 Get seed cookie
 	Details: Returns the wallet's identifier
-	Parameters: N/A
+	Parameters: account (little endian 4 bytes)
 	Response: Wallet identifier (64 bytes)
-	Command: printf "\xC7\x02\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x02\x00\x00\x04\x00\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 9c3400e2e53e053bbdabd698c8b274bc9a31637bb012e3a0cd514103c09f5034f5316dd75afde7e3191516035707d3ed242803d9cbe9afdbd48ec6eea218ca09
 	
 Get commitment
 	Details: Returns the commitment
-	Parameters: identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
+	Parameters: account (little endian 4 bytes), identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
+	Account: 0
 	Identifier: 0400000001000000028000000180000002
 	Value: 2380952381
 	Switch Type: 1
 	Response: Commitment (33 bytes)
-	Command: printf "\xC7\x03\x00\x00\x1A\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x03\x00\x00\x1E\x00\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 08e096c8d9a95570297dfa520bc4f175399cb76672a590a50d5aba6cd438ad02f4
 	
 Get bulletproof
 	Details: Returns the bulletproof
-	Parameters: identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
+	Parameters: account (little endian 4 bytes), identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
+	Account: 0
 	Identifier: 0400000001000000028000000180000002
 	Value: 2380952381
 	Switch Type: 1
 	Response: bulletproof (675 bytes)
-	Command: printf "\xC7\x04\x00\x00\x1A\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x04\x00\x00\x1E\x00\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 1577b9fdca11550fdb3be9e3483ea0b24d3aef0d7581be72159ee35d26eed0c552b1b8e4a1514a107ee891b35538d12a65e533b294feafbeda872abe25344cc70d8a0d505652c9bca2528353666390a2eb4ad39eac313b6ac0c11440f51cd6594c6cb1154dc55d633f4dc71dcde88accff6c9d1955a9e4015027049e23e2251f3fe19f1ff26e62f0b5c2dc15c4334b39b53f91defbf9a06009a518ac312d1e083b0be80c70ec28f8d63f5c3c4d11f76638f3fbf8284d6383ee4d948a4650fe91bdd7c66aea404045765e856b93e53be4e5106ce348094ac279fa13f9247d74da6dc9fe6838a9c31e04d6421b69442e8b42e95fe71f7fb14b9005eaeab723e15cc44af7a79e257d6383e9d4d4bf2ecde4c63c16bc92e4cae8c48cd9bb9f151bd2a0cfcd73474515ac373cf67fb748366ace0bf710da5fcd67c4b53843c50bc98c349683f43a4464753f894576ad0766847e467cec38c92f299ec33e01fc4db705fd1f025c619cbdf438b7548f707f4d2df1eec1c02c9b621ab1eeb99161dd8ac288176c7262755743186cb1360638d56cf3eae708cccb556742951bcd8617298760a4324895e2bed755f6badaa1fc8ea5337ee9cce1dfeed7c8bf102ac7fa32c885d76bd1aad3e496fa069e2782710f2c9ed8df8b495a6c5798c16bb23d09f0c1f0df48c1cebeeb0e89e0d0e6bdfbf868442f37edd3276441c68f9fc7e9b18d46b1cfd1eeed6449fd99d2bd9d276156faec3259ea24980f7a7db5b19a2c0a7861f59ee4a1b52d91746dc6caab7dcaeec15258982079d4554a4b70e759d4add234a7c23872e89147398c999d6f916dce9d480f2c73f0305331983c0ec0aed363b6bfd771117b8c4d09f7cf4555f204d0aee33e0abcb8406906002ca2602de759229c6d4efbfecd3e27a55654848adf51c1ec538544a0b0c767c7d0f2bfcb164e5ee97472
 	
 Get Tor public key
 	Details: Returns the wallet's Tor public key
-	Parameters: requestor (any length)
+	Parameters: account (little endian 4 bytes), requestor (any length)
+	Account: 0
 	Requestor: AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	Response: Compressed Ed25519 public key (32 bytes)
-	Command: printf "\xC7\x05\x00\x00\x1DAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x05\x00\x00\x21\x00\x00\x00\x00AAAAAAAAAAAAAAAAAAAAAAAAAAAAA" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 26489d8933530953bf00c20ced09e1efe74e1a133291b8bcb4cb22d5863becc9
 	
 Get Tor transaction signature
 	Details: Returns the transaction signed with the wallet's Tor private key
-	Parameters: value (little endian 8 bytes), commitment (33 bytes), sender address (32 bytes for GRIN) (52 or 56 bytes from MWC)
+	Parameters: account (little endian 4 bytes), value (little endian 8 bytes), commitment (33 bytes), sender address (32 bytes for GRIN) (52 or 56 bytes from MWC)
+	Account: 0
 	Value: 1
 	Commitment: 08e096c8d9a95570297dfa520bc4f175399cb76672a590a50d5aba6cd438ad02f4
 	Sender Address: ezej3cjtkmevhpyayigo2cpb57tu4gqtgki3rpfuzmrnlbr35te3ebad
 	Response: Ed25519 signature (64 bytes)
-	Command: printf "\xC7\x06\x00\x00\x61\x01\x00\x00\x00\x00\x00\x00\x00\x08\xe0\x96\xc8\xd9\xa9\x55\x70\x29\x7d\xfa\x52\x0b\xc4\xf1\x75\x39\x9c\xb7\x66\x72\xa5\x90\xa5\x0d\x5a\xba\x6c\xd4\x38\xad\x02\xf4ezej3cjtkmevhpyayigo2cpb57tu4gqtgki3rpfuzmrnlbr35te3ebad" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x06\x00\x00\x65\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x08\xe0\x96\xc8\xd9\xa9\x55\x70\x29\x7d\xfa\x52\x0b\xc4\xf1\x75\x39\x9c\xb7\x66\x72\xa5\x90\xa5\x0d\x5a\xba\x6c\xd4\x38\xad\x02\xf4ezej3cjtkmevhpyayigo2cpb57tu4gqtgki3rpfuzmrnlbr35te3ebad" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: bc8e44f664236e9fcc3d2e9dc90bcb69df741d4f72bf5c44d256f22c4415802a9c26ab78df6e8ae452ab0001528fbe6fc0c0a1ef7e825b0745910580dbc96302
 
 Get Tor certificate signature
 	Details: Returns the certificate signed with the wallet's Tor private key
-	Parameters: Ed25519 medium term certificate (at least 76 bytes) (ed25519_signing_cert without the signature)
+	Parameters: account (little endian 4 bytes), Ed25519 medium term certificate (at least 76 bytes) (ed25519_signing_cert without the signature)
+	Account: 0
 	Certificate: 01040006e63101832d7a85ebf60242bd50c80eae7760789288f8041e22c1954604037b42d7b564010020040026489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BECC9
 	Response: Ed25519 signature (64 bytes)
-	Command: printf "\xC7\x07\x00\x00\x4C\x01\x04\x00\x06\xe6\x31\x01\x83\x2d\x7a\x85\xeb\xf6\x02\x42\xbd\x50\xc8\x0e\xae\x77\x60\x78\x92\x88\xf8\x04\x1e\x22\xc1\x95\x46\x04\x03\x7b\x42\xd7\xb5\x64\x01\x00\x20\x04\x00\x26\x48\x9D\x89\x33\x53\x09\x53\xBF\x00\xC2\x0C\xED\x09\xE1\xEF\xE7\x4E\x1A\x13\x32\x91\xB8\xBC\xB4\xCB\x22\xD5\x86\x3B\xEC\xC9" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x07\x00\x00\x50\x00\x00\x00\x00\x01\x04\x00\x06\xe6\x31\x01\x83\x2d\x7a\x85\xeb\xf6\x02\x42\xbd\x50\xc8\x0e\xae\x77\x60\x78\x92\x88\xf8\x04\x1e\x22\xc1\x95\x46\x04\x03\x7b\x42\xd7\xb5\x64\x01\x00\x20\x04\x00\x26\x48\x9D\x89\x33\x53\x09\x53\xBF\x00\xC2\x0C\xED\x09\xE1\xEF\xE7\x4E\x1A\x13\x32\x91\xB8\xBC\xB4\xCB\x22\xD5\x86\x3B\xEC\xC9" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 27c6c4ef00edf65264aff97a28c1517f204eb4e494de231eacba5bb2a4afcaf37ed3f88f149b68d76c3b1e83fc8e9bc10c92f8f58f0afcb9aa98868c0543930b
 
 Start encrypting Slatepack data
 	Details: Returns a random nonce that it will use to encrypt data
-	Parameters: x25519 public key (compressed 32 bytes)
+	Parameters: account (little endian 4 bytes), x25519 public key (compressed 32 bytes)
+	Account: 0
 	Public Key: 9F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C
 	Response: Nonce (12 bytes)
-	Command: printf "\xC7\x08\x00\x00\x20\x9F\x28\xE8\xFA\x94\x5F\xF3\xE7\x11\x1A\xEF\x63\xC4\x39\x68\x23\xF6\x5F\x46\xD8\x53\xF3\x9A\xE3\x6E\x95\x01\x30\x18\x14\x49\x4C" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x08\x00\x00\x24\x00\x00\x00\x00\x9F\x28\xE8\xFA\x94\x5F\xF3\xE7\x11\x1A\xEF\x63\xC4\x39\x68\x23\xF6\x5F\x46\xD8\x53\xF3\x9A\xE3\x6E\x95\x01\x30\x18\x14\x49\x4C" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: changes due to random nonce (86f3a5f7512fba489b4d04df with test nonce 86f3a5f7512fba489b4d04df)
 
 Continue encrypting Slatepack data
@@ -100,11 +107,12 @@ Finish encrypting Slatepack data
 
 Start decrypting Slatepack data
 	Details: Starts decrypting data
-	Parameters: x25519 public key (compressed), nonce that was used to encrypt the data
+	Parameters: account (little endian 4 bytes), x25519 public key (compressed), nonce that was used to encrypt the data
+	Account: 0
 	Public Key: 9F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C
 	Nonce: 86f3a5f7512fba489b4d04df
 	Response: N/A
-	Command: printf "\xC7\x0B\x00\x00\x2C\x9F\x28\xE8\xFA\x94\x5F\xF3\xE7\x11\x1A\xEF\x63\xC4\x39\x68\x23\xF6\x5F\x46\xD8\x53\xF3\x9A\xE3\x6E\x95\x01\x30\x18\x14\x49\x4C\x86\xf3\xa5\xf7\x51\x2f\xba\x48\x9b\x4d\x04\xdf" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x0B\x00\x00\x30\x00\x00\x00\x00\x9F\x28\xE8\xFA\x94\x5F\xF3\xE7\x11\x1A\xEF\x63\xC4\x39\x68\x23\xF6\x5F\x46\xD8\x53\xF3\x9A\xE3\x6E\x95\x01\x30\x18\x14\x49\x4C\x86\xf3\xa5\xf7\x51\x2f\xba\x48\x9b\x4d\x04\xdf" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: N/A
 
 Continue decrypting Slatepack data
@@ -126,28 +134,31 @@ Finish decrypting Slatepack data
 
 Get MQS public key
 	Details: Returns the wallet's MQS public key
-	Parameters: requestor (any length)
+	Parameters: account (little endian 4 bytes), requestor (any length)
+	Account: 0
 	Requestor: A
 	Response: Compressed secp256k1 public key (33 bytes)
-	Command: printf "\xC7\x0E\x00\x00\x01A" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x0E\x00\x00\x05\x00\x00\x00\x00A" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 03d8e38a4968916176410be0c7fb96ca4b03b17a43ea98008071a6efa4deaff4f5
 
 Get MQS transaction signature
 	Details: Returns the transaction signed with the wallet's MQS private key
-	Parameters: value (little endian 8 bytes), commitment (33 bytes), sender address (32 bytes for GRIN) (52 or 56 bytes from MWC)
+	Parameters: account (little endian 4 bytes), value (little endian 8 bytes), commitment (33 bytes), sender address (32 bytes for GRIN) (52 or 56 bytes from MWC)
+	Account: 0
 	Value: 1
 	Commitment: 08e096c8d9a95570297dfa520bc4f175399cb76672a590a50d5aba6cd438ad02f4
 	Sender Address: xmjCJWKPLbe4Dpr1V4krDnwk2w5HMBsFg3yBse8yRUYyFaLpSLHR
 	Response: DER signature (At most 72 bytes)
-	Command: printf "\xC7\x0F\x00\x00\x5D\x01\x00\x00\x00\x00\x00\x00\x00\x08\xe0\x96\xc8\xd9\xa9\x55\x70\x29\x7d\xfa\x52\x0b\xc4\xf1\x75\x39\x9c\xb7\x66\x72\xa5\x90\xa5\x0d\x5a\xba\x6c\xd4\x38\xad\x02\xf4xmjCJWKPLbe4Dpr1V4krDnwk2w5HMBsFg3yBse8yRUYyFaLpSLHR" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x0F\x00\x00\x61\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x08\xe0\x96\xc8\xd9\xa9\x55\x70\x29\x7d\xfa\x52\x0b\xc4\xf1\x75\x39\x9c\xb7\x66\x72\xa5\x90\xa5\x0d\x5a\xba\x6c\xd4\x38\xad\x02\xf4xmjCJWKPLbe4Dpr1V4krDnwk2w5HMBsFg3yBse8yRUYyFaLpSLHR" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 3045022100c3745c60997ec457cc6eb7818a2ae7e7ff8a30ef52a29b9ebeff95c6081a7b32022056f38d201d32a19b75c2af7f81950898d443006c7f034d066b1391ce72dfa3df
 
 Start encrypting MQS data
 	Details: Returns a random salt and nonce that it will use to encrypt data
-	Parameters: secp256k1 public key (uncompressed 65 bytes)
+	Parameters: account (little endian 4 bytes), secp256k1 public key (uncompressed 65 bytes)
+	Account: 0
 	Public Key: 04d8e38a4968916176410be0c7fb96ca4b03b17a43ea98008071a6efa4deaff4f511e30b6472527f07721439021eb80ee068cddbb101f53d10cddd7f51471ced15
 	Response: salt (8 bytes), nonce (12 bytes)
-	Command: printf "\xC7\x10\x00\x00\x41\x04\xd8\xe3\x8a\x49\x68\x91\x61\x76\x41\x0b\xe0\xc7\xfb\x96\xca\x4b\x03\xb1\x7a\x43\xea\x98\x00\x80\x71\xa6\xef\xa4\xde\xaf\xf4\xf5\x11\xe3\x0b\x64\x72\x52\x7f\x07\x72\x14\x39\x02\x1e\xb8\x0e\xe0\x68\xcd\xdb\xb1\x01\xf5\x3d\x10\xcd\xdd\x7f\x51\x47\x1c\xed\x15" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x10\x00\x00\x45\x00\x00\x00\x00\x04\xd8\xe3\x8a\x49\x68\x91\x61\x76\x41\x0b\xe0\xc7\xfb\x96\xca\x4b\x03\xb1\x7a\x43\xea\x98\x00\x80\x71\xa6\xef\xa4\xde\xaf\xf4\xf5\x11\xe3\x0b\x64\x72\x52\x7f\x07\x72\x14\x39\x02\x1e\xb8\x0e\xe0\x68\xcd\xdb\xb1\x01\xf5\x3d\x10\xcd\xdd\x7f\x51\x47\x1c\xed\x15" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: changes due to random salt and nonce (ffec82955929f30286f3a5f7512fba489b4d04df with test salt ffec82955929f302 and nonce 86f3a5f7512fba489b4d04df)
 
 Continue encrypting MQS data
@@ -168,12 +179,13 @@ Finish encrypting MQS data
 
 Start decrypting MQS data
 	Details: Starts decrypting data
-	Parameters: secp256k1 public key (uncompressed 65 bytes), salt that was used to encrypt the data (8 bytes), nonce that was used to encrypt the data (12 bytes)
+	Parameters: account (little endian 4 bytes), secp256k1 public key (uncompressed 65 bytes), salt that was used to encrypt the data (8 bytes), nonce that was used to encrypt the data (12 bytes)
+	Account: 0
 	Public Key: 04d8e38a4968916176410be0c7fb96ca4b03b17a43ea98008071a6efa4deaff4f511e30b6472527f07721439021eb80ee068cddbb101f53d10cddd7f51471ced15
 	Salt: ffec82955929f302
 	Nonce: 86f3a5f7512fba489b4d04df
 	Response: N/A
-	Command: printf "\xC7\x13\x00\x00\x55\x04\xd8\xe3\x8a\x49\x68\x91\x61\x76\x41\x0b\xe0\xc7\xfb\x96\xca\x4b\x03\xb1\x7a\x43\xea\x98\x00\x80\x71\xa6\xef\xa4\xde\xaf\xf4\xf5\x11\xe3\x0b\x64\x72\x52\x7f\x07\x72\x14\x39\x02\x1e\xb8\x0e\xe0\x68\xcd\xdb\xb1\x01\xf5\x3d\x10\xcd\xdd\x7f\x51\x47\x1c\xed\x15\xff\xec\x82\x95\x59\x29\xf3\x02\x86\xf3\xa5\xf7\x51\x2f\xba\x48\x9b\x4d\x04\xdf" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x13\x00\x00\x59\x00\x00\x00\x00\x04\xd8\xe3\x8a\x49\x68\x91\x61\x76\x41\x0b\xe0\xc7\xfb\x96\xca\x4b\x03\xb1\x7a\x43\xea\x98\x00\x80\x71\xa6\xef\xa4\xde\xaf\xf4\xf5\x11\xe3\x0b\x64\x72\x52\x7f\x07\x72\x14\x39\x02\x1e\xb8\x0e\xe0\x68\xcd\xdb\xb1\x01\xf5\x3d\x10\xcd\xdd\x7f\x51\x47\x1c\xed\x15\xff\xec\x82\x95\x59\x29\xf3\x02\x86\xf3\xa5\xf7\x51\x2f\xba\x48\x9b\x4d\x04\xdf" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: N/A
 
 Continue decrypting MQS data
@@ -195,12 +207,13 @@ Finish decrypting MQS data
 
 Start transaction
 	Details: Starts a transaction
-	Parameters: output value (little endian 8 bytes), input value (little endian 8 bytes), fee (little endian 8 bytes)
+	Parameters: account (little endian 4 bytes), output value (little endian 8 bytes), input value (little endian 8 bytes), fee (little endian 8 bytes)
+	Account: 0
 	Output Value: 2
 	Input Value: 1
 	Fee: 3
 	Response: N/A
-	Command: printf "\xC7\x16\x00\x00\x18\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Command: printf "\xC7\x16\x00\x00\x1C\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: N/A
 	
 Continue transaction include output

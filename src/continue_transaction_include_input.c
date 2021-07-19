@@ -101,7 +101,7 @@ void processContinueTransactionIncludeInputRequest(unsigned short *responseLengt
 		TRY {
 	
 			// Derive blinding factor
-			deriveBlindingFactor(blindingFactor, *value, identifierPath, identifierDepth, switchType);
+			deriveBlindingFactor(blindingFactor, transaction.account, *value, identifierPath, identifierDepth, switchType);
 			
 			// Update transaction's blinding factor with the negative blinding factor
 			updateBlindingFactorSum(transaction.blindingFactor, (uint8_t *)blindingFactor, false);

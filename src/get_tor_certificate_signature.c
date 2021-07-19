@@ -41,14 +41,27 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength < sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get certificate from data
-	const uint8_t *certificate = data;
+	const uint8_t *certificate = &data[sizeof(*account)];
+	
+	// Get certificate length
+	const size_t certificateLength = dataLength - sizeof(*account);
 	
 	// Check if certificate type is invalid
 	if(certificate[sizeof(uint8_t)] != SIGNED_CERTIFICATE_TYPE) {
@@ -79,7 +92,7 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 	for(uint8_t i = 0; i < numberOfCertificateExtensions; ++i) {
 	
 		// Check if extension is invalid
-		if(dataLength < currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t)) {
+		if(certificateLength < currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t)) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
@@ -98,7 +111,7 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 		if(extensionType == SIGNING_PUBLIC_KEY_EXTENSION_TYPE) {
 		
 			// Check if signing public key alreay exists or the extension is invalid
-			if(signingPublicKey || extensionLength != ED25519_PUBLIC_KEY_SIZE || dataLength < currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE) {
+			if(signingPublicKey || extensionLength != ED25519_PUBLIC_KEY_SIZE || certificateLength < currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -113,7 +126,7 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 	}
 	
 	// Check if certificate is invalid
-	if(currentExtensionIndex != dataLength) {
+	if(currentExtensionIndex != certificateLength) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -136,7 +149,7 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 		TRY {
 		
 			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get address public key from address private key
 			cx_ecfp_public_key_t addressPublicKey;
@@ -198,8 +211,14 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
 	// Get certificate from data
-	const uint8_t *certificate = data;
+	const uint8_t *certificate = &data[sizeof(*account)];
+	
+	// Get certificate length
+	const size_t certificateLength = dataLength - sizeof(*account);
 	
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -214,10 +233,10 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 		TRY {
 		
 			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get signature of the certificate
-			cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, certificate, dataLength, NULL, 0, (uint8_t *)signature, sizeof(signature), NULL);
+			cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, certificate, certificateLength, NULL, 0, (uint8_t *)signature, sizeof(signature), NULL);
 		}
 		
 		// Finally

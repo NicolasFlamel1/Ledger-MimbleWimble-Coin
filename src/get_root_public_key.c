@@ -26,20 +26,33 @@ void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned cha
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || !dataLength) {
+	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Get requestor from data
-	uint8_t *requestor = data;
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
 	
 	// Check if public keys export manual approval setting is true
 	if(settings.publicKeysExportManualApprovalSetting) {
 	
+		// Get requestor from data
+		uint8_t *requestor = &data[sizeof(*account)];
+		
+		// Get requestor length
+		size_t requestorLength = dataLength - sizeof(*account);
+	
 		// Go through characters in the requestor
-		for(size_t i = 0; i < dataLength; ++i) {
+		for(size_t i = 0; i < requestorLength; ++i) {
 		
 			// Check if character isn't a printable character
 			if(!isPrintableCharacter(requestor[i])) {
@@ -53,16 +66,16 @@ void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned cha
 		#ifdef TARGET_NANOX
 		
 			// Check if requestor wont fit in the requestor line buffer
-			if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+			if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 			
 				// Go through all characters in the middle of the requestor that wont fit in the requestor line buffer
-				while(dataLength != sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+				while(requestorLength != sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 				
 					// Remove character
-					memmove(&requestor[dataLength / 2], &requestor[dataLength / 2 + 1], dataLength - (dataLength / 2 + 1));
+					memmove(&requestor[requestorLength / 2], &requestor[requestorLength / 2 + 1], requestorLength - (requestorLength / 2 + 1));
 					
 					// Decrement requestor's length
-					--dataLength;
+					--requestorLength;
 				}
 			}
 		
@@ -70,23 +83,23 @@ void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned cha
 		#else
 		
 			// Check if requestor wont fit in the requestor line buffer with an ellipsis
-			if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0') - (sizeof(ELLIPSIS) - sizeof((char)'\0'))) {
+			if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0') - (sizeof(ELLIPSIS) - sizeof((char)'\0'))) {
 			
 				// Check if requestor wont fit in the requestor line buffer without an ellipsis
-				if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+				if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 			
 					// Reduce requestor's length to fit in the requestor line buffer
-					dataLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
+					requestorLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
 					
 					// Change end of requestor to be an ellipsis
-					memcpy(&requestor[dataLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
+					memcpy(&requestor[requestorLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
 				}
 			}
 		#endif
 		
 		// Copy requestor into the requestor line buffer
-		memcpy(requestorLineBuffer, requestor, dataLength);
-		requestorLineBuffer[dataLength] = '\0';
+		memcpy(requestorLineBuffer, requestor, requestorLength);
+		requestorLineBuffer[requestorLength] = '\0';
 		
 		// Show export root public key menu
 		showMenu(EXPORT_ROOT_PUBLIC_KEY_MENU);
@@ -106,6 +119,12 @@ void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned cha
 // Process get root public key user interaction
 void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 
+	// Get request's data
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
 	
@@ -119,7 +138,7 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 		TRY {
 	
 			// Get private key
-			getPrivateKeyAndChainCode(&privateKey, NULL);
+			getPrivateKeyAndChainCode(&privateKey, NULL, *account);
 			
 			// Get root public key from the private key
 			getPublicKeyFromPrivateKey((uint8_t *)rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);

@@ -40,7 +40,7 @@ void resetMqsData(void) {
 }
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publicKey, uint8_t *salt) {
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint8_t *publicKey, uint8_t *salt) {
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -52,7 +52,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publ
 		TRY {
 
 			// Get private key at the MQS address private key index
-			getAddressPrivateKey(&privateKey, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
+			getAddressPrivateKey(&privateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
 			
 			// Multiply the public key by the private key
 			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, publicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);

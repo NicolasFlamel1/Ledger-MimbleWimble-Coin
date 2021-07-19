@@ -28,14 +28,24 @@ void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, 
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t)  + COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public key from data
-	const uint8_t *publicKey = data;
+	const uint8_t *publicKey = &data[sizeof(*account)];
 	
 	// Initialize shared private key
 	volatile uint8_t sharedPrivateKey[SLATEPACK_SHARED_PRIVATE_KEY_SIZE];
@@ -53,7 +63,7 @@ void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, 
 		TRY {
 		
 			// Create Slatepack shared private key
-			createSlatepackSharedPrivateKey(sharedPrivateKey, publicKey);
+			createSlatepackSharedPrivateKey(sharedPrivateKey, *account, publicKey);
 		
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
 			initializeChaCha20Poly1305(&slatepackData.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0);

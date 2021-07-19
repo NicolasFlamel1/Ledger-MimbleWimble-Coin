@@ -28,7 +28,7 @@ void resetSlatepackData(void) {
 }
 
 // Create Slatepack shared private key
-void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const uint8_t *publicKey) {
+void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey) {
 
 	// Initialize Ed25519 private key
 	volatile cx_ecfp_private_key_t ed25519PrivateKey;
@@ -43,7 +43,7 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const u
 		TRY {
 		
 			// Get ED25519 private key
-			getAddressPrivateKey(&ed25519PrivateKey, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&ed25519PrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get X25519 private key from the Ed25519 private key
 			getX25519PrivateKeyFromEd25519PrivateKey(&x25519PrivateKey, (cx_ecfp_private_key_t *)&ed25519PrivateKey);

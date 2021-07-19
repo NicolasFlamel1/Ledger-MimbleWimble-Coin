@@ -74,6 +74,9 @@ extern const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX;
 // Proof message identifier index
 extern const size_t PROOF_MESSAGE_IDENTIFIER_INDEX;
 
+// Maximum account
+extern const uint32_t MAXIMUM_ACCOUNT;
+
 
 // Switch type
 enum SwitchType {
@@ -89,28 +92,28 @@ enum SwitchType {
 // Function prototypes
 
 // Get private key and chain code
-void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode);
+void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account);
 
 // Get public key from private key
 void getPublicKeyFromPrivateKey(uint8_t *publicKey, const cx_ecfp_private_key_t *privateKey);
 
 // Derive child key
-void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode);
+void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode);
 
 // Derive blinding factor
-void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType);
+void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType);
 
 // Commit value
 void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor);
 
 // Get rewind nonce
-void getRewindNonce(volatile uint8_t *rewindNonce, const uint8_t *commitment);
+void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment);
 
 // Get private nonce
-void getPrivateNonce(volatile uint8_t *privateNonce, const uint8_t *commitment);
+void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uint8_t *commitment);
 
 // Get address private key
-void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t index, cx_curve_t curve);
+void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve);
 
 // Update blinding factor sum
 void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive);

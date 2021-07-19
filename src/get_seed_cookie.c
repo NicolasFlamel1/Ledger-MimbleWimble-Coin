@@ -19,8 +19,21 @@ void processGetSeedCookieRequest(unsigned short *responseLength, unsigned char *
 	// Get request's data length
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
+	// Get request's data
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -39,7 +52,7 @@ void processGetSeedCookieRequest(unsigned short *responseLength, unsigned char *
 		TRY {
 
 			// Get private key
-			getPrivateKeyAndChainCode(&privateKey, NULL);
+			getPrivateKeyAndChainCode(&privateKey, NULL, *account);
 
 			// Get public key from the private key
 			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];

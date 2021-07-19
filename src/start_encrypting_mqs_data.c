@@ -28,14 +28,24 @@ void processStartEncryptingMqsDataRequest(unsigned short *responseLength, unsign
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != UNCOMPRESSED_PUBLIC_KEY_SIZE) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + UNCOMPRESSED_PUBLIC_KEY_SIZE) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public key from data
-	uint8_t *publicKey = data;
+	uint8_t *publicKey = &data[sizeof(*account)];
 	
 	// Initialize salt
 	uint8_t salt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE];
@@ -59,7 +69,7 @@ void processStartEncryptingMqsDataRequest(unsigned short *responseLength, unsign
 		TRY {
 		
 			// Create MQS shared private key
-			createMqsSharedPrivateKey(sharedPrivateKey, publicKey, salt);
+			createMqsSharedPrivateKey(sharedPrivateKey, *account, publicKey, salt);
 			
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
 			initializeChaCha20Poly1305(&mqsData.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0);

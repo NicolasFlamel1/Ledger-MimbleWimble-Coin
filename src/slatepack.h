@@ -67,7 +67,7 @@ extern struct SlatepackData slatepackData;
 void resetSlatepackData(void);
 
 // Create Slatepack shared private key
-void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const uint8_t *publicKey);
+void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey);
 
 
 #endif

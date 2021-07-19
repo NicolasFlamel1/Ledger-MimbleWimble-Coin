@@ -80,6 +80,12 @@ const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX = 2;
 // Proof message identifier index
 const size_t PROOF_MESSAGE_IDENTIFIER_INDEX = 3;
 
+// Hardened path mask
+static const uint32_t HARDENED_PATH_MASK = 0x80000000;
+
+// Maximum account
+const uint32_t MAXIMUM_ACCOUNT = HARDENED_PATH_MASK - 1;
+
 // Node size
 static const size_t NODE_SIZE = 64;
 
@@ -88,9 +94,6 @@ static const size_t CHAIN_CODE_SIZE = 32;
 
 // Single-signer seed size
 static const size_t SINGLE_SIGNER_SEED_SIZE = 32;
-
-// Hardened path mask
-static const uint32_t HARDENED_PATH_MASK = 0x80000000;
 
 // BIP32 path without coin type
 static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE[] = {
@@ -102,7 +105,7 @@ static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE[] = {
 	HARDENED_PATH_MASK,
 	
 	// Account
-	0 | HARDENED_PATH_MASK,
+	HARDENED_PATH_MASK,
 	
 	// Change
 	0,
@@ -113,6 +116,9 @@ static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE[] = {
 
 // BIP32 path coin type index
 static const size_t BIP32_PATH_COIN_TYPE_INDEX = 1;
+
+// BIP32 path account index
+static const size_t BIP32_PATH_ACCOUNT_INDEX = 2;
 
 // Seed key
 static const char SEED_KEY[] = "IamVoldemort";
@@ -151,7 +157,14 @@ static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
 // Supporting function implementation
 
 // Get private key and chain code
-void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode) {
+void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account) {
+
+	// Check if account is invalid
+	if(account > MAXIMUM_ACCOUNT) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
 
 	// Copy BIP32 path without coin type
 	uint32_t bip32Path[ARRAYLEN(BIP32_PATH_WITHOUT_COIN_TYPE)];
@@ -159,6 +172,9 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 	
 	// Set BIP32 path's coin type
 	bip32Path[BIP32_PATH_COIN_TYPE_INDEX] |= currencyInformation.bip44CoinType;
+	
+	// Set BIP32 path's account
+	bip32Path[BIP32_PATH_ACCOUNT_INDEX] |= account;
 
 	// Initialize node
 	volatile uint8_t node[NODE_SIZE];
@@ -203,13 +219,13 @@ void getPublicKeyFromPrivateKey(uint8_t *publicKey, const cx_ecfp_private_key_t 
 }
 
 // Derive child key
-void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode) {
+void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode) {
 
 	// Check if not using the provided private key and chain code
 	if(!useProvidedPrivateKeyAndChainCode) {
 
 		// Get private key and chain code
-		getPrivateKeyAndChainCode(privateKey, chainCode);
+		getPrivateKeyAndChainCode(privateKey, chainCode, account);
 	}
 	
 	// Go through the path
@@ -307,7 +323,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 }
 
 // Derive blinding factor
-void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType) {
+void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType) {
 
 	// Initialize child private key and chain code
 	volatile cx_ecfp_private_key_t childPrivateKey;
@@ -324,7 +340,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint64_t value, cons
 		TRY {
 		
 			// Derive child's private key and chain code at path
-			deriveChildKey(&childPrivateKey, childChainCode, path, pathLength, false);
+			deriveChildKey(&childPrivateKey, childChainCode, account, path, pathLength, false);
 			
 			// Check switch type
 			switch(switchType) {
@@ -413,7 +429,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 }
 
 // Get rewind nonce
-void getRewindNonce(volatile uint8_t *rewindNonce, const uint8_t *commitment) {
+void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment) {
 
 	// Initialize child private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -425,7 +441,7 @@ void getRewindNonce(volatile uint8_t *rewindNonce, const uint8_t *commitment) {
 		TRY {
 
 			// Get private key
-			getPrivateKeyAndChainCode(&privateKey, NULL);
+			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 
 			// Get public key from the private key
 			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
@@ -453,7 +469,7 @@ void getRewindNonce(volatile uint8_t *rewindNonce, const uint8_t *commitment) {
 }
 
 // Get private nonce
-void getPrivateNonce(volatile uint8_t *privateNonce, const uint8_t *commitment) {
+void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uint8_t *commitment) {
 
 	// Initialize child private key and chain code
 	volatile cx_ecfp_private_key_t childPrivateKey;
@@ -469,7 +485,7 @@ void getPrivateNonce(volatile uint8_t *privateNonce, const uint8_t *commitment) 
 		TRY {
 		
 			// Derive child's private key and chain code at root path
-			deriveChildKey(&childPrivateKey, childChainCode, NULL, 0, false);
+			deriveChildKey(&childPrivateKey, childChainCode, account, NULL, 0, false);
 			
 			// Get private hash from the child's private key
 			getBlake2b((uint8_t *)privateHash, sizeof(privateHash), (uint8_t *)childPrivateKey.d, childPrivateKey.d_len, NULL, 0);
@@ -495,7 +511,7 @@ void getPrivateNonce(volatile uint8_t *privateNonce, const uint8_t *commitment) 
 }
 
 // Get address private key
-void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t index, cx_curve_t curve) {
+void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve) {
 
 	// Initialize blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
@@ -513,7 +529,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 		TRY {
 		
 			// Derive blinding factor from from the address private key blinding factor value and the root path
-			deriveBlindingFactor(blindingFactor, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
+			deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
 			
 			// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
 			cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
@@ -532,7 +548,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(addressPrivateKey->d)], CHAIN_CODE_SIZE);
 			
 			// Derive child key from the address private key and chain code at the index
-			deriveChildKey(addressPrivateKey, chainCode, &index, 1, true);
+			deriveChildKey(addressPrivateKey, chainCode, account, &index, 1, true);
 		}
 		
 		// Finally
@@ -877,6 +893,94 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 			break;
 	}
 }
+
+/*// Verify payment proof message
+bool verifyPaymentProofMessage(uint64_t value, const uint8_t *commitment, const uint8_t *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
+
+	// Get payment proof message
+	uint8_t paymentProofMessage[getPaymentProofMessageLength(value, senderAddressLength)];
+	
+	getPaymentProofMessage(paymentProofMessage, value, commitment, senderAddress, senderAddressLength);
+
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// MimbleWimble Coin ID
+		case MIMBLEWIMBLE_COIN_ID:
+		
+			// Check sender address length
+			switch(senderAddressLength) {
+			
+				// MQS address length
+				case MQS_ADDRESS_LENGTH:
+				
+					// Get message hash
+					var messageHash = new Uint8Array(sha256.arrayBuffer(message));
+				
+					// Get receiver address's public key
+					var receiverAddressPublicKey = Mqs.mqsAddressToPublicKey(this.getReceiverAddress(), isMainnet);
+					
+					// Check if receiver signature doesn't verify the message hash
+					if(Secp256k1Zkp.verifyMessageHashSignature(this.getReceiverSignature(), messageHash, receiverAddressPublicKey) === false) {
+					
+						// Return false
+						return false;
+					}
+					
+					// Break
+					break;
+				
+				// Tor address length
+				case TOR_ADDRESS_LENGTH:
+				
+					// Get receiver address's public key
+					var receiverAddressPublicKey = Tor.torAddressToPublicKey(this.getReceiverAddress());
+				
+					// Check if receiver signature doesn't verify the message
+					if(Ed25519.verify(message, this.getReceiverSignature(), receiverAddressPublicKey) === false) {
+					
+						// Return false
+						return false;
+					}
+					
+					// Break
+					break;
+			}
+			
+			// Break
+			break;
+		
+		// Grin ID
+		case GRIN_ID:
+		
+			// Check if receiver address length is invalid or signature length is invalid
+			if(receiverAddressLength != ED25519_PUBLIC_KEY_SIZE || signatureLength != ED25519_SIGNATURE_SIZE) {
+			
+				// Return false
+				return false;
+			}
+		
+			// Uncompress the public key
+			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
+			
+			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		
+			// Check if verifying payment proof failed
+			if(!cx_eddsa_verify(receiverPublicKey, CX_LAST, CX_SHA512, paymentProofMessage, sizeof(paymentProofMessage), NULL, 0, signature, signatureLength)) {
+			
+				// Return false
+				return false;
+			}
+			
+			// Break
+			break;
+	}
+	
+	// Return true
+	return true;
+}*/
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment) {

@@ -27,20 +27,33 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || !dataLength) {
+	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Get requestor from data
-	uint8_t *requestor = data;
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
 	
 	// Check if public keys export manual approval setting is true
 	if(settings.publicKeysExportManualApprovalSetting) {
 	
+		// Get requestor from data
+		uint8_t *requestor = &data[sizeof(*account)];
+		
+		// Get requestor length
+		size_t requestorLength = dataLength - sizeof(*account);
+	
 		// Go through characters in the requestor
-		for(size_t i = 0; i < dataLength; ++i) {
+		for(size_t i = 0; i < requestorLength; ++i) {
 		
 			// Check if character isn't a printable character
 			if(!isPrintableCharacter(requestor[i])) {
@@ -54,16 +67,16 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 		#ifdef TARGET_NANOX
 		
 			// Check if requestor wont fit in the requestor line buffer
-			if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+			if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 			
 				// Go through all characters in the middle of the requestor that wont fit in the requestor line buffer
-				while(dataLength != sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+				while(requestorLength != sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 				
 					// Remove character
-					memmove(&requestor[dataLength / 2], &requestor[dataLength / 2 + 1], dataLength - (dataLength / 2 + 1));
+					memmove(&requestor[requestorLength / 2], &requestor[requestorLength / 2 + 1], requestorLength - (requestorLength / 2 + 1));
 					
 					// Decrement requestor's length
-					--dataLength;
+					--requestorLength;
 				}
 			}
 		
@@ -71,23 +84,23 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 		#else
 		
 			// Check if requestor wont fit in the requestor line buffer with an ellipsis
-			if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0') - (sizeof(ELLIPSIS) - sizeof((char)'\0'))) {
+			if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0') - (sizeof(ELLIPSIS) - sizeof((char)'\0'))) {
 			
 				// Check if requestor wont fit in the requestor line buffer without an ellipsis
-				if(dataLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+				if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 			
 					// Reduce requestor's length to fit in the requestor line buffer
-					dataLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
+					requestorLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
 					
 					// Change end of requestor to be an ellipsis
-					memcpy(&requestor[dataLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
+					memcpy(&requestor[requestorLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
 				}
 			}
 		#endif
 		
 		// Copy requestor into the requestor line buffer
-		memcpy(requestorLineBuffer, requestor, dataLength);
-		requestorLineBuffer[dataLength] = '\0';
+		memcpy(requestorLineBuffer, requestor, requestorLength);
+		requestorLineBuffer[requestorLength] = '\0';
 		
 		// Show export MQS public key menu
 		showMenu(EXPORT_MQS_PUBLIC_KEY_MENU);
@@ -107,6 +120,12 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 // Process get MQS public key user interaction
 void processGetMqsPublicKeyUserInteraction(unsigned short *responseLength) {
 
+	// Get request's data
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
 	
@@ -120,7 +139,7 @@ void processGetMqsPublicKeyUserInteraction(unsigned short *responseLength) {
 		TRY {
 		
 			// Get address private key at the MQS address private key index
-			getAddressPrivateKey(&addressPrivateKey, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
+			getAddressPrivateKey(&addressPrivateKey, *account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
 			
 			// Get address public key from the address private key
 			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);

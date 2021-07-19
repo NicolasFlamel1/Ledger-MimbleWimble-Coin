@@ -23,14 +23,24 @@ void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get identifer depth from data
-	const uint8_t identifierDepth = data[0];
+	const uint8_t identifierDepth = data[sizeof(*account)];
 	
 	// Check if identifier depth is invalid
 	if(identifierDepth > IDENTIFIER_MAXIMUM_DEPTH) {
@@ -40,7 +50,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *
 	}
 	
 	// Get identifier path from data
-	uint32_t *identifierPath = (uint32_t *)&data[sizeof(identifierDepth)];
+	uint32_t *identifierPath = (uint32_t *)&data[sizeof(*account) + sizeof(identifierDepth)];
 	
 	// Go through all parts in the identifier path
 	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
@@ -50,7 +60,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *
 	}
 	
 	// Get value from data
-	const uint64_t *value = (uint64_t *)&data[IDENTIFIER_SIZE];
+	const uint64_t *value = (uint64_t *)&data[sizeof(*account) + IDENTIFIER_SIZE];
 	
 	// Check if value is invalid
 	if(!*value) {
@@ -60,7 +70,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *
 	}
 	
 	// Get switch type from data
-	const enum SwitchType switchType = data[IDENTIFIER_SIZE + sizeof(uint64_t)];
+	const enum SwitchType switchType = data[sizeof(*account) + IDENTIFIER_SIZE + sizeof(uint64_t)];
 	
 	// Check if switch type is invalid
 	if(switchType > REGULAR_SWITCH_TYPE) {
@@ -82,7 +92,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *
 		TRY {
 	
 			// Derive blinding factor
-			deriveBlindingFactor(blindingFactor, *value, identifierPath, identifierDepth, switchType);
+			deriveBlindingFactor(blindingFactor, *account, *value, identifierPath, identifierDepth, switchType);
 			
 			// Commit value with the blinding factor
 			commitValue(commitment, *value, (uint8_t *)blindingFactor);

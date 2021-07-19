@@ -28,20 +28,30 @@ void processStartTransactionRequest(unsigned short *responseLength, unsigned cha
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	const uint32_t *account = (uint32_t *)data;
+	
+	// Check if account is invalid
+	if(*account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get output value from data
-	const uint64_t *outputValue = (uint64_t *)data;
+	const uint64_t *outputValue = (uint64_t *)&data[sizeof(*account)];
 	
 	// Get input value from data
-	const uint64_t *inputValue = (uint64_t *)&data[sizeof(*outputValue)];
+	const uint64_t *inputValue = (uint64_t *)&data[sizeof(*account) + sizeof(*outputValue)];
 	
 	// Get fee from data
-	const uint64_t *fee = (uint64_t *)&data[sizeof(*outputValue) + sizeof(*inputValue)];
+	const uint64_t *fee = (uint64_t *)&data[sizeof(*account) + sizeof(*outputValue) + sizeof(*inputValue)];
 	
 	// Check if output and input values are invalid
 	if(!*outputValue && !*inputValue) {
@@ -101,12 +111,15 @@ void processStartTransactionUserInteraction(unsigned short *responseLength) {
 
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// Get transaction's account from data
+	transaction.account = *(uint32_t *)data;
 
 	// Get transaction's output value from data
-	transaction.outputValue = *(uint64_t *)data;
+	transaction.outputValue = *(uint64_t *)&data[sizeof(transaction.account)];
 	
 	// Get transaction's input value from data
-	transaction.inputValue = *(uint64_t *)&data[sizeof(transaction.outputValue)] + *(uint64_t *)&data[sizeof(transaction.outputValue) + sizeof(uint64_t)];
+	transaction.inputValue = *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.outputValue)] + *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.outputValue) + sizeof(uint64_t)];
 	
 	// Set that transaction has been started
 	transaction.started = true;

@@ -185,7 +185,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -std=gnu17 -O3 -Os -Wall -D HAVE_BOLOS_NO_DEFAULT_APDU
+CFLAGS += -std=gnu17 -O3 -Os -Wall -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -O3 -Os
