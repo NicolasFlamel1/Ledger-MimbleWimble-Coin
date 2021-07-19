@@ -595,6 +595,17 @@ void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t 
 	
 	// End try
 	END_TRY;
+	
+	// Check if blinding factor sum isn't a zero blinding factor
+	if(!isZeroArray((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
+	
+		// Check if blinding factor sum isn't a valid secret key
+		if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+	}
 }
 
 // Create single-signer signature
@@ -805,7 +816,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				case MQS_ADDRESS_LENGTH:
 				
 					// Check if sender address isn't a valid MQS address
-					if(!isValidMqsAddress(senderAddress, senderAddressLength)) {
+					if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength)) {
 					
 						// Throw invalid parameters error
 						THROW(INVALID_PARAMETERS_ERROR);
@@ -818,7 +829,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				case TOR_ADDRESS_LENGTH:
 				
 					// Check if sender address isn't a valid Tor address
-					if(!isValidTorAddress(senderAddress, senderAddressLength)) {
+					if(!getPublicKeyFromTorAddress(NULL, senderAddress, senderAddressLength)) {
 					
 						// Throw invalid parameters error
 						THROW(INVALID_PARAMETERS_ERROR);

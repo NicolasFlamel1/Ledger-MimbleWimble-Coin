@@ -81,8 +81,8 @@ void resetMqsData(void);
 // Create MQS shared private key
 void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publicKey, uint8_t *salt);
 
-// Is valid MQS address
-bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length);
+// Get public key from MQS address
+bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, size_t length);
 
 
 #endif

@@ -19,8 +19,8 @@ struct Transaction {
 	// Includes input
 	bool includesInput;
 	
-	// Offset created
-	bool offsetCreated;
+	// Offset applied
+	bool offsetApplied;
 	
 	// Output value
 	uint64_t outputValue;

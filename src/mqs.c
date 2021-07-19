@@ -89,8 +89,15 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint8_t *publ
 	END_TRY;
 }
 
-// Is valid MQS address
-bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length) {
+// Get public key from MQS address
+bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, size_t length) {
+
+	// Check if length is invalid
+	if(length != MQS_ADDRESS_LENGTH) {
+	
+		// Return false
+		return false;
+	}
 
 	// Get decoded MQS address length
 	const size_t decodedMqsAddressLength = getBase58DecodedLengthWithChecksum(mqsAddress, length);
@@ -104,7 +111,6 @@ bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length) {
 	
 	// Check if decoding MQS address failed
 	uint8_t decodedMqsAddress[decodedMqsAddressLength];
-	
 	if(!base58DecodeWithChecksum(decodedMqsAddress, mqsAddress, length)) {
 	
 		// Return false
@@ -112,10 +118,17 @@ bool isValidMqsAddress(const uint8_t *mqsAddress, size_t length) {
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], sizeof(decodedMqsAddress) - (VERSION_LENGTH + BASE58_CHECKSUM_SIZE))) {
+	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Return false
 		return false;
+	}
+	
+	// Check if getting the public key
+	if(publicKey) {
+	
+		// Copy decoded MQS address to the public key
+		memcpy(publicKey, &decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE);
 	}
 
 	// Return true

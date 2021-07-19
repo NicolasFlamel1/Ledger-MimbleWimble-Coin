@@ -257,4 +257,4 @@ dep/%.d: %.c Makefile
 
 # List variants
 listvariants:
-	@echo VARIANTS COIN BOL
+	@echo VARIANTS CURRENCY mimblewimble_coin grin

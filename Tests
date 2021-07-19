@@ -223,12 +223,12 @@ Continue transaction include input
 	Command: printf "\xC7\x18\x00\x00\x1A\x03\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: N/A
 
-Continue transaction get offset
-	Details: Returns a random offset applied to the transaction
-	Parameters: N/A
-	Response: offset (32 bytes)
-	Command: printf "\xC7\x19\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
-	Result: changes due to random offset
+Continue transaction apply offset
+	Details: Applies an offset to the transaction
+	Parameters: offset (32 bytes)
+	Response: N/A
+	Command: printf "\xC7\x19\x00\x00\x20" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Result: N/A
 
 Continue transaction get public key
 	Details: Returns public key for the transaction

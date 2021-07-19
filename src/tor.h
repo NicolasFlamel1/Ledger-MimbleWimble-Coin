@@ -32,8 +32,8 @@ extern const size_t ED25519_SIGNATURE_SIZE;
 // Get Tor public key
 void getTorPublicKey(cx_ecfp_public_key_t *publicKey, cx_ecfp_private_key_t *privateKey);
 
-// Is valid Tor address
-bool isValidTorAddress(const uint8_t *torAddress, size_t length);
+// Get public key from Tor address
+bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length);
 
 
 #endif

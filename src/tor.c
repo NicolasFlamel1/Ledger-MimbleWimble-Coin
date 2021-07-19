@@ -37,8 +37,15 @@ void getTorPublicKey(cx_ecfp_public_key_t *publicKey, cx_ecfp_private_key_t *pri
 	cx_edwards_compress_point(CX_CURVE_Ed25519, publicKey->W, publicKey->W_len);
 }
 
-// Is valid Tor address
-bool isValidTorAddress(const uint8_t *torAddress, size_t length) {
+// Get public key from Tor address
+bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length) {
+
+	// Check if length is invalid
+	if(length != TOR_ADDRESS_LENGTH) {
+	
+		// Return false
+		return false;
+	}
 
 	// Get decoded Tor address length
 	const size_t decodedTorAddressLength = getBase32DecodedLength(torAddress, length);
@@ -52,7 +59,6 @@ bool isValidTorAddress(const uint8_t *torAddress, size_t length) {
 	
 	// Decode Tor address
 	uint8_t decodedTorAddress[decodedTorAddressLength];
-	
 	base32Decode(decodedTorAddress, torAddress, length);
 	
 	// Check if decoded Tor address's version is invalid
@@ -87,6 +93,20 @@ bool isValidTorAddress(const uint8_t *torAddress, size_t length) {
 	
 		// Return false
 		return false;
+	}
+	
+	// Check if getting the public key
+	if(publicKey) {
+	
+		// Uncompress the decoded Tor address to an Ed25519 public key
+		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+		uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedTorAddress, ED25519_PUBLIC_KEY_SIZE);
+		
+		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		
+		// Initialize the public key with the uncompressed public key
+		cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
 	}
 	
 	// Return true

@@ -7,7 +7,7 @@
 #include "continue_decrypting_slatepack_data.h"
 #include "continue_encrypting_mqs_data.h"
 #include "continue_encrypting_slatepack_data.h"
-#include "continue_transaction_get_offset.h"
+#include "continue_transaction_apply_offset.h"
 #include "continue_transaction_get_public_key.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
@@ -298,11 +298,11 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Continue transaction get offset instruction
-				case CONTINUE_TRANSACTION_GET_OFFSET_INSTRUCTION:
+				// Continue transaction apply offset instruction
+				case CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION:
 				
-					// Process continue transaction get offset request
-					processContinueTransactionGetOffsetRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process continue transaction apply offset request
+					processContinueTransactionApplyOffsetRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;

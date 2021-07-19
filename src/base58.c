@@ -34,7 +34,7 @@ static size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t
 static size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length);
 
 // Get checksum
-void getChecksum(uint8_t *checksum, const uint8_t *data, size_t length);
+static void getChecksum(uint8_t *checksum, const uint8_t *data, size_t length);
 
 
 // Supporting function implementation
@@ -124,7 +124,7 @@ size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	
 	// Create buffer
 	uint8_t buffer[bufferSize];
-	memset(buffer, 0, sizeof(buffer));
+	explicit_bzero(buffer, sizeof(buffer));
 	
 	// Go through all bytes in the byte array after the leading zeros
 	size_t currentLength = 0;
@@ -162,7 +162,7 @@ size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	// Get result size
 	const size_t resultSize = bufferSize - bufferIndex + numberOfLeadingZeros;
 	
-	// Check if result exist
+	// Check if getting result
 	if(result) {
 	
 		// Set result to start with the number of leading zeros in base58
@@ -196,7 +196,7 @@ size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	
 	// Create buffer
 	uint8_t buffer[bufferSize];
-	memset(buffer, 0, sizeof(buffer));
+	explicit_bzero(buffer, sizeof(buffer));
 	
 	// Go through all characters in the string after the leading zeros in base58
 	size_t currentLength = 0;
@@ -244,11 +244,11 @@ size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	// Get result size
 	const size_t resultSize = bufferSize - bufferIndex + numberOfLeadingZeros;
 	
-	// Check if result exist
+	// Check if getting result
 	if(result) {
 	
 		// Set result to start with the number of leading zeros
-		memset(result, 0, numberOfLeadingZeros);
+		explicit_bzero(result, numberOfLeadingZeros);
 		
 		// Go through all bytes in the buffer after the leading zeros
 		for(size_t i = 0; bufferIndex < bufferSize; ++i, ++bufferIndex) {
@@ -262,13 +262,14 @@ size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	return resultSize;
 }
 
-
 // Get checksum
 void getChecksum(uint8_t *checksum, const uint8_t *data, size_t length) {
 
 	// Get hash of data
 	uint8_t hash[CX_SHA256_SIZE];
 	cx_hash_sha256(data, length, hash, sizeof(hash));
+	
+	// Get hash of hash
 	cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
 	
 	// Set checksum to hash

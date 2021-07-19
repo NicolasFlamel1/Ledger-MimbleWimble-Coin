@@ -197,7 +197,7 @@ void base32Decode(uint8_t *result, const uint8_t *data, size_t length) {
 	for(size_t i = 0; i < numberOfBytes; ++i) {
 	
 		// Get position in the data
-		size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER;
+		const size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER;
 		
 		// Get first quantum
 		const uint8_t firstQuantum = (uint8_t *)memchr(CHARACTER, toUppercase(data[position]), sizeof(CHARACTER)) - CHARACTER;
