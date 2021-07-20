@@ -4,7 +4,9 @@
 #include "blake2b.h"
 #include "common.h"
 #include "crypto.h"
+#include "currency_information.h"
 #include "finish_transaction_get_signature.h"
+#include "menus.h"
 #include "transaction.h"
 
 
@@ -44,20 +46,204 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
-	// TODO accept an optional secret nonce of size NONCE_SIZE, verify payment proof when sending, and requrie user approval when sending
-
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength < COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Get network from first parameter
+	enum Network network = firstParameter;
+	
+	// Get commitment from data
+	
+	// Create payment proof using own address, commitment, and transaction input 
+	
+	// Get receiver address from data
+	
+	// Get receiver signature from data
+	
+	// Verify receiver signature is for the payment proof with the receiver addresses's public key
+	
 	// Get public key from data
-	const uint8_t *publicKey = data;
+	const uint8_t *publicKey = &data[NONCE_SIZE];
+	
+	// Check if public key is invalid
+	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
 	
 	// Get kernel features from data
-	const enum KernelFeatures kernelFeatures = data[COMPRESSED_PUBLIC_KEY_SIZE];
+	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	
+	// Check kernel features
+	switch(kernelFeatures) {
+	
+		// Plain features
+		case PLAIN_FEATURES:
+		
+			// Check if data is invalid
+			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Get fee from data
+				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				
+				// Check if fee is invalid
+				if(*fee != transaction.fee) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			}
+		
+			// Break
+			break;
+		
+		// Coinbase features
+		case COINBASE_FEATURES:
+		
+			// Check if data is invalid
+			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Break
+			break;
+		
+		// Height locked features
+		case HEIGHT_LOCKED_FEATURES:
+		
+			// Check if data is invalid
+			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Get fee from data
+				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				
+				// Check if fee is invalid
+				if(*fee != transaction.fee) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			}
+			
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Check if data is invalid
+			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Get fee from data
+				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				
+				// Check if fee is invalid
+				if(*fee != transaction.fee) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			}
+			
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+	};
+	
+	// Check if transaction hasn't been started
+	if(!transaction.started) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
+	// Check if transaction has remaining output or input
+	if(transaction.remainingOutput || transaction.remainingInput) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
+	// Check if transaction includes input
+	if(transaction.input) {
+	
+		// Check if transaction offset wasn't applied
+		if(!transaction.offsetApplied) {
+		
+			// Throw invalid state error
+			THROW(INVALID_STATE_ERROR);
+		}
+	
+		// Copy transaction's input into the amount line buffer
+		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
+		toString(amountLineBuffer, transaction.input, currencyInformation.fractionalDigits);
+		
+		strcat(amountLineBuffer, " ");
+		strcat(amountLineBuffer, currencyInformation.abbreviation);
+		
+		// Copy transaction's fee into the fee line buffer
+		explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
+		toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
+		
+		strcat(feeLineBuffer, " ");
+		strcat(feeLineBuffer, currencyInformation.abbreviation);
+
+		// Show finalize transaction menu
+		showMenu(FINALIZE_TRANSACTION_MENU);
+		
+		// Set response flags to send response later
+		*responseFlags |= IO_ASYNCH_REPLY;
+	}
+	
+	// Otherwise
+	else {
+	
+		// Process finish transaction get signature user interaction
+		processFinishTransactionGetSignatureUserInteraction(responseLength);
+	}
+}
+
+// Process finish transaction get signature user interaction
+void processFinishTransactionGetSignatureUserInteraction(unsigned short *responseLength) {
+
+	// Get request's data
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// Get secret nonce from data
+	const uint8_t *secretNonce = data;
+	
+	// Get public key from data
+	const uint8_t *publicKey = &data[NONCE_SIZE];
+	
+	// Get kernel features from data
+	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Initialize kernel data
 	uint8_t *kernelData;
@@ -74,13 +260,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t);
 			
-			// Check if data is invalid
-			if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + kernelDataLength) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
 			// Allocate memory for kernel data
 			kernelData = alloca(kernelDataLength);
 			
@@ -89,7 +268,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			
 			{
 				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[sizeof(uint8_t)];
+				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert fee to big endian
 				swapEndianness((uint8_t *)fee, sizeof(*fee));
@@ -107,13 +286,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t);
 			
-			// Check if data is invalid
-			if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + kernelDataLength) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
 			// Allocate memory for kernel data
 			kernelData = alloca(kernelDataLength);
 			
@@ -129,13 +301,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
 			
-			// Check if data is invalid
-			if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + kernelDataLength) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
 			// Allocate memory for kernel data
 			kernelData = alloca(kernelDataLength);
 			
@@ -144,7 +309,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			
 			{
 				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[sizeof(uint8_t)];
+				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert fee to big endian
 				swapEndianness((uint8_t *)fee, sizeof(*fee));
@@ -153,7 +318,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 				memcpy(&kernelData[sizeof(kernelData[0])], fee, sizeof(*fee));
 				
 				// Get lock height from data
-				uint64_t *lockHeight = (uint64_t *)&data[sizeof(uint8_t) + sizeof(*fee)];
+				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(*fee)];
 				
 				// Convert lock height to big endian
 				swapEndianness((uint8_t *)lockHeight, sizeof(*lockHeight));
@@ -171,13 +336,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
 			
-			// Check if data is invalid
-			if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + kernelDataLength) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
 			// Allocate memory for kernel data
 			kernelData = alloca(kernelDataLength);
 			
@@ -186,7 +344,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			
 			{
 				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[sizeof(uint8_t)];
+				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert fee to big endian
 				swapEndianness((uint8_t *)fee, sizeof(*fee));
@@ -195,7 +353,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 				memcpy(&kernelData[sizeof(kernelData[0])], fee, sizeof(*fee));
 				
 				// Get relative height from data
-				uint64_t *relativeHeight = (uint64_t *)&data[sizeof(uint8_t) + sizeof(*fee)];
+				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(*fee)];
 				
 				// Convert relative height to big endian
 				swapEndianness((uint8_t *)relativeHeight, sizeof(*relativeHeight));
@@ -206,28 +364,8 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			
 			// Break
 			break;
-		
-		// Default
-		default:
-		
-			// Throw invalid state error
-			THROW(INVALID_STATE_ERROR);
 	};
-	
-	// Check if transaction hasn't been started
-	if(!transaction.started) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
-	// Check if transaction still has output or input values
-	if(transaction.outputValue || transaction.inputValue) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
+
 	// Get message from the kernel data
 	uint8_t message[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(message, sizeof(message), kernelData, kernelDataLength, NULL, 0);
@@ -247,8 +385,8 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Get private key from the transaction's blinding factor
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
 			
-			// Create single-signer signature from the message, private key, and public key
-			createSingleSignerSignature(signature, message, (cx_ecfp_private_key_t *)&privateKey, publicKey);
+			// Create single-signer signature from the message, private key, secret nonce, and public key
+			createSingleSignerSignature(signature, message, (cx_ecfp_private_key_t *)&privateKey, secretNonce, publicKey);
 		}
 		
 		// Finally

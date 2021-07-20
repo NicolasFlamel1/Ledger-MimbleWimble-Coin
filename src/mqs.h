@@ -6,6 +6,7 @@
 // Header files
 #include <stdint.h>
 #include "chacha20_poly1305.h"
+#include "crypto.h"
 
 
 // Definitions
@@ -82,7 +83,7 @@ void resetMqsData(void);
 void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint8_t *publicKey, uint8_t *salt);
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, size_t length);
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum Network network);
 
 
 #endif

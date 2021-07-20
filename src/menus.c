@@ -644,21 +644,21 @@ static UX_FLOW(exportMqsPublicKeyMenu,
 	FLOW_LOOP
 );
 
-// Start transaction menu notify screen
-static UX_STEP_NOCB(startTransactionMenuNotifyScreen, pnn, {
+// Finalize transaction menu notify screen
+static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 
 	// Picture
 	&C_icon_question,
 
 	// First line
-	"Start",
+	"Finalize",
 	
 	// Second line
 	"transaction?"
 });
 
-// Start transaction menu amount minimal screen
-static UX_STEP_NOCB(startTransactionMenuAmountMinimalScreen,
+// Finalize transaction menu amount minimal screen
+static UX_STEP_NOCB(finalizeTransactionMenuAmountMinimalScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -693,8 +693,8 @@ static UX_STEP_NOCB(startTransactionMenuAmountMinimalScreen,
 );
 
 
-// Start transaction menu amount screen
-static UX_STEP_NOCB(startTransactionMenuAmountScreen,
+// Finalize transaction menu amount screen
+static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -717,8 +717,8 @@ static UX_STEP_NOCB(startTransactionMenuAmountScreen,
 	.text = amountLineBuffer
 });
 
-// Start transaction menu fee minimal screen
-static UX_STEP_NOCB(startTransactionMenuFeeMinimalScreen,
+// Finalize transaction menu fee minimal screen
+static UX_STEP_NOCB(finalizeTransactionMenuFeeMinimalScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -753,8 +753,8 @@ static UX_STEP_NOCB(startTransactionMenuFeeMinimalScreen,
 );
 
 
-// Start transaction menu fee screen
-static UX_STEP_NOCB(startTransactionMenuFeeScreen,
+// Finalize transaction menu fee screen
+static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -777,8 +777,8 @@ static UX_STEP_NOCB(startTransactionMenuFeeScreen,
 	.text = feeLineBuffer
 });
 
-// Start transaction menu approve screen
-static UX_STEP_CB(startTransactionMenuApproveScreen, pbb, processUserInteraction(START_TRANSACTION_INSTRUCTION, true), {
+// Finalize transaction menu approve screen
+static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pbb, processUserInteraction(FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -790,8 +790,8 @@ static UX_STEP_CB(startTransactionMenuApproveScreen, pbb, processUserInteraction
 	"request"
 });
 
-// Start transaction menu deny screen
-static UX_STEP_CB(startTransactionMenuDenyScreen, pbb, processUserInteraction(START_TRANSACTION_INSTRUCTION, false), {
+// Finalize transaction menu deny screen
+static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction(FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -803,8 +803,8 @@ static UX_STEP_CB(startTransactionMenuDenyScreen, pbb, processUserInteraction(ST
 	"request"
 });
 
-// Start transaction menu
-static const ux_flow_step_t *startTransactionMenu[6];
+// Finalize transaction menu
+static const ux_flow_step_t *finalizeTransactionMenu[6];
 
 // Processing menu screen
 static UX_STEP_NOCB(processingMenuScreen, pb, {
@@ -932,51 +932,51 @@ void showMenu(enum Menu menu) {
 			// Break
 			break;
 		
-		// Start transaction menu
-		case START_TRANSACTION_MENU:
+		// Finalize transaction menu
+		case FINALIZE_TRANSACTION_MENU:
 		
-			// Set start transaction menu notify screen
-			startTransactionMenu[0] = &startTransactionMenuNotifyScreen;
+			// Set finalize transaction menu notify screen
+			finalizeTransactionMenu[0] = &finalizeTransactionMenuNotifyScreen;
 			
 			// Check if amount line buffer is longer than one line
 			if(strlen(amountLineBuffer) > LINE_CHARACTER_LENGTH) {
 			
-				// Set start transaction menu amount screen
-				startTransactionMenu[1] = &startTransactionMenuAmountScreen;
+				// Set finalize transaction menu amount screen
+				finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountScreen;
 			}
 			
 			// Otherwise
 			else {
 			
-				// Set start transaction menu amount minimal screen
-				startTransactionMenu[1] = &startTransactionMenuAmountMinimalScreen;
+				// Set finalize transaction menu amount minimal screen
+				finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountMinimalScreen;
 			}
 			
 			// Check if fee line buffer is longer than one line
 			if(strlen(feeLineBuffer) > LINE_CHARACTER_LENGTH) {
 			
-				// Set start transaction menu fee screen
-				startTransactionMenu[2] = &startTransactionMenuFeeScreen;
+				// Set finalize transaction menu fee screen
+				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeScreen;
 			}
 			
 			// Otherwise
 			else {
 			
-				// Set start transaction menu fee minimal screen
-				startTransactionMenu[2] = &startTransactionMenuFeeMinimalScreen;
+				// Set finalize transaction menu fee minimal screen
+				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeMinimalScreen;
 			}
 
-			// Set start transaction menu approve screen
-			startTransactionMenu[3] = &startTransactionMenuApproveScreen;
+			// Set finalize transaction menu approve screen
+			finalizeTransactionMenu[3] = &finalizeTransactionMenuApproveScreen;
 			
-			// Set start transaction menu deny screen
-			startTransactionMenu[4] = &startTransactionMenuDenyScreen;
+			// Set finalize transaction menu deny screen
+			finalizeTransactionMenu[4] = &finalizeTransactionMenuDenyScreen;
 			
-			// Set start transaction loop
-			startTransactionMenu[5] = FLOW_LOOP;
+			// Set finalize transaction loop
+			finalizeTransactionMenu[5] = FLOW_LOOP;
 		
-			// Set menu steps to start transaction menu
-			menuSteps = startTransactionMenu;
+			// Set menu steps to finalize transaction menu
+			menuSteps = finalizeTransactionMenu;
 			
 			// Break
 			break;

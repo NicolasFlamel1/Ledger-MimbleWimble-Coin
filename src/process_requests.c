@@ -444,11 +444,11 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						// Break
 						break;
 					
-					// Start transaction instruction
-					case START_TRANSACTION_INSTRUCTION:
+					// Finish transaction get signature instruction
+					case FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION:
 					
-						// Process start transaction user interaction
-						processStartTransactionUserInteraction((unsigned short *)&responseLength);
+						// Process finish transaction get signature user interaction
+						processFinishTransactionGetSignatureUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
 						break;

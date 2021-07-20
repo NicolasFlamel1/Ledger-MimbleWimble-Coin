@@ -2,7 +2,7 @@
 #include <string.h>
 #include "base58.h"
 #include "common.h"
-#include "crypto.h"
+#include "currency_information.h"
 #include "mqs.h"
 
 
@@ -27,7 +27,13 @@ const size_t MQS_SHARED_PRIVATE_KEY_SALT_SIZE = 8;
 const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
 
 // Version length
-static const size_t VERSION_LENGTH = 2;
+static const size_t VERSION_LENGTH = sizeof(uint16_t);
+
+
+// Function prototypes
+
+// Get version
+uint16_t getVersion(enum Network network);
 
 
 // Supporting function implementation
@@ -90,10 +96,17 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 }
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, size_t length) {
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum Network network) {
 
 	// Check if length is invalid
 	if(length != MQS_ADDRESS_LENGTH) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Check if network is invalid
+	if(network > TESTNET) {
 	
 		// Return false
 		return false;
@@ -118,7 +131,7 @@ bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, s
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(getVersion(network) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Return false
 		return false;
@@ -127,10 +140,102 @@ bool getPublicKeyFromMqsAddress(uint8_t *publicKey, const uint8_t *mqsAddress, s
 	// Check if getting the public key
 	if(publicKey) {
 	
-		// Copy decoded MQS address to the public key
-		memcpy(publicKey, &decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE);
+		// Uncompress the decoded MQS address to an secp256k1 public key
+		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+		memcpy(uncompressedPublicKey, &decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE);
+		
+		uncompressSecp256k1PublicKey(uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		
+		// Initialize the public key with the uncompressed public key
+		cx_ecfp_init_public_key(CX_CURVE_SECP256K1, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
 	}
 
 	// Return true
 	return true;
+}
+
+// Get version
+uint16_t getVersion(enum Network network) {
+
+	// Initialize version
+	uint8_t version[VERSION_LENGTH];
+
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// MimbleWimble Coin ID
+		case MIMBLEWIMBLE_COIN_ID:
+		
+			// Check network
+			switch(network) {
+			
+				// Mainnet
+				case MAINNET:
+				
+					// Set version
+					version[0] = 1;
+					version[1] = 69;
+				
+					// Break
+					break;
+				
+				// Testnet
+				case TESTNET:
+				
+					// Set version
+					version[0] = 1;
+					version[1] = 121;
+				
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+		// Grin ID
+		case GRIN_ID:
+		
+			// Check network
+			switch(network) {
+			
+				// Mainnet
+				case MAINNET:
+				
+					// Set version
+					version[0] = 1;
+					version[1] = 11;
+				
+					// Break
+					break;
+				
+				// Testnet
+				case TESTNET:
+				
+					// Set version
+					version[0] = 1;
+					version[1] = 120;
+				
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+	}
+		
+	// Return version
+	return *(uint16_t *)version;
 }

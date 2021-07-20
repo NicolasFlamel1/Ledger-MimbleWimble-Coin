@@ -26,11 +26,14 @@ void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, un
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint64_t) + COMMITMENT_SIZE) {
+	if(secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint64_t) + COMMITMENT_SIZE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
+	
+	// Get network from first parameter
+	enum Network network = firstParameter;
 	
 	// Get account from data
 	const uint32_t *account = (uint32_t *)data;
@@ -71,7 +74,7 @@ void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, un
 	// Get payment proof message
 	uint8_t paymentProofMessage[getPaymentProofMessageLength(*value, senderAddressLength)];
 	
-	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength);
+	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength, network);
 	
 	// Get hash of the payment proof address
 	uint8_t hash[CX_SHA256_SIZE];

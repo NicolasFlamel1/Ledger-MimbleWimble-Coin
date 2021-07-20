@@ -34,8 +34,8 @@ void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLengt
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction still has output or input values
-	if(transaction.outputValue || transaction.inputValue) {
+	// Check if transaction has remaining output or input
+	if(transaction.remainingOutput || transaction.remainingInput) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);

@@ -8,5 +8,8 @@
 // Process finish transaction get signature request
 void processFinishTransactionGetSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags);
 
+// Process finish transaction get signature user interaction
+void processFinishTransactionGetSignatureUserInteraction(unsigned short *responseLength);
+
 
 #endif

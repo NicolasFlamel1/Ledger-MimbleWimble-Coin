@@ -16,20 +16,23 @@ struct Transaction {
 	// Started
 	bool started;
 	
-	// Includes input
-	bool includesInput;
-	
 	// Offset applied
 	bool offsetApplied;
 	
 	// Account
 	uint32_t account;
 	
-	// Output value
-	uint64_t outputValue;
+	// Set input
+	uint64_t input;
 	
-	// Input value
-	uint64_t inputValue;
+	// Set fee
+	uint64_t fee;
+	
+	// Remaining output
+	uint64_t remainingOutput;
+	
+	// Remaining input
+	uint64_t remainingInput;
 	
 	// Blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];

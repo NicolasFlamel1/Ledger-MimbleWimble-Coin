@@ -79,6 +79,13 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 	// Get signed public key
 	const uint8_t *signedPublicKey = &certificate[sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t)];
 	
+	// Check if signed public key is invalid
+	if(!isValidEd25519PublicKey(signedPublicKey, ED25519_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Get number of certificate extensions
 	const uint8_t numberOfCertificateExtensions = certificate[sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE];
 	

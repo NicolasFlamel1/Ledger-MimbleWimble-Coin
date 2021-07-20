@@ -77,15 +77,15 @@ void processContinueTransactionIncludeOutputRequest(unsigned short *responseLeng
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if no more outputs exists for the transaction
-	if(!transaction.outputValue) {
+	// Check if transaction has no more remaining output
+	if(!transaction.remainingOutput) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if value is too big for the transaction's output value
-	if(*value > transaction.outputValue) {
+	// Check if value is too big for the transaction's remaining output
+	if(*value > transaction.remainingOutput) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -118,8 +118,8 @@ void processContinueTransactionIncludeOutputRequest(unsigned short *responseLeng
 	// End try
 	END_TRY;
 	
-	// Remove value from the transaction's output value
-	transaction.outputValue -= *value;
+	// Remove value from the transaction's remaining output
+	transaction.remainingOutput -= *value;
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

@@ -77,7 +77,6 @@ extern const size_t PROOF_MESSAGE_IDENTIFIER_INDEX;
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
 
-
 // Switch type
 enum SwitchType {
 
@@ -86,6 +85,16 @@ enum SwitchType {
 	
 	// Regular switch type
 	REGULAR_SWITCH_TYPE
+};
+
+// Network
+enum Network {
+
+	// Mainnet
+	MAINNET,
+	
+	// Testnet
+	TESTNET
 };
 
 
@@ -119,7 +128,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive);
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *publicKey);
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicKey);
 
 // Get encrypted data length
 size_t getEncryptedDataLength(size_t dataLength);
@@ -134,7 +143,7 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength);
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum Network network);
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment);
@@ -150,6 +159,9 @@ bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length);
 
 // Is valid secp256k1 public key
 bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length);
+
+// Uncompress secp256k1 public key
+bool uncompressSecp256k1PublicKey(uint8_t *publicKey, size_t length);
 
 
 #endif

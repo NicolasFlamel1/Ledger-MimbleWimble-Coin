@@ -77,15 +77,15 @@ void processContinueTransactionIncludeInputRequest(unsigned short *responseLengt
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if no more inputs exists for the transaction
-	if(!transaction.inputValue) {
+	// Check if transaction has no more remaining input
+	if(!transaction.remainingInput) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if value is too big for the transaction's input value
-	if(*value > transaction.inputValue) {
+	// Check if value is too big for the transaction's remaining input
+	if(*value > transaction.remainingInput) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -118,8 +118,8 @@ void processContinueTransactionIncludeInputRequest(unsigned short *responseLengt
 	// End try
 	END_TRY;
 	
-	// Remove value from the transaction's input value
-	transaction.inputValue -= *value;
+	// Remove value from the transaction's remaining input
+	transaction.remainingInput -= *value;
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

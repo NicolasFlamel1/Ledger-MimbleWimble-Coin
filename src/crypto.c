@@ -625,7 +625,7 @@ void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t 
 }
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *publicKey) {
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicKey) {
 
 	// Create context
 	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_SIGN)];
@@ -660,7 +660,7 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 		
 			// Check if creating single-signer signature failed
 			secp256k1_ecdsa_signature signatureData;
-			if(!secp256k1_aggsig_sign_single((secp256k1_context *)context, signatureData.data, message, privateKey->d, NULL, NULL, NULL, NULL, &publicKeyData, (uint8_t *)seed)) {
+			if(!secp256k1_aggsig_sign_single((secp256k1_context *)context, signatureData.data, message, privateKey->d, secretNonce, NULL, NULL, NULL, &publicKeyData, (uint8_t *)seed)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -817,7 +817,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 }
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength) {
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum Network network) {
 
 	// Check currency information ID
 	switch(currencyInformation.id) {
@@ -832,7 +832,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				case MQS_ADDRESS_LENGTH:
 				
 					// Check if sender address isn't a valid MQS address
-					if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength)) {
+					if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength, network)) {
 					
 						// Throw invalid parameters error
 						THROW(INVALID_PARAMETERS_ERROR);
@@ -1155,6 +1155,43 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 	// Set result to if public key is a valid secp256k1 public key
 	secp256k1_pubkey publicKeyData;
 	bool result = secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, length);
+	
+	// Destroy context
+	secp256k1_context_preallocated_destroy(context);
+	explicit_bzero(contextBuffer, sizeof(contextBuffer));
+	
+	// Return result
+	return result;
+}
+
+// Uncompress secp256k1 public key
+bool uncompressSecp256k1PublicKey(uint8_t *publicKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != UNCOMPRESSED_PUBLIC_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+
+	// Create context
+	uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_NONE)];
+	secp256k1_context *context = secp256k1_context_preallocated_create(contextBuffer, SECP256K1_CONTEXT_NONE);
+	
+	// Initialize result
+	bool result = false;
+	
+	// Check if parsing the public key was successful
+	secp256k1_pubkey publicKeyData;
+	if(secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	
+		// Check if serializing the public key was successful
+		if(secp256k1_ec_pubkey_serialize(context, publicKey, &length, &publicKeyData, SECP256K1_EC_UNCOMPRESSED)) {
+		
+			// Set result
+			result = true;
+		}
+	}
 	
 	// Destroy context
 	secp256k1_context_preallocated_destroy(context);

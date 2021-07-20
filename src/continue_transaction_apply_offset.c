@@ -47,15 +47,15 @@ void processContinueTransactionApplyOffsetRequest(unsigned short *responseLength
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction still has output or input values
-	if(transaction.outputValue || transaction.inputValue) {
+	// Check if transaction has remaining output or input
+	if(transaction.remainingOutput || transaction.remainingInput) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
 	}
 	
 	// Check if transaction doesn't include input or the offset was already applied
-	if(!transaction.includesInput || transaction.offsetApplied) {
+	if(!transaction.input || transaction.offsetApplied) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);

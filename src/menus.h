@@ -62,8 +62,8 @@ enum Menu {
 	// Export MQS public key menu
 	EXPORT_MQS_PUBLIC_KEY_MENU,
 	
-	// Start transaction menu
-	START_TRANSACTION_MENU,
+	// FINALIZE transaction menu
+	FINALIZE_TRANSACTION_MENU,
 	
 	// Processing menu
 	PROCESSING_MENU
