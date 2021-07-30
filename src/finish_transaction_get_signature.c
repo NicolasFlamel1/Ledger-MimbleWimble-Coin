@@ -32,12 +32,12 @@ enum KernelFeatures {
 
 // Address type
 enum AddressType {
+
+	// Tor address type
+	TOR_ADDRESS_TYPE,
 	
 	// MQS address type
-	MQS_ADDRESS_TYPE,
-	
-	// Tor address type
-	TOR_ADDRESS_TYPE
+	MQS_ADDRESS_TYPE
 };
 
 
@@ -56,13 +56,68 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
-	// Check if data is invalid
-	if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	// Check if parameters or data are invalid
+	if(firstParameter > TESTNET_NETWORK_TYPE || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get network type from first parameter
+	const enum NetworkType networkType = firstParameter;
+	
+	// Get address type from second parameter
+	const enum AddressType addressType = secondParameter;
+	
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// MimbleWimble Coin ID
+		case MIMBLEWIMBLE_COIN_ID:
+		
+			// Check address type
+			switch(addressType) {
+			
+				// MQS address type or Tor address type
+				case MQS_ADDRESS_TYPE:
+				case TOR_ADDRESS_TYPE:
+				
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Break
+			break;
+		
+		// Grin ID
+		case GRIN_ID:
+		
+			// Check address type
+			switch(addressType) {
+			
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+		
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Break
+			break;
 	}
 	
 	// Get public key from data
@@ -143,12 +198,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Get network from first parameter
-			const enum Network network = firstParameter;
-			
-			// Get address type from second parameter
-			const enum AddressType addressType = secondParameter;
-		
 			// Get commitment from data
 			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
@@ -237,7 +286,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			const uint8_t *receiverAddress = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)];
 			
 			// Get signature from data
-			const uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
+			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
 			
 			// Get signature length
 			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength);
@@ -263,7 +312,7 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 							address = alloca(addressLength);
 							
 							// Get MQS address
-							getMqsAddress(address, transaction.account, network);
+							getMqsAddress(address, transaction.account, networkType);
 						
 							// Break
 							break;
@@ -282,12 +331,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 						
 							// Break
 							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
 					}
 					
 					// Break
@@ -313,12 +356,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 						
 							// Break
 							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
 					}
 					
 					// Break
@@ -327,10 +364,10 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			
 			// Get payment proof message
 			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.input, addressLength)];
-			getPaymentProofMessage(paymentProofMessage, transaction.input, commitment, address, addressLength, network);
+			getPaymentProofMessage(paymentProofMessage, transaction.input, commitment, address, addressLength, networkType);
 			
 			// Check if verifying payment proof failed
-			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), receiverAddress, receiverAddressLength, network, signature, signatureLength)) {
+			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), receiverAddress, receiverAddressLength, networkType, signature, signatureLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -363,13 +400,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 		
 		// Otherwise
 		else {
-		
-			// Check if parameters are invalid
-			if(firstParameter || secondParameter) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
 			
 			// Clear receiver line buffer
 			explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
@@ -405,13 +435,6 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	
 	// Otherwise
 	else {
-	
-		// Check if parameters are invalid
-		if(firstParameter || secondParameter) {
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-		}
 	
 		// Check if data is invalid
 		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {

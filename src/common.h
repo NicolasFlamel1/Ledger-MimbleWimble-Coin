@@ -22,12 +22,8 @@
 // Error type mask
 extern const uint16_t ERROR_TYPE_MASK;
 
-// Check if target isn't the Nano X
-#ifndef TARGET_NANOX
-
-	// Ellipsis
-	extern const char ELLIPSIS[sizeof("...")];
-#endif
+// Ellipsis
+extern const char ELLIPSIS[sizeof("...")];
 
 // Error
 enum Error {
@@ -55,6 +51,16 @@ enum Error {
 	
 	// Internal error error
 	INTERNAL_ERROR_ERROR
+};
+
+// Network type
+enum NetworkType {
+
+	// Mainnet network type
+	MAINNET_NETWORK_TYPE,
+	
+	// Testnet network type
+	TESTNET_NETWORK_TYPE
 };
 
 

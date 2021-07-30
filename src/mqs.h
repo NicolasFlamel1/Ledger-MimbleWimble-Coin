@@ -83,13 +83,13 @@ void resetMqsData(void);
 void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint8_t *publicKey, uint8_t *salt);
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum Network network);
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum NetworkType networkType);
 
 // Get MQS address from public key
-void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum Network network);
+void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum NetworkType networkType);
 
 // Get Mqs address
-void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum Network network);
+void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum NetworkType networkType);
 
 
 #endif

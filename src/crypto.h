@@ -6,7 +6,7 @@
 // Header files
 #include <os.h>
 #include <stdbool.h>
-#include "secp256k1_generator.h"
+#include "common.h"
 
 
 // Definitions
@@ -31,12 +31,6 @@ extern const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE;
 
 // Public key prefix size
 extern const size_t PUBLIC_KEY_PREFIX_SIZE;
-
-// Generator G
-extern const secp256k1_generator GENERATOR_G;
-
-// Generator H
-extern const secp256k1_generator GENERATOR_H;
 
 // Identifier maximum depth
 extern const size_t IDENTIFIER_MAXIMUM_DEPTH;
@@ -87,16 +81,6 @@ enum SwitchType {
 	REGULAR_SWITCH_TYPE
 };
 
-// Network
-enum Network {
-
-	// Mainnet
-	MAINNET,
-	
-	// Testnet
-	TESTNET
-};
-
 
 // Function prototypes
 
@@ -143,10 +127,10 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum Network network);
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum NetworkType networkType);
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, enum Network network, const uint8_t *signature, size_t signatureLength);
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, enum NetworkType networkType, uint8_t *signature, size_t signatureLength);
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment);

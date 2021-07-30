@@ -27,7 +27,7 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t)) {
+	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength <= sizeof(uint32_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

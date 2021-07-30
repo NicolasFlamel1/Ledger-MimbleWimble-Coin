@@ -33,7 +33,7 @@ static const size_t VERSION_LENGTH = sizeof(uint16_t);
 // Function prototypes
 
 // Get version
-uint16_t getVersion(enum Network network);
+uint16_t getVersion(enum NetworkType networkType);
 
 
 // Supporting function implementation
@@ -96,7 +96,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 }
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum Network network) {
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum NetworkType networkType) {
 
 	// Check if length is invalid
 	if(length != MQS_ADDRESS_LENGTH) {
@@ -124,7 +124,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(getVersion(network) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(getVersion(networkType) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Return false
 		return false;
@@ -148,10 +148,10 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 }
 
 // Get MQS address from public key
-void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum Network network) {
+void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum NetworkType networkType) {
 
 	// Get version
-	const uint16_t version = getVersion(network);
+	const uint16_t version = getVersion(networkType);
 	
 	// Get address data from version and the public key
 	uint8_t addressData[sizeof(version) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
@@ -163,7 +163,7 @@ void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, e
 }
 
 // Get Mqs address
-void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum Network network) {
+void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum NetworkType networkType) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -196,11 +196,11 @@ void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum Network network) 
 	END_TRY;
 	
 	// Get MQS address from the address public key
-	getMqsAddressFromPublicKey(mqsAddress, (uint8_t *)addressPublicKey, network);
+	getMqsAddressFromPublicKey(mqsAddress, (uint8_t *)addressPublicKey, networkType);
 }
 
 // Get version
-uint16_t getVersion(enum Network network) {
+uint16_t getVersion(enum NetworkType networkType) {
 
 	// Initialize version
 	uint8_t version[VERSION_LENGTH];
@@ -211,11 +211,11 @@ uint16_t getVersion(enum Network network) {
 		// MimbleWimble Coin ID
 		case MIMBLEWIMBLE_COIN_ID:
 		
-			// Check network
-			switch(network) {
+			// Check network type
+			switch(networkType) {
 			
-				// Mainnet
-				case MAINNET:
+				// Mainnet network type
+				case MAINNET_NETWORK_TYPE:
 				
 					// Set version
 					version[0] = 1;
@@ -224,8 +224,8 @@ uint16_t getVersion(enum Network network) {
 					// Break
 					break;
 				
-				// Testnet
-				case TESTNET:
+				// Testnet network type
+				case TESTNET_NETWORK_TYPE:
 				
 					// Set version
 					version[0] = 1;
@@ -244,11 +244,11 @@ uint16_t getVersion(enum Network network) {
 		// Grin ID
 		case GRIN_ID:
 		
-			// Check network
-			switch(network) {
+			// Check network type
+			switch(networkType) {
 			
-				// Mainnet
-				case MAINNET:
+				// Mainnet network type
+				case MAINNET_NETWORK_TYPE:
 				
 					// Set version
 					version[0] = 1;
@@ -257,8 +257,8 @@ uint16_t getVersion(enum Network network) {
 					// Break
 					break;
 				
-				// Testnet
-				case TESTNET:
+				// Testnet network type
+				case TESTNET_NETWORK_TYPE:
 				
 					// Set version
 					version[0] = 1;
