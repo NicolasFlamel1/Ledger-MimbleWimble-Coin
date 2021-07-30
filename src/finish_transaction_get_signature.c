@@ -162,27 +162,62 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			// Get receiver address type from data
 			const enum AddressType receiverAddressType = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
-			// Check receiver address type
+			// Check currency information ID
 			size_t receiverAddressLength;
-			switch(receiverAddressType) {
+			switch(currencyInformation.id) {
 			
-				// MQS address type
-				case MQS_ADDRESS_TYPE:
+				// MimbleWimble Coin ID
+				case MIMBLEWIMBLE_COIN_ID:
+			
+					// Check receiver address type
+					switch(receiverAddressType) {
+					
+						// MQS address type
+						case MQS_ADDRESS_TYPE:
+						
+							// Set receiver address
+							receiverAddressLength = MQS_ADDRESS_LENGTH;
+						
+							// Break
+							break;
+						
+						// Tor address type
+						case TOR_ADDRESS_TYPE:
+						
+							// Set receiver address
+							receiverAddressLength = TOR_ADDRESS_LENGTH;
+						
+							// Break
+							break;
+						
+						// Default
+						default:
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+					}
 				
-					// Set receiver address
-					receiverAddressLength = MQS_ADDRESS_LENGTH;
+				// Grin ID
+				case GRIN_ID:
 				
-					// Break
-					break;
-				
-				// Tor address type
-				case TOR_ADDRESS_TYPE:
-				
-					// Set receiver address
-					receiverAddressLength = TOR_ADDRESS_LENGTH;
-				
-					// Break
-					break;
+					// Check receiver address type
+					switch(receiverAddressType) {
+					
+						// Tor address type
+						case TOR_ADDRESS_TYPE:
+						
+							// Set receiver address
+							receiverAddressLength = ED25519_PUBLIC_KEY_SIZE;
+						
+							// Break
+							break;
+						
+						// Default
+						default:
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+					}
 				
 				// Default
 				default:
@@ -261,23 +296,33 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 				// Grin ID
 				case GRIN_ID:
 				
-					// Set address length
-					addressLength = ED25519_PUBLIC_KEY_SIZE;
+					// Check address type
+					switch(addressType) {
 					
-					// Allocate memory for the address
-					address = alloca(addressLength);
-					
-					// Get Ed25519 public key
-					getEd25519PublicKey(address, transaction.account);
+						// Tor address type
+						case TOR_ADDRESS_TYPE:
 				
+							// Set address length
+							addressLength = ED25519_PUBLIC_KEY_SIZE;
+							
+							// Allocate memory for the address
+							address = alloca(addressLength);
+							
+							// Get Ed25519 public key
+							getEd25519PublicKey(address, transaction.account);
+						
+							// Break
+							break;
+						
+						// Default
+						default:
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+					}
+					
 					// Break
 					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get payment proof message
@@ -290,13 +335,44 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Check currency information ID
+			switch(currencyInformation.id) {
+			
+				// MimbleWimble Coin ID
+				case MIMBLEWIMBLE_COIN_ID:
+			
+					// Copy receiver address into the receiver line buffer
+					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
+					memcpy(receiverLineBuffer, receiverAddress, receiverAddressLength);
+					
+					// Break
+					break;
+				
+				// Grin ID
+				case GRIN_ID:
+				
+					// Copy receiver address into the receiver line buffer
+					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
+					toHexString(receiverLineBuffer, receiverAddress, receiverAddressLength);
+					
+					// Break
+					break;
+			}
 		}
 		
-		// Otherwise check if parameters are invalid
-		else if(firstParameter || secondParameter) {
+		// Otherwise
+		else {
 		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
+			// Check if parameters are invalid
+			if(firstParameter || secondParameter) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Clear receiver line buffer
+			explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
 		}
 		
 		// Check if transaction offset wasn't applied

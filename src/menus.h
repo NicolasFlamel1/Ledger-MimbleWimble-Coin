@@ -38,6 +38,9 @@
 // Fee line buffer length
 #define FEE_LINE_BUFFER_LENGTH (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_LENGTH)
 
+// Receiver line buffer length
+#define RECEIVER_LINE_BUFFER_LENGTH (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+
 
 // Constants
 
@@ -62,7 +65,7 @@ enum Menu {
 	// Export MQS public key menu
 	EXPORT_MQS_PUBLIC_KEY_MENU,
 	
-	// FINALIZE transaction menu
+	// Finalize transaction menu
 	FINALIZE_TRANSACTION_MENU,
 	
 	// Processing menu
@@ -100,8 +103,11 @@ extern char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_LENGTH];
 // Amount line buffer
 extern char amountLineBuffer[AMOUNT_LINE_BUFFER_LENGTH];
 
-//Fee line buffer
+// Fee line buffer
 extern char feeLineBuffer[FEE_LINE_BUFFER_LENGTH];
+
+// Receiver line buffer
+extern char receiverLineBuffer[RECEIVER_LINE_BUFFER_LENGTH];
 
 
 // Function prototypes

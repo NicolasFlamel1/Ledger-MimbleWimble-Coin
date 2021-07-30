@@ -25,6 +25,9 @@ char amountLineBuffer[AMOUNT_LINE_BUFFER_LENGTH];
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_LENGTH];
 
+// Receiver line buffer
+char receiverLineBuffer[RECEIVER_LINE_BUFFER_LENGTH];
+
 
 // Constants
 
@@ -692,7 +695,6 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountMinimalScreen,
 	#endif
 );
 
-
 // Finalize transaction menu amount screen
 static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 
@@ -752,7 +754,6 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeMinimalScreen,
 	#endif
 );
 
-
 // Finalize transaction menu fee screen
 static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 
@@ -775,6 +776,40 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 	
 	// Text
 	.text = feeLineBuffer
+});
+
+// Finalize transaction menu receiver screen
+static UX_STEP_NOCB(finalizeTransactionMenuReceiverScreen,
+
+	// Check if target is the Nano X
+	#ifdef TARGET_NANOX
+	
+		// Layout
+		bnnn_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		nb_paging,
+	#endif
+{
+
+	// Title
+	.title = "To",
+	
+	// Text
+	.text = receiverLineBuffer
+});
+
+// Finalize transaction menu no payment proof screen
+static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, nn, {
+
+	// First line
+	"No payment",
+	
+	// Second line
+	"proof"
 });
 
 // Finalize transaction menu approve screen
@@ -804,7 +839,7 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction
 });
 
 // Finalize transaction menu
-static const ux_flow_step_t *finalizeTransactionMenu[6];
+static const ux_flow_step_t *finalizeTransactionMenu[7];
 
 // Processing menu screen
 static UX_STEP_NOCB(processingMenuScreen, pb, {
@@ -846,6 +881,9 @@ void clearMenuBuffers(void) {
 	
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
+	
+	// Clear the receiver line buffer
+	explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
 }
 
 // Show main menu
@@ -965,16 +1003,30 @@ void showMenu(enum Menu menu) {
 				// Set finalize transaction menu fee minimal screen
 				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeMinimalScreen;
 			}
+			
+			// Check if receiver line buffer isn't empty
+			if(strlen(receiverLineBuffer)) {
+			
+				// Set finalize transaction menu receiver screen
+				finalizeTransactionMenu[3] = &finalizeTransactionMenuReceiverScreen;
+			}
+			
+			// Otherwise
+			else {
+			
+				// Set finalize transaction menu no payment proof screen
+				finalizeTransactionMenu[3] = &finalizeTransactionMenuNoPaymentProofScreen;
+			}
 
 			// Set finalize transaction menu approve screen
-			finalizeTransactionMenu[3] = &finalizeTransactionMenuApproveScreen;
+			finalizeTransactionMenu[4] = &finalizeTransactionMenuApproveScreen;
 			
 			// Set finalize transaction menu deny screen
-			finalizeTransactionMenu[4] = &finalizeTransactionMenuDenyScreen;
+			finalizeTransactionMenu[5] = &finalizeTransactionMenuDenyScreen;
 			
 			// Set finalize transaction loop
-			finalizeTransactionMenu[5] = FLOW_LOOP;
-		
+			finalizeTransactionMenu[6] = FLOW_LOOP;
+			
 			// Set menu steps to finalize transaction menu
 			menuSteps = finalizeTransactionMenu;
 			

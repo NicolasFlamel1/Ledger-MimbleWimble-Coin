@@ -1238,8 +1238,8 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 			size_t publicKeySize = UNCOMPRESSED_PUBLIC_KEY_SIZE;
 			if(!secp256k1_ec_pubkey_serialize(context, publicKey, &publicKeySize, &publicKeyData, SECP256K1_EC_UNCOMPRESSED)) {
 			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
 			}
 		}
 		
