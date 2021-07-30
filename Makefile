@@ -68,9 +68,6 @@ else
 $(error Unsupported CURRENCY - use mimblewimble_coin or grin)
 endif
 
-# Define total number of supported currencies
-DEFINES += TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES=2
-
 # Check if target is the Nano X
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 

@@ -8,8 +8,5 @@
 // Process get Tor public key request
 void processGetTorPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags);
 
-// Process get Tor public key user interaction
-void processGetTorPublicKeyUserInteraction(unsigned short *responseLength);
-
 
 #endif

@@ -11,7 +11,6 @@
 	#include "common.h"
 	#include "menus.h"
 	#include "process_requests.h"
-	#include "settings.h"
 	#include "state.h"
 	
 	
@@ -40,9 +39,6 @@
 			// Get currency information
 			getCurrencyInformation(&currencyInformation);
 		}
-		
-		// Initialize settings
-		initializeSettings();
 		
 		// Loop forever
 		while(true) {

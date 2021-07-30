@@ -5,7 +5,6 @@
 #include "currency_information.h"
 #include "menus.h"
 #include "process_requests.h"
-#include "settings.h"
 
 
 // Global variables
@@ -30,26 +29,6 @@ char receiverLineBuffer[RECEIVER_LINE_BUFFER_LENGTH];
 
 
 // Constants
-
-// Settings menu option
-enum SettingsMenuOption {
-
-	// Public keys export option
-	PUBLIC_KEYS_EXPORT_OPTION,
-	
-	// Back option
-	BACK_OPTION
-};
-
-// Approval settings menu option
-enum ApprovalSettingsMenuOption {
-
-	// Automatic approval option
-	AUTOMATIC_APPROVAL_OPTION,
-	
-	// Manual approval option
-	MANUAL_APPROVAL_OPTION
-};
 
 // About menu version screen
 static UX_STEP_NOCB(aboutMenuVersionScreen, 
@@ -187,39 +166,6 @@ static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 	"is ready"
 });
 
-// Approval menu getter values
-static const char *const approvalMenuGetterValues[] = {
-
-	// Automatic approval
-	"Automatic approval",
-	
-	// Manual approval
-	"Manual approval",
-	
-	// Back
-	"Back"
-};
-
-// Settings menu getter values
-static const char *const settingsMenuGetterValues[] = {
-
-	// Public keys export
-	"Public keys export",
-	
-	// Back
-	"Back"
-};
-
-// Main menu settings screen
-static UX_STEP_CB(mainMenuSettingsScreen, pb, ux_menulist_init(0, settingsMenuGetter, settingsMenuSelector), {
-
-	// Picture
-	&C_icon_settings,
-	
-	// Bold line
-	"Settings"
-});
-
 // Main menu about screen
 static UX_STEP_CB(mainMenuAboutScreen, pb, ux_flow_init(0, aboutMenu, NULL), {
 
@@ -245,9 +191,6 @@ static UX_FLOW(mainMenu,
 
 	// Main menu ready screen
 	&mainMenuReadyScreen,
-	
-	// Main menu settings screen
-	&mainMenuSettingsScreen,
 	
 	// Main menu about screen
 	&mainMenuAboutScreen,
@@ -1045,94 +988,4 @@ void showMenu(enum Menu menu) {
 	
 	// Show menu steps
 	ux_flow_init(0, menuSteps, NULL);
-}
-
-// Approval menu getter
-const char *approvalMenuGetter(unsigned int index) {
-
-	// Check if index is in range of the values
-	if(index < ARRAYLEN(approvalMenuGetterValues)) {
-	
-		// Return approval menu getter value at index
-		return approvalMenuGetterValues[index];
-	}
-	
-	// Return nothing
-	return NULL;
-}
-
-// Public keys export settings menu selector
-void publicKeysExportSettingsMenuSelector(unsigned int index) {
-
-	// Check index
-	switch(index) {
-	
-		// Automatic approval
-		case AUTOMATIC_APPROVAL_OPTION:
-		
-			// Check if public keys export manual approval setting is true
-			if(settings.publicKeysExportManualApprovalSetting) {
-			
-				// Save public keys export manual approval setting as false
-				bool publicKeysExportManualApprovalSettingValue = false;
-				saveSetting((void *)&settings.publicKeysExportManualApprovalSetting, &publicKeysExportManualApprovalSettingValue, sizeof(publicKeysExportManualApprovalSettingValue));
-			}
-			
-			// Break
-			break;
-		
-		// Manual approval
-		case MANUAL_APPROVAL_OPTION:
-		
-			// Check if public keys export manual approval setting is false
-			if(!settings.publicKeysExportManualApprovalSetting) {
-			
-				// Save public keys export manual approval setting as true
-				bool publicKeysExportManualApprovalSettingValue = true;
-				saveSetting((void *)&settings.publicKeysExportManualApprovalSetting, &publicKeysExportManualApprovalSettingValue, sizeof(publicKeysExportManualApprovalSettingValue));
-			}
-		
-			// Break
-			break;
-	}
-	
-	// Show settings menu with the public keys export option selected
-	ux_menulist_init_select(0, settingsMenuGetter, settingsMenuSelector, PUBLIC_KEYS_EXPORT_OPTION);
-}
-
-// Settings menu getter
-const char *settingsMenuGetter(unsigned int index) {
-
-	// Check if index is in range of the values
-	if(index < ARRAYLEN(settingsMenuGetterValues)) {
-	
-		// Return settings menu getter value at index
-		return settingsMenuGetterValues[index];
-	}
-	
-	// Return nothing
-	return NULL;
-}
-
-// Settings menu selector
-void settingsMenuSelector(unsigned int index) {
-
-	// Check index
-	switch(index) {
-	
-		// Public keys export
-		case PUBLIC_KEYS_EXPORT_OPTION:
-		
-			// Show public keys export settings menu with the setting's current value option selected
-			ux_menulist_init_select(0, approvalMenuGetter, publicKeysExportSettingsMenuSelector, settings.publicKeysExportManualApprovalSetting);
-		
-			// Break
-			break;
-		
-		// Back
-		default:
-		
-			// Show main menu's settings screen
-			showMainMenu(SETTINGS_SCREEN);
-	}
 }

@@ -1,5 +1,4 @@
 Tests ran with seed phrase: slot rail north melt split chunk leisure much tennis worry boil between divert taxi twelve embrace own brave follow skate pilot change into jar
-// Run $BOLOS_EMU/tools/ledger-live-http-proxy.py first
 
 Notes:
 	Speculos doesn't implement cx_pbkdf2_sha512 for the Nano X, so 'Start encrypting MQS data' and 'Start decrypting MQS data' can't be tested on an emulator for the Nano X.

@@ -8,7 +8,6 @@
 #include "secp256k1_aggsig.h"
 #include "secp256k1_bulletproofs.h"
 #include "secp256k1_commitment.h"
-#include "secp256k1_generator.h"
 #include "secp256k1_preallocated.h"
 #include "tor.h"
 

@@ -78,9 +78,6 @@ enum MainMenuScreen {
 	// Ready
 	READY_SCREEN,
 	
-	// Settings screen
-	SETTINGS_SCREEN,
-	
 	// About screen
 	ABOUT_SCREEN,
 	
@@ -120,18 +117,6 @@ void showMainMenu(enum MainMenuScreen mainMenuScreen);
 
 // Show menu
 void showMenu(enum Menu menu);
-
-// Approval menu getter
-const char *approvalMenuGetter(unsigned int index);
-
-// Public keys export settings menu selector
-void publicKeysExportSettingsMenuSelector(unsigned int index);
-
-// Settings menu getter
-const char *settingsMenuGetter(unsigned int index);
-
-// Settings menu selector
-void settingsMenuSelector(unsigned int index);
 
 
 #endif

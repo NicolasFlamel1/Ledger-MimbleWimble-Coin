@@ -417,15 +417,6 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						// Break
 						break;
 					
-					// Get Tor public key instruction
-					case GET_TOR_PUBLIC_KEY_INSTRUCTION:
-					
-						// Process get Tor public key user interaction
-						processGetTorPublicKeyUserInteraction((unsigned short *)&responseLength);
-						
-						// Break
-						break;
-					
 					// Get Tor certificate signature instruction
 					case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
 					
@@ -433,15 +424,6 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						processGetTorCertificateSignatureUserInteraction((unsigned short *)&responseLength);
 					
 						// break
-						break;
-					
-					// Get MQS public key instruction
-					case GET_MQS_PUBLIC_KEY_INSTRUCTION:
-					
-						// Process get MQS public key user interaction
-						processGetMqsPublicKeyUserInteraction((unsigned short *)&responseLength);
-						
-						// Break
 						break;
 					
 					// Finish transaction get signature instruction
