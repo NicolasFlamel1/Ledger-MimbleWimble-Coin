@@ -93,7 +93,10 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, un
 			
 			// Get address public key from address private key
 			cx_ecfp_public_key_t addressPublicKey;
-			getTorPublicKey(&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
+			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+			
+			// Compress the address public key
+			cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
 			
 			// Check if the address public key is in the payment proof message
 			if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {

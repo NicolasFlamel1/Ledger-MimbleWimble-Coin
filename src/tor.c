@@ -25,17 +25,13 @@ static const uint8_t ADDRESS_VERSION = 3;
 static const uint8_t ADDRESS_CHECKSUM_SEED[] = {'.', 'o', 'n', 'i', 'o', 'n', ' ', 'c', 'h', 'e', 'c', 'k', 's', 'u', 'm'};
 
 
+// Function prototypes
+
+// Get checksum
+void getChecksum(uint8_t *checksum, const uint8_t *address);
+
+
 // Supporting function implementation
-
-// Get Tor public key
-void getTorPublicKey(cx_ecfp_public_key_t *publicKey, cx_ecfp_private_key_t *privateKey) {
-
-	// Get public key from private key
-	cx_ecfp_generate_pair(CX_CURVE_Ed25519, publicKey, privateKey, KEEP_PRIVATE_KEY);
-	
-	// Compress the public key
-	cx_edwards_compress_point(CX_CURVE_Ed25519, publicKey->W, publicKey->W_len);
-}
 
 // Get public key from Tor address
 bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length) {
@@ -68,21 +64,12 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 		return false;
 	}
 	
-	// Create checksum data
-	uint8_t checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE + sizeof(ADDRESS_VERSION)];
-	memcpy(checksumData, ADDRESS_CHECKSUM_SEED, sizeof(ADDRESS_CHECKSUM_SEED));
-	memcpy(&checksumData[sizeof(ADDRESS_CHECKSUM_SEED)], decodedTorAddress, ED25519_PUBLIC_KEY_SIZE);
-	checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE] = ADDRESS_VERSION;
-	
-	// Get checksum as a hash of the checksum data
-	cx_sha3_t hash;
-	cx_sha3_init(&hash, CX_SHA256_SIZE * BITS_IN_A_BYTE);
-	
-	uint8_t checksum[CX_SHA256_SIZE];
-	cx_hash(&hash.header, CX_LAST, checksumData, sizeof(checksumData), checksum, sizeof(checksum));
+	// Get checksum from the decoded Tor address
+	uint8_t checksum[ADDRESS_CHECKSUM_LENGTH];
+	getChecksum(checksum, decodedTorAddress);
 	
 	// Check if decoded Tor address's checksum is invalid
-	if(memcmp(&decodedTorAddress[ED25519_PUBLIC_KEY_SIZE], checksum, ADDRESS_CHECKSUM_LENGTH)) {
+	if(memcmp(&decodedTorAddress[ED25519_PUBLIC_KEY_SIZE], checksum, sizeof(checksum))) {
 	
 		// Return false
 		return false;
@@ -111,4 +98,59 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	
 	// Return true
 	return true;
+}
+
+// Get Tor address from public key
+void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey) {
+
+	// Get checksum from the public key
+	uint8_t checksum[ADDRESS_CHECKSUM_LENGTH];
+	getChecksum(checksum, publicKey);
+	
+	// Get address data from the public key and checksum
+	uint8_t addressData[ED25519_PUBLIC_KEY_SIZE + sizeof(checksum) + sizeof(ADDRESS_VERSION)];
+	memcpy(addressData, publicKey, ED25519_PUBLIC_KEY_SIZE);
+	memcpy(&addressData[ED25519_PUBLIC_KEY_SIZE], checksum, sizeof(checksum));
+	addressData[ED25519_PUBLIC_KEY_SIZE + sizeof(checksum)] = ADDRESS_VERSION;
+	
+	// Encode the address data to get the Tor address
+	base32Encode(torAddress, addressData, sizeof(addressData));
+	
+	// Go through all characters in the Tor address
+	for(size_t i = 0; i < TOR_ADDRESS_LENGTH; ++i) {
+	
+		// Make character lowercase
+		torAddress[i] = toLowercase(torAddress[i]);
+	}
+}
+
+// Get Tor address
+void getTorAddress(uint8_t *torAddress, uint32_t account) {
+
+	// Get Ed25519 public key
+	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
+	getEd25519PublicKey(ed25519PublicKey, account);
+	
+	// Get Tor address from the Ed25519 public key
+	getTorAddressFromPublicKey(torAddress, ed25519PublicKey);
+}
+
+// Get checksum
+void getChecksum(uint8_t *checksum, const uint8_t *address) {
+
+	// Create checksum data
+	uint8_t checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE + sizeof(ADDRESS_VERSION)];
+	memcpy(checksumData, ADDRESS_CHECKSUM_SEED, sizeof(ADDRESS_CHECKSUM_SEED));
+	memcpy(&checksumData[sizeof(ADDRESS_CHECKSUM_SEED)], address, ED25519_PUBLIC_KEY_SIZE);
+	checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE] = ADDRESS_VERSION;
+	
+	// Get hash of the checksum data
+	cx_sha3_t hash;
+	cx_sha3_init(&hash, CX_SHA256_SIZE * BITS_IN_A_BYTE);
+	
+	uint8_t hashResult[CX_SHA256_SIZE];
+	cx_hash(&hash.header, CX_LAST, checksumData, sizeof(checksumData), hashResult, sizeof(hashResult));
+	
+	// Get checksum from the hash
+	memcpy(checksum, hashResult, ADDRESS_CHECKSUM_LENGTH);
 }

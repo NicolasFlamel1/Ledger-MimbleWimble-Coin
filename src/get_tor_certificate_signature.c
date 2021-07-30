@@ -146,40 +146,16 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Initialize address private key
-	volatile cx_ecfp_private_key_t addressPrivateKey;
+	// Get Ed25519 public key
+	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
+	getEd25519PublicKey(ed25519PublicKey, *account);
 	
-	// Begin try
-	BEGIN_TRY {
+	// Check if the signing public key isn't the Ed25519 public key
+	if(memcmp(signingPublicKey, ed25519PublicKey, sizeof(ed25519PublicKey))) {
 	
-		// Try
-		TRY {
-		
-			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
-			
-			// Get address public key from address private key
-			cx_ecfp_public_key_t addressPublicKey;
-			getTorPublicKey(&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
-			
-			// Check if the signing public key isn't the address public key
-			if(memcmp(signingPublicKey, &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Clear the address private key
-			explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
-		}
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
 	}
-	
-	// End try
-	END_TRY;
 	
 	// Convert certificate expiration to time
 	struct Time time;

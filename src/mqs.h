@@ -85,5 +85,11 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 // Get public key from MQS address
 bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum Network network);
 
+// Get MQS address from public key
+void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum Network network);
+
+// Get Mqs address
+void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum Network network);
+
 
 #endif

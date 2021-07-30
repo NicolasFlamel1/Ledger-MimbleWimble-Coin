@@ -72,6 +72,9 @@ bool isPrintableCharacter(char character);
 // To uppercase
 char toUppercase(char character);
 
+// To lowercase
+char toLowercase(char character);
+
 // Is zero array
 bool isZeroArray(const uint8_t *array, size_t length);
 

@@ -7,7 +7,9 @@
 #include "currency_information.h"
 #include "finish_transaction_get_signature.h"
 #include "menus.h"
+#include "mqs.h"
 #include "transaction.h"
+#include "tor.h"
 
 
 // Constants
@@ -28,6 +30,16 @@ enum KernelFeatures {
 	NO_RECENT_DUPLICATE_FEATURES
 };
 
+// Address type
+enum AddressType {
+	
+	// MQS address type
+	MQS_ADDRESS_TYPE,
+	
+	// Tor address type
+	TOR_ADDRESS_TYPE
+};
+
 
 // Supporting function implementation
 
@@ -46,25 +58,12 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
-	// Check if parameters or data are invalid
-	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	// Check if data is invalid
+	if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
-	
-	// Get network from first parameter
-	enum Network network = firstParameter;
-	
-	// Get commitment from data
-	
-	// Create payment proof using own address, commitment, and transaction input 
-	
-	// Get receiver address from data
-	
-	// Get receiver signature from data
-	
-	// Verify receiver signature is for the payment proof with the receiver addresses's public key
 	
 	// Get public key from data
 	const uint8_t *publicKey = &data[NONCE_SIZE];
@@ -80,92 +79,25 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check kernel features
+	size_t kernelFeaturesLength;
 	switch(kernelFeatures) {
 	
-		// Plain features
+		// Plain and coinbase features
 		case PLAIN_FEATURES:
-		
-			// Check if data is invalid
-			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			{
-				// Get fee from data
-				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Check if fee is invalid
-				if(*fee != transaction.fee) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
-		
-			// Break
-			break;
-		
-		// Coinbase features
 		case COINBASE_FEATURES:
 		
-			// Check if data is invalid
-			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t);
 		
 			// Break
 			break;
 		
-		// Height locked features
+		// Height locked and no recent duplicate features
 		case HEIGHT_LOCKED_FEATURES:
-		
-			// Check if data is invalid
-			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			{
-				// Get fee from data
-				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Check if fee is invalid
-				if(*fee != transaction.fee) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
-			
-			// Break
-			break;
-		
-		// No recent duplicate features
 		case NO_RECENT_DUPLICATE_FEATURES:
 		
-			// Check if data is invalid
-			if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			{
-				// Get fee from data
-				const uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Check if fee is invalid
-				if(*fee != transaction.fee) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint64_t);
 			
 			// Break
 			break;
@@ -194,6 +126,179 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	// Check if transaction includes input
 	if(transaction.input) {
 	
+		// Check if data is invalid
+		if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
+		// Check if a payment proof information is provided
+		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		
+			// Check if data is invalid
+			if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get network from first parameter
+			const enum Network network = firstParameter;
+			
+			// Get address type from second parameter
+			const enum AddressType addressType = secondParameter;
+		
+			// Get commitment from data
+			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			
+			// Check if commitment is invalid
+			if(!commitmentIsValid(commitment)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get receiver address type from data
+			const enum AddressType receiverAddressType = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			
+			// Check receiver address type
+			size_t receiverAddressLength;
+			switch(receiverAddressType) {
+			
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Set receiver address
+					receiverAddressLength = MQS_ADDRESS_LENGTH;
+				
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Set receiver address
+					receiverAddressLength = TOR_ADDRESS_LENGTH;
+				
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Check if data is invalid
+			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get receiver address from data
+			const uint8_t *receiverAddress = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)];
+			
+			// Get signature from data
+			const uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
+			
+			// Get signature length
+			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength);
+			
+			// Check currency information ID
+			size_t addressLength;
+			uint8_t *address;
+			switch(currencyInformation.id) {
+			
+				// MimbleWimble Coin ID
+				case MIMBLEWIMBLE_COIN_ID:
+				
+					// Check address type
+					switch(addressType) {
+					
+						// MQS address type
+						case MQS_ADDRESS_TYPE:
+						
+							// Set address length
+							addressLength = MQS_ADDRESS_LENGTH;
+							
+							// Allocate memory for the address
+							address = alloca(addressLength);
+							
+							// Get MQS address
+							getMqsAddress(address, transaction.account, network);
+						
+							// Break
+							break;
+						
+						// Tor address type
+						case TOR_ADDRESS_TYPE:
+						
+							// Set address length
+							addressLength = TOR_ADDRESS_LENGTH;
+							
+							// Allocate memory for the address
+							address = alloca(addressLength);
+							
+							// Get Tor address
+							getTorAddress(address, transaction.account);
+						
+							// Break
+							break;
+						
+						// Default
+						default:
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+					}
+					
+					// Break
+					break;
+				
+				// Grin ID
+				case GRIN_ID:
+				
+					// Set address length
+					addressLength = ED25519_PUBLIC_KEY_SIZE;
+					
+					// Allocate memory for the address
+					address = alloca(addressLength);
+					
+					// Get Ed25519 public key
+					getEd25519PublicKey(address, transaction.account);
+				
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get payment proof message
+			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.input, addressLength)];
+			getPaymentProofMessage(paymentProofMessage, transaction.input, commitment, address, addressLength, network);
+			
+			// Check if verifying payment proof failed
+			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), receiverAddress, receiverAddressLength, network, signature, signatureLength)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		}
+		
+		// Otherwise check if parameters are invalid
+		else if(firstParameter || secondParameter) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
 		// Check if transaction offset wasn't applied
 		if(!transaction.offsetApplied) {
 		
@@ -224,6 +329,20 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 	
 	// Otherwise
 	else {
+	
+		// Check if parameters are invalid
+		if(firstParameter || secondParameter) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+	
+		// Check if data is invalid
+		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
 	
 		// Process finish transaction get signature user interaction
 		processFinishTransactionGetSignatureUserInteraction(responseLength);
@@ -266,16 +385,11 @@ void processFinishTransactionGetSignatureUserInteraction(unsigned short *respons
 			// Set kernel features in the kernel data
 			kernelData[0] = kernelFeatures;
 			
-			{
-				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Convert fee to big endian
-				swapEndianness((uint8_t *)fee, sizeof(*fee));
-				
-				// Append fee to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0])], fee, sizeof(*fee));
-			}
+			// Convert fee to big endian
+			swapEndianness((uint8_t *)&transaction.fee, sizeof(transaction.fee));
+			
+			// Append fee to the kernel data
+			memcpy(&kernelData[sizeof(kernelData[0])], &transaction.fee, sizeof(transaction.fee));
 		
 			// Break
 			break;
@@ -307,24 +421,21 @@ void processFinishTransactionGetSignatureUserInteraction(unsigned short *respons
 			// Set kernel features in the kernel data
 			kernelData[0] = kernelFeatures;
 			
+			// Convert fee to big endian
+			swapEndianness((uint8_t *)&transaction.fee, sizeof(transaction.fee));
+			
+			// Append fee to the kernel data
+			memcpy(&kernelData[sizeof(kernelData[0])], &transaction.fee, sizeof(transaction.fee));
+			
 			{
-				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Convert fee to big endian
-				swapEndianness((uint8_t *)fee, sizeof(*fee));
-				
-				// Append fee to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0])], fee, sizeof(*fee));
-				
 				// Get lock height from data
-				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(*fee)];
+				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert lock height to big endian
 				swapEndianness((uint8_t *)lockHeight, sizeof(*lockHeight));
 				
 				// Append lock height to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(*fee)], lockHeight, sizeof(*lockHeight));
+				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], lockHeight, sizeof(*lockHeight));
 			}
 			
 			// Break
@@ -342,24 +453,22 @@ void processFinishTransactionGetSignatureUserInteraction(unsigned short *respons
 			// Set kernel features in the kernel data
 			kernelData[0] = kernelFeatures;
 			
+			// Convert fee to big endian
+			swapEndianness((uint8_t *)&transaction.fee, sizeof(transaction.fee));
+			
+			// Append fee to the kernel data
+			memcpy(&kernelData[sizeof(kernelData[0])], &transaction.fee, sizeof(transaction.fee));
+			
 			{
-				// Get fee from data
-				uint64_t *fee = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
-				
-				// Convert fee to big endian
-				swapEndianness((uint8_t *)fee, sizeof(*fee));
-				
-				// Append fee to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0])], fee, sizeof(*fee));
 				
 				// Get relative height from data
-				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(*fee)];
+				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert relative height to big endian
 				swapEndianness((uint8_t *)relativeHeight, sizeof(*relativeHeight));
 				
 				// Append relative height to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(*fee)], relativeHeight, sizeof(*relativeHeight));
+				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], relativeHeight, sizeof(*relativeHeight));
 			}
 			
 			// Break

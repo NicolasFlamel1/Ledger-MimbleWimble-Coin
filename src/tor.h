@@ -29,11 +29,14 @@ extern const size_t ED25519_SIGNATURE_SIZE;
 
 // Function prototypes
 
-// Get Tor public key
-void getTorPublicKey(cx_ecfp_public_key_t *publicKey, cx_ecfp_private_key_t *privateKey);
-
 // Get public key from Tor address
 bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length);
+
+// Get Tor address from public key
+void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey);
+
+// Get Tor address
+void getTorAddress(uint8_t *torAddress, uint32_t account);
 
 
 #endif

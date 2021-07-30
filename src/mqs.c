@@ -105,13 +105,6 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 		return false;
 	}
 	
-	// Check if network is invalid
-	if(network > TESTNET) {
-	
-		// Return false
-		return false;
-	}
-
 	// Get decoded MQS address length
 	const size_t decodedMqsAddressLength = getBase58DecodedLengthWithChecksum(mqsAddress, length);
 	
@@ -144,7 +137,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
 		memcpy(uncompressedPublicKey, &decodedMqsAddress[VERSION_LENGTH], COMPRESSED_PUBLIC_KEY_SIZE);
 		
-		uncompressSecp256k1PublicKey(uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		uncompressSecp256k1PublicKey(uncompressedPublicKey);
 		
 		// Initialize the public key with the uncompressed public key
 		cx_ecfp_init_public_key(CX_CURVE_SECP256K1, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
@@ -152,6 +145,58 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 
 	// Return true
 	return true;
+}
+
+// Get MQS address from public key
+void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum Network network) {
+
+	// Get version
+	const uint16_t version = getVersion(network);
+	
+	// Get address data from version and the public key
+	uint8_t addressData[sizeof(version) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
+	memcpy(addressData, &version, sizeof(version));
+	memcpy(&addressData[sizeof(version)], publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
+	
+	// Encode the address data to get the MQS address
+	base58EncodeWithChecksum(mqsAddress, addressData, sizeof(addressData));
+}
+
+// Get Mqs address
+void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum Network network) {
+
+	// Initialize address private key
+	volatile cx_ecfp_private_key_t addressPrivateKey;
+	
+	// Initialize address public key
+	volatile uint8_t addressPublicKey[COMPRESSED_PUBLIC_KEY_SIZE];
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Get address private key at the MQS address private key index
+			getAddressPrivateKey(&addressPrivateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
+			
+			// Get address public key from the address private key
+			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the address private key
+			explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
+		}
+	}
+	
+	// End try
+	END_TRY;
+	
+	// Get MQS address from the address public key
+	getMqsAddressFromPublicKey(mqsAddress, (uint8_t *)addressPublicKey, network);
 }
 
 // Get version

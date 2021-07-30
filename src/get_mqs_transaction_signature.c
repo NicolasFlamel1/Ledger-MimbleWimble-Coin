@@ -76,7 +76,7 @@ void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, un
 	
 	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength, network);
 	
-	// Get hash of the payment proof address
+	// Get hash of the payment proof message
 	uint8_t hash[CX_SHA256_SIZE];
 	cx_hash_sha256(paymentProofMessage, sizeof(paymentProofMessage), hash, sizeof(hash));
 	

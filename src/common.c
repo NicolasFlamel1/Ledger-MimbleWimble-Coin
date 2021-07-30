@@ -87,6 +87,24 @@ char toUppercase(char character) {
 	}
 }
 
+// To lowercase
+char toLowercase(char character) {
+
+	// Check if character is uppercase
+	if(character >= 'A' && character <= 'Z') {
+	
+		// Return character as lowercase
+		return character += 'a' - 'A';
+	}
+	
+	// Otherwise
+	else {
+	
+		// Return character
+		return character;
+	}
+}
+
 // Is zero array
 bool isZeroArray(const uint8_t *array, size_t length) {
 

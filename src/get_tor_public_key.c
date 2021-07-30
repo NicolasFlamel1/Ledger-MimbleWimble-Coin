@@ -6,7 +6,6 @@
 #include "get_tor_public_key.h"
 #include "menus.h"
 #include "settings.h"
-#include "tor.h"
 
 
 // Supporting function implementation
@@ -125,48 +124,22 @@ void processGetTorPublicKeyUserInteraction(unsigned short *responseLength) {
 	
 	// Get account from data
 	const uint32_t *account = (uint32_t *)data;
-
-	// Initialize address private key
-	volatile cx_ecfp_private_key_t addressPrivateKey;
 	
-	// Initialize address public key
-	volatile cx_ecfp_public_key_t addressPublicKey;
+	// Get Ed25519 public key
+	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
+	getEd25519PublicKey(ed25519PublicKey, *account);
 	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-		
-			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
-			
-			// Get address public key from address private key
-			getTorPublicKey((cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Clear the address private key
-			explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
-		}
-	}
-	
-	// End try
-	END_TRY;
-	
-	// Check if response with the address public key will overflow
-	if(willResponseOverflow(*responseLength, ED25519_PUBLIC_KEY_SIZE)) {
+	// Check if response with the Ed25519 public key will overflow
+	if(willResponseOverflow(*responseLength, sizeof(ed25519PublicKey))) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 	
 	// Append address public key to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)&addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
+	memcpy(&G_io_apdu_buffer[*responseLength], ed25519PublicKey, sizeof(ed25519PublicKey));
 	
-	*responseLength += ED25519_PUBLIC_KEY_SIZE;
+	*responseLength += sizeof(ed25519PublicKey);
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

@@ -894,13 +894,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 	}
 }
 
-/*// Verify payment proof message
-bool verifyPaymentProofMessage(uint64_t value, const uint8_t *commitment, const uint8_t *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
-
-	// Get payment proof message
-	uint8_t paymentProofMessage[getPaymentProofMessageLength(value, senderAddressLength)];
-	
-	getPaymentProofMessage(paymentProofMessage, value, commitment, senderAddress, senderAddressLength);
+// Verify payment proof message
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, enum Network network, const uint8_t *signature, size_t signatureLength) {
 
 	// Check currency information ID
 	switch(currencyInformation.id) {
@@ -908,23 +903,38 @@ bool verifyPaymentProofMessage(uint64_t value, const uint8_t *commitment, const 
 		// MimbleWimble Coin ID
 		case MIMBLEWIMBLE_COIN_ID:
 		
-			// Check sender address length
-			switch(senderAddressLength) {
+			// Check receiver address length
+			switch(receiverAddressLength) {
 			
 				// MQS address length
 				case MQS_ADDRESS_LENGTH:
 				
-					// Get message hash
-					var messageHash = new Uint8Array(sha256.arrayBuffer(message));
-				
-					// Get receiver address's public key
-					var receiverAddressPublicKey = Mqs.mqsAddressToPublicKey(this.getReceiverAddress(), isMainnet);
+					// Check if signature length is invalid
+					if(signatureLength > MAXIMUM_DER_SIGNATURE_SIZE) {
 					
-					// Check if receiver signature doesn't verify the message hash
-					if(Secp256k1Zkp.verifyMessageHashSignature(this.getReceiverSignature(), messageHash, receiverAddressPublicKey) === false) {
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
 					
-						// Return false
-						return false;
+					{
+						// Check if getting receiver public key from receiver's MQS address failed
+						cx_ecfp_public_key_t receiverPublicKey;
+						if(!getPublicKeyFromMqsAddress(&receiverPublicKey, receiverAddress, receiverAddressLength, network)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+					
+						// Get hash of the message
+						uint8_t hash[CX_SHA256_SIZE];
+						cx_hash_sha256(message, messageLength, hash, sizeof(hash));
+						
+						// Check if verifying the hash with the receiver public key and signature failed
+						if(!cx_ecdsa_verify(&receiverPublicKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), signature, signatureLength)) {
+						
+							// Return false
+							return false;
+						}
 					}
 					
 					// Break
@@ -933,18 +943,38 @@ bool verifyPaymentProofMessage(uint64_t value, const uint8_t *commitment, const 
 				// Tor address length
 				case TOR_ADDRESS_LENGTH:
 				
-					// Get receiver address's public key
-					var receiverAddressPublicKey = Tor.torAddressToPublicKey(this.getReceiverAddress());
-				
-					// Check if receiver signature doesn't verify the message
-					if(Ed25519.verify(message, this.getReceiverSignature(), receiverAddressPublicKey) === false) {
+					// Check if signature length is invalid
+					if(signatureLength != ED25519_SIGNATURE_SIZE) {
 					
-						// Return false
-						return false;
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+					
+					{
+						// Check if getting receiver public key from receiver's Tor address failed
+						cx_ecfp_public_key_t receiverPublicKey;
+						if(!getPublicKeyFromTorAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+						
+						// Check if verifying the message with the receiver public key and signature failed
+						if(!cx_eddsa_verify(&receiverPublicKey, CX_LAST, CX_SHA512, message, messageLength, NULL, 0, signature, signatureLength)) {
+						
+							// Return false
+							return false;
+						}
 					}
 					
 					// Break
 					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Break
@@ -953,34 +983,53 @@ bool verifyPaymentProofMessage(uint64_t value, const uint8_t *commitment, const 
 		// Grin ID
 		case GRIN_ID:
 		
-			// Check if receiver address length is invalid or signature length is invalid
-			if(receiverAddressLength != ED25519_PUBLIC_KEY_SIZE || signatureLength != ED25519_SIGNATURE_SIZE) {
+			// Check if signature length is invalid
+			if(signatureLength != ED25519_SIGNATURE_SIZE) {
 			
-				// Return false
-				return false;
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
-		
-			// Uncompress the public key
-			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-			uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
-			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
 			
-			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
-		
-			// Check if verifying payment proof failed
-			if(!cx_eddsa_verify(receiverPublicKey, CX_LAST, CX_SHA512, paymentProofMessage, sizeof(paymentProofMessage), NULL, 0, signature, signatureLength)) {
+			// Check if the receiver address isn't a valid Ed25519 public key
+			if(!isValidEd25519PublicKey(receiverAddress, receiverAddressLength)) {
 			
-				// Return false
-				return false;
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Uncompress the receiver address to a public key
+				uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+				uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+				memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], receiverAddress, receiverAddressLength);
+				
+				cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+				
+				// Initialize the receiver public key with the uncompressed public key
+				cx_ecfp_public_key_t receiverPublicKey;
+				cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), &receiverPublicKey);
+			
+				// Check if verifying the message with the receiver public key and signature failed
+				if(!cx_eddsa_verify(&receiverPublicKey, CX_LAST, CX_SHA512, message, messageLength, NULL, 0, signature, signatureLength)) {
+				
+					// Return false
+					return false;
+				}
 			}
 			
 			// Break
 			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Return true
 	return true;
-}*/
+}
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment) {
@@ -1165,38 +1214,84 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 }
 
 // Uncompress secp256k1 public key
-bool uncompressSecp256k1PublicKey(uint8_t *publicKey, size_t length) {
-
-	// Check if length is invalid
-	if(length != UNCOMPRESSED_PUBLIC_KEY_SIZE) {
-	
-		// Return false
-		return false;
-	}
+void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 
 	// Create context
 	uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_NONE)];
 	secp256k1_context *context = secp256k1_context_preallocated_create(contextBuffer, SECP256K1_CONTEXT_NONE);
 	
-	// Initialize result
-	bool result = false;
+	// Begin try
+	BEGIN_TRY {
 	
-	// Check if parsing the public key was successful
-	secp256k1_pubkey publicKeyData;
-	if(secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+		// Try
+		TRY {
 	
-		// Check if serializing the public key was successful
-		if(secp256k1_ec_pubkey_serialize(context, publicKey, &length, &publicKeyData, SECP256K1_EC_UNCOMPRESSED)) {
+			// Check if parsing the public key failed
+			secp256k1_pubkey publicKeyData;
+			if(!secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Check if serializing the public key failed
+			size_t publicKeySize = UNCOMPRESSED_PUBLIC_KEY_SIZE;
+			if(!secp256k1_ec_pubkey_serialize(context, publicKey, &publicKeySize, &publicKeyData, SECP256K1_EC_UNCOMPRESSED)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		}
 		
-			// Set result
-			result = true;
+		// Finally
+		FINALLY {
+	
+			// Destroy context
+			secp256k1_context_preallocated_destroy(context);
+			explicit_bzero(contextBuffer, sizeof(contextBuffer));
 		}
 	}
 	
-	// Destroy context
-	secp256k1_context_preallocated_destroy(context);
-	explicit_bzero(contextBuffer, sizeof(contextBuffer));
+	// End try
+	END_TRY;
+}
+
+// Get Ed25519 public key
+void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
+
+	// Initialize address private key
+	volatile cx_ecfp_private_key_t addressPrivateKey;
 	
-	// Return result
-	return result;
+	// Initialize address public key
+	volatile cx_ecfp_public_key_t addressPublicKey;
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Get address private key at the Tor address private key index
+			getAddressPrivateKey(&addressPrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			
+			// Get address public key from address private key
+			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+			
+			// Compress the address public key
+			cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the address private key
+			explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
+		}
+	}
+	
+	// End try
+	END_TRY;
+	
+	// Get Ed25519 public key from the address public key
+	memcpy(ed25519PublicKey, (uint8_t *)&addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
 }
