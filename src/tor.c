@@ -12,9 +12,6 @@
 // Tor address private key index
 const uint32_t TOR_ADDRESS_PRIVATE_KEY_INDEX = 0;
 
-// Ed25519 signature size
-const size_t ED25519_SIGNATURE_SIZE = 64;
-
 // Address checksum length
 static const size_t ADDRESS_CHECKSUM_LENGTH = 2;
 

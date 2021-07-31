@@ -5,7 +5,7 @@
 #include "common.h"
 #include "crypto.h"
 #include "currency_information.h"
-#include "finish_transaction_get_signature.h"
+#include "finish_transaction.h"
 #include "menus.h"
 #include "mqs.h"
 #include "transaction.h"
@@ -43,8 +43,8 @@ enum AddressType {
 
 // Supporting function implementation
 
-// Process finish transaction get signature request
-void processFinishTransactionGetSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+// Process finish transaction request
+void processFinishTransactionRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -443,13 +443,13 @@ void processFinishTransactionGetSignatureRequest(unsigned short *responseLength,
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 	
-		// Process finish transaction get signature user interaction
-		processFinishTransactionGetSignatureUserInteraction(responseLength);
+		// Process finish transaction user interaction
+		processFinishTransactionUserInteraction(responseLength);
 	}
 }
 
-// Process finish transaction get signature user interaction
-void processFinishTransactionGetSignatureUserInteraction(unsigned short *responseLength) {
+// Process finish transaction user interaction
+void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];

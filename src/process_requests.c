@@ -15,12 +15,13 @@
 #include "finish_decrypting_slatepack_data.h"
 #include "finish_encrypting_mqs_data.h"
 #include "finish_encrypting_slatepack_data.h"
-#include "finish_transaction_get_signature.h"
+#include "finish_transaction.h"
 #include "get_application_information.h"
-#include "get_bulletproof.h"
+#include "get_blinding_factor_tweak_multiply.h"
 #include "get_commitment.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
+#include "get_private_nonce.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
 #include "get_tor_public_key.h"
@@ -109,11 +110,20 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get bulletproof instruction
-				case GET_BULLETPROOF_INSTRUCTION:
+				// Get private nonce instruction
+				case GET_PRIVATE_NONCE_INSTRUCTION:
 				
-					// Process get bulletproof request
-					processGetBulletproofRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get private nonce request
+					processGetPrivateNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					
+					// Break
+					break;
+				
+				// Get blinding factor tweak multiply instruction
+				case GET_BLINDING_FACTOR_TWEAK_MULTIPLY_INSTRUCTION:
+				
+					// Process blinding factor tweak multiply request
+					processGetBlindingFactorTweakMultiplyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
@@ -316,11 +326,11 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Finish transaction get signature instruction
-				case FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION:
+				// Finish transaction instruction
+				case FINISH_TRANSACTION_INSTRUCTION:
 				
-					// Process finish transaction get signature request
-					processFinishTransactionGetSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process finish transaction request
+					processFinishTransactionRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
@@ -426,11 +436,11 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						// break
 						break;
 					
-					// Finish transaction get signature instruction
-					case FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION:
+					// Finish transaction instruction
+					case FINISH_TRANSACTION_INSTRUCTION:
 					
-						// Process finish transaction get signature user interaction
-						processFinishTransactionGetSignatureUserInteraction((unsigned short *)&responseLength);
+						// Process finish transaction user interaction
+						processFinishTransactionUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
 						break;

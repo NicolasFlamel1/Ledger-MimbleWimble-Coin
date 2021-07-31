@@ -53,17 +53,13 @@ const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 // Odd compressed public key prefix
 const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX = 0x03;
 
-// Bulletproof size
-const size_t BULLETPROOF_SIZE = 675;
+// Ed25519 signature size
+const size_t ED25519_SIGNATURE_SIZE = 64;
 
-// Proof message size
-const size_t PROOF_MESSAGE_SIZE = 20;
-
-// Proof message switch type index
-const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX = 2;
-
-// Proof message identifier index
-const size_t PROOF_MESSAGE_IDENTIFIER_INDEX = 3;
+// Secp256k1 curve order
+const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE] = {
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
+};
 
 // Hardened path mask
 static const uint32_t HARDENED_PATH_MASK = 0x80000000;
@@ -134,20 +130,6 @@ static uint64_t ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE = 713;
 
 // Address private key hash key
 static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = "Grinbox_seed";
-
-// Secp256k1 curve order
-static const uint8_t SECP256K1_CURVE_ORDER[] = {
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
-};
-
-// Bits proven per range
-static const size_t BITS_PROVEN_PER_RANGE = sizeof(uint64_t) * BITS_IN_A_BYTE;
-
-// Number of generators
-static const size_t NUMBER_OF_GENERATORS = 256;
-
-// Scratch space size
-static const size_t SCRATCH_SPACE_SIZE = 17612;
 
 // Secp256k1 private key size
 static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
@@ -452,7 +434,6 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 			
 			// Get rewind nonce from the rewind hash and the commitment
 			getBlake2b((uint8_t *)rewindNonce, NONCE_SIZE, rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
-		
 		}
 		
 		// Finally
@@ -474,9 +455,6 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 	volatile cx_ecfp_private_key_t childPrivateKey;
 	volatile uint8_t childChainCode[CHAIN_CODE_SIZE];
 	
-	// Initialize private hash
-	volatile uint8_t privateHash[NONCE_SIZE];
-	
 	// Begin try
 	BEGIN_TRY {
 	
@@ -487,10 +465,11 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 			deriveChildKey(&childPrivateKey, childChainCode, account, NULL, 0, false);
 			
 			// Get private hash from the child's private key
-			getBlake2b((uint8_t *)privateHash, sizeof(privateHash), (uint8_t *)childPrivateKey.d, childPrivateKey.d_len, NULL, 0);
+			uint8_t privateHash[NONCE_SIZE];
+			getBlake2b(privateHash, sizeof(privateHash), (uint8_t *)childPrivateKey.d, childPrivateKey.d_len, NULL, 0);
 			
 			// Get private nonce from the private hash and the commitment
-			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, (uint8_t *)privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
+			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
 		}
 		
 		// Finally
@@ -499,9 +478,6 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 			// Clear the child private key and chain code
 			explicit_bzero((cx_ecfp_private_key_t *)&childPrivateKey, sizeof(childPrivateKey));
 			explicit_bzero((uint8_t *)childChainCode, sizeof(childChainCode));
-			
-			// Clear the private hash
-			explicit_bzero((uint8_t *)privateHash, sizeof(privateHash));
 		}
 	}
 	
@@ -1067,56 +1043,6 @@ bool commitmentIsValid(const uint8_t *commitment) {
 	return result;
 }
 
-// Calculate bulletproof
-void calculateBulletproof(volatile uint8_t *bulletproof, volatile size_t *bulletproofLength, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
-
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
-	
-	// Create scratch space
-	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
-	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
-	
-	// Create generators
-	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS)];
-	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS);
-	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-	
-			// Check if creating bulletproof failed
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, (uint8_t *)bulletproof, (size_t *)bulletproofLength, NULL, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
-
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Destroy generators
-			secp256k1_bulletproof_generators_preallocated_destroy((secp256k1_context *)context, (secp256k1_bulletproof_generators *)generators);
-			explicit_bzero((uint8_t *)generatorsBuffer, sizeof(generatorsBuffer));
-			
-			// Destroy scratch space
-			secp256k1_scratch_space_preallocated_destroy((secp256k1_scratch_space *)scratchSpace);
-			explicit_bzero((uint8_t *)scratchSpaceBuffer, sizeof(scratchSpaceBuffer));
-			
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
-		}
-	}
-	
-	// End try
-	END_TRY;
-}
-
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 
@@ -1176,7 +1102,7 @@ bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
 	secp256k1_context *context = secp256k1_context_preallocated_create(contextBuffer, SECP256K1_CONTEXT_NONE);
 	
 	// Set result to if private key is a valid secp256k1 private key
-	bool result = secp256k1_ec_seckey_verify(context, privateKey);
+	const bool result = secp256k1_ec_seckey_verify(context, privateKey);
 	
 	// Destroy context
 	secp256k1_context_preallocated_destroy(context);
@@ -1202,7 +1128,7 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 	
 	// Set result to if public key is a valid secp256k1 public key
 	secp256k1_pubkey publicKeyData;
-	bool result = secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, length);
+	const bool result = secp256k1_ec_pubkey_parse(context, &publicKeyData, publicKey, length);
 	
 	// Destroy context
 	secp256k1_context_preallocated_destroy(context);

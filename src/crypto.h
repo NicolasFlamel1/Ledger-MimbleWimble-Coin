@@ -14,6 +14,12 @@
 // Blinding factor size
 #define BLINDING_FACTOR_SIZE 32
 
+// Ed25519 public key size
+#define ED25519_PUBLIC_KEY_SIZE 32
+
+// Curve order size
+#define CURVE_ORDER_SIZE 32
+
 
 // Constants
 
@@ -56,17 +62,11 @@ extern const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 // Odd compressed public key prefix
 extern const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX;
 
-// Bulletproof size
-extern const size_t BULLETPROOF_SIZE;
+// Ed25519 signature size
+extern const size_t ED25519_SIGNATURE_SIZE;
 
-// Proof message size
-extern const size_t PROOF_MESSAGE_SIZE;
-
-// Proof message switch type index
-extern const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX;
-
-// Proof message identifier index
-extern const size_t PROOF_MESSAGE_IDENTIFIER_INDEX;
+// Secp256k1 curve order
+extern const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE];
 
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
@@ -134,9 +134,6 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment);
-
-// Calculate bulletproof
-void calculateBulletproof(volatile uint8_t *bulletproof, volatile size_t *bulletproofLength, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);

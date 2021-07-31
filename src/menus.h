@@ -4,8 +4,8 @@
 
 
 // Header files
+#include "crypto.h"
 #include "currency_information.h"
-#include "tor.h"
 
 
 // Definitions

@@ -756,7 +756,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, nn, {
 });
 
 // Finalize transaction menu approve screen
-static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pbb, processUserInteraction(FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION, true), {
+static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pbb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -769,7 +769,7 @@ static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pbb, processUserInteract
 });
 
 // Finalize transaction menu deny screen
-static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction(FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION, false), {
+static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,

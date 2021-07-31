@@ -85,23 +85,23 @@ void epochToTime(struct Time *time, uint64_t epoch) {
 	uint64_t seconds = epoch + SECONDS_FROM_1601_TO_1970;
 	
 	// Remove quadricentennials from seconds
-	uint16_t quadricentennials = seconds / SECONDS_IN_A_QUADRICENTENNIAL;
+	const uint16_t quadricentennials = seconds / SECONDS_IN_A_QUADRICENTENNIAL;
 	seconds %= SECONDS_IN_A_QUADRICENTENNIAL;
 	
 	// Remove centennials from seconds
-	uint8_t centennials = MIN(seconds / SECONDS_IN_A_CENTENNIAL, MAXIMUM_CENTENNIALS);
+	const uint8_t centennials = MIN(seconds / SECONDS_IN_A_CENTENNIAL, MAXIMUM_CENTENNIALS);
 	seconds -= (uint64_t)centennials * SECONDS_IN_A_CENTENNIAL;
 	
 	// Remove quadrennials from seconds
-	uint8_t quadrennials = MIN(seconds / SECONDS_IN_A_QUADRENNIAL, MAXIMUM_QUADRENNIALS);
+	const uint8_t quadrennials = MIN(seconds / SECONDS_IN_A_QUADRENNIAL, MAXIMUM_QUADRENNIALS);
 	seconds -= quadrennials * SECONDS_IN_A_QUADRENNIAL;
 	
 	// Remove annuals from seconds
-	uint8_t annuals = MIN(seconds / SECONDS_IN_AN_ANNUAL, MAXIMUM_ANNUALS);
+	const uint8_t annuals = MIN(seconds / SECONDS_IN_AN_ANNUAL, MAXIMUM_ANNUALS);
 	seconds -= annuals * SECONDS_IN_AN_ANNUAL;
 	
 	// Remove year day from seconds
-	uint16_t yearDay = seconds / SECONDS_IN_A_DAY;
+	const uint16_t yearDay = seconds / SECONDS_IN_A_DAY;
 	seconds %= SECONDS_IN_A_DAY;
 	
 	// Set time's hour
@@ -123,7 +123,7 @@ void epochToTime(struct Time *time, uint64_t epoch) {
 	time->year = REBEASE_YEAR + quadricentennials * YEARS_IN_A_QUADRICENTENNIAL + centennials * YEARS_IN_A_CENTENNIAL + quadrennials * YEARS_IN_A_QUADRENNIAL + annuals;
 	
 	// Get if year is a leap year
-	bool leapYear = isLeapYear(time->year);
+	const bool leapYear = isLeapYear(time->year);
 	
 	// Go through all months
 	for(time->day = time->month = 1; time->month <= MONTHS_IN_A_YEAR; ++time->month) {

@@ -25,8 +25,11 @@ enum Instruction {
 	// Get commitment instruction
 	GET_COMMITMENT_INSTRUCTION,
 	
-	// Get bulletproof instruction
-	GET_BULLETPROOF_INSTRUCTION,
+	// Get private nonce instruction
+	GET_PRIVATE_NONCE_INSTRUCTION,
+	
+	// Get blinding factor tweak multiply instruction
+	GET_BLINDING_FACTOR_TWEAK_MULTIPLY_INSTRUCTION,
 	
 	// Get Tor public key instruction
 	GET_TOR_PUBLIC_KEY_INSTRUCTION,
@@ -94,8 +97,8 @@ enum Instruction {
 	// Continue transaction get public key instruction
 	CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
 	
-	// Finish transaction get signature instruction
-	FINISH_TRANSACTION_GET_SIGNATURE_INSTRUCTION
+	// Finish transaction instruction
+	FINISH_TRANSACTION_INSTRUCTION
 };
 
 

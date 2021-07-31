@@ -17,7 +17,7 @@ const size_t POLY1305_TAG_SIZE = 16;
 static const char CHACHA20_STATE_CONSTANT[] = "expand 32-byte k";
 
 // ChaCha20 state block counter index
-static const size_t CHACHA20_BLOCK_COUNTER_INDEX = 12;
+static const size_t CHACHA20_STATE_BLOCK_COUNTER_INDEX = 12;
 
 // Poly1305 block size size
 static const size_t POLY1305_BLOCK_SIZE = 16;
@@ -44,7 +44,7 @@ static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength) {
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, uint32_t blockCounter, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength) {
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -65,7 +65,7 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 	chaCha20Poly1305State->chaCha20OriginalState[9] = *(uint32_t *)&key[sizeof(uint32_t) * 5];
 	chaCha20Poly1305State->chaCha20OriginalState[10] = *(uint32_t *)&key[sizeof(uint32_t) * 6];
 	chaCha20Poly1305State->chaCha20OriginalState[11] = *(uint32_t *)&key[sizeof(uint32_t) * 7];
-	chaCha20Poly1305State->chaCha20OriginalState[12] = 0;
+	chaCha20Poly1305State->chaCha20OriginalState[12] = blockCounter;
 	chaCha20Poly1305State->chaCha20OriginalState[13] = *(uint32_t *)nonce;
 	chaCha20Poly1305State->chaCha20OriginalState[14] = *(uint32_t *)&nonce[sizeof(uint32_t) * 1];
 	chaCha20Poly1305State->chaCha20OriginalState[15] = *(uint32_t *)&nonce[sizeof(uint32_t) * 2];
@@ -118,7 +118,7 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	}
 
 	// Increment the ChaCha20 original state's block counter
-	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_BLOCK_COUNTER_INDEX];
+	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 	
 	// Initialize ChaCha20 current state
 	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
@@ -149,7 +149,7 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	}
 
 	// Increment the ChaCha20 original state's block counter
-	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_BLOCK_COUNTER_INDEX];
+	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 	
 	// Initialize ChaCha20 current state
 	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];

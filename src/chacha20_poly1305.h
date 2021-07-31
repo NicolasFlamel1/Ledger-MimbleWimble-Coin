@@ -55,7 +55,7 @@ extern const size_t POLY1305_TAG_SIZE;
 // Function prototypes
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength);
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, uint32_t blockCounter, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength);
 
 // Encrypt ChaCha20 Poly1305 data
 void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength);

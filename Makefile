@@ -234,9 +234,9 @@ run: all
 dependencies:
 	
 	# Create Secp256k1-zkp dependency
-	wget "https://github.com/NicolasFlamel1/secp256k1-zkp/archive/master.zip"
+	wget "https://github.com/mimblewimble/secp256k1-zkp/archive/master.zip"
 	cd src && unzip ../master.zip
-	cd src/secp256k1-zkp-master && ./autogen.sh && ./configure && make
+	#cd src/secp256k1-zkp-master && ./autogen.sh && ./configure && make
 	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_A 5/#define WINDOW_A 2/g" ecmult_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_G 16/#define WINDOW_G 2/g" ecmult_impl.h
@@ -244,6 +244,8 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/abort/\/\/abort/g" secp256k1.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);/\/*fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);*\//g" util.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/abort();/\/*abort();*\//g" util.h	
+	cd src/secp256k1-zkp-master/src && sed -i "s/#include \"ecmult_static_context.h\"/\/\/#include \"ecmult_static_context.h\"/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_static_context/NULL/g" ecmult_gen_impl.h
 	rm master.zip
 
 # Include BOLOS SDK Makefile rules

@@ -39,7 +39,18 @@ Get commitment
 	Response: Commitment (33 bytes)
 	Command: printf "\xC7\x03\x00\x00\x1E\x00\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 	Result: 08e096c8d9a95570297dfa520bc4f175399cb76672a590a50d5aba6cd438ad02f4
-	
+
+Get tau1 and tau2
+	Details: Returns the tau1 and tau2 needed to create a bulletproof
+	Parameters: account (little endian 4 bytes), identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
+	Account: 0
+	Identifier: 0400000001000000028000000180000002
+	Value: 2380952381
+	Switch Type: 1
+	Response: Tau1 (32 bytes), Tau2 (32 bytes) 
+	Command: printf "\xC7\x04\x00\x00\x1E\x00\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x02\x80\x00\x00\x01\x80\x00\x00\x02\x3D\x73\xEA\x8D\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
+	Result: b982ea49e272905ed8dac6ad579037fa614c83212ee7955ace71da4b83e6151b8661706430334b26947f8a135229cc9fc3fa56d6dded2c3579ec1fdf0d44e4b0
+
 Get bulletproof
 	Details: Returns the bulletproof
 	Parameters: account (little endian 4 bytes), identifier (17 bytes), value (little endian 8 bytes), switch type (1 byte)
