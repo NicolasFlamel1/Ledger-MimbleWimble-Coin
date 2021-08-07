@@ -12,8 +12,8 @@
 // Tor address private key index
 const uint32_t TOR_ADDRESS_PRIVATE_KEY_INDEX = 0;
 
-// Address checksum length
-static const size_t ADDRESS_CHECKSUM_LENGTH = 2;
+// Address checksum size
+static const size_t ADDRESS_CHECKSUM_SIZE = 2;
 
 // Address version
 static const uint8_t ADDRESS_VERSION = 3;
@@ -34,7 +34,7 @@ void getChecksum(uint8_t *checksum, const uint8_t *address);
 bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length) {
 
 	// Check if length is invalid
-	if(length != TOR_ADDRESS_LENGTH) {
+	if(length != TOR_ADDRESS_SIZE) {
 	
 		// Return false
 		return false;
@@ -44,7 +44,7 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	const size_t decodedTorAddressLength = getBase32DecodedLength(torAddress, length);
 	
 	// Check if decoded Tor address length is invalid
-	if(decodedTorAddressLength != ED25519_PUBLIC_KEY_SIZE + ADDRESS_CHECKSUM_LENGTH + sizeof(ADDRESS_VERSION)) {
+	if(decodedTorAddressLength != ED25519_PUBLIC_KEY_SIZE + ADDRESS_CHECKSUM_SIZE + sizeof(ADDRESS_VERSION)) {
 	
 		// Return false
 		return false;
@@ -55,14 +55,14 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	base32Decode(decodedTorAddress, torAddress, length);
 	
 	// Check if decoded Tor address's version is invalid
-	if(decodedTorAddress[ED25519_PUBLIC_KEY_SIZE + ADDRESS_CHECKSUM_LENGTH] != ADDRESS_VERSION) {
+	if(decodedTorAddress[ED25519_PUBLIC_KEY_SIZE + ADDRESS_CHECKSUM_SIZE] != ADDRESS_VERSION) {
 	
 		// Return false
 		return false;
 	}
 	
 	// Get checksum from the decoded Tor address
-	uint8_t checksum[ADDRESS_CHECKSUM_LENGTH];
+	uint8_t checksum[ADDRESS_CHECKSUM_SIZE];
 	getChecksum(checksum, decodedTorAddress);
 	
 	// Check if decoded Tor address's checksum is invalid
@@ -101,7 +101,7 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey) {
 
 	// Get checksum from the public key
-	uint8_t checksum[ADDRESS_CHECKSUM_LENGTH];
+	uint8_t checksum[ADDRESS_CHECKSUM_SIZE];
 	getChecksum(checksum, publicKey);
 	
 	// Get address data from the public key and checksum
@@ -114,7 +114,7 @@ void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey) {
 	base32Encode(torAddress, addressData, sizeof(addressData));
 	
 	// Go through all characters in the Tor address
-	for(size_t i = 0; i < TOR_ADDRESS_LENGTH; ++i) {
+	for(size_t i = 0; i < TOR_ADDRESS_SIZE; ++i) {
 	
 		// Make character lowercase
 		torAddress[i] = toLowercase(torAddress[i]);
@@ -149,5 +149,5 @@ void getChecksum(uint8_t *checksum, const uint8_t *address) {
 	cx_hash(&hash.header, CX_LAST, checksumData, sizeof(checksumData), hashResult, sizeof(hashResult));
 	
 	// Get checksum from the hash
-	memcpy(checksum, hashResult, ADDRESS_CHECKSUM_LENGTH);
+	memcpy(checksum, hashResult, ADDRESS_CHECKSUM_SIZE);
 }

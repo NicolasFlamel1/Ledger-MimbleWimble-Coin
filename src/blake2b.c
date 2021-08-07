@@ -7,8 +7,8 @@
 
 // Definitions
 
-// Parameter reserved length
-#define PARAMETER_RESERVED_LENGTH 14
+// Parameter reserved size
+#define PARAMETER_RESERVED_SIZE 14
 
 
 // Structures
@@ -44,7 +44,7 @@ struct Parameter {
 	uint8_t innerLength;
 	
 	// Reserved
-	uint8_t reserved[PARAMETER_RESERVED_LENGTH];
+	uint8_t reserved[PARAMETER_RESERVED_SIZE];
 	
 	// Salt
 	uint8_t salt[BLAKE2B_SALTBYTES];

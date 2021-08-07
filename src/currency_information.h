@@ -8,20 +8,20 @@
 
 // Definitions
 
-// Currency information name length
-#define CURRENCY_INFORMATION_NAME_LENGTH sizeof("MimbleWimble Coin")
+// Currency information name size
+#define CURRENCY_INFORMATION_NAME_SIZE sizeof("MimbleWimble Coin")
 
-// Currency information abbreviation length
-#define CURRENCY_INFORMATION_ABBREVIATION_LENGTH sizeof("GRIN")
+// Currency information abbreviation size
+#define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("GRIN")
 
-// Currency information version length
-#define CURRENCY_INFORMATION_VERSION_LENGTH sizeof("0.0.1")
+// Currency information version size
+#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("0.0.1")
 
-// Currency information icon colors length
-#define CURRENCY_INFORMATION_ICON_COLORS_LENGTH 2
+// Currency information icon colors size
+#define CURRENCY_INFORMATION_ICON_COLORS_SIZE 2
 
-// Currency information icon bitmap length
-#define CURRENCY_INFORMATION_ICON_BITMAP_LENGTH 32
+// Currency information icon bitmap size
+#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
 
 
 // Structures
@@ -39,19 +39,19 @@ struct CurrencyInformation {
 	uint8_t fractionalDigits;
 	
 	// Name
-	char name[CURRENCY_INFORMATION_NAME_LENGTH];
+	char name[CURRENCY_INFORMATION_NAME_SIZE];
 	
 	// Abbreviation
-	char abbreviation[CURRENCY_INFORMATION_ABBREVIATION_LENGTH];
+	char abbreviation[CURRENCY_INFORMATION_ABBREVIATION_SIZE];
 	
 	// Version
-	char version[CURRENCY_INFORMATION_VERSION_LENGTH];
+	char version[CURRENCY_INFORMATION_VERSION_SIZE];
 	
 	// Icon colors
-	unsigned int iconColors[CURRENCY_INFORMATION_ICON_COLORS_LENGTH];
+	unsigned int iconColors[CURRENCY_INFORMATION_ICON_COLORS_SIZE];
 	
 	// Icon bitmap
-	unsigned char iconBitmap[CURRENCY_INFORMATION_ICON_BITMAP_LENGTH];
+	unsigned char iconBitmap[CURRENCY_INFORMATION_ICON_BITMAP_SIZE];
 	
 	// Icon details
 	bagl_icon_details_t iconDetails;

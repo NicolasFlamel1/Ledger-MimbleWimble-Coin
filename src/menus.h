@@ -13,33 +13,33 @@
 // Check if target is the Nano X
 #ifdef TARGET_NANOX
 
-	// Line character length
-	#define LINE_CHARACTER_LENGTH 20
+	// Line character size
+	#define LINE_CHARACTER_SIZE 20
 
 // Otherwise
 #else
 
-	// Line character length
-	#define LINE_CHARACTER_LENGTH 14
+	// Line character size
+	#define LINE_CHARACTER_SIZE 14
 #endif
 
-// Requestor line buffer length
-#define REQUESTOR_LINE_BUFFER_LENGTH (LINE_CHARACTER_LENGTH * 2 + sizeof((char)'\0'))
+// Requestor line buffer size
+#define REQUESTOR_LINE_BUFFER_SIZE (LINE_CHARACTER_SIZE * 2 + sizeof((char)'\0'))
 
-// Time line buffer length
-#define TIME_LINE_BUFFER_LENGTH sizeof("HH:MM:SS on YYYYYY-mm-dd ZZZ")
+// Time line buffer size
+#define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd ZZZ")
 
-// Tor public key line buffer length
-#define TOR_PUBLIC_KEY_LINE_BUFFER_LENGTH (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Tor public key line buffer size
+#define TOR_PUBLIC_KEY_LINE_BUFFER_SIZE (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
-// Amount line buffer length
-#define AMOUNT_LINE_BUFFER_LENGTH (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_LENGTH)
+// Amount line buffer size
+#define AMOUNT_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
-// Fee line buffer length
-#define FEE_LINE_BUFFER_LENGTH (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_LENGTH)
+// Fee line buffer size
+#define FEE_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
-// Receiver line buffer length
-#define RECEIVER_LINE_BUFFER_LENGTH (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Receiver line buffer size
+#define RECEIVER_LINE_BUFFER_SIZE (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 
 // Constants
@@ -89,22 +89,22 @@ enum MainMenuScreen {
 // Global variables
 
 // Requestor line buffer
-extern char requestorLineBuffer[REQUESTOR_LINE_BUFFER_LENGTH];
+extern char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
 
 // Time line buffer
-extern char timeLineBuffer[TIME_LINE_BUFFER_LENGTH];
+extern char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
 // Tor public key line buffer
-extern char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_LENGTH];
+extern char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_SIZE];
 
 // Amount line buffer
-extern char amountLineBuffer[AMOUNT_LINE_BUFFER_LENGTH];
+extern char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 
 // Fee line buffer
-extern char feeLineBuffer[FEE_LINE_BUFFER_LENGTH];
+extern char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
 // Receiver line buffer
-extern char receiverLineBuffer[RECEIVER_LINE_BUFFER_LENGTH];
+extern char receiverLineBuffer[RECEIVER_LINE_BUFFER_SIZE];
 
 
 // Function prototypes

@@ -34,10 +34,8 @@ void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength,
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Initialize tag
-	uint8_t tag[POLY1305_TAG_SIZE];
-	
 	// Get ChaCha20 Poly1305 tag
+	uint8_t tag[POLY1305_TAG_SIZE];
 	getChaCha20Poly1305Tag(&slatepackData.chaCha20Poly1305State, tag);
 	
 	// Check if response with the tag will overflow

@@ -6,8 +6,8 @@
 // Header files
 #include <os.h>
 
-// Check if target isn't the Nano X
-#ifndef TARGET_NANOX
+// Check if target is the Nano S
+#ifdef TARGET_NANOS
 
 	// Header files
 	#include <libcxng.h>

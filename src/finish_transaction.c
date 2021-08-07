@@ -225,7 +225,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 						case MQS_ADDRESS_TYPE:
 						
 							// Set receiver address
-							receiverAddressLength = MQS_ADDRESS_LENGTH;
+							receiverAddressLength = MQS_ADDRESS_SIZE;
 						
 							// Break
 							break;
@@ -234,7 +234,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 						case TOR_ADDRESS_TYPE:
 						
 							// Set receiver address
-							receiverAddressLength = TOR_ADDRESS_LENGTH;
+							receiverAddressLength = TOR_ADDRESS_SIZE;
 						
 							// Break
 							break;
@@ -306,7 +306,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 						case MQS_ADDRESS_TYPE:
 						
 							// Set address length
-							addressLength = MQS_ADDRESS_LENGTH;
+							addressLength = MQS_ADDRESS_SIZE;
 							
 							// Allocate memory for the address
 							address = alloca(addressLength);
@@ -321,7 +321,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 						case TOR_ADDRESS_TYPE:
 						
 							// Set address length
-							addressLength = TOR_ADDRESS_LENGTH;
+							addressLength = TOR_ADDRESS_SIZE;
 							
 							// Allocate memory for the address
 							address = alloca(addressLength);

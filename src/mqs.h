@@ -14,8 +14,8 @@
 // MQS data session key size
 #define MQS_DATA_SESSION_KEY_SIZE 16
 
-// MQS address length
-#define MQS_ADDRESS_LENGTH 52
+// MQS address size
+#define MQS_ADDRESS_SIZE 52
 
 
 // Constants

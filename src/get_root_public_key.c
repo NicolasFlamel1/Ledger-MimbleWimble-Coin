@@ -19,7 +19,7 @@ void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned cha
 	const uint8_t secondParameter = G_io_apdu_buffer[APDU_OFF_P2];
 	
 	// Get request's data length
-	size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
+	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];

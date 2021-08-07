@@ -10,22 +10,22 @@
 // Global variables
 
 // Requestor line buffer
-char requestorLineBuffer[REQUESTOR_LINE_BUFFER_LENGTH];
+char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
 
 // Time line buffer
-char timeLineBuffer[TIME_LINE_BUFFER_LENGTH];
+char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
 // Tor public key line buffer
-char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_LENGTH];
+char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_SIZE];
 
 // Amount line buffer
-char amountLineBuffer[AMOUNT_LINE_BUFFER_LENGTH];
+char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 
 // Fee line buffer
-char feeLineBuffer[FEE_LINE_BUFFER_LENGTH];
+char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
 // Receiver line buffer
-char receiverLineBuffer[RECEIVER_LINE_BUFFER_LENGTH];
+char receiverLineBuffer[RECEIVER_LINE_BUFFER_SIZE];
 
 
 // Constants
@@ -920,7 +920,7 @@ void showMenu(enum Menu menu) {
 			finalizeTransactionMenu[0] = &finalizeTransactionMenuNotifyScreen;
 			
 			// Check if amount line buffer is longer than one line
-			if(strlen(amountLineBuffer) > LINE_CHARACTER_LENGTH) {
+			if(strlen(amountLineBuffer) > LINE_CHARACTER_SIZE) {
 			
 				// Set finalize transaction menu amount screen
 				finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountScreen;
@@ -934,7 +934,7 @@ void showMenu(enum Menu menu) {
 			}
 			
 			// Check if fee line buffer is longer than one line
-			if(strlen(feeLineBuffer) > LINE_CHARACTER_LENGTH) {
+			if(strlen(feeLineBuffer) > LINE_CHARACTER_SIZE) {
 			
 				// Set finalize transaction menu fee screen
 				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeScreen;

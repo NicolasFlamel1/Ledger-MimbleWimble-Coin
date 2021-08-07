@@ -106,29 +106,14 @@ void processGetBlindingFactorTweakMultiplyRequest(unsigned short *responseLength
 	
 		// Try
 		TRY {
-	
+		
 			// Derive blinding factor
 			deriveBlindingFactor(blindingFactor, *account, *value, identifierPath, identifierDepth, switchType);
 			
+			// TODO find a way to interact with the blinding factor in this way that doesn't expose it under certain conditions
+			
 			// Multiply the scalar by the blinding factor
 			cx_math_multm((uint8_t *)result, scalar, (uint8_t *)blindingFactor, SECP256K1_CURVE_ORDER, sizeof(result));
-			
-			// Check if the result is zero or the result is the blinding factor
-			if(cx_math_is_zero((uint8_t *)result, sizeof(result)) || !cx_math_cmp((uint8_t *)result, (uint8_t *)blindingFactor, sizeof(result))) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-		}
-		
-		// Catch other errors
-		CATCH_OTHER(error) {
-		
-			// Clear the result
-			explicit_bzero((uint8_t *)result, sizeof(result));
-			
-			// Throw error
-			THROW(error);
 		}
 		
 		// Finally

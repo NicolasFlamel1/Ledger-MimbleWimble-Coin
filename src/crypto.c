@@ -675,13 +675,9 @@ size_t getEncryptedDataLength(size_t dataLength) {
 // Encrypt data
 void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
 
-	// Initialized padded data
+	// Pad the data
 	uint8_t paddedData[getEncryptedDataLength(dataLength)];
-	
-	// Set data in padded data
 	memcpy(paddedData, data, dataLength);
-	
-	// Set padding in padded data
 	memset(&paddedData[dataLength], sizeof(paddedData) - dataLength, sizeof(paddedData) - dataLength);
 	
 	// Initialize encryption key
@@ -761,7 +757,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		case MIMBLEWIMBLE_COIN_ID:
 		
 			// Check if sender address length is invalid
-			if(senderAddressLength != MQS_ADDRESS_LENGTH && senderAddressLength != TOR_ADDRESS_LENGTH) {
+			if(senderAddressLength != MQS_ADDRESS_SIZE && senderAddressLength != TOR_ADDRESS_SIZE) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -803,8 +799,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 			// Check sender address length
 			switch(senderAddressLength) {
 			
-				// MQS address length
-				case MQS_ADDRESS_LENGTH:
+				// MQS address size
+				case MQS_ADDRESS_SIZE:
 				
 					// Check if sender address isn't a valid MQS address
 					if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength, networkType)) {
@@ -816,8 +812,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 					// Break
 					break;
 				
-				// Tor address length
-				case TOR_ADDRESS_LENGTH:
+				// Tor address size
+				case TOR_ADDRESS_SIZE:
 				
 					// Check if sender address isn't a valid Tor address
 					if(!getPublicKeyFromTorAddress(NULL, senderAddress, senderAddressLength)) {
@@ -881,8 +877,8 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 			// Check receiver address length
 			switch(receiverAddressLength) {
 			
-				// MQS address length
-				case MQS_ADDRESS_LENGTH:
+				// MQS address size
+				case MQS_ADDRESS_SIZE:
 				
 					// Check if signature length is invalid
 					if(signatureLength > MAXIMUM_DER_SIGNATURE_SIZE) {
@@ -915,8 +911,8 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 					// Break
 					break;
 				
-				// Tor address length
-				case TOR_ADDRESS_LENGTH:
+				// Tor address size
+				case TOR_ADDRESS_SIZE:
 				
 					// Check if signature length is invalid
 					if(signatureLength != ED25519_SIGNATURE_SIZE) {

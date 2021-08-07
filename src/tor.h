@@ -11,8 +11,8 @@
 
 // Definitions
 
-// Tor address length
-#define TOR_ADDRESS_LENGTH 56
+// Tor address size
+#define TOR_ADDRESS_SIZE 56
 
 
 // Constants
