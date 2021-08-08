@@ -261,6 +261,7 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge g;" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge_set_xy(&g, &x, &y);" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_gej_set_ge(r, &g);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    memset(n, 0, sizeof(n));" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
 	rm master.zip
