@@ -236,14 +236,33 @@ dependencies:
 	# Create Secp256k1-zkp dependency
 	wget "https://github.com/mimblewimble/secp256k1-zkp/archive/master.zip"
 	cd src && unzip ../master.zip
-	cd src/secp256k1-zkp-master && ./autogen.sh && ./configure && make
 	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_A 5/#define WINDOW_A 2/g" ecmult_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_G 16/#define WINDOW_G 2/g" ecmult_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf/\/\/fprintf/g" secp256k1.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/abort/\/\/abort/g" secp256k1.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);/\/*fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);*\//g" util.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/abort();/\/*abort();*\//g" util.h	
+	cd src/secp256k1-zkp-master/src && sed -i "s/abort();/\/*abort();*\//g" util.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#include \"ecmult_static_context.h\"/\/\/#include \"ecmult_static_context.h\"/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_static_context/NULL/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/return ctx->prec != NULL;/return ctx->prec == NULL;/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_gen(const/secp256k1_ecmult_gen2(const/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#endif \/\* SECP256K1_ECMULT_GEN_IMPL_H \*\///g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "#include \"device.h\"" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    unsigned char n[32];" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_scalar_get_b32(n, gn);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    uint8_t generator[] = {0x04, 0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8};" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), n, sizeof(n));" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe x;" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&x, &generator[1]);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe y;" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&y, &generator[33]);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge g;" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge_set_xy(&g, &x, &y);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_gej_set_ge(r, &g);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
 	rm master.zip
 
 # Include BOLOS SDK Makefile rules
