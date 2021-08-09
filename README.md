@@ -75,7 +75,7 @@ Instruction: 00
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: N/A
-Response: Application name (varying length) | 00 | application version (varying length) | 00
+Response: Application name (UTF-8 string varying length) | 00 | application version (UTF-8 string varying length) | 00
 Requires user interaction: No
 Example request: C700000000
 Example response: 4D696D626C6557696D626C6520436F696E00302E302E3100
@@ -88,7 +88,7 @@ Class: C7
 Instruction: 01
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | requestor's name (varying length)
+Data: Account (unsigned 4 bytes little endian integer) | requestor's name (UTF-8 string varying length)
 Response: Compressed secp256k1 public key (33 bytes)
 Requires user interaction: Yes
 Example request: C701000012000000004E69636F6C617320466C616d656C
@@ -102,7 +102,7 @@ Class: C7
 Instruction: 02
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian)
+Data: Account (unsigned 4 bytes little endian integer)
 Response: Seed cookie (64 bytes)
 Requires user interaction: No
 Example request: C70200000400000000
@@ -116,7 +116,7 @@ Class: C7
 Instruction: 03
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Commitment (33 bytes)
 Requires user interaction: No
 Example request: C70300001E0000000004000000010000000280000001800000023D73EA8D0000000001
@@ -130,7 +130,7 @@ Class: C7
 Instruction: 04
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Private nonce (32 bytes)
 Requires user interaction: No
 Example request: C70400001E0000000004000000010000000280000001800000023D73EA8D0000000001
@@ -144,7 +144,7 @@ Class: C7
 Instruction: 05
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular) | scalar (32 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular) | scalar (32 bytes)
 Response: Scalar (32 bytes)
 Requires user interaction: No
 Example request: C70500003E0000000004000000010000000280000001800000023D73EA8D00000000010001020304050607080900010203040506070809000102030405060708090001
@@ -158,7 +158,7 @@ Class: C7
 Instruction: 06
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian)
+Data: Account (unsigned 4 bytes little endian integer)
 Response: Ed25519 public key (32 bytes)
 Requires user interaction: No
 Example request: C70600000400000000
@@ -172,7 +172,7 @@ Class: C7
 Instruction: 07
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | value (unsigned 8 bytes little endian) | commitment (33 bytes) | sender address (52 bytes for MQS address, 56 bytes for Tor address)
+Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes for MQS address, 56 bytes for Tor address)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: No
 Example request: C70700006500000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4657A656A33636A746B6D6576687079617969676F326370623537747534677174676B6933727066757A6D726E6C6272333574653365626164
@@ -186,7 +186,7 @@ Class: C7
 Instruction: 08
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | Ed25519 medium term certificate (varying size ed25519_signing_cert without the signature)
+Data: Account (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size ed25519_signing_cert without the signature)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: Yes
 Example request: C7080000500000000001040006E63101832D7A85EBF60242BD50C80EAE7760789288F8041E22C1954604037B42D7B564010020040026489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BECC9
@@ -195,12 +195,12 @@ Example response: 27C6C4EF00EDF65264AFF97A28C1517F204EB4E494DE231EACBA5BB2A4AFCA
 
 * Start encrypting Slatepack data
 ```
-Description: Returns the random nonce that will be used to encrypt the Slatepack data using the public key and account's private key to create a shared secret key
+Description: Returns the random nonce that will be used to encrypt the Slatepack data using the public key and account's Tor private key's X25519 private key to create a shared secret key
 Class: C7
 Instruction: 09
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | X25519 public key (32 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes)
 Response: Nonce (12 bytes)
 Requires user interaction: No
 Example request: C709000024000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C
@@ -237,12 +237,12 @@ Example response: 0B3BE8125B4081F33E7EB62A43C41A26
 
 * Start decrypting Slatepack data
 ```
-Description: Starts decrypting the encrypted Slatepack data using the provided nonce, public key, and account's private key
+Description: Starts decrypting the encrypted Slatepack data using the provided nonce, public key, and account's Tor private key's X25519 private key
 Class: C7
 Instruction: 0C
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | X25519 public key (32 bytes) | nonce (12 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes) | nonce (12 bytes)
 Response: N/A
 Requires user interaction: No
 Example request: C70C000030000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C86F3A5F7512FBA489B4D04DF
@@ -284,7 +284,7 @@ Class: C7
 Instruction: 0F
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian)
+Data: Account (unsigned 4 bytes little endian integer)
 Response: Compressed secp256k1 public key (33 bytes)
 Requires user interaction: No
 Example request: C70F00000400000000
@@ -298,7 +298,7 @@ Class: C7
 Instruction: 10
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | value (unsigned 8 bytes little endian) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address)
+Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address)
 Response: DER signature (at most 72 bytes)
 Requires user interaction: No
 Example request: C71000006100000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4786D6A434A574B504C6265344470723156346B72446E776B327735484D42734667337942736538795255597946614C70534C4852
@@ -307,12 +307,12 @@ Example response: 3045022100C3745C60997EC457CC6EB7818A2AE7E7FF8A30EF52A29B9EBEFF
 
 * Start encrypting MQS data
 ```
-Description: Returns the random salt and nonce that will be used to encrypt the MQS data using the public key and account's private key to create a shared secret key
+Description: Returns the random salt and nonce that will be used to encrypt the MQS data using the public key and account's MQS private key to create a shared secret key
 Class: C7
 Instruction: 11
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | secp256k1 compressed public key (33 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | secp256k1 compressed public key (33 bytes)
 Response: Salt (8 bytes) | nonce (12 bytes)
 Requires user interaction: No
 Example request: C7110000250000000003D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F5
@@ -349,12 +349,12 @@ Example response: 8DE95463C9B23A107D18BA3DDE480E61
 
 * Start decrypting MQS data
 ```
-Description: Starts decrypting the encrypted MQS data using the provided salt, nonce, public key, and account's private key
+Description: Starts decrypting the encrypted MQS data using the provided salt, nonce, public key, and account's MQS private key
 Class: C7
 Instruction: 14
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | secp256k1 compressed public key (33 bytes) | salt (8 bytes) | nonce (12 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | secp256k1 compressed public key (33 bytes) | salt (8 bytes) | nonce (12 bytes)
 Response: N/A
 Requires user interaction: No
 Example request: C7140000390000000003D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F5FFEC82955929F30286F3A5F7512FBA489B4D04DF
@@ -396,7 +396,7 @@ Class: C7
 Instruction: 17
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | output (unsigned 8 bytes little endian) | input (unsigned 8 bytes little endian) | fee (unsigned 8 bytes little endian)
+Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer)
 Response: N/A
 Requires user interaction: No
 Example request: C71700001C00000000020000000000000001000000000000000300000000000000
@@ -410,7 +410,7 @@ Class: C7
 Instruction: 18
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: N/A
 Requires user interaction: No
 Example request: C71800001A0300000001000000000000000000000000020000000000000001
@@ -424,7 +424,7 @@ Class: C7
 Instruction: 19
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: N/A
 Requires user interaction: No
 Example request: C71900001A0300000002000000000000000000000000040000000000000001
@@ -466,7 +466,7 @@ Class: C7
 Instruction: 1C
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: Address type (Tor 00, MQS 01)
-Data: Secret nonce (32 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian), no recent duplicate 03 | relative height (unsigned 8 bytes little endian)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Data: Secret nonce (32 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C71C00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201
