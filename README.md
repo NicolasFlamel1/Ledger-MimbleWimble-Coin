@@ -76,9 +76,9 @@ Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: N/A
 Response: Application name (varying length) | 00 | application version (varying length) | 00
-Requires user interaction: no
+Requires user interaction: No
 Example request: C700000000
-Example response: 4d696d626c6557696d626c6520436f696e00302e302e3100
+Example response: 4D696D626C6557696D626C6520436F696E00302E302E3100
 ```
 
 * Get root public key
@@ -89,10 +89,10 @@ Instruction: 01
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian) | requestor's name (varying length)
-Response: Account's compressed root public key (33 bytes)
-Requires user interaction: yes
+Response: Compressed secp256k1 public key (33 bytes)
+Requires user interaction: Yes
 Example request: C701000012000000004E69636F6C617320466C616d656C
-Example response: 02cc4773277f41e7e10e1e28c1cc6a7e70d857e15cd677c5c8b65d98893d441c83
+Example response: 02CC4773277F41E7E10E1E28C1CC6A7E70D857E15CD677C5C8B65D98893D441C83
 ```
 
 * Get seed cookie
@@ -103,8 +103,8 @@ Instruction: 02
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian)
-Response: Account's seed cookie (64 bytes)
-Requires user interaction: no
+Response: Seed cookie (64 bytes)
+Requires user interaction: No
 Example request: C70200000400000000
 Example response: 9c3400e2e53e053bbdabd698c8b274bc9a31637bb012e3a0cd514103c09f5034f5316dd75afde7e3191516035707d3ed242803d9cbe9afdbd48ec6eea218ca09
 ```
@@ -117,10 +117,10 @@ Instruction: 03
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
-Response: Account's commitment for the identifier, value, and switch type (33 bytes)
-Requires user interaction: no
+Response: Commitment (33 bytes)
+Requires user interaction: No
 Example request: C70300001E0000000004000000010000000280000001800000023D73EA8D0000000001
-Example response: 08e096c8d9a95570297dfa520bc4f175399cb76672a590a50d5aba6cd438ad02f4
+Example response: 08E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4
 ```
 
 * Get private nonce
@@ -131,10 +131,10 @@ Instruction: 04
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
-Response: Account's private nonce for the identifier, value, and switch type (32 bytes)
-Requires user interaction: no
+Response: Private nonce (32 bytes)
+Requires user interaction: No
 Example request: C70400001E0000000004000000010000000280000001800000023D73EA8D0000000001
-Example response: d633bbdc04805794f647f15f26cb392616903dfd281ab954d49914d369a2b864
+Example response: D633BBDC04805794F647F15F26CB392616903DFD281AB954D49914D369A2B864
 ```
 
 * Get blinding factor tweak multiply
@@ -145,10 +145,10 @@ Instruction: 05
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian) | identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular) | scalar (32 bytes)
-Response: Account's blinding factor for the identifier, value, and switch type multiplied by the scalar (32 bytes)
-Requires user interaction: no
+Response: Scalar (32 bytes)
+Requires user interaction: No
 Example request: C70500003E0000000004000000010000000280000001800000023D73EA8D00000000010001020304050607080900010203040506070809000102030405060708090001
-Example response: 53b1227c3283f79d51b5fc95e7cdc60c739951432892f373e6ee058f2237d137
+Example response: 53B1227C3283F79D51B5FC95E7CDC60C739951432892F373E6EE058F2237D137
 ```
 
 * Get Tor public key
@@ -159,10 +159,318 @@ Instruction: 06
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian)
-Response: Account's Tor public key (32 bytes)
-Requires user interaction: no
+Response: Ed25519 public key (32 bytes)
+Requires user interaction: No
 Example request: C70600000400000000
-Example response: 26489d8933530953bf00c20ced09e1efe74e1a133291b8bcb4cb22d5863becc9
+Example response: 26489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BECC9
+```
+
+* Get Tor transaction signature
+```
+Description: Returns the transaction's payment proof signed with the account's Tor private key
+Class: C7
+Instruction: 07
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | value (unsigned 8 bytes little endian) | commitment (33 bytes) | sender address (52 bytes for MQS address, 56 bytes for Tor address)
+Response: Ed25519 signature (64 bytes)
+Requires user interaction: No
+Example request: C70700006500000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4657A656A33636A746B6D6576687079617969676F326370623537747534677174676B6933727066757A6D726E6C6272333574653365626164
+Example response: BC8E44F664236E9FCC3D2E9DC90BCB69DF741D4F72BF5C44D256F22C4415802A9C26AB78DF6E8AE452AB0001528FBE6FC0C0A1EF7E825B0745910580DBC96302
+```
+
+* Get Tor certificate signature
+```
+Description: Returns the certificate signed with the account's Tor private key
+Class: C7
+Instruction: 08
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | Ed25519 medium term certificate (varying size ed25519_signing_cert without the signature)
+Response: Ed25519 signature (64 bytes)
+Requires user interaction: Yes
+Example request: C7080000500000000001040006E63101832D7A85EBF60242BD50C80EAE7760789288F8041E22C1954604037B42D7B564010020040026489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BECC9
+Example response: 27C6C4EF00EDF65264AFF97A28C1517F204EB4E494DE231EACBA5BB2A4AFCAF37ED3F88F149B68D76C3B1E83FC8E9BC10C92F8F58F0AFCB9AA98868C0543930B
+```
+
+* Start encrypting Slatepack data
+```
+Description: Returns the random nonce that will be used to encrypt the Slatepack data using the public key and account's private key to create a shared secret key
+Class: C7
+Instruction: 09
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | X25519 public key (32 bytes)
+Response: Nonce (12 bytes)
+Requires user interaction: No
+Example request: C709000024000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C
+Example response: 86F3A5F7512FBA489B4D04DF
+```
+
+* Continue encrypting Slatepack data
+```
+Description: Returns the data encrypted for use in a Slatepack
+Class: C7
+Instruction: 0A
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Data (64 bytes with the final request able to be less than 64 bytes)
+Response: Encrypted data (same size as the data)
+Requires user interaction: No
+Example request: C70A00004000010203040506070809000102030405060708090001020304050607080900010203040506070809000102030405060708090001020304050607080900010203
+Example response: CD475B638924CDD7AC822ABA96A6E559D9FF39D84680D2C93AC61FC23B5AE28366ACD619C0A16296ED156F3D98B2E440B3B6FB88B162C1219ED5C009554A74C8
+```
+
+* Finish encrypting Slatepack data
+```
+Description: Returns the tag of the encrypted data
+Class: C7
+Instruction: 0B
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: N/A
+Response: Tag (16 bytes)
+Requires user interaction: No
+Example request: C70B000000
+Example response: 0B3BE8125B4081F33E7EB62A43C41A26
+```
+
+* Start decrypting Slatepack data
+```
+Description: Starts decrypting the encrypted Slatepack data using the provided nonce, public key, and account's private key
+Class: C7
+Instruction: 0C
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | X25519 public key (32 bytes) | nonce (12 bytes)
+Response: N/A
+Requires user interaction: No
+Example request: C70C000030000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C86F3A5F7512FBA489B4D04DF
+Example response: N/A
+```
+
+* Continue decrypting Slatepack data
+```
+Description: Returns the decrypted data encrypted with a random AES key
+Class: C7
+Instruction: 0D
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Data (64 bytes with the final request able to be less than 64 bytes)
+Response: Decrypted data (size of the data ceil to the next 16 byte boundary)
+Requires user interaction: No
+Example request: C70D000040CD475B638924CDD7AC822ABA96A6E559D9FF39D84680D2C93AC61FC23B5AE28366ACD619C0A16296ED156F3D98B2E440B3B6FB88B162C1219ED5C009554A74C8
+Example response: 5E8C5D613CF500995FB6B03E0A8B266D89D18DDD8672593BE0179B3B88020D05A96A74ED39366613831007729FCC398775B89DEB42A8569067FBCA3C2FE60FC7A823F99A54D4C9E9A3D84D0B16D1A432
+```
+
+* Finish decrypting Slatepack data
+```
+Description: Returns the AES key used to encrypt the decrypted data if the provided tag is correct for the decrypted data
+Class: C7
+Instruction: 0E
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Tag (16 bytes)
+Response: AES key (16 bytes)
+Requires user interaction: No
+Example request: C70E0000100B3BE8125B4081F33E7EB62A43C41A26
+Example response: 000102030405060708090A0B0C0D0E0F
+```
+
+* Get MQS public key
+```
+Description: Returns the account's MQS public key
+Class: C7
+Instruction: 0F
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian)
+Response: Compressed secp256k1 public key (33 bytes)
+Requires user interaction: No
+Example request: C70F00000400000000
+Example response: 03D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F5
+```
+
+* Get MQS transaction signature
+```
+Description: Returns the transaction's payment proof signed with the account's MQS private key
+Class: C7
+Instruction: 10
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | value (unsigned 8 bytes little endian) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address)
+Response: DER signature (at most 72 bytes)
+Requires user interaction: No
+Example request: C71000006100000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4786D6A434A574B504C6265344470723156346B72446E776B327735484D42734667337942736538795255597946614C70534C4852
+Example response: 3045022100C3745C60997EC457CC6EB7818A2AE7E7FF8A30EF52A29B9EBEFF95C6081A7B32022056F38D201D32A19B75C2AF7F81950898D443006C7F034D066B1391CE72DFA3DF
+```
+
+* Start encrypting MQS data
+```
+Description: Returns the random salt and nonce that will be used to encrypt the MQS data using the public key and account's private key to create a shared secret key
+Class: C7
+Instruction: 11
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | secp256k1 uncompressed public key (65 bytes)
+Response: Salt (8 bytes) | nonce (12 bytes)
+Requires user interaction: No
+Example request: C7110000450000000004D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F511E30B6472527F07721439021EB80EE068CDDBB101F53D10CDDD7F51471CED15
+Example response: FFEC82955929F30286F3A5F7512FBA489B4D04DF
+```
+
+* Continue encrypting MQS data
+```
+Description: Returns the data encrypted for use in MQS
+Class: C7
+Instruction: 12
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Data (64 bytes with the final request able to be less than 64 bytes)
+Response: Encrypted data (same size as the data)
+Requires user interaction: No
+Example request: C71200004000010203040506070809000102030405060708090001020304050607080900010203040506070809000102030405060708090001020304050607080900010203
+Example response: 4C299DF0C501B7C78E961788C7BB35773B81E5D9820F2D6437074B24CF0F100CF8A16E7F0EA077308F22A9F1C63C44EA089D8171A846DBB2712EE69B0CA7DEBF
+```
+
+* Finish encrypting MQS data
+```
+Description: Returns the tag of the encrypted data
+Class: C7
+Instruction: 13
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: N/A
+Response: Tag (16 bytes)
+Requires user interaction: No
+Example request: C713000000
+Example response: 8DE95463C9B23A107D18BA3DDE480E61
+```
+
+* Start decrypting MQS data
+```
+Description: Starts decrypting the encrypted MQS data using the provided salt, nonce, public key, and account's private key
+Class: C7
+Instruction: 14
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | secp256k1 uncompressed public key (65 bytes) | salt (8 bytes) | nonce (12 bytes)
+Response: N/A
+Requires user interaction: No
+Example request: C7140000590000000004D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F511E30B6472527F07721439021EB80EE068CDDBB101F53D10CDDD7F51471CED15FFEC82955929F30286F3A5F7512FBA489B4D04DF
+Example response: N/A
+```
+
+* Continue decrypting MQS data
+```
+Description: Returns the decrypted data encrypted with a random AES key
+Class: C7
+Instruction: 15
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Data (64 bytes with the final request able to be less than 64 bytes)
+Response: Decrypted data (size of the data ceil to the next 16 byte boundary)
+Requires user interaction: No
+Example request: C7150000404C299DF0C501B7C78E961788C7BB35773B81E5D9820F2D6437074B24CF0F100CF8A16E7F0EA077308F22A9F1C63C44EA089D8171A846DBB2712EE69B0CA7DEBF
+Example response: 5E8C5D613CF500995FB6B03E0A8B266D89D18DDD8672593BE0179B3B88020D05A96A74ED39366613831007729FCC398775B89DEB42A8569067FBCA3C2FE60FC7A823F99A54D4C9E9A3D84D0B16D1A432
+```
+
+* Finish decrypting MQS data
+```
+Description: Returns the AES key used to encrypt the decrypted data if the provided tag is correct for the decrypted data
+Class: C7
+Instruction: 16
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Tag (16 bytes)
+Response: AES key (16 bytes)
+Requires user interaction: No
+Example request: C7160000108DE95463C9B23A107D18BA3DDE480E61
+Example response: 000102030405060708090A0B0C0D0E0F
+```
+
+* Start transaction
+```
+Description: Starts a transaction with the following output, input, and fee for the account
+Class: C7
+Instruction: 17
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Account (unsigned 4 bytes little endian) | output (unsigned 8 bytes little endian) | input (unsigned 8 bytes little endian) | fee (unsigned 8 bytes little endian)
+Response: N/A
+Requires user interaction: No
+Example request: C71700001C00000000020000000000000001000000000000000300000000000000
+Example response: N/A
+```
+
+* Continue transaction include output
+```
+Description: Includes the output for the identifier, value, and switch type in the transaction
+Class: C7
+Instruction: 18
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Response: N/A
+Requires user interaction: No
+Example request: C71800001A0300000001000000000000000000000000020000000000000001
+Example response: N/A
+```
+
+* Continue transaction include input
+```
+Description: Includes the input for the identifier, value, and switch type in the transaction
+Class: C7
+Instruction: 19
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian) | switch type (00 none, 01 regular)
+Response: N/A
+Requires user interaction: No
+Example request: C71900001A0300000002000000000000000000000000040000000000000001
+Example response: N/A
+```
+
+* Continue transaction apply offset
+```
+Description: Applies an offset to the transaction's blinding factor
+Class: C7
+Instruction: 1A
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: Offset (32 bytes)
+Response: N/A
+Requires user interaction: No
+Example request: C71A00002008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02
+Example response: N/A
+```
+
+* Continue transaction get public key
+```
+Description: Returns the transaction's blinding factor's public key
+Class: C7
+Instruction: 1B
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: 00
+Data: N/A
+Response: Secp256k1 compressed public key (33 bytes)
+Requires user interaction: No
+Example request: C71B000000
+Example response: 0283871BA8A6D5CA7CCDDC7CCF3D00AC331B166A11AF42FA217D4AEDEAD8F58BD1
+```
+
+* Finish transaction
+```
+Description: Returns the kenrel information signed with the transaction's binding factor
+Class: C7
+Instruction: 1C
+Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameter two: Address type (Tor 00, MQS 01)
+Data: Secret nonce (32 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian), no recent duplicate 03 | relative height (unsigned 8 bytes little endian)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Response: Single-signer signature (64 bytes)
+Requires user interaction: Yes for transactions that include an input, no otherwise
+Example request: C71C00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201
+Example response: 039172A3DC31C8D65251CD3B20FD2EF33B31FC34455C07E99A8E79CA8C84A4174960C5E68DB491A9E7DAF86E7E18B5EA310E84DD965A939709A5210E1C4862FF
 ```
 
 ### Response Codes
