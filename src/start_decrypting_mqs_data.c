@@ -28,7 +28,7 @@ void processStartDecryptingMqsDataRequest(unsigned short *responseLength, unsign
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength != sizeof(uint32_t) + UNCOMPRESSED_PUBLIC_KEY_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE + CHACHA20_NONCE_SIZE) {
+	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength != sizeof(uint32_t) + COMPRESSED_PUBLIC_KEY_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE + CHACHA20_NONCE_SIZE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -48,10 +48,10 @@ void processStartDecryptingMqsDataRequest(unsigned short *responseLength, unsign
 	uint8_t *publicKey = &data[sizeof(*account)];
 	
 	// Get salt from data
-	uint8_t *salt = &data[sizeof(*account) + UNCOMPRESSED_PUBLIC_KEY_SIZE];
+	uint8_t *salt = &data[sizeof(*account) + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Get nonce from data
-	const uint8_t *nonce = &data[sizeof(*account) + UNCOMPRESSED_PUBLIC_KEY_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE];
+	const uint8_t *nonce = &data[sizeof(*account) + COMPRESSED_PUBLIC_KEY_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE];
 	
 	// Create random MQS data session key
 	cx_rng(mqsData.sessionKey, sizeof(mqsData.sessionKey));

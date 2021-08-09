@@ -312,10 +312,10 @@ Class: C7
 Instruction: 11
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | secp256k1 uncompressed public key (65 bytes)
+Data: Account (unsigned 4 bytes little endian) | secp256k1 compressed public key (33 bytes)
 Response: Salt (8 bytes) | nonce (12 bytes)
 Requires user interaction: No
-Example request: C7110000450000000004D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F511E30B6472527F07721439021EB80EE068CDDBB101F53D10CDDD7F51471CED15
+Example request: C7110000250000000003D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F5
 Example response: FFEC82955929F30286F3A5F7512FBA489B4D04DF
 ```
 
@@ -354,10 +354,10 @@ Class: C7
 Instruction: 14
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian) | secp256k1 uncompressed public key (65 bytes) | salt (8 bytes) | nonce (12 bytes)
+Data: Account (unsigned 4 bytes little endian) | secp256k1 compressed public key (33 bytes) | salt (8 bytes) | nonce (12 bytes)
 Response: N/A
 Requires user interaction: No
-Example request: C7140000590000000004D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F511E30B6472527F07721439021EB80EE068CDDBB101F53D10CDDD7F51471CED15FFEC82955929F30286F3A5F7512FBA489B4D04DF
+Example request: C7140000390000000003D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAFF4F5FFEC82955929F30286F3A5F7512FBA489B4D04DF
 Example response: N/A
 ```
 
@@ -461,7 +461,7 @@ Example response: 0283871BA8A6D5CA7CCDDC7CCF3D00AC331B166A11AF42FA217D4AEDEAD8F5
 
 * Finish transaction
 ```
-Description: Returns the kenrel information signed with the transaction's binding factor
+Description: Returns the kernel information signed with the transaction's blinding factor
 Class: C7
 Instruction: 1C
 Parameters one: Network type (Mainnet 00, Floonet 01)
@@ -490,4 +490,4 @@ D101: Internal error
 ### Notes
 * The emulator doesn't implement the `cx_pbkdf2_sha512` related system calls for the Ledger Nano X, so the `Start encrypting MQS data` and `Start decrypting MQS data` commands can't be tested on an emulator for the Ledger Nano X.
 * The emulator doesn't implement the `cx_ecdh` function for `CX_CURVE_Curve25519` curves, so the `Start encrypting Slatepack data` and `Start decrypting Slatepack data` commands can't be tested on an emulator.
-* This app can be build for the Ledger Nano S, however most commands will crash the Ledger Nano S since it doesn't have enough ram.
+* This app can be built for the Ledger Nano S, however most commands will crash the Ledger Nano S since it doesn't have enough ram.

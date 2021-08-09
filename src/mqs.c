@@ -49,7 +49,7 @@ void resetMqsData(void) {
 }
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint8_t *publicKey, uint8_t *salt) {
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey, uint8_t *salt) {
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -60,11 +60,16 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 		// Try
 		TRY {
 
+			// Uncompress the public key
+			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			memcpy(uncompressedPublicKey, publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
+			uncompressSecp256k1PublicKey(uncompressedPublicKey);
+			
 			// Get private key at the MQS address private key index
 			getAddressPrivateKey(&privateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
 			
-			// Multiply the public key by the private key
-			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, publicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);
+			// Multiply the uncompressed public key by the private key
+			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);
 			
 			// Check if target is the Nano X
 			#ifdef TARGET_NANOX
@@ -76,14 +81,14 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 				
 				// TODO test cx_pbkdf2_sha512 on real hardware to see if the padding is necessary
 				
-				// Get shared private key from the tweaked public key and padded salt
-				cx_pbkdf2_sha512(&publicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+				// Get shared private key from the tweaked uncompressed public key and padded salt
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			
 			// Otherwise
 			#else
 			
-				// Get shared private key from the tweaked public key and salt
-				cx_pbkdf2_sha512(&publicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+				// Get shared private key from the tweaked uncompressed public key and salt
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			
 			#endif
 		}
@@ -141,7 +146,6 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 		// Uncompress the decoded MQS address to an secp256k1 public key
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
 		memcpy(uncompressedPublicKey, &decodedMqsAddress[VERSION_SIZE], COMPRESSED_PUBLIC_KEY_SIZE);
-		
 		uncompressSecp256k1PublicKey(uncompressedPublicKey);
 		
 		// Initialize the public key with the uncompressed public key

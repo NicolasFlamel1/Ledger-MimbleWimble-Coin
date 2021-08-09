@@ -80,7 +80,7 @@ extern struct MqsData mqsData;
 void resetMqsData(void);
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint8_t *publicKey, uint8_t *salt);
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey, uint8_t *salt);
 
 // Get public key from MQS address
 bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum NetworkType networkType);
