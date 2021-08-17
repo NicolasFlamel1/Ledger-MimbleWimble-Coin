@@ -112,7 +112,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive);
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicKey);
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
 
 // Get encrypted data length
 size_t getEncryptedDataLength(size_t dataLength);
@@ -142,7 +142,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
 bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length);
 
 // Is valid secp256k1 public key
-bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length);
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length, bool *zeroArray);
 
 // Uncompress secp256k1 public key
 void uncompressSecp256k1PublicKey(uint8_t *publicKey);

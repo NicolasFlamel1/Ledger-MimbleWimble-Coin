@@ -134,7 +134,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(getVersion(networkType) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_SIZE], COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(getVersion(networkType) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_SIZE], COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
 	
 		// Return false
 		return false;

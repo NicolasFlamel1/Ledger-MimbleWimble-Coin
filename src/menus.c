@@ -603,41 +603,6 @@ static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 	"transaction?"
 });
 
-// Finalize transaction menu amount minimal screen
-static UX_STEP_NOCB(finalizeTransactionMenuAmountMinimalScreen,
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Amount",
-			
-			// Second line
-			amountLineBuffer
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Amount",
-			
-			// Text
-			.text = amountLineBuffer
-		}
-	#endif
-);
-
 // Finalize transaction menu amount screen
 static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 
@@ -661,41 +626,6 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 	// Text
 	.text = amountLineBuffer
 });
-
-// Finalize transaction menu fee minimal screen
-static UX_STEP_NOCB(finalizeTransactionMenuFeeMinimalScreen,
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Fee",
-			
-			// Second line
-			feeLineBuffer
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Fee",
-			
-			// Text
-			.text = feeLineBuffer
-		}
-	#endif
-);
 
 // Finalize transaction menu fee screen
 static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
@@ -919,33 +849,11 @@ void showMenu(enum Menu menu) {
 			// Set finalize transaction menu notify screen
 			finalizeTransactionMenu[0] = &finalizeTransactionMenuNotifyScreen;
 			
-			// Check if amount line buffer is longer than one line
-			if(strlen(amountLineBuffer) > LINE_CHARACTER_SIZE) {
+			// Set finalize transaction menu amount screen
+			finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountScreen;
 			
-				// Set finalize transaction menu amount screen
-				finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountScreen;
-			}
-			
-			// Otherwise
-			else {
-			
-				// Set finalize transaction menu amount minimal screen
-				finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountMinimalScreen;
-			}
-			
-			// Check if fee line buffer is longer than one line
-			if(strlen(feeLineBuffer) > LINE_CHARACTER_SIZE) {
-			
-				// Set finalize transaction menu fee screen
-				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeScreen;
-			}
-			
-			// Otherwise
-			else {
-			
-				// Set finalize transaction menu fee minimal screen
-				finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeMinimalScreen;
-			}
+			// Set finalize transaction menu fee screen
+			finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeScreen;
 			
 			// Check if receiver line buffer isn't empty
 			if(strlen(receiverLineBuffer)) {

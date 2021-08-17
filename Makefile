@@ -19,7 +19,7 @@ APPVERSION_P = 1
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Emulator flags
-EMULATOR_FLAGS = --seed "slot rail north melt split chunk leisure much tennis worry boil between divert taxi twelve embrace own brave follow skate pilot change into jar"
+EMULATOR_FLAGS = --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 # Check if currency isn't defined
 ifndef CURRENCY

@@ -59,7 +59,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(firstParameter > TESTNET_NETWORK_TYPE || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -120,18 +120,40 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			break;
 	}
 	
+	// Get public nonce from data
+	const uint8_t *publicNonce = &data[NONCE_SIZE];
+	
+	// Check if public nonce is used
+	if(!isZeroArray(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	
+		// Check if public nonce is invalid
+		bool zeroArray;
+		if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE, &zeroArray)) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
+		// Check if public nonce as a public key is a zero array
+		if(zeroArray) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+	}
+	
 	// Get public key from data
-	const uint8_t *publicKey = &data[NONCE_SIZE];
+	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check if public key is invalid
-	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get kernel features from data
-	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check kernel features
 	size_t kernelFeaturesLength;
@@ -182,24 +204,24 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 	if(transaction.input) {
 	
 		// Check if data is invalid
-		if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
 		// Check if a payment proof information is provided
-		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Check if data is invalid
-			if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)) {
+			if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get commitment from data
-			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if commitment is invalid
 			if(!commitmentIsValid(commitment)) {
@@ -209,7 +231,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			}
 			
 			// Get receiver address type from data
-			const enum AddressType receiverAddressType = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			const enum AddressType receiverAddressType = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Check currency information ID
 			size_t receiverAddressLength;
@@ -276,20 +298,20 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			}
 			
 			// Check if data is invalid
-			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength) {
+			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get receiver address from data
-			const uint8_t *receiverAddress = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)];
+			const uint8_t *receiverAddress = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)];
 			
 			// Get signature from data
-			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
+			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
 			
 			// Get signature length
-			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength);
+			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength);
 			
 			// Check currency information ID
 			size_t addressLength;
@@ -437,7 +459,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 	else {
 	
 		// Check if data is invalid
-		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
@@ -457,11 +479,14 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Get secret nonce from data
 	const uint8_t *secretNonce = data;
 	
+	// Get public nonce from data
+	const uint8_t *publicNonce = &data[NONCE_SIZE];
+	
 	// Get public key from data
-	const uint8_t *publicKey = &data[NONCE_SIZE];
+	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Get kernel features from data
-	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Initialize kernel data
 	uint8_t *kernelData;
@@ -528,7 +553,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			
 			{
 				// Get lock height from data
-				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert lock height to big endian
 				swapEndianness((uint8_t *)lockHeight, sizeof(*lockHeight));
@@ -561,7 +586,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			{
 				
 				// Get relative height from data
-				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert relative height to big endian
 				swapEndianness((uint8_t *)relativeHeight, sizeof(*relativeHeight));
@@ -593,8 +618,8 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			// Get private key from the transaction's blinding factor
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
 			
-			// Create single-signer signature from the message, private key, secret nonce, and public key
-			createSingleSignerSignature(signature, message, (cx_ecfp_private_key_t *)&privateKey, secretNonce, publicKey);
+			// Create single-signer signature from the message, private key, secret nonce, public nonce if used, and public key
+			createSingleSignerSignature(signature, message, (cx_ecfp_private_key_t *)&privateKey, secretNonce, isZeroArray(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE) ? NULL : publicNonce, publicKey);
 		}
 		
 		// Finally

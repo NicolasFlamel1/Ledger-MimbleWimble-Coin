@@ -72,17 +72,6 @@ void processStartTransactionRequest(unsigned short *responseLength, unsigned cha
 		transaction.remainingInput = transaction.input + transaction.fee;
 	}
 	
-	// Otherwise
-	else {
-	
-		// Check if fee is invalid
-		if(transaction.fee) {
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-		}
-	}
-	
 	// Set that transaction has been started
 	transaction.started = true;
 	

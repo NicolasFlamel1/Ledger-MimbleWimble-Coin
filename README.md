@@ -75,7 +75,7 @@ Instruction: 00
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: N/A
-Response: Application name (UTF-8 string varying length) | 00 | application version (UTF-8 string varying length) | 00
+Response: Application name (ASCII string varying length) | 00 | application version (ASCII string varying length) | 00
 Requires user interaction: No
 Example request: C700000000
 Example response: 4D696D626C6557696D626C6520436F696E00302E302E3100
@@ -88,7 +88,7 @@ Class: C7
 Instruction: 01
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | requestor's name (UTF-8 string varying length)
+Data: Account (unsigned 4 bytes little endian integer) | requestor's name (ASCII string varying length)
 Response: Compressed secp256k1 public key (33 bytes)
 Requires user interaction: Yes
 Example request: C701000012000000004E69636F6C617320466C616d656C
@@ -466,7 +466,7 @@ Class: C7
 Instruction: 1C
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: Address type (Tor 00, MQS 01)
-Data: Secret nonce (32 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Data: Secret nonce (32 bytes) | public nonce (use provided 33 bytes, use NULL 000000000000000000000000000000000000000000000000000000000000000000) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C71C00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201
@@ -491,3 +491,4 @@ D101: Internal error
 * The emulator doesn't implement the `cx_pbkdf2_sha512` related system calls for the Ledger Nano X, so the `Start encrypting MQS data` and `Start decrypting MQS data` commands can't be tested on an emulator for the Ledger Nano X.
 * The emulator doesn't implement the `cx_ecdh` function for `CX_CURVE_Curve25519` curves, so the `Start encrypting Slatepack data` and `Start decrypting Slatepack data` commands can't be tested on an emulator.
 * This app can be built for the Ledger Nano S, however most commands will crash the Ledger Nano S since it doesn't have enough ram.
+* The app will reset its internal Slatepack, MQS data, and/or transaction state when unrelated commands are requested. For example, performing a `Start transaction` command followed by a `Get commitment` command will reset the app's internal transaction state thus requiring another `Start transaction` command to be performed before a `Continue transaction include output` command can be performed.
