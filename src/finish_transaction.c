@@ -230,94 +230,11 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Get receiver address type from data
-			const enum AddressType receiverAddressType = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
-			
-			// Check currency information ID
-			size_t receiverAddressLength;
-			switch(currencyInformation.id) {
-			
-				// MimbleWimble Coin ID
-				case MIMBLEWIMBLE_COIN_ID:
-			
-					// Check receiver address type
-					switch(receiverAddressType) {
-					
-						// MQS address type
-						case MQS_ADDRESS_TYPE:
-						
-							// Set receiver address
-							receiverAddressLength = MQS_ADDRESS_SIZE;
-						
-							// Break
-							break;
-						
-						// Tor address type
-						case TOR_ADDRESS_TYPE:
-						
-							// Set receiver address
-							receiverAddressLength = TOR_ADDRESS_SIZE;
-						
-							// Break
-							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
-					}
-					
-					// Break
-					break;
-				
-				// Grin ID
-				case GRIN_ID:
-				
-					// Check receiver address type
-					switch(receiverAddressType) {
-					
-						// Tor address type
-						case TOR_ADDRESS_TYPE:
-						
-							// Set receiver address
-							receiverAddressLength = ED25519_PUBLIC_KEY_SIZE;
-						
-							// Break
-							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
-					}
-					
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Check if data is invalid
-			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Get receiver address from data
-			const uint8_t *receiverAddress = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)];
-			
 			// Get signature from data
-			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength];
+			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Get signature length
-			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t) + receiverAddressLength);
+			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
 			
 			// Check currency information ID
 			size_t addressLength;
@@ -395,7 +312,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			getPaymentProofMessage(paymentProofMessage, transaction.send, commitment, address, addressLength, networkType);
 			
 			// Check if verifying payment proof failed
-			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), receiverAddress, receiverAddressLength, networkType, signature, signatureLength)) {
+			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.receiverAddress, transaction.receiverAddressLength, networkType, signature, signatureLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -409,7 +326,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			
 					// Copy receiver address into the receiver line buffer
 					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
-					memcpy(receiverLineBuffer, receiverAddress, receiverAddressLength);
+					memcpy(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
 					
 					// Break
 					break;
@@ -419,7 +336,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 				
 					// Copy receiver address into the receiver line buffer
 					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
-					toHexString(receiverLineBuffer, receiverAddress, receiverAddressLength);
+					toHexString(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
 					
 					// Break
 					break;

@@ -57,8 +57,6 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char
 			
 			// Get address public key from the address private key
 			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
-			
-			// TODO convert public key to MQS address
 		}
 		
 		// Finally

@@ -396,7 +396,7 @@ Class: C7
 Instruction: 17
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer)
+Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer) | [receiver address (52 bytes MQS address, 56 bytes Tor address)]
 Response: N/A
 Requires user interaction: No
 Example request: C71700001C00000000020000000000000001000000000000000300000000000000
@@ -466,7 +466,7 @@ Class: C7
 Instruction: 1C
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: Address type (Tor 00, MQS 01)
-Data: Secret nonce (32 bytes) | public nonce (use provided 33 bytes, use NULL 000000000000000000000000000000000000000000000000000000000000000000) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver address type (Tor 00, MQS 01) | receiver address (52 bytes MQS address, 56 bytes Tor address) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Data: Secret nonce (32 bytes) | public nonce (use provided 33 bytes, use NULL 000000000000000000000000000000000000000000000000000000000000000000) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C71C00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201

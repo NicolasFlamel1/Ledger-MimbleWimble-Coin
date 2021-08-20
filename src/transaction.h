@@ -6,6 +6,7 @@
 // Header files
 #include <stdbool.h>
 #include "crypto.h"
+#include "tor.h"
 
 
 // Structures
@@ -36,6 +37,12 @@ struct Transaction {
 	
 	// Blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
+	
+	// Receiver address length
+	size_t receiverAddressLength;
+	
+	// Receiver address
+	uint8_t receiverAddress[TOR_ADDRESS_SIZE];
 };
 
 
