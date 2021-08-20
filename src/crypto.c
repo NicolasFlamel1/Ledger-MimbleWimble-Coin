@@ -791,6 +791,8 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		// Grin ID
 		case GRIN_ID:
 		
+			// TODO test Grin
+		
 			// Check if sender address length is invalid
 			if(senderAddressLength != ED25519_PUBLIC_KEY_SIZE) {
 			
@@ -862,6 +864,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 		
 		// Grin ID
 		case GRIN_ID:
+		
+			// TODO test Grin
 		
 			// Check if the sender address isn't a valid Ed25519 public key
 			if(!isValidEd25519PublicKey(senderAddress, senderAddressLength)) {
@@ -975,6 +979,8 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		
 		// Grin ID
 		case GRIN_ID:
+		
+			// TODO test Grin
 		
 			// Check if signature length is invalid
 			if(signatureLength != ED25519_SIGNATURE_SIZE) {

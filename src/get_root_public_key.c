@@ -2,7 +2,6 @@
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
-#include "currency_information.h"
 #include "get_root_public_key.h"
 #include "menus.h"
 

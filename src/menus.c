@@ -295,99 +295,6 @@ static UX_FLOW(exportRootPublicKeyMenu,
 	FLOW_LOOP
 );
 
-// Export Tor public key menu notify screen
-static UX_STEP_NOCB(exportTorPublicKeyMenuNotifyScreen, pnn, {
-
-	// Picture
-	&C_icon_question,
-
-	// First line
-	"Export Tor",
-	
-	// Second line
-	"public key?"
-});
-
-// Export Tor public key menu requestor screen
-static UX_STEP_NOCB(exportTorPublicKeyMenuRequestorScreen,
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Requestor",
-			
-			// Second line
-			requestorLineBuffer
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Requestor",
-			
-			// Text
-			.text = requestorLineBuffer
-		}
-	#endif
-);
-
-// Export Tor public key menu approve screen
-static UX_STEP_CB(exportTorPublicKeyMenuApproveScreen, pbb, processUserInteraction(GET_TOR_PUBLIC_KEY_INSTRUCTION, true), {
-
-	// Picture
-	&C_icon_approve,
-	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
-});
-
-// Export Tor public key menu deny screen
-static UX_STEP_CB(exportTorPublicKeyMenuDenyScreen, pbb, processUserInteraction(GET_TOR_PUBLIC_KEY_INSTRUCTION, false), {
-
-	// Picture
-	&C_icon_reject,
-	
-	// First Bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
-});
-
-// Export Tor public key menu
-static UX_FLOW(exportTorPublicKeyMenu,
-
-	// Export Tor public key menu notify screen
-	&exportTorPublicKeyMenuNotifyScreen,
-	
-	// Export Tor public key menu requestor screen
-	&exportTorPublicKeyMenuRequestorScreen,
-
-	// Export Tor public key menu approve screen
-	&exportTorPublicKeyMenuApproveScreen,
-	
-	// Export Tor public key menu deny screen
-	&exportTorPublicKeyMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
-);
-
 // Sign Tor certificate menu notify screen
 static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 
@@ -492,99 +399,6 @@ static UX_FLOW(signTorCertificateMenu,
 	
 	// Sign Tor certificate menu deny screen
 	&signTorCertificateMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
-);
-
-// Export MQS public key menu notify screen
-static UX_STEP_NOCB(exportMqsPublicKeyMenuNotifyScreen, pnn, {
-
-	// Picture
-	&C_icon_question,
-
-	// First line
-	"Export MQS",
-	
-	// Second line
-	"public key?"
-});
-
-// Export MQS public key menu requestor screen
-static UX_STEP_NOCB(exportMqsPublicKeyMenuRequestorScreen,
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Requestor",
-			
-			// Second line
-			requestorLineBuffer
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Requestor",
-			
-			// Text
-			.text = requestorLineBuffer
-		}
-	#endif
-);
-
-// Export MQS public key menu approve screen
-static UX_STEP_CB(exportMqsPublicKeyMenuApproveScreen, pbb, processUserInteraction(GET_MQS_PUBLIC_KEY_INSTRUCTION, true), {
-
-	// Picture
-	&C_icon_approve,
-	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
-});
-
-// Export MQS public key menu deny screen
-static UX_STEP_CB(exportMqsPublicKeyMenuDenyScreen, pbb, processUserInteraction(GET_MQS_PUBLIC_KEY_INSTRUCTION, false), {
-
-	// Picture
-	&C_icon_reject,
-	
-	// First Bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
-});
-
-// Export MQS public key menu
-static UX_FLOW(exportMqsPublicKeyMenu,
-
-	// Export MQS public key menu notify screen
-	&exportMqsPublicKeyMenuNotifyScreen,
-	
-	// Export MQS public key menu requestor screen
-	&exportMqsPublicKeyMenuRequestorScreen,
-
-	// Export MQS public key menu approve screen
-	&exportMqsPublicKeyMenuApproveScreen,
-	
-	// Export MQS public key menu deny screen
-	&exportMqsPublicKeyMenuDenyScreen,
 	
 	// Loop
 	FLOW_LOOP
@@ -816,29 +630,11 @@ void showMenu(enum Menu menu) {
 			// Break
 			break;
 		
-		// Export Tor public key menu
-		case EXPORT_TOR_PUBLIC_KEY_MENU:
-		
-			// Set menu steps to export Tor public key menu
-			menuSteps = exportTorPublicKeyMenu;
-			
-			// Break
-			break;
-		
 		// Sign Tor certificate menu
 		case SIGN_TOR_CERTIFICATE_MENU:
 		
 			// Set menu steps to sign Tor certificate menu
 			menuSteps = signTorCertificateMenu;
-			
-			// Break
-			break;
-		
-		// Export MQS public key menu
-		case EXPORT_MQS_PUBLIC_KEY_MENU:
-		
-			// Set menu steps to export MQS public key menu
-			menuSteps = exportMqsPublicKeyMenu;
 			
 			// Break
 			break;

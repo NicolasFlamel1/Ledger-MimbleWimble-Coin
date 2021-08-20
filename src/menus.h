@@ -56,14 +56,8 @@ enum Menu {
 	// Export root public key menu
 	EXPORT_ROOT_PUBLIC_KEY_MENU,
 	
-	// Export Tor public key menu
-	EXPORT_TOR_PUBLIC_KEY_MENU,
-	
 	// Sign Tor certificate menu
 	SIGN_TOR_CERTIFICATE_MENU,
-	
-	// Export MQS public key menu
-	EXPORT_MQS_PUBLIC_KEY_MENU,
 	
 	// Finalize transaction menu
 	FINALIZE_TRANSACTION_MENU,

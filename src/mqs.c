@@ -252,42 +252,6 @@ uint16_t getVersion(enum NetworkType networkType) {
 			
 			// Break
 			break;
-			
-		// Grin ID
-		case GRIN_ID:
-		
-			// Check network type
-			switch(networkType) {
-			
-				// Mainnet network type
-				case MAINNET_NETWORK_TYPE:
-				
-					// Set version
-					version[0] = 1;
-					version[1] = 11;
-				
-					// Break
-					break;
-				
-				// Testnet network type
-				case TESTNET_NETWORK_TYPE:
-				
-					// Set version
-					version[0] = 1;
-					version[1] = 120;
-				
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Break
-			break;
 		
 		// Default
 		default:

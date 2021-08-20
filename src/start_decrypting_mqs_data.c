@@ -3,6 +3,7 @@
 #include "chacha20_poly1305.h"
 #include "common.h"
 #include "crypto.h"
+#include "currency_information.h"
 #include "mqs.h"
 #include "start_decrypting_mqs_data.h"
 
@@ -12,6 +13,16 @@
 // Process start decrypting MQS data request
 void processStartDecryptingMqsDataRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// Grin ID
+		case GRIN_ID:
+	
+			// Throw unknown instruction error
+			THROW(UNKNOWN_INSTRUCTION_ERROR);
+	}
+	
 	// Reset the MQS data
 	resetMqsData();
 	

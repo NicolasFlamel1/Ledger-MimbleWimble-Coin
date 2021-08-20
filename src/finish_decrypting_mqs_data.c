@@ -2,6 +2,7 @@
 #include <string.h>
 #include "chacha20_poly1305.h"
 #include "common.h"
+#include "currency_information.h"
 #include "finish_decrypting_mqs_data.h"
 #include "mqs.h"
 
@@ -11,6 +12,16 @@
 // Process finish decrypting MQS data request
 void processFinishDecryptingMqsDataRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// Grin ID
+		case GRIN_ID:
+	
+			// Throw unknown instruction error
+			THROW(UNKNOWN_INSTRUCTION_ERROR);
+	}
+	
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	

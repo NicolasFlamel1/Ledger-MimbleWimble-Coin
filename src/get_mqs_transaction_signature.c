@@ -4,6 +4,7 @@
 #undef _GNU_SOURCE
 #include "common.h"
 #include "crypto.h"
+#include "currency_information.h"
 #include "get_mqs_transaction_signature.h"
 #include "mqs.h"
 
@@ -13,6 +14,16 @@
 // Process get MQS transaction signature request
 void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// Grin ID
+		case GRIN_ID:
+	
+			// Throw unknown instruction error
+			THROW(UNKNOWN_INSTRUCTION_ERROR);
+	}
+	
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
+#include "currency_information.h"
 #include "get_mqs_public_key.h"
 #include "mqs.h"
 
@@ -11,6 +12,16 @@
 // Process get MQS public key request
 void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
+	// Check currency information ID
+	switch(currencyInformation.id) {
+	
+		// Grin ID
+		case GRIN_ID:
+	
+			// Throw unknown instruction error
+			THROW(UNKNOWN_INSTRUCTION_ERROR);
+	}
+	
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	

@@ -100,6 +100,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 		// Grin ID
 		case GRIN_ID:
 		
+			// TODO test Grin
+		
 			// Check address type
 			switch(addressType) {
 			
@@ -284,6 +286,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 				// Grin ID
 				case GRIN_ID:
 				
+					// TODO test Grin
+				
 					// Check address type
 					switch(addressType) {
 					
@@ -333,6 +337,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 				
 				// Grin ID
 				case GRIN_ID:
+				
+					// TODO test Grin
 				
 					// Copy receiver address into the receiver line buffer
 					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));

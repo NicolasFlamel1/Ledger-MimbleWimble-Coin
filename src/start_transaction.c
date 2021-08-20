@@ -123,6 +123,8 @@ void processStartTransactionRequest(unsigned short *responseLength, unsigned cha
 				// Grin ID
 				case GRIN_ID:
 				
+					// TODO test Grin
+				
 					// Check receiver address length
 					switch(transaction.receiverAddressLength) {
 					
