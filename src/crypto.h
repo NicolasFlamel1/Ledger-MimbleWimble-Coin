@@ -62,6 +62,9 @@ extern const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 // Odd compressed public key prefix
 extern const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX;
 
+// Ed25519 compressed public key prefix
+extern const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+
 // Ed25519 signature size
 extern const size_t ED25519_SIGNATURE_SIZE;
 

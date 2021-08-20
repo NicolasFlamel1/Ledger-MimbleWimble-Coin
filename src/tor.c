@@ -84,7 +84,7 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	
 		// Uncompress the decoded Tor address to an Ed25519 public key
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-		uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+		uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedTorAddress, ED25519_PUBLIC_KEY_SIZE);
 		
 		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));

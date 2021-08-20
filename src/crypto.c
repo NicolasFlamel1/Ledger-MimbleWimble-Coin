@@ -53,6 +53,9 @@ const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 // Odd compressed public key prefix
 const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX = 0x03;
 
+// Ed25519 compressed public key prefix
+const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
+
 // Ed25519 signature size
 const size_t ED25519_SIGNATURE_SIZE = 64;
 
@@ -990,7 +993,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 			{
 				// Uncompress the receiver address to a public key
 				uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-				uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+				uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 				memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], receiverAddress, receiverAddressLength);
 				
 				cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
@@ -1076,7 +1079,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 		
 			// Uncompress the public key
 			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-			uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+			uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
 			
 			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));

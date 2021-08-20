@@ -21,7 +21,7 @@ static const char FIRST_PRINTABLE_CHARACTER = ' ';
 static const char LAST_PRINTABLE_CHARACTER = '~';
 
 // Hexadecimal characters
-static const char HEXADECIMAL_CHARACTERS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+static const char HEXADECIMAL_CHARACTERS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 // Uint64 buffer size
 static const size_t UINT64_BUFFER_SIZE = sizeof("18446744073709551615") - sizeof((char)'\0');

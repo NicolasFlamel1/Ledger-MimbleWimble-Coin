@@ -61,18 +61,24 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 				THROW(MALFORMED_REQUEST_ERROR);
 			}
 			
+			// Get request's class
+			const uint8_t class = G_io_apdu_buffer[APDU_OFF_CLA];
+			
 			// Check if request's class is unknown
-			if(G_io_apdu_buffer[APDU_OFF_CLA] != REQUEST_CLASS) {
+			if(class != REQUEST_CLASS) {
 			
 				// Throw unknown class error
 				THROW(UNKNOWN_CLASS_ERROR);
 			}
 			
+			// Get request's instruction
+			const enum Instruction instruction = G_io_apdu_buffer[APDU_OFF_INS];
+			
 			// Reset unrelated state
-			resetUnrelatedState(G_io_apdu_buffer[APDU_OFF_INS]);
+			resetUnrelatedState(instruction);
 			
 			// Check request's instruction
-			switch(G_io_apdu_buffer[APDU_OFF_INS]) {
+			switch(instruction) {
 			
 				// Get application information instruction
 				case GET_APPLICATION_INFORMATION_INSTRUCTION:

@@ -50,7 +50,7 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 			
 			// Uncompress the public key
 			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-			uncompressedPublicKey[0] = EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+			uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 			
 			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));

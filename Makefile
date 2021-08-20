@@ -189,7 +189,7 @@ LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
 # Compiler Secp256k1-zkp settings
-CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_FIELD_10X26 -D USE_SCALAR_8X32 -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_BULLETPROOF -D ENABLE_MODULE_AGGSIG -I src/secp256k1-zkp-master
+CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_FIELD_10X26 -D USE_SCALAR_8X32 -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -I src/secp256k1-zkp-master
 
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
@@ -246,7 +246,7 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/#include \"ecmult_static_context.h\"/\/\/#include \"ecmult_static_context.h\"/g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_static_context/NULL/g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/return ctx->prec != NULL;/return ctx->prec == NULL;/g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_gen(const/secp256k1_ecmult_gen2(const/g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_gen(const/secp256k1_ecmult_gen_unused(const/g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#endif \/\* SECP256K1_ECMULT_GEN_IMPL_H \*\///g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#include \"device.h\"" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {" >> ecmult_gen_impl.h

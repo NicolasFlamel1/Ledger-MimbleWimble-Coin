@@ -250,6 +250,9 @@ uint16_t getVersion(enum NetworkType networkType) {
 					THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
+			// Break
+			break;
+			
 		// Grin ID
 		case GRIN_ID:
 		
@@ -282,6 +285,9 @@ uint16_t getVersion(enum NetworkType networkType) {
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Break
+			break;
 		
 		// Default
 		default:
