@@ -44,6 +44,8 @@ void processGetTorPublicKeyRequest(unsigned short *responseLength, unsigned char
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
 	getEd25519PublicKey(ed25519PublicKey, *account);
 	
+	// TODO convert Ed25519 public key to Tor address
+	
 	// Check if response with the Ed25519 public key will overflow
 	if(willResponseOverflow(*responseLength, sizeof(ed25519PublicKey))) {
 	

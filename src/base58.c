@@ -61,13 +61,13 @@ size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, size_t length) {
 }
 
 // Base58 encode with checksum
-void base58EncodeWithChecksum(uint8_t *result, const uint8_t *data, size_t length) {
+void base58EncodeWithChecksum(uint8_t *result, uint8_t *data, size_t length) {
+
+	// Append checksum to the data
+	getChecksum(&data[length - BASE58_CHECKSUM_SIZE], data, length - BASE58_CHECKSUM_SIZE);
 
 	// Get base58 encoding of the data
-	const size_t resultLength = base58EncodeGetLength(result, data, length);
-	
-	// Append checksum to the result
-	getChecksum(&result[resultLength], result, resultLength);
+	base58EncodeGetLength(result, data, length);
 }
 
 // Get base58 decoded length

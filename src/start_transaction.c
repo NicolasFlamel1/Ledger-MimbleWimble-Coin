@@ -45,31 +45,41 @@ void processStartTransactionRequest(unsigned short *responseLength, unsigned cha
 	// Get transaction's remaining output from data
 	transaction.remainingOutput = *(uint64_t *)&data[sizeof(transaction.account)];
 	
-	// Get transaction's input from data
-	transaction.input = *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput)];
+	// Get input from data
+	const uint64_t *input = (uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput)];
 	
 	// Get transaction's fee from data
-	transaction.fee = *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(transaction.input)];
+	transaction.fee = *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input)];
 	
 	// Check if remaining output and input are invalid
-	if(!transaction.remainingOutput && !transaction.input) {
+	if(!transaction.remainingOutput && !*input) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Check if an input exists
-	if(transaction.input) {
+	if(*input) {
+	
+		// Check if input is invalid
+		if(*input <= transaction.remainingOutput) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
 	
 		// Check if fee is invalid or will overflow
-		if(!transaction.fee || UINT64_MAX - transaction.input < transaction.fee) {
+		if(!transaction.fee || UINT64_MAX - *input < transaction.fee) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
 		// Set transaction's remaining input
-		transaction.remainingInput = transaction.input + transaction.fee;
+		transaction.remainingInput = *input + transaction.fee;
+		
+		// Set transaction's send
+		transaction.send = *input - transaction.remainingOutput;
 	}
 	
 	// Set that transaction has been started

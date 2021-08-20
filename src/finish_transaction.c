@@ -200,8 +200,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction includes input
-	if(transaction.input) {
+	// Check if transaction is sending
+	if(transaction.send) {
 	
 		// Check if data is invalid
 		if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
@@ -267,6 +267,9 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 							// Throw invalid parameters error
 							THROW(INVALID_PARAMETERS_ERROR);
 					}
+					
+					// Break
+					break;
 				
 				// Grin ID
 				case GRIN_ID:
@@ -289,6 +292,9 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 							// Throw invalid parameters error
 							THROW(INVALID_PARAMETERS_ERROR);
 					}
+					
+					// Break
+					break;
 				
 				// Default
 				default:
@@ -335,7 +341,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 							
 							// Get MQS address
 							getMqsAddress(address, transaction.account, networkType);
-						
+							
 							// Break
 							break;
 						
@@ -385,8 +391,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 			}
 			
 			// Get payment proof message
-			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.input, addressLength)];
-			getPaymentProofMessage(paymentProofMessage, transaction.input, commitment, address, addressLength, networkType);
+			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.send, addressLength)];
+			getPaymentProofMessage(paymentProofMessage, transaction.send, commitment, address, addressLength, networkType);
 			
 			// Check if verifying payment proof failed
 			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), receiverAddress, receiverAddressLength, networkType, signature, signatureLength)) {
@@ -436,7 +442,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.input, currencyInformation.fractionalDigits);
+		toString(amountLineBuffer, transaction.send, currencyInformation.fractionalDigits);
 		
 		strcat(amountLineBuffer, " ");
 		strcat(amountLineBuffer, currencyInformation.abbreviation);

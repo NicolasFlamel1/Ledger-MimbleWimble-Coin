@@ -30,7 +30,7 @@ void base58Encode(uint8_t *result, const uint8_t *data, size_t length);
 size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, size_t length);
 
 // Base58 encode with checksum
-void base58EncodeWithChecksum(uint8_t *result, const uint8_t *data, size_t length);
+void base58EncodeWithChecksum(uint8_t *result, uint8_t *data, size_t length);
 
 // Get base58 decoded length
 size_t getBase58DecodedLength(const uint8_t *data, size_t length);

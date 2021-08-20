@@ -22,10 +22,10 @@ struct Transaction {
 	// Account
 	uint32_t account;
 	
-	// Set input
-	uint64_t input;
+	// Send
+	uint64_t send;
 	
-	// Set fee
+	// Fee
 	uint64_t fee;
 	
 	// Remaining output
