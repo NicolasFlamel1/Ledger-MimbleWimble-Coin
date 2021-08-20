@@ -206,7 +206,7 @@ static UX_FLOW(mainMenu,
 static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 
 	// Picture
-	&C_icon_question,
+	&C_icon_view,
 
 	// First line
 	"Export root",
@@ -299,7 +299,7 @@ static UX_FLOW(exportRootPublicKeyMenu,
 static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 
 	// Picture
-	&C_icon_question,
+	&C_icon_view,
 
 	// First line
 	"Sign temporary",
@@ -408,7 +408,7 @@ static UX_FLOW(signTorCertificateMenu,
 static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 
 	// Picture
-	&C_icon_question,
+	&C_icon_view,
 
 	// First line
 	"Finalize",
