@@ -189,7 +189,7 @@ LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
 # Compiler Secp256k1-zkp settings
-CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_FIELD_10X26 -D USE_SCALAR_8X32 -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -I src/secp256k1-zkp-master
+CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_FIELD_10X26 -D USE_SCALAR_8X32 -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
 
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
@@ -234,7 +234,7 @@ run: all
 dependencies:
 	
 	# Create Secp256k1-zkp dependency
-	wget "https://github.com/mimblewimble/secp256k1-zkp/archive/master.zip"
+	wget "https://github.com/NicolasFlamel1/secp256k1-zkp/archive/master.zip"
 	cd src && unzip ../master.zip
 	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_A 5/#define WINDOW_A 2/g" ecmult_impl.h
@@ -264,6 +264,7 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && echo "    memset(n, 0, sizeof(n));" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/if (proof == NULL) {/secp256k1_scalar_get_b32(proof, \&taux);return 1;if (proof == NULL) {/g" rangeproof_impl.h
 	rm master.zip
 
 # Include BOLOS SDK Makefile rules

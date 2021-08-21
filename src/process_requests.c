@@ -17,11 +17,10 @@
 #include "finish_encrypting_slatepack_data.h"
 #include "finish_transaction.h"
 #include "get_application_information.h"
-#include "get_blinding_factor_tweak_multiply.h"
 #include "get_commitment.h"
+#include "get_bulletproof_taux.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
-#include "get_private_nonce.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
 #include "get_tor_public_key.h"
@@ -116,21 +115,12 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get private nonce instruction
-				case GET_PRIVATE_NONCE_INSTRUCTION:
+				// Get bulletproof taux instruction
+				case GET_BULLETPROOF_TAUX_INSTRUCTION:
 				
-					// Process get private nonce request
-					processGetPrivateNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
-					// Break
-					break;
+					// Process get bulletproof taux request
+					processGetBulletproofTauxRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
-				// Get blinding factor tweak multiply instruction
-				case GET_BLINDING_FACTOR_TWEAK_MULTIPLY_INSTRUCTION:
-				
-					// Process blinding factor tweak multiply request
-					processGetBlindingFactorTweakMultiplyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
 					// Break
 					break;
 				

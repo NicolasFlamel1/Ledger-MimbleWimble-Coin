@@ -153,5 +153,8 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey);
 // Get Ed25519 public key
 void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account);
 
+// Calculate bulletproof taux
+void calculateBulletproofTaux(volatile uint8_t *bulletproofTaux, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
+
 
 #endif

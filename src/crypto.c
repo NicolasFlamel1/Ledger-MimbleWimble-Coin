@@ -7,7 +7,6 @@
 #include "mqs.h"
 #include "secp256k1_aggsig.h"
 #include "secp256k1_bulletproofs.h"
-#include "secp256k1_commitment.h"
 #include "secp256k1_preallocated.h"
 #include "tor.h"
 
@@ -136,6 +135,15 @@ static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = "Grinbox_seed";
 
 // Secp256k1 private key size
 static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
+
+// Bits proven per range
+static const size_t BITS_PROVEN_PER_RANGE = sizeof(uint64_t) * BITS_IN_A_BYTE;
+
+// Number of generators
+static const size_t NUMBER_OF_GENERATORS = 256;
+
+// Scratch space size
+static const size_t SCRATCH_SPACE_SIZE = 132;
 
 
 // Supporting function implementation
@@ -1250,4 +1258,55 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
 	
 	// Get Ed25519 public key from the address public key
 	memcpy(ed25519PublicKey, (uint8_t *)&addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
+}
+
+// Calculate bulletproof taux
+void calculateBulletproofTaux(volatile uint8_t *bulletproofTaux, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
+
+	// Create context
+	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN)];
+	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+	
+	// Create scratch space
+	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
+	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
+	
+	// Create generators
+	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS)];
+	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS);
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+	
+			// Check if creating bulletproof failed
+			size_t unused = SIZE_MAX;
+			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, (uint8_t *)bulletproofTaux, &unused, NULL, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
+
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Destroy generators
+			secp256k1_bulletproof_generators_preallocated_destroy((secp256k1_context *)context, (secp256k1_bulletproof_generators *)generators);
+			explicit_bzero((uint8_t *)generatorsBuffer, sizeof(generatorsBuffer));
+			
+			// Destroy scratch space
+			secp256k1_scratch_space_preallocated_destroy((secp256k1_scratch_space *)scratchSpace);
+			explicit_bzero((uint8_t *)scratchSpaceBuffer, sizeof(scratchSpaceBuffer));
+			
+			// Destroy context
+			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
+			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
+		}
+	}
+	
+	// End try
+	END_TRY;
 }
