@@ -19,9 +19,6 @@ const size_t NONCE_SIZE = 32;
 // Commitment size
 const size_t COMMITMENT_SIZE = 33;
 
-// Compressed public key size
-const size_t COMPRESSED_PUBLIC_KEY_SIZE = 33;
-
 // Uncompressed public key size
 const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE = 65;
 

@@ -15,8 +15,11 @@ char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
 // Time line buffer
 char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
-// Tor public key line buffer
-char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_SIZE];
+// Public key line buffer
+char publicKeyLineBuffer[PUBLIC_KEY_LINE_BUFFER_SIZE];
+
+// Public key type line buffer
+char publicKeyTypeLineBuffer[PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE];
 
 // Amount line buffer
 char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
@@ -269,7 +272,7 @@ static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pbb, processUserInteraction
 	// Picture
 	&C_icon_reject,
 	
-	// First Bold line
+	// First bold line
 	"Deny",
 	
 	// Second bold line
@@ -290,6 +293,82 @@ static UX_FLOW(exportRootPublicKeyMenu,
 	
 	// Export root public key menu deny screen
 	&exportRootPublicKeyMenuDenyScreen,
+	
+	// Loop
+	FLOW_LOOP
+);
+
+// Verify public key menu notify screen
+static UX_STEP_NOCB(verifyPublicKeyMenuNotifyScreen, pnn, {
+
+	// Picture
+	&C_icon_view,
+
+	// First line
+	publicKeyTypeLineBuffer,
+	
+	// Second line
+	"public key?"
+});
+
+// Verify public key menu public key screen
+static UX_STEP_NOCB(verifyPublicKeyMenuPublicKeyScreen,
+
+	// Check if target is the Nano X
+	#ifdef TARGET_NANOX
+	
+		// Layout
+		bnnn_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		nb_paging,
+	#endif
+{
+
+	// Title
+	.title = "Public key",
+	
+	// Text
+	.text = publicKeyLineBuffer
+});
+
+// Verify public key menu valid screen
+static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, true), {
+
+	// Picture
+	&C_icon_approve,
+	
+	// Bold line
+	"Valid"
+});
+
+// Verify public key menu invalid screen
+static UX_STEP_CB(verifyPublicKeyMenuInvalidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, false), {
+
+	// Picture
+	&C_icon_reject,
+	
+	// Bold line
+	"Invalid"
+});
+
+// Verify public key menu
+static UX_FLOW(verifyPublicKeyMenu,
+
+	// Verify public key menu notify screen
+	&verifyPublicKeyMenuNotifyScreen,
+	
+	// Verify public key menu public key screen
+	&verifyPublicKeyMenuPublicKeyScreen,
+
+	// Verify public key menu approve screen
+	&verifyPublicKeyMenuValidScreen,
+	
+	// Verify public key menu deny screen
+	&verifyPublicKeyMenuInvalidScreen,
 	
 	// Loop
 	FLOW_LOOP
@@ -353,7 +432,7 @@ static UX_STEP_NOCB(signTorCertificateMenuPublicKeyScreen,
 	.title = "Public key",
 	
 	// Text
-	.text = torPublicKeyLineBuffer
+	.text = publicKeyLineBuffer
 });
 
 // Sign Tor certificate menu approve screen
@@ -375,7 +454,7 @@ static UX_STEP_CB(signTorCertificateMenuDenyScreen, pbb, processUserInteraction(
 	// Picture
 	&C_icon_reject,
 	
-	// First Bold line
+	// First bold line
 	"Deny",
 	
 	// Second bold line
@@ -518,7 +597,7 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction
 	// Picture
 	&C_icon_reject,
 	
-	// First Bold line
+	// First bold line
 	"Deny",
 	
 	// Second bold line
@@ -560,8 +639,11 @@ void clearMenuBuffers(void) {
 	// Clear the time line buffer
 	explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
 	
-	// Clear the Tor public key line buffer
-	explicit_bzero(torPublicKeyLineBuffer, sizeof(torPublicKeyLineBuffer));
+	// Clear the public key line buffer
+	explicit_bzero(publicKeyLineBuffer, sizeof(publicKeyLineBuffer));
+	
+	// Clear the public key type line buffer
+	explicit_bzero(publicKeyTypeLineBuffer, sizeof(publicKeyTypeLineBuffer));
 	
 	// Clear the amount line buffer
 	explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
@@ -627,6 +709,15 @@ void showMenu(enum Menu menu) {
 			// Set menu steps to export root public key menu
 			menuSteps = exportRootPublicKeyMenu;
 			
+			// Break
+			break;
+		
+		// Verify public key menu
+		case VERIFY_PUBLIC_KEY_MENU:
+		
+			// Set menu steps to verify public key menu
+			menuSteps = verifyPublicKeyMenu;
+		
 			// Break
 			break;
 		

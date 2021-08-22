@@ -22,6 +22,7 @@
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
 #include "get_private_nonce.h"
+#include "get_public_key_verification.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
 #include "get_tor_public_key.h"
@@ -94,6 +95,15 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 				
 					// Process get root public key request
 					processGetRootPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					
+					// Break
+					break;
+				
+				// Get public key verification instruction
+				case GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION:
+				
+					// Process get public key verification request
+					processGetPublicKeyVerificationRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
@@ -429,6 +439,15 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 					
 						// Process get root public key user interaction
 						processGetRootPublicKeyUserInteraction((unsigned short *)&responseLength);
+						
+						// Break
+						break;
+					
+					// Get public key verification instruction
+					case GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION:
+					
+						// Process get public key verification user interaction
+						processGetPublicKeyVerificationUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
 						break;

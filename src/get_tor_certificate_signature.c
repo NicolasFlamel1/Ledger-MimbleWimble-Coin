@@ -174,9 +174,9 @@ void processGetTorCertificateSignatureRequest(unsigned short *responseLength, un
 		SPRINTF(timeLineBuffer, "%02u:%02u:%02u on %u-%02u-%02u UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
 	#endif
 	
-	// Copy signed public key into the Tor public key line buffer
-	toHexString(torPublicKeyLineBuffer, signedPublicKey, ED25519_PUBLIC_KEY_SIZE);
-	torPublicKeyLineBuffer[sizeof(torPublicKeyLineBuffer) - 1] = '\0';
+	// Copy signed public key into the public key line buffer
+	toHexString(publicKeyLineBuffer, signedPublicKey, ED25519_PUBLIC_KEY_SIZE);
+	publicKeyLineBuffer[ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE - 1] = '\0';
 	
 	// Show sign Tor certificate menu
 	showMenu(SIGN_TOR_CERTIFICATE_MENU);

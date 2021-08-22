@@ -29,8 +29,11 @@
 // Time line buffer size
 #define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd ZZZ")
 
-// Tor public key line buffer size
-#define TOR_PUBLIC_KEY_LINE_BUFFER_SIZE (ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Public key line buffer size
+#define PUBLIC_KEY_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+
+// Public key type line buffer size
+#define PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE sizeof("Verify root")
 
 // Amount line buffer size
 #define AMOUNT_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
@@ -55,6 +58,9 @@ enum Menu {
 	
 	// Export root public key menu
 	EXPORT_ROOT_PUBLIC_KEY_MENU,
+	
+	// Verify public key menu
+	VERIFY_PUBLIC_KEY_MENU,
 	
 	// Sign Tor certificate menu
 	SIGN_TOR_CERTIFICATE_MENU,
@@ -88,8 +94,11 @@ extern char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
 // Time line buffer
 extern char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
-// Tor public key line buffer
-extern char torPublicKeyLineBuffer[TOR_PUBLIC_KEY_LINE_BUFFER_SIZE];
+// Public key line buffer
+extern char publicKeyLineBuffer[PUBLIC_KEY_LINE_BUFFER_SIZE];
+
+// Public key type line buffer
+extern char publicKeyTypeLineBuffer[PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE];
 
 // Amount line buffer
 extern char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];

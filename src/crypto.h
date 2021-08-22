@@ -20,6 +20,9 @@
 // Curve order size
 #define CURVE_ORDER_SIZE 32
 
+// Compressed public key size
+#define COMPRESSED_PUBLIC_KEY_SIZE 33
+
 
 // Constants
 
@@ -28,9 +31,6 @@ extern const size_t NONCE_SIZE;
 
 // Commitment size
 extern const size_t COMMITMENT_SIZE;
-
-// Compressed public key size
-extern const size_t COMPRESSED_PUBLIC_KEY_SIZE;
 
 // Uncompressed public key size
 extern const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE;

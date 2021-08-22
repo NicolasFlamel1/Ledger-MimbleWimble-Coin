@@ -19,6 +19,9 @@ enum Instruction {
 	// Get root public key instruction
 	GET_ROOT_PUBLIC_KEY_INSTRUCTION,
 	
+	// Get public key verification instruction
+	GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION,
+	
 	// Get seed cookie instruction
 	GET_SEED_COOKIE_INSTRUCTION,
 	
