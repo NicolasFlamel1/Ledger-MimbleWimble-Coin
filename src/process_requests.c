@@ -21,6 +21,7 @@
 #include "get_bulletproof_taux.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
+#include "get_private_nonce.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
 #include "get_tor_public_key.h"
@@ -111,6 +112,15 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 				
 					// Process get commitment request
 					processGetCommitmentRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					
+					// Break
+					break;
+				
+				// Get private nonce instruction
+				case GET_PRIVATE_NONCE_INSTRUCTION:
+				
+					// Process get private nonce request
+					processGetPrivateNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;

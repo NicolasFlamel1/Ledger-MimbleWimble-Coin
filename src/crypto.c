@@ -1281,7 +1281,7 @@ void calculateBulletproofTaux(volatile uint8_t *bulletproofTaux, const uint64_t 
 		// Try
 		TRY {
 	
-			// Check if creating bulletproof failed
+			// Check if creating bulletproof taux failed
 			size_t unused = SIZE_MAX;
 			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, (uint8_t *)bulletproofTaux, &unused, NULL, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
 
