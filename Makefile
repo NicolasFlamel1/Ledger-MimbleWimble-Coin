@@ -264,7 +264,7 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && echo "    memset(n, 0, sizeof(n));" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/if (proof == NULL) {/secp256k1_scalar_get_b32(proof, \&taux);return 1;if (proof == NULL) {/g" rangeproof_impl.h
+	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/commits == NULL) ||/commits == NULL) || 1 || /g" main_impl.h
 	rm master.zip
 
 # Include BOLOS SDK Makefile rules

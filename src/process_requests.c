@@ -18,10 +18,10 @@
 #include "finish_transaction.h"
 #include "get_application_information.h"
 #include "get_commitment.h"
-#include "get_bulletproof_taux.h"
+#include "get_bulletproof_t_one_and_t_two.h"
+#include "get_bulletproof_tau_x.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
-#include "get_private_nonce.h"
 #include "get_public_key_verification.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
@@ -126,20 +126,20 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get private nonce instruction
-				case GET_PRIVATE_NONCE_INSTRUCTION:
+				// Get bulletproof tau x instruction
+				case GET_BULLETPROOF_TAU_X_INSTRUCTION:
 				
-					// Process get private nonce request
-					processGetPrivateNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
+					// Process get bulletproof tau x request
+					processGetBulletproofTauXRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
 					// Break
 					break;
 				
-				// Get bulletproof taux instruction
-				case GET_BULLETPROOF_TAUX_INSTRUCTION:
+				// Get bulletproof t one and t two instruction
+				case GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION:
 				
-					// Process get bulletproof taux request
-					processGetBulletproofTauxRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get bulletproof t one and t two request
+					processGetBulletproofTOneAndTTwoRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;

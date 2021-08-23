@@ -2,7 +2,7 @@
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
-#include "get_bulletproof_taux.h"
+#include "get_bulletproof_tau_x.h"
 
 
 // Constants
@@ -16,14 +16,14 @@ static const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX = 2;
 // Proof message identifier index
 static const size_t PROOF_MESSAGE_IDENTIFIER_INDEX = 3;
 
-// Taux size
-static const size_t TAUX_SIZE = 32;
+// Tau x size
+static const size_t TAU_X_SIZE = 32;
 
 
 // Supporting function implementation
 
-// Process get bulletproof taux request
-void processGetBulletproofTauxRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+// Process get bulletproof tau x request
+void processGetBulletproofTauXRequest(unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -109,8 +109,8 @@ void processGetBulletproofTauxRequest(unsigned short *responseLength, unsigned c
 	// Initialize private nonce
 	volatile uint8_t privateNonce[NONCE_SIZE];
 	
-	// Initialize bulletproof taux
-	volatile uint8_t bulletproofTaux[TAUX_SIZE];
+	// Initialize bulletproof tau x
+	volatile uint8_t bulletproofTauX[TAU_X_SIZE];
 	
 	// Begin try
 	BEGIN_TRY {
@@ -132,8 +132,8 @@ void processGetBulletproofTauxRequest(unsigned short *responseLength, unsigned c
 			// Get private nonce
 			getPrivateNonce(privateNonce, *account, commitment);
 			
-			// Calculate bulletproof taux
-			calculateBulletproofTaux(bulletproofTaux, value, (uint8_t *)blindingFactor, rewindNonce, (uint8_t *)privateNonce, proofMessage);
+			// Calculate bulletproof tau x
+			calculateBulletproofTauX(bulletproofTauX, value, (uint8_t *)blindingFactor, rewindNonce, (uint8_t *)privateNonce, proofMessage);
 		}
 		
 		// Finally
@@ -150,17 +150,17 @@ void processGetBulletproofTauxRequest(unsigned short *responseLength, unsigned c
 	// End try
 	END_TRY;
 	
-	// Check if response with the bulletproof taux will overflow
-	if(willResponseOverflow(*responseLength, sizeof(bulletproofTaux))) {
+	// Check if response with the bulletproof tau x will overflow
+	if(willResponseOverflow(*responseLength, sizeof(bulletproofTauX))) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 
-	// Append bulletproof taux to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)bulletproofTaux, sizeof(bulletproofTaux));
+	// Append bulletproof tau x to response
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)bulletproofTauX, sizeof(bulletproofTauX));
 	
-	*responseLength += sizeof(bulletproofTaux);
+	*responseLength += sizeof(bulletproofTauX);
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

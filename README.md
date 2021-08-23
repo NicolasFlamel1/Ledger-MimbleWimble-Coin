@@ -137,32 +137,32 @@ Example request: C70400001E0000000004000000010000000280000001800000023D73EA8D000
 Example response: 08E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4
 ```
 
-* Get private nonce
+* Get bulletproof taux
 ```
-Description: Returns the account's private nonce for the identifier, value, and switch type
+Description: Returns the account's bulletproof taux for the identifier, value, and switch type
 Class: C7
 Instruction: 05
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
-Response: Private nonce (32 bytes)
+Response: Bulletproof taux (32 bytes)
 Requires user interaction: No
 Example request: C70500001E0000000004000000010000000280000001800000023D73EA8D0000000001
-Example response: D633BBDC04805794F647F15F26CB392616903DFD281AB954D49914D369A2B864
+Example response: 0336ECDD1EF3AC2202686D8BCCA5A7BD9BAAE211C1B9BF3C9A4FC3EF6DD0CA98
 ```
 
-* Get bulletproof taux
+* Get bulletproof t one and t two
 ```
-Description: Returns the account's bulletproof taux for the identifier, value, and switch type
+Description: Returns the account's bulletproof t one and t two for the identifier, value, and switch type
 Class: C7
 Instruction: 06
 Parameters one: Network type (Mainnet 00, Floonet 01)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
-Response: Bulletproof taux (32 bytes)
+Response: Bulletproof t one (33 bytes) | bulletproof t two (33 bytes)
 Requires user interaction: No
 Example request: C70600001E0000000004000000010000000280000001800000023D73EA8D0000000001
-Example response: 0336ECDD1EF3AC2202686D8BCCA5A7BD9BAAE211C1B9BF3C9A4FC3EF6DD0CA98
+Example response: 038e3b1f117fb8a7d0cb1096c8d4f70397ada4cc303cf025258ec4912e4179991b02da62acd91892b0c0c717766ec78a16b6b3f122c3c26c924ad5f5814cd7687e77
 ```
 
 * Get Tor public key

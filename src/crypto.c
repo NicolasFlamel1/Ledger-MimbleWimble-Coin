@@ -136,8 +136,11 @@ static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
 // Bits proven per range
 static const size_t BITS_PROVEN_PER_RANGE = sizeof(uint64_t) * BITS_IN_A_BYTE;
 
-// Number of generators
-static const size_t NUMBER_OF_GENERATORS = 256;
+// Number of generators tau x
+static const size_t NUMBER_OF_GENERATORS_TAU_X = 256;
+
+// Number of generators t one and t two
+static const size_t NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO = 128;
 
 // Scratch space size
 static const size_t SCRATCH_SPACE_SIZE = 132;
@@ -1257,20 +1260,20 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
 	memcpy(ed25519PublicKey, (uint8_t *)&addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
 }
 
-// Calculate bulletproof taux
-void calculateBulletproofTaux(volatile uint8_t *bulletproofTaux, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
+// Calculate bulletproof tau x
+void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
 
 	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
+	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
 	
 	// Create scratch space
 	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
 	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
 	
 	// Create generators
-	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS)];
-	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS);
+	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS_TAU_X)];
+	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS_TAU_X);
 	
 	// Begin try
 	BEGIN_TRY {
@@ -1278,10 +1281,77 @@ void calculateBulletproofTaux(volatile uint8_t *bulletproofTaux, const uint64_t 
 		// Try
 		TRY {
 	
-			// Check if creating bulletproof taux failed
-			size_t unused = SIZE_MAX;
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, (uint8_t *)bulletproofTaux, &unused, NULL, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
+			// Check if creating bulletproof tau x failed
+			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, (uint8_t *)bulletproofTauX, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
 
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Destroy generators
+			secp256k1_bulletproof_generators_preallocated_destroy((secp256k1_context *)context, (secp256k1_bulletproof_generators *)generators);
+			explicit_bzero((uint8_t *)generatorsBuffer, sizeof(generatorsBuffer));
+			
+			// Destroy scratch space
+			secp256k1_scratch_space_preallocated_destroy((secp256k1_scratch_space *)scratchSpace);
+			explicit_bzero((uint8_t *)scratchSpaceBuffer, sizeof(scratchSpaceBuffer));
+			
+			// Destroy context
+			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
+			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
+		}
+	}
+	
+	// End try
+	END_TRY;
+}
+
+// Calculate bulletproof t one and t two
+void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *tTwo, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce) {
+
+	// Create context
+	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
+	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
+	
+	// Create scratch space
+	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
+	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
+	
+	// Create generators
+	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO)];
+	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO);
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+	
+			// Check if creating bulletproof t one and t two failed
+			secp256k1_pubkey tOneData;
+			secp256k1_pubkey tTwoData;
+			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, NULL, &tOneData, &tTwoData, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, NULL)) {
+
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
+			// Check if serializing t one failed
+			size_t publicKeySize = COMPRESSED_PUBLIC_KEY_SIZE;
+			if(!secp256k1_ec_pubkey_serialize((secp256k1_context *)context, (uint8_t *)tOne, &publicKeySize, &tOneData, SECP256K1_EC_COMPRESSED)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
+			// Check if serializing ttwo failed
+			publicKeySize = COMPRESSED_PUBLIC_KEY_SIZE;
+			if(!secp256k1_ec_pubkey_serialize((secp256k1_context *)context, (uint8_t *)tTwo, &publicKeySize, &tTwoData, SECP256K1_EC_COMPRESSED)) {
+			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}

@@ -28,11 +28,11 @@ enum Instruction {
 	// Get commitment instruction
 	GET_COMMITMENT_INSTRUCTION,
 	
-	// Get private nonce instruction
-	GET_PRIVATE_NONCE_INSTRUCTION,
+	// Get bulletproof tau x instruction
+	GET_BULLETPROOF_TAU_X_INSTRUCTION,
 	
-	// Get bulletproof taux instruction
-	GET_BULLETPROOF_TAUX_INSTRUCTION,
+	// Get bulletproof t one and t two instruction
+	GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION,
 	
 	// Get Tor public key instruction
 	GET_TOR_PUBLIC_KEY_INSTRUCTION,
