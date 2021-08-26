@@ -36,7 +36,7 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	
 	# Application paramaters
 	APP_LOAD_PARAMS += --path "44'/593'"
-	APP_LOAD_PARAMS += --appFlags 0xA00
+	APP_LOAD_PARAMS += --appFlags 0x800
 	
 	# Defines
 	DEFINES += CURRENCY_ID=0 CURRENCY_BIP44_COIN_TYPE=593 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
@@ -49,7 +49,7 @@ else ifeq ($(CURRENCY),grin)
 	
 	# Application parameters
 	APP_LOAD_PARAMS += --path "44'/592'"
-	APP_LOAD_PARAMS += --appFlags 0x200
+	APP_LOAD_PARAMS += --appFlags 0
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Defines
