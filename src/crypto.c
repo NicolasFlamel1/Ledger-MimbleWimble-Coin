@@ -56,7 +56,7 @@ const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 const size_t ED25519_SIGNATURE_SIZE = 64;
 
 // Secp256k1 curve order
-const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE] = {
+static const uint8_t SECP256K1_CURVE_ORDER[] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
 };
 
@@ -182,6 +182,13 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 			
 			// Get private key from node
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);
+			
+			// Check if private key isn't a valid secret key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)privateKey->d, privateKey->d_len)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 		}
 		
 		// Finally
@@ -271,8 +278,8 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				// Get new private key from node
 				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
 				
-				// Check if new private key is overflowed
-				if(cx_math_cmp((uint8_t *)newPrivateKey.d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len) >= 0) {
+				// Check if new private key isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -281,8 +288,8 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				// Add private key to the new private key
 				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);
 				
-				// Check if new private key is zero
-				if(cx_math_is_zero((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
+				// Check if new private key isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -445,6 +452,13 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 			
 			// Get rewind nonce from the rewind hash and the commitment
 			getBlake2b((uint8_t *)rewindNonce, NONCE_SIZE, rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
+			
+			// Check if rewind nonce isn't a valid secret key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)rewindNonce, NONCE_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 		}
 		
 		// Finally
@@ -481,6 +495,13 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 			
 			// Get private nonce from the private hash and the commitment
 			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
+			
+			// Check if private nonce isn't a valid secret key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)privateNonce, NONCE_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 		}
 		
 		// Finally
@@ -523,8 +544,8 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			// Get address private key from node
 			cx_ecfp_init_private_key(curve, (uint8_t *)node, sizeof(addressPrivateKey->d), (cx_ecfp_private_key_t *)addressPrivateKey);
 			
-			// Check if address private key is zero or is overflowed
-			if(cx_math_is_zero((uint8_t *)addressPrivateKey->d, addressPrivateKey->d_len) || cx_math_cmp((uint8_t *)addressPrivateKey->d, SECP256K1_CURVE_ORDER, addressPrivateKey->d_len) >= 0) {
+			// Check if address private key isn't a valid private key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)addressPrivateKey->d, addressPrivateKey->d_len)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -584,6 +605,17 @@ void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Check if blinding factor sum isn't a zero blinding factor
+			if(!isZeroArray((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
+			
+				// Check if blinding factor sum isn't a valid secret key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			}
 		}
 		
 		// Finally
@@ -597,17 +629,6 @@ void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t 
 	
 	// End try
 	END_TRY;
-	
-	// Check if blinding factor sum isn't a zero blinding factor
-	if(!isZeroArray((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
-	
-		// Check if blinding factor sum isn't a valid secret key
-		if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-		}
-	}
 }
 
 // Create single-signer signature

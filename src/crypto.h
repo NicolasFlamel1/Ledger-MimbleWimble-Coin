@@ -17,9 +17,6 @@
 // Ed25519 public key size
 #define ED25519_PUBLIC_KEY_SIZE 32
 
-// Curve order size
-#define CURVE_ORDER_SIZE 32
-
 // Compressed public key size
 #define COMPRESSED_PUBLIC_KEY_SIZE 33
 
@@ -67,9 +64,6 @@ extern const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 
 // Ed25519 signature size
 extern const size_t ED25519_SIGNATURE_SIZE;
-
-// Secp256k1 curve order
-extern const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE];
 
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
