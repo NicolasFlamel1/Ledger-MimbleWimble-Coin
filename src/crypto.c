@@ -535,7 +535,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 		// Try
 		TRY {
 		
-			// Derive blinding factor from from the address private key blinding factor value and the root path
+			// Derive blinding factor from the address private key blinding factor value and the root path
 			deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
 			
 			// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
