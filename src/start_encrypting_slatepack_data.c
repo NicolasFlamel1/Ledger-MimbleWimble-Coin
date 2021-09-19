@@ -10,7 +10,7 @@
 // Supporting function implementation
 
 // Process start encrypting Slatepack data request
-void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 	
 	// Reset the Slatepack data
 	resetSlatepackData();

@@ -9,7 +9,7 @@
 // Supporting function implementation
 
 // Process finish encrypting Slatepack data request
-void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];

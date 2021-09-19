@@ -10,7 +10,7 @@
 // Supporting function implementation
 
 // Process start transaction request
-void processStartTransactionRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processStartTransactionRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Reset the transaction
 	resetTransaction();

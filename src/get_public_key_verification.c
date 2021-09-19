@@ -26,7 +26,7 @@ enum PublicKeyType {
 // Supporting function implementation
 
 // Process get public key verification request
-void processGetPublicKeyVerificationRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -162,7 +162,7 @@ void processGetPublicKeyVerificationRequest(unsigned short *responseLength, unsi
 }
 
 // Process get public key user interaction
-void processGetPublicKeyVerificationUserInteraction(unsigned short *responseLength) {
+void processGetPublicKeyVerificationUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
 
 	// Throw success
 	THROW(SWO_SUCCESS);

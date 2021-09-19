@@ -44,7 +44,7 @@ enum AddressType {
 // Supporting function implementation
 
 // Process finish transaction request
-void processFinishTransactionRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processFinishTransactionRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -291,8 +291,9 @@ void processFinishTransactionRequest(unsigned short *responseLength, unsigned ch
 					// Check address type
 					switch(addressType) {
 					
-						// Tor address type
+						// Tor address type or default
 						case TOR_ADDRESS_TYPE:
+						default:
 				
 							// Set address length
 							addressLength = ED25519_PUBLIC_KEY_SIZE;

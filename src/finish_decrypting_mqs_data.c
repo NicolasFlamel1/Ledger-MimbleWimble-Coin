@@ -10,7 +10,7 @@
 // Supporting function implementation
 
 // Process finish decrypting MQS data request
-void processFinishDecryptingMqsDataRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processFinishDecryptingMqsDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Check currency information ID
 	switch(currencyInformation.id) {

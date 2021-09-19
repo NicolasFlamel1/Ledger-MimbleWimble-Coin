@@ -29,8 +29,12 @@ const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
 // Version size
 static const size_t VERSION_SIZE = sizeof(uint16_t);
 
-// Salt padding size
-static const size_t SALT_PADDING_SIZE = sizeof("\x00\x00\x00\x00") - sizeof((char)'\0');
+// Check if target is the Nano X
+#ifdef TARGET_NANOX
+
+	// Salt padding size
+	static const size_t SALT_PADDING_SIZE = sizeof("\x00\x00\x00\x00") - sizeof((char)'\0');
+#endif
 
 
 // Function prototypes

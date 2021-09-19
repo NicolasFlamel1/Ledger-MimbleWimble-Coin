@@ -89,8 +89,8 @@ static const size_t CHAIN_CODE_SIZE = 32;
 // Single-signer seed size
 static const size_t SINGLE_SIGNER_SEED_SIZE = 32;
 
-// BIP32 path without coin type
-static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE[] = {
+// BIP32 path without coin type and account
+static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
 
 	// Purpose
 	44 | HARDENED_PATH_MASK,
@@ -158,9 +158,9 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 
-	// Copy BIP32 path without coin type
-	uint32_t bip32Path[ARRAYLEN(BIP32_PATH_WITHOUT_COIN_TYPE)];
-	memcpy(bip32Path, BIP32_PATH_WITHOUT_COIN_TYPE, sizeof(BIP32_PATH_WITHOUT_COIN_TYPE));
+	// Copy BIP32 path without coin type and account
+	uint32_t bip32Path[ARRAYLEN(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT)];
+	memcpy(bip32Path, BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
 	
 	// Set BIP32 path's coin type
 	bip32Path[BIP32_PATH_COIN_TYPE_INDEX] |= currencyInformation.bip44CoinType;

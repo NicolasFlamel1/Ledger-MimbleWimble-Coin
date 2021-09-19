@@ -12,7 +12,7 @@
 // Supporting function implementation
 
 // Process get MQS transaction signature request
-void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Check currency information ID
 	switch(currencyInformation.id) {

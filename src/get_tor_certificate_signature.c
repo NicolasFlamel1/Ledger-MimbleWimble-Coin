@@ -26,7 +26,7 @@ static const uint16_t CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR = 60 * 60;
 // Supporting function implementation
 
 // Process get Tor certificate signature request
-void processGetTorCertificateSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];

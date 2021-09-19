@@ -9,7 +9,7 @@
 // Supporting function implementation
 
 // Process get Tor public key request
-void processGetTorPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetTorPublicKeyRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];

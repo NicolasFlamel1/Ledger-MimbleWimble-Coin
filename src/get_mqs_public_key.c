@@ -10,7 +10,7 @@
 // Supporting function implementation
 
 // Process get MQS public key request
-void processGetMqsPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetMqsPublicKeyRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Check currency information ID
 	switch(currencyInformation.id) {
