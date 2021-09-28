@@ -265,6 +265,7 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/commits == NULL) ||/commits == NULL) || 1 || /g" main_impl.h
+	cd src/secp256k1-zkp-master && grep -rlP "memset\([^,]+, 0," | xargs sed -i -E "s/memset\(([^,]+), 0(x00)?,/explicit_bzero(\1,/g"
 	rm master.zip
 
 # Include BOLOS SDK Makefile rules
