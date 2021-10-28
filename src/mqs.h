@@ -17,6 +17,9 @@
 // MQS address size
 #define MQS_ADDRESS_SIZE 52
 
+// MQS shared private key salt size
+#define MQS_SHARED_PRIVATE_KEY_SALT_SIZE 8
+
 
 // Constants
 
@@ -25,9 +28,6 @@ extern const uint32_t MQS_ADDRESS_PRIVATE_KEY_INDEX;
 
 // MQS shared private key size
 extern const size_t MQS_SHARED_PRIVATE_KEY_SIZE;
-
-// MQS shared private key salt size
-extern const size_t MQS_SHARED_PRIVATE_KEY_SALT_SIZE;
 
 // MQS shared private key number of iterations
 extern const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS;

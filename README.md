@@ -13,17 +13,16 @@ sudo apt-get install libc6-dev gcc-multilib g++-multilib
 Download the Ledger Nano X SDK:
 ```
 git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
-sed -i "s/\`clang/\`$\(CLANGPATH\)clang/g" nanox-secure-sdk/Makefile.rules_generic
 ```
 Download the ARM and Clang development tools:
 ```
-wget -O gcc.tar.bz2 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2'
-wget -O clang.tar.xz 'https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz'
+wget -O gcc.tar.bz2 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2'
+wget -O clang.tar.xz 'https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz'
 mkdir bolos-environment
 tar -xJf clang.tar.xz --directory bolos-environment
-mv bolos-environment/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu- bolos-environment/clang-arm-fropi
+mv bolos-environment/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 bolos-environment/clang-arm-fropi
 tar -xjf gcc.tar.bz2 --directory bolos-environment
-mv bolos-environment/gcc-arm-none-eabi-10.3-2021.07 bolos-environment/gcc-arm-none-eabi
+mv bolos-environment/gcc-arm-none-eabi-10.3-2021.10 bolos-environment/gcc-arm-none-eabi
 ```
 Add environmental variables:
 ```

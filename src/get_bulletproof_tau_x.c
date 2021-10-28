@@ -5,10 +5,13 @@
 #include "get_bulletproof_tau_x.h"
 
 
-// Constants
+// Definitions
 
 // Proof message size
-static const size_t PROOF_MESSAGE_SIZE = 20;
+#define PROOF_MESSAGE_SIZE 20
+
+
+// Constants
 
 // Proof message switch type index
 static const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX = 2;
@@ -85,10 +88,9 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	}
 	
 	// Initialize proof message
-	uint8_t proofMessage[PROOF_MESSAGE_SIZE];
+	uint8_t proofMessage[PROOF_MESSAGE_SIZE] = {};
 	
 	// Set proof message's value
-	explicit_bzero(proofMessage, sizeof(proofMessage));
 	proofMessage[PROOF_MESSAGE_SWITCH_TYPE_INDEX] = switchType;
 	proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX] = identifierDepth;
 	memcpy(&proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX + sizeof(identifierDepth)], &data[sizeof(*account) + sizeof(identifierDepth)], IDENTIFIER_SIZE - sizeof(identifierDepth));

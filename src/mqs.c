@@ -12,6 +12,16 @@
 struct MqsData mqsData;
 
 
+// Definitions
+
+// Check if target is the Nano X
+#ifdef TARGET_NANOX
+
+	// Salt padding size
+	#define SALT_PADDING_SIZE (sizeof("\x00\x00\x00\x00") - sizeof((char)'\0'))
+#endif
+
+
 // Constants
 
 // MQS address private key index
@@ -20,21 +30,11 @@ const uint32_t MQS_ADDRESS_PRIVATE_KEY_INDEX = 0;
 // MQS shared private key size
 const size_t MQS_SHARED_PRIVATE_KEY_SIZE = 32;
 
-// MQS shared private key salt size
-const size_t MQS_SHARED_PRIVATE_KEY_SALT_SIZE = 8;
-
 // MQS shared private key number of iterations
 const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
 
 // Version size
 static const size_t VERSION_SIZE = sizeof(uint16_t);
-
-// Check if target is the Nano X
-#ifdef TARGET_NANOX
-
-	// Salt padding size
-	static const size_t SALT_PADDING_SIZE = sizeof("\x00\x00\x00\x00") - sizeof((char)'\0');
-#endif
 
 
 // Function prototypes
@@ -79,9 +79,8 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			#ifdef TARGET_NANOX
 			
 				// Pad the salt
-				uint8_t paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + SALT_PADDING_SIZE];
+				uint8_t paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + SALT_PADDING_SIZE] = {};
 				memcpy(paddedSalt, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE);
-				explicit_bzero(&paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE], SALT_PADDING_SIZE);
 				
 				// TODO test cx_pbkdf2_sha512 on real hardware to see if the padding is necessary
 				

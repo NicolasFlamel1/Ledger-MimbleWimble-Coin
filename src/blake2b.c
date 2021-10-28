@@ -104,7 +104,7 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 	if(key) {
 	
 		// Initialize key block
-		volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES];
+		volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES] = {};
 		
 		// Begin try
 		BEGIN_TRY {
@@ -115,9 +115,6 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 				// Set key at the start of the key block
 				memcpy((uint8_t *)keyBlock, key, keyLength);
 				
-				// Clear the rest of the key block
-				explicit_bzero((uint8_t *)&keyBlock[keyLength], sizeof(keyBlock) - keyLength);
-		
 				// Update the hash with the block
 				cx_hash(&hash.header, 0, (uint8_t *)keyBlock, sizeof(keyBlock), NULL, 0);
 			}
