@@ -12,14 +12,11 @@
 // Process get MQS public key request
 void processGetMqsPublicKeyRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check currency doesn't allow MQS addresses
+	if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 	
-		// Grin ID
-		case GRIN_ID:
-	
-			// Throw unknown instruction error
-			THROW(UNKNOWN_INSTRUCTION_ERROR);
+		// Throw unknown instruction error
+		THROW(UNKNOWN_INSTRUCTION_ERROR);
 	}
 	
 	// Get request's first parameter
@@ -35,7 +32,7 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, __attribute__
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength != sizeof(uint32_t)) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

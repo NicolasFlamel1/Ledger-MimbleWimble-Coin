@@ -24,7 +24,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength != IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength != IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

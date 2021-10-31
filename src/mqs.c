@@ -12,6 +12,16 @@
 struct MqsData mqsData;
 
 
+// Definitions
+
+// Check if target is the Nano X
+#ifdef TARGET_NANOX
+
+	// Salt padding size
+	#define SALT_PADDING_SIZE (sizeof("\x00\x00\x00\x00") - sizeof((char)'\0'))
+#endif
+
+
 // Constants
 
 // MQS address private key index
@@ -20,20 +30,8 @@ const uint32_t MQS_ADDRESS_PRIVATE_KEY_INDEX = 0;
 // MQS shared private key size
 const size_t MQS_SHARED_PRIVATE_KEY_SIZE = 32;
 
-// MQS shared private key salt size
-const size_t MQS_SHARED_PRIVATE_KEY_SALT_SIZE = 8;
-
 // MQS shared private key number of iterations
 const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
-
-// Version size
-static const size_t VERSION_SIZE = sizeof(uint16_t);
-
-
-// Function prototypes
-
-// Get version
-uint16_t getVersion(enum NetworkType networkType);
 
 
 // Supporting function implementation
@@ -68,8 +66,24 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			// Multiply the uncompressed public key by the private key
 			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);
 			
-			// Get shared private key from the tweaked uncompressed public key and salt
-			cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			// Check if target is the Nano X
+			#ifdef TARGET_NANOX
+			
+				// Pad the salt
+				uint8_t paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + SALT_PADDING_SIZE] = {};
+				memcpy(paddedSalt, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE);
+				
+				// TODO test cx_pbkdf2_sha512 on real hardware to see if the padding is necessary
+				
+				// Get shared private key from the tweaked uncompressed public key and padded salt
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			
+			// Otherwise
+			#else
+			
+				// Get shared private key from the tweaked uncompressed public key and salt
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			#endif
 		}
 		
 		// Finally
@@ -85,7 +99,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 }
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length, enum NetworkType networkType) {
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length) {
 
 	// Check if length is invalid
 	if(length != MQS_ADDRESS_SIZE) {
@@ -98,7 +112,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	const size_t decodedMqsAddressLength = getBase58DecodedLengthWithChecksum(mqsAddress, length);
 	
 	// Check if decoded MQS address length is invalid
-	if(decodedMqsAddressLength != VERSION_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE) {
+	if(decodedMqsAddressLength != sizeof(currencyInformation.mqsVersion) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE) {
 	
 		// Return false
 		return false;
@@ -113,7 +127,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(getVersion(networkType) != *(uint16_t *)decodedMqsAddress || !isValidSecp256k1PublicKey(&decodedMqsAddress[VERSION_SIZE], COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
+	if(memcmp(currencyInformation.mqsVersion, decodedMqsAddress, sizeof(currencyInformation.mqsVersion)) || !isValidSecp256k1PublicKey(&decodedMqsAddress[sizeof(currencyInformation.mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
 	
 		// Return false
 		return false;
@@ -124,7 +138,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	
 		// Uncompress the decoded MQS address to an secp256k1 public key
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-		memcpy(uncompressedPublicKey, &decodedMqsAddress[VERSION_SIZE], COMPRESSED_PUBLIC_KEY_SIZE);
+		memcpy(uncompressedPublicKey, &decodedMqsAddress[sizeof(currencyInformation.mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE);
 		uncompressSecp256k1PublicKey(uncompressedPublicKey);
 		
 		// Initialize the public key with the uncompressed public key
@@ -136,22 +150,19 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 }
 
 // Get MQS address from public key
-void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey, enum NetworkType networkType) {
+void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey) {
 
-	// Get version
-	const uint16_t version = getVersion(networkType);
-	
 	// Get address data from version and the public key
-	uint8_t addressData[sizeof(version) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
-	memcpy(addressData, &version, sizeof(version));
-	memcpy(&addressData[sizeof(version)], publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
+	uint8_t addressData[sizeof(currencyInformation.mqsVersion) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
+	memcpy(addressData, currencyInformation.mqsVersion, sizeof(currencyInformation.mqsVersion));
+	memcpy(&addressData[sizeof(currencyInformation.mqsVersion)], publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
 	
 	// Encode the address data to get the MQS address
 	base58EncodeWithChecksum(mqsAddress, addressData, sizeof(addressData));
 }
 
 // Get Mqs address
-void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum NetworkType networkType) {
+void getMqsAddress(uint8_t *mqsAddress, uint32_t account) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -184,61 +195,5 @@ void getMqsAddress(uint8_t *mqsAddress, uint32_t account, enum NetworkType netwo
 	END_TRY;
 	
 	// Get MQS address from the address public key
-	getMqsAddressFromPublicKey(mqsAddress, (uint8_t *)addressPublicKey, networkType);
-}
-
-// Get version
-uint16_t getVersion(enum NetworkType networkType) {
-
-	// Initialize version
-	uint8_t version[VERSION_SIZE];
-
-	// Check currency information ID
-	switch(currencyInformation.id) {
-	
-		// MimbleWimble Coin ID
-		case MIMBLEWIMBLE_COIN_ID:
-		
-			// Check network type
-			switch(networkType) {
-			
-				// Mainnet network type
-				case MAINNET_NETWORK_TYPE:
-				
-					// Set version
-					version[0] = 1;
-					version[1] = 69;
-				
-					// Break
-					break;
-				
-				// Testnet network type
-				case TESTNET_NETWORK_TYPE:
-				
-					// Set version
-					version[0] = 1;
-					version[1] = 121;
-				
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Break
-			break;
-		
-		// Default
-		default:
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-	}
-		
-	// Return version
-	return *(uint16_t *)version;
+	getMqsAddressFromPublicKey(mqsAddress, (uint8_t *)addressPublicKey);
 }

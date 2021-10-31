@@ -5,11 +5,16 @@
 
 // Header files
 #include <ux.h>
+#include <stdbool.h>
+
 
 // Definitions
 
+// Currency MQS version size
+#define CURRENCY_MQS_VERSION_SIZE sizeof(uint16_t)
+
 // Currency information name size
-#define CURRENCY_INFORMATION_NAME_SIZE sizeof("MimbleWimble Coin")
+#define CURRENCY_INFORMATION_NAME_SIZE sizeof("MimbleWimble Coin Floonet")
 
 // Currency information abbreviation size
 #define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("GRIN")
@@ -23,20 +28,26 @@
 // Currency information icon bitmap size
 #define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
 
-
-// Structures
-
 // Currency information
 struct CurrencyInformation {
-
-	// ID
-	size_t id;
 
 	// BIP44 coin type
 	uint32_t bip44CoinType;
 	
 	// Fractional digits
 	uint8_t fractionalDigits;
+	
+	// MQS address payment proof allowed
+	bool mqsAddressPaymentProofAllowed;
+	
+	// Tor address payment proof allowed
+	bool torAddressPaymentProofAllowed;
+	
+	// Ed25519 address payment proof allowed
+	bool ed25519AddressPaymentProofAllowed;
+	
+	// MQS version
+	uint8_t mqsVersion[CURRENCY_MQS_VERSION_SIZE];
 	
 	// Name
 	char name[CURRENCY_INFORMATION_NAME_SIZE];
@@ -55,19 +66,6 @@ struct CurrencyInformation {
 	
 	// Icon details
 	bagl_icon_details_t iconDetails;
-};
-
-
-// Constants
-
-// Currency ID
-enum CurrencyId {
-
-	// MimbleWimble Coin ID
-	MIMBLEWIMBLE_COIN_ID,
-	
-	// Grin ID
-	GRIN_ID
 };
 
 

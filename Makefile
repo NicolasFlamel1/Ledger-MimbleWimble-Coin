@@ -39,7 +39,27 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	APP_LOAD_PARAMS += --appFlags 0x800
 	
 	# Defines
-	DEFINES += CURRENCY_ID=0 CURRENCY_BIP44_COIN_TYPE=593 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=593 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_MQS_VERSION=\{1,69\} CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+
+# Otherwise check if currency is MimbleWimble Coin floonet
+else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
+
+	# Application name
+	APPNAME = "MimbleWimble Coin Floonet"
+	
+	# Application parameters
+	APP_LOAD_PARAMS += --path "44'/1'"
+	APP_LOAD_PARAMS += --appFlags 0
+	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	
+	# Defines
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=1 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_MQS_VERSION=\{1,121\} CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	
+	# Defines library
+	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	
+	# Emulator flags
+	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise check if currency is Grin
 else ifeq ($(CURRENCY),grin)
@@ -53,7 +73,27 @@ else ifeq ($(CURRENCY),grin)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Defines
-	DEFINES += CURRENCY_ID=1 CURRENCY_BIP44_COIN_TYPE=592 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_NAME=\"Grin\" CURRENCY_ABBREVIATION=\"GRIN\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_grin CURRENCY_ICON_COLORS=C_icon_grin_colors CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=592 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_NAME=\"Grin\" CURRENCY_ABBREVIATION=\"GRIN\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_grin CURRENCY_ICON_COLORS=C_icon_grin_colors CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	
+	# Defines library
+	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	
+	# Emulator flags
+	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
+
+# Otherwise check if currency is Grin testnet
+else ifeq ($(CURRENCY),grin_testnet)
+
+	# Application name
+	APPNAME = "Grin Testnet"
+	
+	# Application parameters
+	APP_LOAD_PARAMS += --path "44'/1'"
+	APP_LOAD_PARAMS += --appFlags 0
+	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	
+	# Defines
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=1 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_NAME=\"Grin\\x20Testnet\" CURRENCY_ABBREVIATION=\"GRIN\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_grin CURRENCY_ICON_COLORS=C_icon_grin_colors CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -65,7 +105,7 @@ else ifeq ($(CURRENCY),grin)
 else
 
 # Display error
-$(error Unsupported CURRENCY - use mimblewimble_coin or grin)
+$(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, or grin_testnet)
 endif
 
 # Check if target is the Nano X
@@ -275,4 +315,4 @@ dep/%.d: %.c Makefile
 
 # List variants
 listvariants:
-	@echo VARIANTS CURRENCY mimblewimble_coin grin
+	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet

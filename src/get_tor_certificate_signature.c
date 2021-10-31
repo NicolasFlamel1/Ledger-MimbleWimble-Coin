@@ -41,7 +41,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -176,7 +176,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	
 	// Copy signed public key into the public key line buffer
 	toHexString(publicKeyLineBuffer, signedPublicKey, ED25519_PUBLIC_KEY_SIZE);
-	publicKeyLineBuffer[ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE - 1] = '\0';
+	publicKeyLineBuffer[ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 	
 	// Show sign Tor certificate menu
 	showMenu(SIGN_TOR_CERTIFICATE_MENU);

@@ -13,14 +13,11 @@
 // Process continue decrypting MQS data request
 void processContinueDecryptingMqsDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check currency doesn't allow MQS addresses
+	if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 	
-		// Grin ID
-		case GRIN_ID:
-	
-			// Throw unknown instruction error
-			THROW(UNKNOWN_INSTRUCTION_ERROR);
+		// Throw unknown instruction error
+		THROW(UNKNOWN_INSTRUCTION_ERROR);
 	}
 	
 	// Get request's first parameter
@@ -36,7 +33,7 @@ void processContinueDecryptingMqsDataRequest(unsigned short *responseLength, __a
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || !dataLength || dataLength > CHACHA20_BLOCK_SIZE) {
+	if(firstParameter || secondParameter || !dataLength || dataLength > CHACHA20_BLOCK_SIZE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

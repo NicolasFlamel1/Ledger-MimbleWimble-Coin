@@ -14,14 +14,11 @@
 // Process get MQS transaction signature request
 void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check currency doesn't allow MQS addresses
+	if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 	
-		// Grin ID
-		case GRIN_ID:
-	
-			// Throw unknown instruction error
-			THROW(UNKNOWN_INSTRUCTION_ERROR);
+		// Throw unknown instruction error
+		THROW(UNKNOWN_INSTRUCTION_ERROR);
 	}
 	
 	// Get request's first parameter
@@ -37,14 +34,11 @@ void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, __
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint64_t) + COMMITMENT_SIZE) {
+	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint64_t) + COMMITMENT_SIZE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
-	
-	// Get network type from first parameter
-	enum NetworkType networkType = firstParameter;
 	
 	// Get account from data
 	const uint32_t *account = (uint32_t *)data;
@@ -85,7 +79,7 @@ void processGetMqsTransactionSignatureRequest(unsigned short *responseLength, __
 	// Get payment proof message
 	uint8_t paymentProofMessage[getPaymentProofMessageLength(*value, senderAddressLength)];
 	
-	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength, networkType);
+	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength);
 	
 	// Get hash of the payment proof message
 	uint8_t hash[CX_SHA256_SIZE];

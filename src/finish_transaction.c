@@ -37,7 +37,10 @@ enum AddressType {
 	TOR_ADDRESS_TYPE,
 	
 	// MQS address type
-	MQS_ADDRESS_TYPE
+	MQS_ADDRESS_TYPE,
+	
+	// Ed25519 address type
+	ED25519_ADDRESS_TYPE
 };
 
 
@@ -59,67 +62,62 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Get network type from first parameter
-	const enum NetworkType networkType = firstParameter;
+	// Get address type from first parameter
+	const enum AddressType addressType = firstParameter;
 	
-	// Get address type from second parameter
-	const enum AddressType addressType = secondParameter;
+	// Check address type
+	switch(addressType) {
 	
-	// Check currency information ID
-	switch(currencyInformation.id) {
-	
-		// MimbleWimble Coin ID
-		case MIMBLEWIMBLE_COIN_ID:
+		// MQS address type
+		case MQS_ADDRESS_TYPE:
 		
-			// Check address type
-			switch(addressType) {
+			// Check currency doesn't allow MQS addresses
+			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 			
-				// MQS address type or Tor address type
-				case MQS_ADDRESS_TYPE:
-				case TOR_ADDRESS_TYPE:
-				
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Break
 			break;
 		
-		// Grin ID
-		case GRIN_ID:
+		// Tor address type
+		case TOR_ADDRESS_TYPE:
 		
-			// TODO test Grin
-		
-			// Check address type
-			switch(addressType) {
+			// Check currency doesn't allow Tor addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed) {
 			
-				// Tor address type
-				case TOR_ADDRESS_TYPE:
-		
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
-			
+		
 			// Break
 			break;
+		
+		// Ed25519 address type
+		case ED25519_ADDRESS_TYPE:
+		
+			// Check currency doesn't allow Ed25519 addresses
+			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public nonce from data
@@ -238,113 +236,89 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Get signature length
 			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
 			
-			// Check currency information ID
+			// Check address type
 			size_t addressLength;
 			uint8_t *address;
-			switch(currencyInformation.id) {
+			switch(addressType) {
 			
-				// MimbleWimble Coin ID
-				case MIMBLEWIMBLE_COIN_ID:
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
 				
-					// Check address type
-					switch(addressType) {
+					// Set address length
+					addressLength = MQS_ADDRESS_SIZE;
 					
-						// MQS address type
-						case MQS_ADDRESS_TYPE:
-						
-							// Set address length
-							addressLength = MQS_ADDRESS_SIZE;
-							
-							// Allocate memory for the address
-							address = alloca(addressLength);
-							
-							// Get MQS address
-							getMqsAddress(address, transaction.account, networkType);
-							
-							// Break
-							break;
-						
-						// Tor address type
-						case TOR_ADDRESS_TYPE:
-						
-							// Set address length
-							addressLength = TOR_ADDRESS_SIZE;
-							
-							// Allocate memory for the address
-							address = alloca(addressLength);
-							
-							// Get Tor address
-							getTorAddress(address, transaction.account);
-						
-							// Break
-							break;
-					}
+					// Allocate memory for the address
+					address = alloca(addressLength);
+					
+					// Get MQS address
+					getMqsAddress(address, transaction.account);
 					
 					// Break
 					break;
 				
-				// Grin ID
-				case GRIN_ID:
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
 				
-					// TODO test Grin
-				
-					// Check address type
-					switch(addressType) {
+					// Set address length
+					addressLength = TOR_ADDRESS_SIZE;
 					
-						// Tor address type or default
-						case TOR_ADDRESS_TYPE:
-						default:
-				
-							// Set address length
-							addressLength = ED25519_PUBLIC_KEY_SIZE;
-							
-							// Allocate memory for the address
-							address = alloca(addressLength);
-							
-							// Get Ed25519 public key
-							getEd25519PublicKey(address, transaction.account);
-						
-							// Break
-							break;
-					}
+					// Allocate memory for the address
+					address = alloca(addressLength);
 					
+					// Get Tor address
+					getTorAddress(address, transaction.account);
+				
+					// Break
+					break;
+				
+				// Ed25519 address type
+				case ED25519_ADDRESS_TYPE:
+				
+					// Set address length
+					addressLength = ED25519_PUBLIC_KEY_SIZE;
+					
+					// Allocate memory for the address
+					address = alloca(addressLength);
+					
+					// Get Ed25519 public key
+					getEd25519PublicKey(address, transaction.account);
+				
 					// Break
 					break;
 			}
 			
 			// Get payment proof message
 			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.send, addressLength)];
-			getPaymentProofMessage(paymentProofMessage, transaction.send, commitment, address, addressLength, networkType);
+			getPaymentProofMessage(paymentProofMessage, transaction.send, commitment, address, addressLength);
 			
 			// Check if verifying payment proof failed
-			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.receiverAddress, transaction.receiverAddressLength, networkType, signature, signatureLength)) {
+			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.receiverAddress, transaction.receiverAddressLength, signature, signatureLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Check currency information ID
-			switch(currencyInformation.id) {
+			// Check receiver address length
+			switch(transaction.receiverAddressLength) {
 			
-				// MimbleWimble Coin ID
-				case MIMBLEWIMBLE_COIN_ID:
-			
+				// MQS address size or Tor address size
+				case MQS_ADDRESS_SIZE:
+				case TOR_ADDRESS_SIZE:
+				
 					// Copy receiver address into the receiver line buffer
 					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
 					memcpy(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
-					
+				
 					// Break
 					break;
-				
-				// Grin ID
-				case GRIN_ID:
-				
-					// TODO test Grin
+			
+				// Ed25519 address size
+				case ED25519_PUBLIC_KEY_SIZE:
 				
 					// Copy receiver address into the receiver line buffer
 					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
 					toHexString(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
-					
+				
 					// Break
 					break;
 			}

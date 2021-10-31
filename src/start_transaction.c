@@ -28,14 +28,11 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
-	
-	// Get network type from first parameter
-	const enum NetworkType networkType = firstParameter;
 	
 	// Get transaction's account from data
 	transaction.account = *(uint32_t *)data;
@@ -75,79 +72,66 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			// Get receiver address from data
 			const uint8_t *receiverAddress = &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee)];
 			
-			// Check currency information ID
-			switch(currencyInformation.id) {
+			// Check receiver address length
+			switch(transaction.receiverAddressLength) {
 			
-				// MimbleWimble Coin ID
-				case MIMBLEWIMBLE_COIN_ID:
-			
-					// Check receiver address length
-					switch(transaction.receiverAddressLength) {
+				// MQS address size
+				case MQS_ADDRESS_SIZE:
+				
+					// Check currency doesn't allow MQS addresses
+					if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 					
-						// MQS address size
-						case MQS_ADDRESS_SIZE:
-						
-							// Check if receiver address isn't a valid MQS address
-							if(!getPublicKeyFromMqsAddress(NULL, receiverAddress, transaction.receiverAddressLength, networkType)) {
-							
-								// Throw invalid parameters error
-								THROW(INVALID_PARAMETERS_ERROR);
-							}
-						
-							// Break
-							break;
-						
-						// Tor address size
-						case TOR_ADDRESS_SIZE:
-						
-							// Check if receiver address isn't a valid Tor address
-							if(!getPublicKeyFromTorAddress(NULL, receiverAddress, transaction.receiverAddressLength)) {
-							
-								// Throw invalid parameters error
-								THROW(INVALID_PARAMETERS_ERROR);
-							}
-						
-							// Break
-							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
 					}
+				
+					// Check if receiver address isn't a valid MQS address
+					if(!getPublicKeyFromMqsAddress(NULL, receiverAddress, transaction.receiverAddressLength)) {
 					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+				
 					// Break
 					break;
 				
-				// Grin ID
-				case GRIN_ID:
+				// Tor address size
+				case TOR_ADDRESS_SIZE:
 				
-					// TODO test Grin
-				
-					// Check receiver address length
-					switch(transaction.receiverAddressLength) {
+					// Check currency doesn't allow Tor addresses
+					if(!currencyInformation.torAddressPaymentProofAllowed) {
 					
-						// Ed25519 public key size
-						case ED25519_PUBLIC_KEY_SIZE:
-						
-							// Check if the receiver address isn't a valid Ed25519 public key
-							if(!isValidEd25519PublicKey(receiverAddress, transaction.receiverAddressLength)) {
-							
-								// Throw invalid parameters error
-								THROW(INVALID_PARAMETERS_ERROR);
-							}
-						
-							// Break
-							break;
-						
-						// Default
-						default:
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
 					}
+				
+					// Check if receiver address isn't a valid Tor address
+					if(!getPublicKeyFromTorAddress(NULL, receiverAddress, transaction.receiverAddressLength)) {
 					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+				
+					// Break
+					break;
+				
+				// Ed25519 public key size
+				case ED25519_PUBLIC_KEY_SIZE:
+				
+					// Check currency doesn't allow Ed25519 addresses
+					if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+				
+					// Check if the receiver address isn't a valid Ed25519 public key
+					if(!isValidEd25519PublicKey(receiverAddress, transaction.receiverAddressLength)) {
+					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+				
 					// Break
 					break;
 				

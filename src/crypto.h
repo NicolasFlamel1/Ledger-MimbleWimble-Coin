@@ -124,10 +124,10 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum NetworkType networkType);
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength);
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, enum NetworkType networkType, uint8_t *signature, size_t signatureLength);
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
 
 // Commitment is valid
 bool commitmentIsValid(const uint8_t *commitment);

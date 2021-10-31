@@ -21,7 +21,7 @@ void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLengt
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter || dataLength) {
+	if(firstParameter || secondParameter || dataLength) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

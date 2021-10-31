@@ -801,14 +801,14 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 // Get payment proof message length
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check sender address length
+	switch(senderAddressLength) {
 	
-		// MimbleWimble Coin ID
-		case MIMBLEWIMBLE_COIN_ID:
+		// MQS address size
+		case MQS_ADDRESS_SIZE:
 		
-			// Check if sender address length is invalid
-			if(senderAddressLength != MQS_ADDRESS_SIZE && senderAddressLength != TOR_ADDRESS_SIZE) {
+			// Check currency doesn't allow MQS addresses
+			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -817,13 +817,26 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 			// Return payment proof message length
 			return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
 		
-		// Grin ID
-		case GRIN_ID:
+		// Tor address size
+		case TOR_ADDRESS_SIZE:
+		
+			// Check currency doesn't allow TOR addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Return payment proof message length
+			return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
+		
+		// Ed25519 address size
+		case ED25519_PUBLIC_KEY_SIZE:
 		
 			// TODO test Grin
 		
-			// Check if sender address length is invalid
-			if(senderAddressLength != ED25519_PUBLIC_KEY_SIZE) {
+			// Check currency doesn't allow Ed25519 addresses
+			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -841,42 +854,26 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 }
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength, enum NetworkType networkType) {
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check sender address length
+	switch(senderAddressLength) {
 	
-		// MimbleWimble Coin ID
-		case MIMBLEWIMBLE_COIN_ID:
+		// MQS address size
+		case MQS_ADDRESS_SIZE:
 		
-			// Check sender address length
-			switch(senderAddressLength) {
+			// Check currency doesn't allow MQS addresses
+			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 			
-				// MQS address size
-				case MQS_ADDRESS_SIZE:
-				
-					// Check if sender address isn't a valid MQS address
-					if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength, networkType)) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-				
-					// Break
-					break;
-				
-				// Tor address size
-				case TOR_ADDRESS_SIZE:
-				
-					// Check if sender address isn't a valid Tor address
-					if(!getPublicKeyFromTorAddress(NULL, senderAddress, senderAddressLength)) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-				
-					// Break
-					break;
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Check if sender address isn't a valid MQS address
+			if(!getPublicKeyFromMqsAddress(NULL, senderAddress, senderAddressLength)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Append commitment as a hex string to the message
@@ -891,10 +888,46 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 			// Break
 			break;
 		
-		// Grin ID
-		case GRIN_ID:
+		// Tor address size
+		case TOR_ADDRESS_SIZE:
+		
+			// Check currency doesn't allow TOR addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Check if sender address isn't a valid Tor address
+			if(!getPublicKeyFromTorAddress(NULL, senderAddress, senderAddressLength)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Append commitment as a hex string to the message
+			toHexString((char *)message, commitment, COMMITMENT_SIZE);
+			
+			// Append sender address to the message
+			memcpy(&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE], senderAddress, senderAddressLength);
+			
+			// Append value as a string to the message
+			toString((char *)&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength], value, 0);
+			
+			// Break
+			break;
+		
+		// Ed25519 address size
+		case ED25519_PUBLIC_KEY_SIZE:
 		
 			// TODO test Grin
+			
+			// Check currency doesn't allow Ed25519 addresses
+			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Check if the sender address isn't a valid Ed25519 public key
 			if(!isValidEd25519PublicKey(senderAddress, senderAddressLength)) {
@@ -921,95 +954,100 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 }
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, enum NetworkType networkType, uint8_t *signature, size_t signatureLength) {
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength) {
 
-	// Check currency information ID
-	switch(currencyInformation.id) {
+	// Check receiver address length
+	switch(receiverAddressLength) {
 	
-		// MimbleWimble Coin ID
-		case MIMBLEWIMBLE_COIN_ID:
+		// MQS address size
+		case MQS_ADDRESS_SIZE:
 		
-			// Check receiver address length
-			switch(receiverAddressLength) {
+			// Check currency doesn't allow MQS addresses
+			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 			
-				// MQS address size
-				case MQS_ADDRESS_SIZE:
-				
-					// Check if signature length is invalid
-					if(signatureLength > MAXIMUM_DER_SIGNATURE_SIZE) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-					
-					{
-						// Check if getting receiver public key from receiver's MQS address failed
-						cx_ecfp_public_key_t receiverPublicKey;
-						if(!getPublicKeyFromMqsAddress(&receiverPublicKey, receiverAddress, receiverAddressLength, networkType)) {
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
-						}
-					
-						// Get hash of the message
-						uint8_t hash[CX_SHA256_SIZE];
-						cx_hash_sha256(message, messageLength, hash, sizeof(hash));
-						
-						// Check if verifying the hash with the receiver public key and signature failed
-						if(!cx_ecdsa_verify(&receiverPublicKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), signature, signatureLength)) {
-						
-							// Return false
-							return false;
-						}
-					}
-					
-					// Break
-					break;
-				
-				// Tor address size
-				case TOR_ADDRESS_SIZE:
-				
-					// Check if signature length is invalid
-					if(signatureLength != ED25519_SIGNATURE_SIZE) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-					
-					{
-						// Check if getting receiver public key from receiver's Tor address failed
-						cx_ecfp_public_key_t receiverPublicKey;
-						if(!getPublicKeyFromTorAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
-						}
-						
-						// Check if verifying the message with the receiver public key and signature failed
-						if(!cx_eddsa_verify(&receiverPublicKey, CX_LAST, CX_SHA512, message, messageLength, NULL, 0, signature, signatureLength)) {
-						
-							// Return false
-							return false;
-						}
-					}
-					
-					// Break
-					break;
-				
-				// Default
-				default:
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Check if signature length is invalid
+			if(signatureLength > MAXIMUM_DER_SIGNATURE_SIZE) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Check if getting receiver public key from receiver's MQS address failed
+				cx_ecfp_public_key_t receiverPublicKey;
+				if(!getPublicKeyFromMqsAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			
+				// Get hash of the message
+				uint8_t hash[CX_SHA256_SIZE];
+				cx_hash_sha256(message, messageLength, hash, sizeof(hash));
+				
+				// Check if verifying the hash with the receiver public key and signature failed
+				if(!cx_ecdsa_verify(&receiverPublicKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), signature, signatureLength)) {
+				
+					// Return false
+					return false;
+				}
 			}
 			
 			// Break
 			break;
 		
-		// Grin ID
-		case GRIN_ID:
+		// Tor address size
+		case TOR_ADDRESS_SIZE:
+		
+			// Check currency doesn't allow Tor addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Check if signature length is invalid
+			if(signatureLength != ED25519_SIGNATURE_SIZE) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
+				// Check if getting receiver public key from receiver's Tor address failed
+				cx_ecfp_public_key_t receiverPublicKey;
+				if(!getPublicKeyFromTorAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Check if verifying the message with the receiver public key and signature failed
+				if(!cx_eddsa_verify(&receiverPublicKey, CX_LAST, CX_SHA512, message, messageLength, NULL, 0, signature, signatureLength)) {
+				
+					// Return false
+					return false;
+				}
+			}
+			
+			// Break
+			break;
+		
+		// Ed25519 address size
+		case ED25519_PUBLIC_KEY_SIZE:
 		
 			// TODO test Grin
+		
+			// Check currency doesn't allow Ed25519 addresses
+			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Check if signature length is invalid
 			if(signatureLength != ED25519_SIGNATURE_SIZE) {

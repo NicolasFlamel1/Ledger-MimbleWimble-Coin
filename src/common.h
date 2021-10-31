@@ -53,16 +53,6 @@ enum Error {
 	INTERNAL_ERROR_ERROR
 };
 
-// Network type
-enum NetworkType {
-
-	// Mainnet network type
-	MAINNET_NETWORK_TYPE,
-	
-	// Testnet network type
-	TESTNET_NETWORK_TYPE
-};
-
 
 // Function prototypes
 

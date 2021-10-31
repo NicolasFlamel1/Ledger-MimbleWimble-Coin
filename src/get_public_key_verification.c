@@ -41,17 +41,14 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter > TESTNET_NETWORK_TYPE || secondParameter > MQS_PUBLIC_KEY_TYPE || dataLength != sizeof(uint32_t)) {
+	if(secondParameter || dataLength != sizeof(uint32_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Get network type from first parameter
-	const enum NetworkType networkType = firstParameter;
-	
-	// Get public key type from second parameter
-	const enum PublicKeyType publicKeyType = secondParameter;
+	// Get public key type from first parameter
+	const enum PublicKeyType publicKeyType = firstParameter;
 	
 	// Get account from data
 	const uint32_t *account = (uint32_t *)data;
@@ -104,13 +101,20 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			
 			// Copy root public key into the public key line buffer
 			toHexString(publicKeyLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
-			publicKeyLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE - 1] = '\0';
-		
+			publicKeyLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
+			
 			// Break
 			break;
 		
 		// Tor public key type
 		case TOR_PUBLIC_KEY_TYPE:
+		
+			// Check currency doesn't allow Tor addresses and Ed25519 addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed && !currencyInformation.ed25519AddressPaymentProofAllowed) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Set public key type line buffer
 			strcpy(publicKeyTypeLineBuffer, "Verify Tor");
@@ -121,7 +125,7 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			
 			// Copy Tor address into the public key line buffer
 			memcpy(publicKeyLineBuffer, torAddress, sizeof(torAddress));
-			publicKeyLineBuffer[sizeof(torAddress) - 1] = '\0';
+			publicKeyLineBuffer[sizeof(torAddress)] = '\0';
 		
 			// Break
 			break;
@@ -129,29 +133,32 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 		// MQS public key type
 		case MQS_PUBLIC_KEY_TYPE:
 		
-			// Check currency information ID
-			switch(currencyInformation.id) {
+			// Check currency doesn't allow MQS addresses
+			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
 			
-				// Grin ID
-				case GRIN_ID:
-			
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
-		
+			
 			// Set public key type line buffer
 			strcpy(publicKeyTypeLineBuffer, "Verify MQS");
 			
 			// Get MQS address
 			uint8_t mqsAddress[MQS_ADDRESS_SIZE];
-			getMqsAddress(mqsAddress, *account, networkType);
+			getMqsAddress(mqsAddress, *account);
 			
 			// Copy MQS address into the public key line buffer
 			memcpy(publicKeyLineBuffer, mqsAddress, sizeof(mqsAddress));
-			publicKeyLineBuffer[sizeof(mqsAddress) - 1] = '\0';
+			publicKeyLineBuffer[sizeof(mqsAddress)] = '\0';
 		
 			// Break
 			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Show verify public key menu

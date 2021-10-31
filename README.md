@@ -13,14 +13,17 @@ sudo apt-get install libc6-dev gcc-multilib g++-multilib
 Download the Ledger Nano X SDK:
 ```
 git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
+cd nanox-secure-sdk
+git reset --hard a79eaf92aef434a5e63caca6b238fd00db523c8f
+cd ..
 ```
 Download the ARM and Clang development tools:
 ```
 wget -O gcc.tar.bz2 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2'
-wget -O clang.tar.xz 'https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz'
+wget -O clang.tar.xz 'https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz'
 mkdir bolos-environment
 tar -xJf clang.tar.xz --directory bolos-environment
-mv bolos-environment/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 bolos-environment/clang-arm-fropi
+mv bolos-environment/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu- bolos-environment/clang-arm-fropi
 tar -xjf gcc.tar.bz2 --directory bolos-environment
 mv bolos-environment/gcc-arm-none-eabi-10.3-2021.10 bolos-environment/gcc-arm-none-eabi
 ```
@@ -62,6 +65,10 @@ The app can be ran in the emulator with the following command:
 ```
 make run
 ```
+Unit tests for this app can be ran by running the following command while the emulator is running and opening the test/index.html file in a web browser.
+```
+$BOLOS_EMU/tools/ledger-live-http-proxy.py
+```
 
 ### Commands
 The app supports the following commands.
@@ -71,7 +78,7 @@ The app supports the following commands.
 Description: Returns the application name and version
 Class: C7
 Instruction: 00
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: N/A
 Response: Application name (ASCII string varying length) | 00 | application version (ASCII string varying length) | 00
@@ -85,7 +92,7 @@ Example response: 4D696D626C6557696D626C6520436F696E00302E302E3100
 Description: Returns the account's root public key
 Class: C7
 Instruction: 01
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | requestor's name (ASCII string varying length)
 Response: Compressed secp256k1 public key (33 bytes)
@@ -99,8 +106,8 @@ Example response: 02CC4773277F41E7E10E1E28C1CC6A7E70D857E15CD677C5C8B65D98893D44
 Description: Returns if the user verifies that the public key is valid
 Class: C7
 Instruction: 02
-Parameters one: Network type (Mainnet 00, Floonet 01)
-Parameter two: Public key type (Root 00, Tor 01, MQS 02)
+Parameters one: Public key type (Root 00, Tor 01, MQS 02)
+Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer)
 Response: N/A
 Requires user interaction: Yes
@@ -113,7 +120,7 @@ Example response: N/A
 Description: Returns the account's seed cookie which can be used to identify the account
 Class: C7
 Instruction: 03
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer)
 Response: Seed cookie (64 bytes)
@@ -127,7 +134,7 @@ Example response: 9c3400e2e53e053bbdabd698c8b274bc9a31637bb012e3a0cd514103c09f50
 Description: Returns the account's commitment for the identifier, value, and switch type
 Class: C7
 Instruction: 04
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Commitment (33 bytes)
@@ -141,7 +148,7 @@ Example response: 08E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD
 Description: Returns the account's bulletproof tau x for the identifier, value, and switch type
 Class: C7
 Instruction: 05
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Bulletproof tau x (32 bytes)
@@ -155,7 +162,7 @@ Example response: 0336ECDD1EF3AC2202686D8BCCA5A7BD9BAAE211C1B9BF3C9A4FC3EF6DD0CA
 Description: Returns the account's bulletproof t one and t two for the identifier, value, and switch type
 Class: C7
 Instruction: 06
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Bulletproof t one (33 bytes) | bulletproof t two (33 bytes)
@@ -169,7 +176,7 @@ Example response: 038e3b1f117fb8a7d0cb1096c8d4f70397ada4cc303cf025258ec4912e4179
 Description: Returns the account's Tor public key
 Class: C7
 Instruction: 07
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer)
 Response: Ed25519 public key (32 bytes)
@@ -183,7 +190,7 @@ Example response: 26489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BEC
 Description: Returns the transaction's payment proof signed with the account's Tor private key
 Class: C7
 Instruction: 08
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes for MQS address, 56 bytes for Tor address)
 Response: Ed25519 signature (64 bytes)
@@ -197,7 +204,7 @@ Example response: BC8E44F664236E9FCC3D2E9DC90BCB69DF741D4F72BF5C44D256F22C441580
 Description: Returns the certificate signed with the account's Tor private key
 Class: C7
 Instruction: 09
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size ed25519_signing_cert without the signature)
 Response: Ed25519 signature (64 bytes)
@@ -211,7 +218,7 @@ Example response: 27C6C4EF00EDF65264AFF97A28C1517F204EB4E494DE231EACBA5BB2A4AFCA
 Description: Returns the random nonce that will be used to encrypt the Slatepack data using the public key and account's Tor private key's X25519 private key to create a shared secret key
 Class: C7
 Instruction: 0A
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes)
 Response: Nonce (12 bytes)
@@ -225,7 +232,7 @@ Example response: 86F3A5F7512FBA489B4D04DF
 Description: Returns the data encrypted for use in a Slatepack
 Class: C7
 Instruction: 0B
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Data (64 bytes with the final request able to be less than 64 bytes)
 Response: Encrypted data (same size as the data)
@@ -239,7 +246,7 @@ Example response: CD475B638924CDD7AC822ABA96A6E559D9FF39D84680D2C93AC61FC23B5AE2
 Description: Returns the tag of the encrypted data
 Class: C7
 Instruction: 0C
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: N/A
 Response: Tag (16 bytes)
@@ -253,7 +260,7 @@ Example response: 0B3BE8125B4081F33E7EB62A43C41A26
 Description: Starts decrypting the encrypted Slatepack data using the provided nonce, public key, and account's Tor private key's X25519 private key
 Class: C7
 Instruction: 0D
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes) | nonce (12 bytes)
 Response: N/A
@@ -267,7 +274,7 @@ Example response: N/A
 Description: Returns the decrypted data encrypted with a random AES key
 Class: C7
 Instruction: 0E
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Data (64 bytes with the final request able to be less than 64 bytes)
 Response: Decrypted data (size of the data ceil to the next 16 byte boundary)
@@ -281,7 +288,7 @@ Example response: 5E8C5D613CF500995FB6B03E0A8B266D89D18DDD8672593BE0179B3B88020D
 Description: Returns the AES key used to encrypt the decrypted data if the provided tag is correct for the decrypted data
 Class: C7
 Instruction: 0F
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Tag (16 bytes)
 Response: AES key (16 bytes)
@@ -295,7 +302,7 @@ Example response: 000102030405060708090A0B0C0D0E0F
 Description: Returns the account's MQS public key
 Class: C7
 Instruction: 10
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer)
 Response: Compressed secp256k1 public key (33 bytes)
@@ -309,7 +316,7 @@ Example response: 03D8E38A4968916176410BE0C7FB96CA4B03B17A43EA98008071A6EFA4DEAF
 Description: Returns the transaction's payment proof signed with the account's MQS private key
 Class: C7
 Instruction: 11
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address)
 Response: DER signature (at most 72 bytes)
@@ -323,7 +330,7 @@ Example response: 3045022100C3745C60997EC457CC6EB7818A2AE7E7FF8A30EF52A29B9EBEFF
 Description: Returns the random salt and nonce that will be used to encrypt the MQS data using the public key and account's MQS private key to create a shared secret key
 Class: C7
 Instruction: 12
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | secp256k1 compressed public key (33 bytes)
 Response: Salt (8 bytes) | nonce (12 bytes)
@@ -337,7 +344,7 @@ Example response: FFEC82955929F30286F3A5F7512FBA489B4D04DF
 Description: Returns the data encrypted for use in MQS
 Class: C7
 Instruction: 13
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Data (64 bytes with the final request able to be less than 64 bytes)
 Response: Encrypted data (same size as the data)
@@ -351,7 +358,7 @@ Example response: 4C299DF0C501B7C78E961788C7BB35773B81E5D9820F2D6437074B24CF0F10
 Description: Returns the tag of the encrypted data
 Class: C7
 Instruction: 14
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: N/A
 Response: Tag (16 bytes)
@@ -365,7 +372,7 @@ Example response: 8DE95463C9B23A107D18BA3DDE480E61
 Description: Starts decrypting the encrypted MQS data using the provided salt, nonce, public key, and account's MQS private key
 Class: C7
 Instruction: 15
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | secp256k1 compressed public key (33 bytes) | salt (8 bytes) | nonce (12 bytes)
 Response: N/A
@@ -379,7 +386,7 @@ Example response: N/A
 Description: Returns the decrypted data encrypted with a random AES key
 Class: C7
 Instruction: 16
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Data (64 bytes with the final request able to be less than 64 bytes)
 Response: Decrypted data (size of the data ceil to the next 16 byte boundary)
@@ -393,7 +400,7 @@ Example response: 5E8C5D613CF500995FB6B03E0A8B266D89D18DDD8672593BE0179B3B88020D
 Description: Returns the AES key used to encrypt the decrypted data if the provided tag is correct for the decrypted data
 Class: C7
 Instruction: 17
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Tag (16 bytes)
 Response: AES key (16 bytes)
@@ -407,7 +414,7 @@ Example response: 000102030405060708090A0B0C0D0E0F
 Description: Starts a transaction with the following output, input, and fee for the account
 Class: C7
 Instruction: 18
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer) | [receiver address (52 bytes MQS address, 56 bytes Tor address)]
 Response: N/A
@@ -421,7 +428,7 @@ Example response: N/A
 Description: Includes the output for the identifier, value, and switch type in the transaction
 Class: C7
 Instruction: 19
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: N/A
@@ -435,7 +442,7 @@ Example response: N/A
 Description: Includes the input for the identifier, value, and switch type in the transaction
 Class: C7
 Instruction: 1A
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: N/A
@@ -449,7 +456,7 @@ Example response: N/A
 Description: Applies an offset to the transaction's blinding factor
 Class: C7
 Instruction: 1B
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: Offset (32 bytes)
 Response: N/A
@@ -463,7 +470,7 @@ Example response: N/A
 Description: Returns the transaction's blinding factor's public key
 Class: C7
 Instruction: 1C
-Parameters one: Network type (Mainnet 00, Floonet 01)
+Parameters one: 00
 Parameter two: 00
 Data: N/A
 Response: Secp256k1 compressed public key (33 bytes)
@@ -477,8 +484,8 @@ Example response: 0283871BA8A6D5CA7CCDDC7CCF3D00AC331B166A11AF42FA217D4AEDEAD8F5
 Description: Returns the kernel information signed with the transaction's blinding factor
 Class: C7
 Instruction: 1D
-Parameters one: Network type (Mainnet 00, Floonet 01)
-Parameter two: Address type (Tor 00, MQS 01)
+Parameters one: Address type (Tor 00, MQS 01, Ed25519 02)
+Parameter two: 00
 Data: Secret nonce (32 bytes) | public nonce (use provided 33 bytes, use NULL 000000000000000000000000000000000000000000000000000000000000000000) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
