@@ -11,6 +11,12 @@
 #include "tor.h"
 
 
+// Definitions
+
+// Ed25519 component size
+#define ED25519_COMPONENT_SIZE 32
+
+
 // Constants
 
 // Nonce size
@@ -60,11 +66,22 @@ static const uint8_t SECP256K1_CURVE_ORDER[] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
 };
 
+// Ed25519 curve order
+static const uint8_t ED25519_CURVE_ORDER[] = {
+	0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xED
+};
+
 // Hardened path mask
 static const uint32_t HARDENED_PATH_MASK = 0x80000000;
 
 // Maximum account
 const uint32_t MAXIMUM_ACCOUNT = HARDENED_PATH_MASK - 1;
+
+// X25519 public key size
+const size_t X25519_PUBLIC_KEY_SIZE = 32;
+
+// X25519 compressed public key prefix
+const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 
 // Generator G
 static const secp256k1_generator GENERATOR_G = {
@@ -796,6 +813,37 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 	
 	// End try
 	END_TRY;
+}
+
+// Get X25519 public key from Ed25519 public key
+void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint8_t *ed25519PublicKey) {
+
+	// Uncompress the Ed25519 public key
+	uint8_t uncompressedEd25519PublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+	uncompressedEd25519PublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+	memcpy(&uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE], ed25519PublicKey, ED25519_PUBLIC_KEY_SIZE);
+	
+	cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedEd25519PublicKey, sizeof(uncompressedEd25519PublicKey));
+	
+	// Get uncompressed Ed25519 public key's y value
+	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + ED25519_COMPONENT_SIZE];
+
+	// Initialize one
+	uint8_t one[ED25519_COMPONENT_SIZE] = {};
+	one[sizeof(one) - 1] = 1;
+	
+	// Compute (1 + y) mod p
+	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	
+	// Compute (1 - y) mod p
+	cx_math_subm(y, one, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	
+	// Compute the X25519 public key as (1 + y) / (1 - y) mod p
+	cx_math_invprimem(y, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	
+	// Swap the X25519 public key's endianness
+	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
 }
 
 // Get payment proof message length

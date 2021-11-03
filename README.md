@@ -206,7 +206,7 @@ Class: C7
 Instruction: 09
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size ed25519_signing_cert without the signature)
+Data: Account (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size Ed25519_signing_cert without header and signature)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: Yes
 Example request: C7090000500000000001040006E63101832D7A85EBF60242BD50C80EAE7760789288F8041E22C1954604037B42D7B564010020040026489D8933530953BF00C20CED09E1EFE74E1A133291B8BCB4CB22D5863BECC9
@@ -220,7 +220,7 @@ Class: C7
 Instruction: 0A
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | Ed25519 public key (32 bytes)
 Response: Nonce (12 bytes)
 Requires user interaction: No
 Example request: C70A000024000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C
@@ -262,7 +262,7 @@ Class: C7
 Instruction: 0D
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | X25519 public key (32 bytes) | nonce (12 bytes)
+Data: Account (unsigned 4 bytes little endian integer) | Ed25519 public key (32 bytes) | nonce (12 bytes)
 Response: N/A
 Requires user interaction: No
 Example request: C70D000030000000009F28E8FA945FF3E7111AEF63C4396823F65F46D853F39AE36E9501301814494C86F3A5F7512FBA489B4D04DF

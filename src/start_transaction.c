@@ -143,7 +143,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			}
 			
 			// Set transaction's receiver address
-			memcpy(transaction.receiverAddress, &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee)], transaction.receiverAddressLength);
+			memcpy(transaction.receiverAddress, receiverAddress, transaction.receiverAddressLength);
 		}
 	
 		// Check if input is invalid

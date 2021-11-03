@@ -165,13 +165,13 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	#ifdef TARGET_NANOX
 	
 		// Copy time into the time line buffer
-		SPRINTF(timeLineBuffer, "%02u:%02u:%02u on\n%u-%02u-%02u UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
+		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
 	
 	// Otherwise
 	#else
 	
 		// Copy time into the time line buffer
-		SPRINTF(timeLineBuffer, "%02u:%02u:%02u on %u-%02u-%02u UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
+		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
 	#endif
 	
 	// Copy signed public key into the public key line buffer

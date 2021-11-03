@@ -42,21 +42,25 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 		// Try
 		TRY {
 		
-			// Get ED25519 private key
+			// Get Ed25519 private key
 			getAddressPrivateKey(&ed25519PrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get X25519 private key from the Ed25519 private key
 			getX25519PrivateKeyFromEd25519PrivateKey(&x25519PrivateKey, (cx_ecfp_private_key_t *)&ed25519PrivateKey);
 			
-			// Uncompress the public key
-			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-			uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
-			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+			// Get X25519 public key from the public key
+			uint8_t x25519PublicKey[X25519_PUBLIC_KEY_SIZE];
+			getX25519PublicKeyFromEd25519PublicKey(x25519PublicKey, publicKey);
 			
-			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+			// Uncompress the X25519 public key
+			uint8_t uncompressedX25519PublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			uncompressedX25519PublicKey[0] = X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+			memcpy(&uncompressedX25519PublicKey[PUBLIC_KEY_PREFIX_SIZE], x25519PublicKey, sizeof(x25519PublicKey));
 			
-			// Create a shared private key from the X25519 private key and uncompressed public key
-			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedPublicKey, sizeof(uncompressedPublicKey), (uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE);
+			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey));
+			
+			// Create a shared private key from the X25519 private key and uncompressed X25519 public key
+			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey), (uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE);
 			
 			// Swap shared private key's endianness
 			swapEndianness((uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE);

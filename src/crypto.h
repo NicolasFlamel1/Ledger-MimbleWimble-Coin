@@ -68,6 +68,12 @@ extern const size_t ED25519_SIGNATURE_SIZE;
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
 
+// X25519 public key size
+extern const size_t X25519_PUBLIC_KEY_SIZE;
+
+// X25519 compressed public key prefix
+extern const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+
 // Switch type
 enum SwitchType {
 
@@ -119,6 +125,9 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLengt
 
 // Get X25519 private key from Ed25519 private key
 void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x25519PrivateKey, const cx_ecfp_private_key_t *ed25519PrivateKey);
+
+// Get X25519 public key from Ed25519 public key
+void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint8_t *ed25519PublicKey);
 
 // Get payment proof message length
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);

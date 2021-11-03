@@ -227,6 +227,9 @@
 					// Run decrypt MQS data test
 					await decryptMqsDataTest(hardwareWallet, extendedPrivateKey);
 					
+					// Run receive transaction test
+					//await receiveTransactionTest(hardwareWallet, extendedPrivateKey);
+					
 					// Log message
 					console.log("Passed running all tests");
 				}
@@ -264,12 +267,6 @@
 			// Log message
 			console.log("Running get application information test");
 		
-			// Expected application name
-			const EXPECTED_APPLICATION_NAME = "MimbleWimble Coin";
-			
-			// Expected application version
-			const EXPECTED_APPLICATION_VERSION = "0.0.1";
-		
 			// Get the application information from the hardware wallet
 			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
 			
@@ -283,26 +280,12 @@
 			// Log application name
 			console.log("Application name: " + applicationName);
 			
-			// Check if application name is invalid
-			if(applicationName !== EXPECTED_APPLICATION_NAME) {
-			
-				// Throw error
-				throw "Invalid application name: " + applicationName;
-			}
-			
 			// Get application version from the response
 			let applicationVersionDelimiter = findTextDelimiter(response.subarray(applicationNameDelimiter + [TEXT_DELIMITER]["length"]));
 			let applicationVersion = (new TextDecoder()).decode(response.subarray(applicationNameDelimiter + [TEXT_DELIMITER]["length"]).subarray(0, applicationVersionDelimiter));
 									
 			// Log application version
 			console.log("Application version: " + applicationVersion);
-			
-			// Check if application version is invalid
-			if(applicationVersion !== EXPECTED_APPLICATION_VERSION) {
-			
-				// Throw error
-				throw "Invalid application version: " + applicationVersion;
-			}
 			
 			// Log message
 			console.log("Passed getting application information test");		
@@ -453,7 +436,7 @@
 			const AMOUNT = new BigNumber("1234567890");
 			
 			// Identifier
-			const IDENTIFIER = new Identifier("04000000018000000200000003800000004");
+			const IDENTIFIER = new Identifier("0400000001800000020000000380000004");
 			
 			// Switch type
 			const SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
@@ -504,7 +487,7 @@
 			const AMOUNT = new BigNumber("1234567890");
 			
 			// Identifier
-			const IDENTIFIER = new Identifier("04000000018000000200000003800000004");
+			const IDENTIFIER = new Identifier("0400000001800000020000000380000004");
 			
 			// Switch type
 			const SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
@@ -625,7 +608,7 @@
 			const AMOUNT = new BigNumber("1234567890");
 			
 			// Identifier
-			const IDENTIFIER = new Identifier("04000000018000000200000003800000004");
+			const IDENTIFIER = new Identifier("0400000001800000020000000380000004");
 			
 			// Switch type
 			const SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
@@ -737,20 +720,29 @@
 			// Certificate public key offset
 			const CERTIFICATE_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 7;
 			
+			// Certificate signing public key offset
+			const CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 44;
+			
 			// Certificate signature offset
 			const CERTIFICATE_SIGNATURE_OFFSET = CERTIFICATE_HEADER_LENGTH + 76;
 			
-			// Certificate (created with `tor --keygen --SigningKeyLifetime '6 months'` and replaced signing public key starting at byte 76 with the hardware wallet's Tor public key)
-			const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d000000000001040006fffa01d9afc73716a5ec5991143dfa477962bc96479967a39c2ea14fc726afba14838701002004002c425da6a34d075d0b576a6e5d4a66f524a2751eebe74e98b8bb29f025137c2af0b25d5210a9563fffaf8525bbf32b24af5d4677cef8dce69c9643727c35b1a183ebfb3e1a03622b9777a5fabd22ec9d80acbdc2937139ab9c227e0719bebd01");
+			// Certificate (contents of an ed25519_signing_cert file created with the command `tor --keygen --SigningKeyLifetime '6 months'`)
+			const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d0000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd4582410100200400b3ee07b33145c47278e7f35468247a4d13905595fe98a533f1b5120609229429fafef1e44a3f25add4570fb3bd0806a9b6a6afeaf32fffd3a40152e5abb6e763069e76ceec0b4027d8a88e37443d304ef963003d44c48c27235f71494778d60d");
 			
 			// Get Tor private key from the extended private key
 			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
 			
+			// Get Tor public key from the Tor private key
+			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Replace signing public key in certificate with the Tor public key
+			let certificate = Common.mergeArrays([CERTIFICATE.subarray(0, CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET), torPublicKey, CERTIFICATE.subarray(CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET + torPublicKey["length"])]);
+			
 			// Get the expected Tor certificate signature from the certificate and Tor private key
-			let expectedTorCertificateSignature = Ed25519.sign(CERTIFICATE.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
+			let expectedTorCertificateSignature = Ed25519.sign(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
 			
 			// Log message
-			console.log("Verify that the certificate's public key is: " + Common.toHexString(CERTIFICATE.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH)));
+			console.log("Verify that the certificate's public key is: " + Common.toHexString(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH)));
 			
 			// Get the Tor certificate signature from the hardware wallet
 			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
@@ -759,7 +751,7 @@
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
 				// Certificate
-				Buffer.from(CERTIFICATE.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET))
+				Buffer.from(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET))
 			]));
 			
 			// Remove response code from response
@@ -776,7 +768,7 @@
 			}
 			
 			// Log signed Tor certificate
-			console.log("Signed Tor certificate: " + Common.toHexString(CERTIFICATE.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
+			console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
 			
 			// Log message
 			console.log("Passed getting Tor certificate signature test");	
@@ -824,7 +816,7 @@
 			const AMOUNT = new BigNumber("1234567890");
 			
 			// Identifier
-			const IDENTIFIER = new Identifier("04000000018000000200000003800000004");
+			const IDENTIFIER = new Identifier("0400000001800000020000000380000004");
 			
 			// Switch type
 			const SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
@@ -1124,6 +1116,88 @@
 			
 			// Log message
 			console.log("Passed running decrypt MQS data test");
+		}
+		
+		// Receive transaction test
+		async function receiveTransactionTest(hardwareWallet, extendedPrivateKey) {
+		
+			// Log message
+			console.log("Running receive transaction test");
+		
+			// Output
+			const OUTPUT = new BigNumber("1234567890");
+			
+			// Input
+			const INPUT = new BigNumber(0);
+			
+			// Fee
+			const FEE = new BigNumber(0);
+			
+			// Identifier
+			const IDENTIFIER = new Identifier("0400000001800000020000000380000004");
+			
+			// Switch type
+			const SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
+			
+			// Get the output's blinding factor
+			let outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, IDENTIFIER, SWITCH_TYPE);
+			
+			// Get the sum of all the transaction's blinding factors
+			let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], []);
+			
+			// Get the expected transaction public key from the transaction's blinding factor
+			let expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
+		
+			// Start transaction on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Output
+				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+				
+				// Input
+				Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+				
+				// Fee
+				Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+				
+				// Receiver address
+				Buffer.from([])
+			]));
+			
+			// Include output in the transaction on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			
+				// Identifier
+				Buffer.from(IDENTIFIER.getValue()),
+				
+				// Amount
+				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+				
+				// Switch type
+				Buffer.from(new Uint8Array([SWITCH_TYPE]))
+			]));
+			
+			// Get the transaction public key from the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+		
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Log transaction public key
+			console.log("Transaction public key: " + Common.toHexString(response));
+			
+			// Check if transaction public key is invalid
+			if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
+			
+				// Throw error
+				throw "Invalid transaction public key: " + Common.toHexString(response);
+			}
+			
+			// Log message
+			console.log("Passed running receive transaction test");
 		}
 		
 		// Find text delimiter
