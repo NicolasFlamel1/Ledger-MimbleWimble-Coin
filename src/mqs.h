@@ -12,7 +12,7 @@
 // Definitions
 
 // MQS data session key size
-#define MQS_DATA_SESSION_KEY_SIZE 16
+#define MQS_DATA_SESSION_KEY_SIZE 32
 
 // MQS address size
 #define MQS_ADDRESS_SIZE 52

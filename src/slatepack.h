@@ -11,7 +11,7 @@
 // Definitions
 
 // Slatepack data session key size
-#define SLATEPACK_DATA_SESSION_KEY_SIZE 16
+#define SLATEPACK_DATA_SESSION_KEY_SIZE 32
 
 
 // Constants
