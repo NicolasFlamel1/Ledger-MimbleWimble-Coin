@@ -65,7 +65,7 @@ The app can be ran in the emulator with the following command:
 ```
 make run
 ```
-Unit tests for this app can be ran by running the following command while the emulator is running and opening the test/index.html file in a web browser.
+Tests for this app can be ran by running the following command while the emulator is running and opening the test/index.html file in a web browser.
 ```
 $BOLOS_EMU/tools/ledger-live-http-proxy.py
 ```
@@ -509,6 +509,6 @@ D101: Internal error
 
 ### Notes
 * The emulator doesn't implement the `cx_pbkdf2_sha512` related system calls for the Ledger Nano X, so the `Start encrypting MQS data` and `Start decrypting MQS data` commands can't be tested on an emulator for the Ledger Nano X.
-* The emulator doesn't implement the `cx_ecdh` function for `CX_CURVE_Curve25519` curves, so the `Start encrypting Slatepack data` and `Start decrypting Slatepack data` commands can't be tested on an emulator.
+* The emulator doesn't implement the `cx_ecdh` and `cx_edwards_decompress_point` functions for `CX_CURVE_Curve25519` curves, so the `Start encrypting Slatepack data` and `Start decrypting Slatepack data` commands can't be tested on an emulator.
 * This app can be built for the Ledger Nano S, however most commands will crash the Ledger Nano S since it doesn't have enough ram.
 * The app will reset its internal Slatepack, MQS data, and/or transaction state when unrelated commands are requested. For example, performing a `Start transaction` command followed by a `Get commitment` command will reset the app's internal transaction state thus requiring another `Start transaction` command to be performed before a `Continue transaction include output` command can be performed.

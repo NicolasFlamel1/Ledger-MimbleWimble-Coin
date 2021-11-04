@@ -7,6 +7,7 @@
 
 	<script src="BLAKE2b.min.js"></script>
 	<script src="Ed25519.min.js"></script>
+	<script src="X25519.min.js"></script>
 	<script src="LedgerJS-6.10.0.min.js"></script>
 	<script src="secp256k1-zkp.min.js"></script>
 	<script src="bignumber.js-9.0.1.min.js"></script>
@@ -20,6 +21,7 @@
 	<script src="seed.min.js"></script>
 	<script src="tor.min.js"></script>
 	<script src="mqs.min.js"></script>
+	<script src="slatepack.min.js"></script>
 	<script src="consensus.min.js"></script>
 	<script src="base58.min.js"></script>
 	<script src="proof_builder.min.js"></script>
@@ -157,6 +159,9 @@
 			// Initialize Ed25519
 			await Ed25519.initialize();
 			
+			// Initialize X25519
+			await X25519.initialize();
+			
 			// Initialize secp256k1-zkp
 			await Secp256k1Zkp.initialize();
 			
@@ -214,6 +219,12 @@
 					
 					// Run get Tor certificate signature test
 					await getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey);
+					
+					// Run encrypt Slatepack data test
+					await encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
+					
+					// Run decrypt Slatepack data test
+					await decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run get MQS public key test
 					await getMqsPublicKeyTest(hardwareWallet, extendedPrivateKey);
@@ -772,6 +783,202 @@
 			
 			// Log message
 			console.log("Passed getting Tor certificate signature test");	
+		}
+		
+		// Encrypt Slatepack data test
+		async function encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey) {
+		
+			// Log message
+			console.log("Running encrypt Slatepack data test");
+			
+			// Data
+			const DATA = Common.fromHexString("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F");
+			
+			// Maximum chunk size
+			const MAXIMUM_CHUNK_SIZE = 64;
+			
+			// While random private key isn't a valid secret key
+			let privateKey = new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH);
+			do {
+			
+				// Fill offset with random values
+				crypto.getRandomValues(privateKey);
+				
+			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
+			
+			// Get Tor private key from the random private key
+			let otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), TOR_ADDRESS_KEY_INDEX);
+			
+			// Get Tor public key from the Tor private key
+			let otherTorPublicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+			
+			// Start encrypting Slatepack data on the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+						
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Public key
+				Buffer.from(otherTorPublicKey)
+			]));
+			
+			// Get nonce from response
+			let nonce = response.subarray(0, Slatepack.NONCE_LENGTH);
+			
+			// Go through all chunks of the data
+			let encryptedData = new Uint8Array([]);
+			for(let i = 0; i <= DATA["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
+			
+				// Continue encrypting Slatepack data on the hardware wallet
+				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(DATA.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
+				
+				// Remove response code from response
+				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+				
+				// Append encrypted data to list
+				encryptedData = Common.mergeArrays([encryptedData, response]);
+			}
+			
+			// Finish encrypting Slatepack data on the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+			
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Append tag to encrypted data
+			encryptedData = Common.mergeArrays([encryptedData, response]);
+			
+			// Log encrypted Slatepack data
+			console.log("Encrypted Slatepack data: " + Common.toHexString(encryptedData));
+			
+			// Get Tor private key from the extended private key
+			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
+			
+			// Get Tor public key from the Tor private key
+			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Decrypt the encrypted data
+			let decryptedData = await Slatepack.decryptMessage(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
+			
+			// Log decrypted Slatepack data
+			console.log("Decrypted Slatepack data: " + Common.toHexString(decryptedData));
+			
+			// Check if decrypted data is invalid
+			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
+			
+				// Throw error
+				throw "Invalid decrypted Slatepack data: " + Common.toHexString(decryptedData);
+			}
+			
+			// Log message
+			console.log("Passed running encrypt Slatepack data test");
+		}
+		
+		// Decrypt Slatepack data test
+		async function decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey) {
+		
+			// Log message
+			console.log("Running decrypt Slatepack data test");
+			
+			// Data
+			const DATA = Common.fromHexString("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F");
+			
+			// Maximum chunk size
+			const MAXIMUM_CHUNK_SIZE = 64;
+			
+			// AES IV size
+			const AES_IV_SIZE = 16;
+			
+			// While random private key isn't a valid secret key
+			let privateKey = new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH);
+			do {
+			
+				// Fill offset with random values
+				crypto.getRandomValues(privateKey);
+				
+			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
+			
+			// Get Tor private key from the random private key
+			let otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), TOR_ADDRESS_KEY_INDEX);
+			
+			// Get Tor public key from the Tor private key
+			let otherTorPublicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+			
+			// Get Tor private key from the extended private key
+			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
+			
+			// Get Tor public key from the Tor private key
+			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Encrypt the data
+			let encryptedData = await Slatepack.encryptMessage(otherTorPrivateKey, torPublicKey, DATA);
+			
+			// Log encrypted Slatepack data
+			console.log("Encrypted Slatepack data: " + Common.toHexString(encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX]));
+			
+			// Remove tag from the encrypted data
+			let tag = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX].subarray(encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX]["length"] - Slatepack.TAG_LENGTH);
+			encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX] = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX].subarray(0, encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX]["length"] - Slatepack.TAG_LENGTH);
+			
+			// Start decrypting Slatepack data on the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+						
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Public key
+				Buffer.from(otherTorPublicKey),
+				
+				// Nonce
+				Buffer.from(encryptedData[Slatepack.ENCRYPTED_MESSAGE_NONCE_INDEX]),
+			]));
+			
+			// Go through all chunks of the encrypted data
+			let decryptedDataChunks = [];
+			for(let i = 0; i <= encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX]["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
+			
+				// Continue decrypting Slatepack data on the hardware wallet
+				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX].subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
+				
+				// Remove response code from response
+				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+				
+				// Append decrypted data chunk to list
+				decryptedDataChunks.push(response);
+			}
+			
+			// Finish decrypting Slatepack data on the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(tag));
+			
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Create AES key from response
+			let aesKey = await crypto.subtle.importKey("raw", response, {"name": "AES-CBC"}, false, ["decrypt"]);
+			
+			// Go through all decrypted data chunks
+			let decryptedData = new Uint8Array([]);
+			for(let i = 0; i < decryptedDataChunks["length"]; ++i) {
+			
+				// Decrypt the data chunk with the AES key
+				let data = new Uint8Array(await crypto.subtle.decrypt({"name": "AES-CBC", "iv": new Uint8Array(AES_IV_SIZE)}, aesKey, decryptedDataChunks[i]));
+				
+				// Append decrypted data chunk to list
+				decryptedData = Common.mergeArrays([decryptedData, data]);
+			}
+			
+			// Log decrypted Slatepack data
+			console.log("Decrypted Slatepack data: " + Common.toHexString(decryptedData));
+			
+			// Check if decrypted data is invalid
+			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
+			
+				// Throw error
+				throw "Invalid decrypted Slatepack data: " + Common.toHexString(decryptedData);
+			}
+			
+			// Log message
+			console.log("Passed running decrypt Slatepack data test");
 		}
 		
 		// Get MQS public key test
