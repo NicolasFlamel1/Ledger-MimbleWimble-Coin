@@ -279,10 +279,10 @@
 					await getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run encrypt Slatepack data test
-					await encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
+					//await encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run decrypt Slatepack data test
-					await decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
+					//await decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run get MQS public key test
 					await getMqsPublicKeyTest(hardwareWallet, extendedPrivateKey);
@@ -292,10 +292,10 @@
 					await getMqsTransactionSignatureTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
 					
 					// Run encrypt MQS data test
-					await encryptMqsDataTest(hardwareWallet, extendedPrivateKey);
+					//await encryptMqsDataTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run decrypt MQS data test
-					await decryptMqsDataTest(hardwareWallet, extendedPrivateKey);
+					//await decryptMqsDataTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run receive transaction test
 					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT);
