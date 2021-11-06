@@ -604,8 +604,55 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction
 	"request"
 });
 
-// Finalize transaction menu
-static const ux_flow_step_t *finalizeTransactionMenu[7];
+// Finalize transaction receiver menu
+static UX_FLOW(finalizeTransactionReceiverMenu,
+
+	// Finalize transaction menu notify screen
+	&finalizeTransactionMenuNotifyScreen,
+	
+	// Finalize transaction menu amount screen
+	&finalizeTransactionMenuAmountScreen,
+	
+	// Finalize transaction menu fee screen
+	&finalizeTransactionMenuFeeScreen,
+	
+	// Finalize transaction menu no receiver screen
+	&finalizeTransactionMenuReceiverScreen,
+	
+	// Finalize transaction menu approve screen
+	&finalizeTransactionMenuApproveScreen,
+	
+	// Finalize transaction menu deny screen
+	&finalizeTransactionMenuDenyScreen,
+	
+	// Loop
+	FLOW_LOOP
+);
+
+// Finalize transaction no payment proof menu
+static UX_FLOW(finalizeTransactionNoPaymentProofMenu,
+
+	// Finalize transaction menu notify screen
+	&finalizeTransactionMenuNotifyScreen,
+	
+	// Finalize transaction menu amount screen
+	&finalizeTransactionMenuAmountScreen,
+	
+	// Finalize transaction menu fee screen
+	&finalizeTransactionMenuFeeScreen,
+	
+	// Finalize transaction menu no payment proof screen
+	&finalizeTransactionMenuNoPaymentProofScreen,
+	
+	// Finalize transaction menu approve screen
+	&finalizeTransactionMenuApproveScreen,
+	
+	// Finalize transaction menu deny screen
+	&finalizeTransactionMenuDenyScreen,
+	
+	// Loop
+	FLOW_LOOP
+);
 
 // Processing menu screen
 static UX_STEP_NOCB(processingMenuScreen, pb, {
@@ -733,40 +780,19 @@ void showMenu(enum Menu menu) {
 		// Finalize transaction menu
 		case FINALIZE_TRANSACTION_MENU:
 		
-			// Set finalize transaction menu notify screen
-			finalizeTransactionMenu[0] = &finalizeTransactionMenuNotifyScreen;
-			
-			// Set finalize transaction menu amount screen
-			finalizeTransactionMenu[1] = &finalizeTransactionMenuAmountScreen;
-			
-			// Set finalize transaction menu fee screen
-			finalizeTransactionMenu[2] = &finalizeTransactionMenuFeeScreen;
-			
 			// Check if receiver line buffer isn't empty
 			if(strlen(receiverLineBuffer)) {
 			
-				// Set finalize transaction menu receiver screen
-				finalizeTransactionMenu[3] = &finalizeTransactionMenuReceiverScreen;
+				// Set menu steps to finalize transaction receiver menu
+				menuSteps = finalizeTransactionReceiverMenu;
 			}
 			
 			// Otherwise
 			else {
 			
-				// Set finalize transaction menu no payment proof screen
-				finalizeTransactionMenu[3] = &finalizeTransactionMenuNoPaymentProofScreen;
+				// Set menu steps to finalize transaction no payment proof menu
+				menuSteps = finalizeTransactionNoPaymentProofMenu;
 			}
-
-			// Set finalize transaction menu approve screen
-			finalizeTransactionMenu[4] = &finalizeTransactionMenuApproveScreen;
-			
-			// Set finalize transaction menu deny screen
-			finalizeTransactionMenu[5] = &finalizeTransactionMenuDenyScreen;
-			
-			// Set finalize transaction loop
-			finalizeTransactionMenu[6] = FLOW_LOOP;
-			
-			// Set menu steps to finalize transaction menu
-			menuSteps = finalizeTransactionMenu;
 			
 			// Break
 			break;

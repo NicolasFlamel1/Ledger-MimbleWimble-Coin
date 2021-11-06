@@ -229,7 +229,7 @@ LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
 # Compiler Secp256k1-zkp settings
-CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_FIELD_10X26 -D USE_SCALAR_8X32 -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
+CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_COMMITMENT -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
 
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
@@ -275,7 +275,7 @@ dependencies:
 	# Create Secp256k1-zkp dependency
 	wget "https://github.com/NicolasFlamel1/secp256k1-zkp/archive/master.zip"
 	cd src && unzip ../master.zip
-	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c
+	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c hash.h hash_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_A 5/#define WINDOW_A 2/g" ecmult_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_G 16/#define WINDOW_G 2/g" ecmult_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf/\/\/fprintf/g" secp256k1.c
@@ -304,6 +304,10 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/commits == NULL) ||/commits == NULL) || 1 || /g" main_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select field implementation\"/#include \"field_ledger.h\"/g" field.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select field implementation\"/#include \"field_ledger_impl.h\"/g" field_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger.h\"/g" scalar.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger_impl.h\"/g" scalar_impl.h
 	cd src/secp256k1-zkp-master && grep -rlP "memset\([^,]+, 0," | xargs sed -i -E "s/memset\(([^,]+), 0(x00)?,/explicit_bzero(\1,/g"
 	rm master.zip
 

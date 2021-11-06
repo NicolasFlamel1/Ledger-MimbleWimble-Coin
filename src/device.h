@@ -6,19 +6,15 @@
 // Header files
 #include <os.h>
 
-// Check if target is the Nano S
-#ifdef TARGET_NANOS
+// Check if CX API is at least level 12
+#if CX_APILEVEL >= 12
 
 	// Header files
 	#include <libcxng.h>
 	#include <os_apdu.h>
-#endif
 
-
-// Definitions
-
-// Check if target is the Nano X
-#ifdef TARGET_NANOX
+// Otherwise
+#else
 
 	// OS error ranges
 	#define ERR_IOL_RANGE 0x1000

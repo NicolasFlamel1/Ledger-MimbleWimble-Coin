@@ -14,8 +14,8 @@ struct MqsData mqsData;
 
 // Definitions
 
-// Check if target is the Nano X
-#ifdef TARGET_NANOX
+// Check if CX API is less than level 12
+#if CX_APILEVEL < 12
 
 	// Salt padding size
 	#define SALT_PADDING_SIZE (sizeof("\x00\x00\x00\x00") - sizeof((char)'\0'))
@@ -66,9 +66,15 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			// Multiply the uncompressed public key by the private key
 			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);
 			
-			// Check if target is the Nano X
-			#ifdef TARGET_NANOX
+			// Check if CX API is at least level 12
+			#if CX_APILEVEL >= 12
 			
+				// Get shared private key from the tweaked uncompressed public key and salt
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			
+			// Otherwise
+			#else
+		
 				// Pad the salt
 				uint8_t paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + SALT_PADDING_SIZE] = {};
 				memcpy(paddedSalt, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE);
@@ -77,12 +83,6 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 				
 				// Get shared private key from the tweaked uncompressed public key and padded salt
 				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
-			
-			// Otherwise
-			#else
-			
-				// Get shared private key from the tweaked uncompressed public key and salt
-				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			#endif
 		}
 		
