@@ -77,7 +77,7 @@ void processStartDecryptingMqsDataRequest(__attribute__((unused)) unsigned short
 			createMqsSharedPrivateKey(sharedPrivateKey, *account, publicKey, salt);
 			
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
-			initializeChaCha20Poly1305(&mqsData.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0);
+			initializeChaCha20Poly1305(&mqsData.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0);
 		}
 		
 		// Finally

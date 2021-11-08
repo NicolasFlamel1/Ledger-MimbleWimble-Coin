@@ -222,10 +222,10 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -std=gnu17 -O3 -Os -Wall -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main
+CFLAGS += -std=gnu17 -Oz -Wall -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
+LDFLAGS += -Oz
 LDLIBS += -lm -lgcc -lc
 
 # Compiler Secp256k1-zkp settings
@@ -287,16 +287,18 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/return ctx->prec != NULL;/return ctx->prec == NULL;/g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_gen(const/secp256k1_ecmult_gen_unused(const/g" ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#endif \/\* SECP256K1_ECMULT_GEN_IMPL_H \*\///g" ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "#include \"crypto.h\"" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "#include \"device.h\"" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "static void secp256k1_ecmult_gen(__attribute__((unused)) const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    unsigned char n[32];" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    uint8_t n[SCALAR_DATA_SIZE];" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_scalar_get_b32(n, gn);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    uint8_t generator[] = {0x04, 0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8};" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), n, sizeof(n));" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe x;" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&x, &generator[1]);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&x, &generator[PUBLIC_KEY_PREFIX_SIZE]);" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe y;" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&y, &generator[33]);" >> ecmult_gen_impl.h
+	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&y, &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE]);" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge g;" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge_set_xy(&g, &x, &y);" >> ecmult_gen_impl.h
 	cd src/secp256k1-zkp-master/src && echo "    secp256k1_gej_set_ge(r, &g);" >> ecmult_gen_impl.h
@@ -308,6 +310,10 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select field implementation\"/#include \"field_ledger_impl.h\"/g" field_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger.h\"/g" scalar.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger_impl.h\"/g" scalar_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_scalar_is_even(/int secp256k1_scalar_is_even_unused(/g" scalar_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/a->d\[/a->data[/g" scalar_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_scalar_inverse(/void secp256k1_scalar_inverse_unused(/g" scalar_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_scalar_get_b32(&output64\[0\]/swapEndianness((uint8_t *)\&r, sizeof(r));swapEndianness((uint8_t *)\&s, sizeof(s));secp256k1_scalar_get_b32(\&output64[0]/g" secp256k1.c
 	cd src/secp256k1-zkp-master && grep -rlP "memset\([^,]+, 0," | xargs sed -i -E "s/memset\(([^,]+), 0(x00)?,/explicit_bzero(\1,/g"
 	rm master.zip
 

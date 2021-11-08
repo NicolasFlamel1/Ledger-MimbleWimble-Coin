@@ -11,12 +11,6 @@
 #include "tor.h"
 
 
-// Definitions
-
-// Ed25519 component size
-#define ED25519_COMPONENT_SIZE 32
-
-
 // Constants
 
 // Nonce size
@@ -27,9 +21,6 @@ const size_t COMMITMENT_SIZE = 33;
 
 // Uncompressed public key size
 const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE = 65;
-
-// Public key prefix size
-const size_t PUBLIC_KEY_PREFIX_SIZE = 1;
 
 // Identifier maximum depth
 const size_t IDENTIFIER_MAXIMUM_DEPTH = 4;
@@ -55,6 +46,9 @@ const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 // Odd compressed public key prefix
 const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX = 0x03;
 
+// Uncompressed public key prefix
+const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04;
+
 // Ed25519 compressed public key prefix
 const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 
@@ -62,8 +56,13 @@ const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 const size_t ED25519_SIGNATURE_SIZE = 64;
 
 // Secp256k1 curve order
-static const uint8_t SECP256K1_CURVE_ORDER[] = {
+const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
+};
+
+// Secp256k1 curve order half
+const uint8_t SECP256k1_CURVE_ORDER_HALF[CURVE_ORDER_SIZE] = {
+	0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x5D, 0x57, 0x6E, 0x73, 0x57, 0xA4, 0x50, 0x1D, 0xDF, 0xE9, 0x2F, 0x46, 0x68, 0x1B, 0x20, 0xA0
 };
 
 // Ed25519 curve order
@@ -84,7 +83,7 @@ const size_t X25519_PUBLIC_KEY_SIZE = 32;
 const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 
 // Generator G
-static const secp256k1_generator GENERATOR_G = {
+const secp256k1_generator GENERATOR_G = {
 	{
 		0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8
 	}
@@ -826,21 +825,21 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedEd25519PublicKey, sizeof(uncompressedEd25519PublicKey));
 	
 	// Get uncompressed Ed25519 public key's y value
-	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + ED25519_COMPONENT_SIZE];
+	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 
 	// Initialize one
-	uint8_t one[ED25519_COMPONENT_SIZE] = {};
+	uint8_t one[PUBLIC_KEY_COMPONENT_SIZE] = {};
 	one[sizeof(one) - 1] = 1;
 	
 	// Compute (1 + y) mod p
-	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	// Compute (1 - y) mod p
-	cx_math_subm(y, one, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	cx_math_subm(y, one, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	// Compute the X25519 public key as (1 + y) / (1 - y) mod p
-	cx_math_invprimem(y, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
-	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, ED25519_COMPONENT_SIZE);
+	cx_math_invprimem(y, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	// Swap the X25519 public key's endianness
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);

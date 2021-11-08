@@ -10,7 +10,7 @@
 
 // Definitions
 
-// Chacha20 block size
+// ChaCha20 block size
 #define CHACHA20_BLOCK_SIZE 64
 
 // Poly1305 number size
@@ -55,7 +55,7 @@ extern const size_t POLY1305_TAG_SIZE;
 // Function prototypes
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength);
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter);
 
 // Encrypt ChaCha20 Poly1305 data
 void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength);
@@ -65,6 +65,9 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 
 // Get ChaCha20 Poly1305 tag
 void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *tag);
+
+// Initialize ChaCha20 current state
+void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
 
 
 #endif

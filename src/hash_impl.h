@@ -7,6 +7,15 @@
 #include "hash.h"
 
 
+// Constants
+
+// Zero
+static const uint8_t ZERO[] = {0};
+
+// One
+static const uint8_t ONE[] = {1};
+
+
 // Supporting function implementation
 
 // Secp256k1 SHA256 initialize
@@ -28,6 +37,9 @@ static void secp256k1_sha256_finalize(secp256k1_sha256 *hash, unsigned char *out
 
 	// Get the resulting hash
 	cx_hash((cx_hash_t *)hash, CX_LAST, NULL, 0, out, CX_SHA256_SIZE);
+	
+	// Clear hash
+	explicit_bzero(hash, sizeof(*hash));
 }
 
 // Secp256k1 HMAC SHA256 initialize
@@ -49,6 +61,9 @@ static void secp256k1_hmac_sha256_finalize(secp256k1_hmac_sha256 *hash, unsigned
 
 	// Get the resulting hash
 	cx_hmac((cx_hmac_t *)hash, CX_LAST | CX_NO_REINIT, NULL, 0, out, CX_SHA256_SIZE);
+	
+	// Clear hash
+	explicit_bzero(hash, sizeof(*hash));
 }
 
 // Secp256k1 RFC6979 HMAC SHA256 initialize
@@ -58,12 +73,12 @@ static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha2
 	
 	// Initialize state
 	explicit_bzero(state, sizeof(*state));
-	memset(state->v, 0x01, sizeof(state->v));
+	memset(state->v, 1, sizeof(state->v));
 	
 	secp256k1_hmac_sha256 hmac;
 	secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
 	secp256k1_hmac_sha256_write(&hmac, state->v, sizeof(state->v));
-	secp256k1_hmac_sha256_write(&hmac, (uint8_t []){0}, 1);
+	secp256k1_hmac_sha256_write(&hmac, ZERO, sizeof(ZERO));
 	secp256k1_hmac_sha256_write(&hmac, key, length);
 	secp256k1_hmac_sha256_finalize(&hmac, state->k);
 	secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
@@ -72,7 +87,7 @@ static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha2
 	
 	secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
 	secp256k1_hmac_sha256_write(&hmac, state->v, sizeof(state->v));
-	secp256k1_hmac_sha256_write(&hmac, (uint8_t []){1}, 1);
+	secp256k1_hmac_sha256_write(&hmac, ONE, sizeof(ONE));
 	secp256k1_hmac_sha256_write(&hmac, key, length);
 	secp256k1_hmac_sha256_finalize(&hmac, state->k);
 	secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
@@ -92,7 +107,7 @@ static void secp256k1_rfc6979_hmac_sha256_generate(secp256k1_rfc6979_hmac_sha256
 		secp256k1_hmac_sha256 hmac;
 		secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
 		secp256k1_hmac_sha256_write(&hmac, state->v, sizeof(state->v));
-		secp256k1_hmac_sha256_write(&hmac, (uint8_t []){0}, 1);
+		secp256k1_hmac_sha256_write(&hmac, ZERO, sizeof(ZERO));
 		secp256k1_hmac_sha256_finalize(&hmac, state->k);
 		secp256k1_hmac_sha256_initialize(&hmac, state->k, sizeof(state->k));
 		secp256k1_hmac_sha256_write(&hmac, state->v, sizeof(state->v));

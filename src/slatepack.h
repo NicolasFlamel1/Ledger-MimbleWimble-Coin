@@ -50,7 +50,7 @@ struct SlatepackData {
 	// Session key
 	uint8_t sessionKey[SLATEPACK_DATA_SESSION_KEY_SIZE];
 	
-	// Chacha20 Poly1305 state
+	// ChaCha20 Poly1305 state
 	struct ChaCha20Poly1305State chaCha20Poly1305State;
 };
 

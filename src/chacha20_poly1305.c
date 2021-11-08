@@ -34,9 +34,6 @@ static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
 // Rotate left
 static void rotateLeft(uint32_t *value, size_t bits);
 
-// Initialize ChaCha20 current state
-static void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
-
 // Update Poly1305 accumulator
 static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength);
 
@@ -44,7 +41,7 @@ static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength) {
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter) {
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -65,7 +62,7 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 	chaCha20Poly1305State->chaCha20OriginalState[9] = *(uint32_t *)&key[sizeof(uint32_t) * 5];
 	chaCha20Poly1305State->chaCha20OriginalState[10] = *(uint32_t *)&key[sizeof(uint32_t) * 6];
 	chaCha20Poly1305State->chaCha20OriginalState[11] = *(uint32_t *)&key[sizeof(uint32_t) * 7];
-	chaCha20Poly1305State->chaCha20OriginalState[12] = 0;
+	chaCha20Poly1305State->chaCha20OriginalState[12] = counter;
 	chaCha20Poly1305State->chaCha20OriginalState[13] = *(uint32_t *)nonce;
 	chaCha20Poly1305State->chaCha20OriginalState[14] = *(uint32_t *)&nonce[sizeof(uint32_t) * 1];
 	chaCha20Poly1305State->chaCha20OriginalState[15] = *(uint32_t *)&nonce[sizeof(uint32_t) * 2];
@@ -253,7 +250,7 @@ void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305Sta
 	for(size_t i = 0; i <= valueLength / POLY1305_BLOCK_SIZE; ++i) {
 	
 		// Get current block size
-		const size_t currentBlockSize = MIN(MAX(valueLength - POLY1305_BLOCK_SIZE * i, 0), POLY1305_BLOCK_SIZE);
+		const size_t currentBlockSize = MIN((uint8_t)MAX((int8_t)(valueLength - POLY1305_BLOCK_SIZE * i), 0), POLY1305_BLOCK_SIZE);
 		
 		// Check if the current block isn't empty
 		if(currentBlockSize) {

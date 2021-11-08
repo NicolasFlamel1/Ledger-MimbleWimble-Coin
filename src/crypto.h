@@ -7,6 +7,7 @@
 #include <os.h>
 #include <stdbool.h>
 #include "common.h"
+#include "secp256k1_generator.h"
 
 
 // Definitions
@@ -20,6 +21,15 @@
 // Compressed public key size
 #define COMPRESSED_PUBLIC_KEY_SIZE 33
 
+// Curve order size
+#define CURVE_ORDER_SIZE 32
+
+// Public key prefix size
+#define PUBLIC_KEY_PREFIX_SIZE 1
+
+// Public key component size
+#define PUBLIC_KEY_COMPONENT_SIZE 32
+
 
 // Constants
 
@@ -31,9 +41,6 @@ extern const size_t COMMITMENT_SIZE;
 
 // Uncompressed public key size
 extern const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE;
-
-// Public key prefix size
-extern const size_t PUBLIC_KEY_PREFIX_SIZE;
 
 // Identifier maximum depth
 extern const size_t IDENTIFIER_MAXIMUM_DEPTH;
@@ -59,11 +66,20 @@ extern const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 // Odd compressed public key prefix
 extern const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX;
 
+// Uncompressed public key prefix
+extern const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX;
+
 // Ed25519 compressed public key prefix
 extern const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 
 // Ed25519 signature size
 extern const size_t ED25519_SIGNATURE_SIZE;
+
+// Secp256k1 curve order
+extern const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE];
+
+// Secp256k1 curve order half
+extern const uint8_t SECP256k1_CURVE_ORDER_HALF[CURVE_ORDER_SIZE];
 
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
@@ -73,6 +89,9 @@ extern const size_t X25519_PUBLIC_KEY_SIZE;
 
 // X25519 compressed public key prefix
 extern const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+
+// Generator G
+extern const secp256k1_generator GENERATOR_G;
 
 // Switch type
 enum SwitchType {
