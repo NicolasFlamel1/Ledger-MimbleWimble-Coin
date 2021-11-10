@@ -3,11 +3,6 @@
 #define HASH_H
 
 
-// Header files
-#include <stdbool.h>
-#include "device.h"
-
-
 // Definitions
 
 // RFC6979 V size

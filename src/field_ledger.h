@@ -1,48 +1,65 @@
-/**********************************************************************
- * Copyright (c) 2013, 2014 Pieter Wuille                             *
- * Distributed under the MIT software license, see the accompanying   *
- * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
- **********************************************************************/
+// Header guard
+#ifndef FIELD_LEDGER_H
+#define FIELD_LEDGER_H
 
-#ifndef SECP256K1_FIELD_REPR_H
-#define SECP256K1_FIELD_REPR_H
 
-#include <stdint.h>
+// Definitions
 
-typedef struct {
-    /* X = sum(i=0..9, elem[i]*2^26) mod n */
-    uint32_t n[10];
-#ifdef VERIFY
-    int magnitude;
-    int normalized;
-#endif
-} secp256k1_fe;
+// Field element data size
+#define FIELD_ELEMENT_DATA_SIZE 32
 
-/* Unpacks a constant into a overlapping multi-limbed FE element. */
+// Secp256k1 field element constant inner
 #define SECP256K1_FE_CONST_INNER(d7, d6, d5, d4, d3, d2, d1, d0) { \
-    (d0) & 0x3FFFFFFUL, \
-    (((uint32_t)d0) >> 26) | (((uint32_t)(d1) & 0xFFFFFUL) << 6), \
-    (((uint32_t)d1) >> 20) | (((uint32_t)(d2) & 0x3FFFUL) << 12), \
-    (((uint32_t)d2) >> 14) | (((uint32_t)(d3) & 0xFFUL) << 18), \
-    (((uint32_t)d3) >> 8) | (((uint32_t)(d4) & 0x3UL) << 24), \
-    (((uint32_t)d4) >> 2) & 0x3FFFFFFUL, \
-    (((uint32_t)d4) >> 28) | (((uint32_t)(d5) & 0x3FFFFFUL) << 4), \
-    (((uint32_t)d5) >> 22) | (((uint32_t)(d6) & 0xFFFFUL) << 10), \
-    (((uint32_t)d6) >> 16) | (((uint32_t)(d7) & 0x3FFUL) << 16), \
-    (((uint32_t)d7) >> 10) \
+	(uint8_t)(((uint32_t)d7) >> 24), \
+	(uint8_t)(((uint32_t)d7) >> 16), \
+	(uint8_t)(((uint32_t)d7) >> 8), \
+	(uint8_t)(((uint32_t)d7) >> 0), \
+	(uint8_t)(((uint32_t)d6) >> 24), \
+	(uint8_t)(((uint32_t)d6) >> 16), \
+	(uint8_t)(((uint32_t)d6) >> 8), \
+	(uint8_t)(((uint32_t)d6) >> 0), \
+	(uint8_t)(((uint32_t)d5) >> 24), \
+	(uint8_t)(((uint32_t)d5) >> 16), \
+	(uint8_t)(((uint32_t)d5) >> 8), \
+	(uint8_t)(((uint32_t)d5) >> 0), \
+	(uint8_t)(((uint32_t)d4) >> 24), \
+	(uint8_t)(((uint32_t)d4) >> 16), \
+	(uint8_t)(((uint32_t)d4) >> 8), \
+	(uint8_t)(((uint32_t)d4) >> 0), \
+	(uint8_t)(((uint32_t)d3) >> 24), \
+	(uint8_t)(((uint32_t)d3) >> 16), \
+	(uint8_t)(((uint32_t)d3) >> 8), \
+	(uint8_t)(((uint32_t)d3) >> 0), \
+	(uint8_t)(((uint32_t)d2) >> 24), \
+	(uint8_t)(((uint32_t)d2) >> 16), \
+	(uint8_t)(((uint32_t)d2) >> 8), \
+	(uint8_t)(((uint32_t)d2) >> 0), \
+	(uint8_t)(((uint32_t)d1) >> 24), \
+	(uint8_t)(((uint32_t)d1) >> 16), \
+	(uint8_t)(((uint32_t)d1) >> 8), \
+	(uint8_t)(((uint32_t)d1) >> 0), \
+	(uint8_t)(((uint32_t)d0)  >> 24), \
+	(uint8_t)(((uint32_t)d0)  >> 16), \
+	(uint8_t)(((uint32_t)d0)  >> 8), \
+	(uint8_t)(((uint32_t)d0)  >> 0) \
 }
 
-#ifdef VERIFY
-#define SECP256K1_FE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {SECP256K1_FE_CONST_INNER((d7), (d6), (d5), (d4), (d3), (d2), (d1), (d0)), 1, 1}
-#else
+// Secp256k1 field element constant
 #define SECP256K1_FE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {SECP256K1_FE_CONST_INNER((d7), (d6), (d5), (d4), (d3), (d2), (d1), (d0))}
-#endif
 
+
+// Structures
+
+// Secp256k1 field element
 typedef struct {
-    uint32_t n[8];
-} secp256k1_fe_storage;
 
-#define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
-#define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
+	// Data
+	uint8_t data[FIELD_ELEMENT_DATA_SIZE];
+	
+} secp256k1_fe;
 
-#endif /* SECP256K1_FIELD_REPR_H */
+// Secp256k1 field element storage
+typedef secp256k1_fe secp256k1_fe_storage;
+
+
+#endif

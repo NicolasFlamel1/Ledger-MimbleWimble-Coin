@@ -81,6 +81,12 @@ extern const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE];
 // Secp256k1 curve order half
 extern const uint8_t SECP256k1_CURVE_ORDER_HALF[CURVE_ORDER_SIZE];
 
+// Secp256k1 curve prime
+extern const uint8_t SECP256K1_CURVE_PRIME[CURVE_ORDER_SIZE];
+
+// Secp256k1 curve square root exponent
+extern const uint8_t SECP256K1_CURVE_SQUARE_ROOT_EXPONENT[CURVE_ORDER_SIZE];
+
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
 

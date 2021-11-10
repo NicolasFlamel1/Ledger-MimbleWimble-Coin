@@ -5,9 +5,7 @@
 
 // Header files
 #include <os_io_seproxyhal.h>
-#include <string.h>
 #include "chacha20_poly1305.h"
-#include "crypto.h"
 
 
 // Definitions
@@ -164,7 +162,7 @@ static int secp256k1_scalar_is_one(const secp256k1_scalar *scalar) {
 	one[sizeof(one) - 1] = 1;
 	
 	// Return if scalar is equal to one
-	return !cx_math_cmp(scalar->data, one, sizeof(scalar->data));
+	return !memcmp(scalar->data, one, sizeof(scalar->data));
 }
 
 // Secp256k1 scalar is high
@@ -216,7 +214,7 @@ static int secp256k1_scalar_shr_int(secp256k1_scalar *scalar, int bits) {
 static void secp256k1_scalar_sqr(secp256k1_scalar *result, const secp256k1_scalar *scalar) {
 
 	// Set result to the scalar square
-	uint8_t two[] = {2};
+	const uint8_t two[] = {2};
 	cx_math_powm(result->data, scalar->data, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(scalar->data));
 }
 

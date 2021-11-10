@@ -79,7 +79,7 @@ static bool isLeapYear(uint32_t year);
 // Epoch to time
 void epochToTime(struct Time *time, uint64_t epoch) {
 
-	// Based on a post by Alexey Frunze and Andre Kampling (https://stackoverflow.com/a/11197532)
+	// Based on code by Alexey Frunze and Andre Kampling (https://stackoverflow.com/a/11197532)
 
 	// Get seconds from 1601 to epoch
 	uint64_t seconds = epoch + SECONDS_FROM_1601_TO_1970;

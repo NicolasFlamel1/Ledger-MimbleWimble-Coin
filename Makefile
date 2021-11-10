@@ -39,7 +39,17 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	APP_LOAD_PARAMS += --appFlags 0x800
 	
 	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=593 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_MQS_VERSION=\{1,69\} CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
+	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
+	DEFINES += CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_MQS_VERSION=\{1,69\}
+	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
+	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
+	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
+	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
+	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
 
 # Otherwise check if currency is MimbleWimble Coin floonet
 else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
@@ -53,7 +63,17 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=1 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_MQS_VERSION=\{1,121\} CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\" CURRENCY_ABBREVIATION=\"MWC\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
+	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
+	DEFINES += CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_MQS_VERSION=\{1,121\}
+	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
+	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
+	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
+	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
+	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -73,7 +93,15 @@ else ifeq ($(CURRENCY),grin)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=592 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_NAME=\"Grin\" CURRENCY_ABBREVIATION=\"GRIN\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_grin CURRENCY_ICON_COLORS=C_icon_grin_colors CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
+	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
+	DEFINES += CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_NAME=\"Grin\"
+	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
+	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
+	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
+	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -93,7 +121,15 @@ else ifeq ($(CURRENCY),grin_testnet)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=1 CURRENCY_FRACTIONAL_DIGITS=9 CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED CURRENCY_NAME=\"Grin\\x20Testnet\" CURRENCY_ABBREVIATION=\"GRIN\" CURRENCY_VERSION=\"$(APPVERSION)\" CURRENCY_ICON_DETAILS=C_icon_grin CURRENCY_ICON_COLORS=C_icon_grin_colors CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
+	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
+	DEFINES += CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED
+	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
+	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
+	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
+	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
+	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -314,6 +350,12 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/a->d\[/a->data[/g" scalar_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_scalar_inverse(/void secp256k1_scalar_inverse_unused(/g" scalar_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_scalar_get_b32(&output64\[0\]/swapEndianness((uint8_t *)\&r, sizeof(r));swapEndianness((uint8_t *)\&s, sizeof(s));secp256k1_scalar_get_b32(\&output64[0]/g" secp256k1.c
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ge_from_storage(ge, &s);/swapEndianness((uint8_t *)\&s.x, sizeof(s.x));swapEndianness((uint8_t *)\&s.y, sizeof(s.y));secp256k1_ge_from_storage(ge, \&s);/g" secp256k1.c
+	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ge_to_storage(&s, ge);/secp256k1_ge_to_storage(\&s, ge);swapEndianness((uint8_t *)\&s.x, sizeof(s.x));swapEndianness((uint8_t *)\&s.y, sizeof(s.y));/g" secp256k1.c
+	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal(/int secp256k1_fe_equal_unused(/g" field_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal_var(/int secp256k1_fe_equal_var_unused(/g" field_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_fe_inv(/void secp256k1_fe_inv_unused(/g" field_impl.h
+	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_sqrt(/int secp256k1_fe_sqrt_unused(/g" field_impl.h
 	cd src/secp256k1-zkp-master && grep -rlP "memset\([^,]+, 0," | xargs sed -i -E "s/memset\(([^,]+), 0(x00)?,/explicit_bzero(\1,/g"
 	rm master.zip
 
