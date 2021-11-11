@@ -171,6 +171,9 @@ static const size_t NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO = 128;
 // Scratch space size
 static const size_t SCRATCH_SPACE_SIZE = 116;
 
+// Commitment even prefix
+static const uint8_t COMMITMENT_ODD_PREFIX = 9;
+
 
 // Supporting function implementation
 
@@ -354,9 +357,11 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 	volatile cx_ecfp_private_key_t childPrivateKey;
 	volatile uint8_t childChainCode[CHAIN_CODE_SIZE];
 	
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
+	// Initialize hash state
+	volatile cx_sha256_t hashState;
+	
+	// Initialize publicKeyGenerator
+	volatile uint8_t publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_J_PUBLIC)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
 	// Begin try
 	BEGIN_TRY {
@@ -382,11 +387,67 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 				// Regular switch type
 				case REGULAR_SWITCH_TYPE:
 				
-					// Check if performing blind switch with the child's private key and the value failed
-					if(!secp256k1_blind_switch((secp256k1_context *)context, (uint8_t *)blindingFactor, (uint8_t *)childPrivateKey.d, value, &GENERATOR_H, &GENERATOR_G, &GENERATOR_J_PUBLIC)) {
+					{
 					
-						// Throw internal error error
-						THROW(INTERNAL_ERROR_ERROR);
+						// Check if child's private key overflowed or is zero
+						if(cx_math_cmp((uint8_t *)childPrivateKey.d, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE) >= 0 || cx_math_is_zero((uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+					
+						// Get commitment from value and child's private key
+						volatile uint8_t *commitment = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
+						commitValue(commitment, value, (uint8_t *)childPrivateKey.d);
+						
+						// Add commitment to the hash state
+						cx_sha256_init((cx_sha256_t *)&hashState);
+						cx_hash((cx_hash_t *)&hashState, 0, (uint8_t *)commitment, COMMITMENT_SIZE, NULL, 0);
+						
+						// Get product of the generator public key and the child's private key
+						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_J_PUBLIC, sizeof(GENERATOR_J_PUBLIC));
+						volatile uint8_t *x = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
+						swapEndianness((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
+						volatile uint8_t *y = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+						swapEndianness((uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+						
+						// Check if the result is infinity
+						if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, sizeof(publicKeyGenerator), (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+						
+						// Normalize the result's components
+						cx_math_modm((uint8_t *)x, sizeof(PUBLIC_KEY_COMPONENT_SIZE), SECP256K1_CURVE_PRIME, sizeof(PUBLIC_KEY_COMPONENT_SIZE));
+						cx_math_modm((uint8_t *)y, sizeof(PUBLIC_KEY_COMPONENT_SIZE), SECP256K1_CURVE_PRIME, sizeof(PUBLIC_KEY_COMPONENT_SIZE));
+						
+						// Check if result's x component is zero
+						if(cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+						
+						// Compress the result
+						publicKeyGenerator[0] = (publicKeyGenerator[sizeof(publicKeyGenerator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+						
+						// Add result to the hash
+						volatile uint8_t *hash = y;
+						cx_hash((cx_hash_t *)&hashState, CX_LAST, (uint8_t *)publicKeyGenerator, COMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)hash, CX_SHA256_SIZE);
+						
+						// Check if the hash overflows
+						if(cx_math_cmp((uint8_t *)hash, SECP256K1_CURVE_ORDER, CX_SHA256_SIZE) >= 0) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+						
+						// Add the child's private key to the hash
+						cx_math_addm((uint8_t *)hash, (uint8_t *)hash, (uint8_t *)childPrivateKey.d, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+						
+						// Copy result to the blinding factor
+						memcpy((uint8_t *)blindingFactor, (uint8_t *)hash, BLINDING_FACTOR_SIZE);
 					}
 				
 					// Break
@@ -397,13 +458,15 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 		// Finally
 		FINALLY {
 		
+			// Clear the public key generator
+			explicit_bzero((uint8_t *)publicKeyGenerator, sizeof(publicKeyGenerator));
+		
+			// Clear the hash state
+			explicit_bzero((cx_sha256_t *)&hashState, sizeof(hashState));
+		
 			// Clear the child private key and chain code
 			explicit_bzero((cx_ecfp_private_key_t *)&childPrivateKey, sizeof(childPrivateKey));
 			explicit_bzero((uint8_t *)childChainCode, sizeof(childChainCode));
-			
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
 		}
 	}
 	
@@ -414,38 +477,73 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 // Commit value
 void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor) {
 
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
+	// Check if blinding factor overflowed
+	if(cx_math_cmp(blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE) >= 0) {
 	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Initialize generators
+	volatile uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	volatile uint8_t blindGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+
 	// Begin try
 	BEGIN_TRY {
 	
 		// Try
 		TRY {
-	
-			// Check if performing Pedersen commit with the value and the blinding factor failed
-			secp256k1_pedersen_commitment commitmentValue;
-			if(!secp256k1_pedersen_commit((secp256k1_context *)context, &commitmentValue, blindingFactor, value, &GENERATOR_H, &GENERATOR_G)) {
-				
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
+		
+			// Get product of the value and its generator
+			memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_H, sizeof(GENERATOR_H));
+			uint8_t temp[BLINDING_FACTOR_SIZE] = {};
+			U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
+			U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+			
+			bool isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
+			
+			// Get product of the blind and its generator
+			memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
+			
+			// Check if the result isn't infinity
+			if(cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
+			
+				// Get sum of products
+				isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
 			}
 			
-			// Check if serializing commitment failed
-			if(!secp256k1_pedersen_commitment_serialize((secp256k1_context *)context, (uint8_t *)commitment, &commitmentValue)) {
-				
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
+			// Check if result is infinity
+			if(isInfinity) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Normalize result's x component
+			volatile uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
+			cx_math_modm((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Copy x component to the commitment
+			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Get the square of the result's y component's square root
+			volatile uint8_t *squareRootSquared = x;
+			volatile uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			const uint8_t two[] = {2};
+			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Set commitment's prefix
+			commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
 		}
 		
 		// Finally
 		FINALLY {
 		
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
+			// Clear the generators
+			explicit_bzero((uint8_t *)valueGenerator, sizeof(valueGenerator));
+			explicit_bzero((uint8_t *)blindGenerator, sizeof(blindGenerator));
 		}
 	}
 	
@@ -1377,7 +1475,7 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
 }
 
 // Calculate bulletproof tau x
-void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
+void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
 
 	// Create context
 	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
@@ -1398,7 +1496,7 @@ void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, const uint64_t 
 		TRY {
 	
 			// Check if creating bulletproof tau x failed
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, (uint8_t *)bulletproofTauX, NULL, NULL, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
+			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, (uint8_t *)bulletproofTauX, NULL, NULL, &value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1427,7 +1525,7 @@ void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, const uint64_t 
 }
 
 // Calculate bulletproof t one and t two
-void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *tTwo, const uint64_t *value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce) {
+void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce) {
 
 	// Create context
 	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
@@ -1450,7 +1548,7 @@ void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *t
 			// Check if creating bulletproof t one and t two failed
 			secp256k1_pubkey tOneData;
 			secp256k1_pubkey tTwoData;
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, NULL, &tOneData, &tTwoData, value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, NULL)) {
+			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, NULL, &tOneData, &tTwoData, &value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, NULL)) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);

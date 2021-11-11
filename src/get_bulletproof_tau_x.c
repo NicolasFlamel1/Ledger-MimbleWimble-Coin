@@ -48,17 +48,18 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get identifer depth from data
-	const uint8_t identifierDepth = data[sizeof(*account)];
+	const uint8_t identifierDepth = data[sizeof(account)];
 	
 	// Check if identifier depth is invalid
 	if(identifierDepth > IDENTIFIER_MAXIMUM_DEPTH) {
@@ -68,17 +69,18 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	}
 	
 	// Get value from data
-	const uint64_t *value = (uint64_t *)&data[sizeof(*account) + IDENTIFIER_SIZE];
+	uint64_t value;
+	memcpy(&value, &data[sizeof(account) + IDENTIFIER_SIZE], sizeof(value));
 	
 	// Check if value is invalid
-	if(!*value) {
+	if(!value) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get switch type from data
-	const enum SwitchType switchType = data[sizeof(*account) + IDENTIFIER_SIZE + sizeof(uint64_t)];
+	const enum SwitchType switchType = data[sizeof(account) + IDENTIFIER_SIZE + sizeof(uint64_t)];
 	
 	// Check if switch type is invalid
 	if(switchType > REGULAR_SWITCH_TYPE) {
@@ -93,10 +95,11 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	// Set proof message's value
 	proofMessage[PROOF_MESSAGE_SWITCH_TYPE_INDEX] = switchType;
 	proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX] = identifierDepth;
-	memcpy(&proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX + sizeof(identifierDepth)], &data[sizeof(*account) + sizeof(identifierDepth)], IDENTIFIER_SIZE - sizeof(identifierDepth));
+	memcpy(&proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX + sizeof(identifierDepth)], &data[sizeof(account) + sizeof(identifierDepth)], IDENTIFIER_SIZE - sizeof(identifierDepth));
 	
 	// Get identifier path from data
-	uint32_t *identifierPath = (uint32_t *)&data[sizeof(*account) + sizeof(identifierDepth)];
+	uint32_t identifierPath[identifierDepth];
+	memcpy(identifierPath, &data[sizeof(account) + sizeof(identifierDepth)], sizeof(identifierPath));
 	
 	// Go through all parts in the identifier path
 	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
@@ -121,18 +124,18 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 		TRY {
 	
 			// Derive blinding factor
-			deriveBlindingFactor(blindingFactor, *account, *value, identifierPath, identifierDepth, switchType);
+			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			
 			// Commit value with the blinding factor
 			uint8_t commitment[COMMITMENT_SIZE];
-			commitValue(commitment, *value, (uint8_t *)blindingFactor);
+			commitValue(commitment, value, (uint8_t *)blindingFactor);
 			
 			// Get rewind nonce
 			uint8_t rewindNonce[NONCE_SIZE];
-			getRewindNonce(rewindNonce, *account, commitment);
+			getRewindNonce(rewindNonce, account, commitment);
 			
 			// Get private nonce
-			getPrivateNonce(privateNonce, *account, commitment);
+			getPrivateNonce(privateNonce, account, commitment);
 			
 			// Calculate bulletproof tau x
 			calculateBulletproofTauX(bulletproofTauX, value, (uint8_t *)blindingFactor, rewindNonce, (uint8_t *)privateNonce, proofMessage);

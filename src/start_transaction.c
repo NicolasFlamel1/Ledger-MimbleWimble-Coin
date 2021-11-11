@@ -35,7 +35,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	}
 	
 	// Get transaction's account from data
-	transaction.account = *(uint32_t *)data;
+	memcpy(&transaction.account, data, sizeof(transaction.account));
 	
 	// Check if account is invalid
 	if(transaction.account > MAXIMUM_ACCOUNT) {
@@ -45,32 +45,33 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	}
 	
 	// Get transaction's remaining output from data
-	transaction.remainingOutput = *(uint64_t *)&data[sizeof(transaction.account)];
+	memcpy(&transaction.remainingOutput, &data[sizeof(transaction.account)], sizeof(transaction.remainingOutput));
 	
 	// Get input from data
-	const uint64_t *input = (uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput)];
+	uint64_t input;
+	memcpy(&input, &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput)], sizeof(input));
 	
 	// Get transaction's fee from data
-	transaction.fee = *(uint64_t *)&data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input)];
+	memcpy(&transaction.fee, &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input)], sizeof(transaction.fee));
 	
 	// Check if remaining output and input are invalid
-	if(!transaction.remainingOutput && !*input) {
+	if(!transaction.remainingOutput && !input) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Check if an input exists
-	if(*input) {
+	if(input) {
 	
 		// Check if a receiver address is provided
-		if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee)) {
+		if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee)) {
 		
 			// Get transaction's receiver address length
-			transaction.receiverAddressLength = dataLength - (sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee));
+			transaction.receiverAddressLength = dataLength - (sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee));
 			
 			// Get receiver address from data
-			const uint8_t *receiverAddress = &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee)];
+			const uint8_t *receiverAddress = &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee)];
 			
 			// Check receiver address length
 			switch(transaction.receiverAddressLength) {
@@ -147,28 +148,28 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		}
 	
 		// Check if input is invalid
-		if(*input <= transaction.remainingOutput) {
+		if(input <= transaction.remainingOutput) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 	
 		// Check if fee is invalid or will overflow
-		if(!transaction.fee || UINT64_MAX - *input < transaction.fee) {
+		if(!transaction.fee || UINT64_MAX - input < transaction.fee) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
 		// Set transaction's remaining input
-		transaction.remainingInput = *input + transaction.fee;
+		transaction.remainingInput = input + transaction.fee;
 		
 		// Set transaction's send
-		transaction.send = *input - transaction.remainingOutput;
+		transaction.send = input - transaction.remainingOutput;
 	}
 	
 	// Otherwise check if data is invalid
-	else if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(*input) + sizeof(transaction.fee)) {
+	else if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

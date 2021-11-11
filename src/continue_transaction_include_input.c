@@ -41,7 +41,8 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 	}
 	
 	// Get identifier path from data
-	uint32_t *identifierPath = (uint32_t *)&data[sizeof(identifierDepth)];
+	uint32_t identifierPath[identifierDepth];
+	memcpy(identifierPath, &data[sizeof(identifierDepth)], sizeof(identifierPath));
 	
 	// Go through all parts in the identifier path
 	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
@@ -51,10 +52,11 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 	}
 	
 	// Get value from data
-	const uint64_t *value = (uint64_t *)&data[IDENTIFIER_SIZE];
+	uint64_t value;
+	memcpy(&value, &data[IDENTIFIER_SIZE], sizeof(value));
 	
 	// Check if value is invalid
-	if(!*value) {
+	if(!value) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -85,7 +87,7 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 	}
 	
 	// Check if value is too big for the transaction's remaining input
-	if(*value > transaction.remainingInput) {
+	if(value > transaction.remainingInput) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -101,7 +103,7 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 		TRY {
 	
 			// Derive blinding factor
-			deriveBlindingFactor(blindingFactor, transaction.account, *value, identifierPath, identifierDepth, switchType);
+			deriveBlindingFactor(blindingFactor, transaction.account, value, identifierPath, identifierDepth, switchType);
 			
 			// Update transaction's blinding factor with the negative blinding factor
 			updateBlindingFactorSum(transaction.blindingFactor, (uint8_t *)blindingFactor, false);
@@ -119,7 +121,7 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 	END_TRY;
 	
 	// Remove value from the transaction's remaining input
-	transaction.remainingInput -= *value;
+	transaction.remainingInput -= value;
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

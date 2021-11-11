@@ -35,17 +35,18 @@ void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, 
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public key from data
-	const uint8_t *publicKey = &data[sizeof(*account)];
+	const uint8_t *publicKey = &data[sizeof(account)];
 	
 	// Initialize shared private key
 	volatile uint8_t sharedPrivateKey[SLATEPACK_SHARED_PRIVATE_KEY_SIZE];
@@ -63,7 +64,7 @@ void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, 
 		TRY {
 		
 			// Create Slatepack shared private key
-			createSlatepackSharedPrivateKey(sharedPrivateKey, *account, publicKey);
+			createSlatepackSharedPrivateKey(sharedPrivateKey, account, publicKey);
 		
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
 			initializeChaCha20Poly1305(&slatepackData.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0);

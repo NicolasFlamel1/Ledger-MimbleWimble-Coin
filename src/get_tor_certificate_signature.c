@@ -48,20 +48,21 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get certificate from data
-	const uint8_t *certificate = &data[sizeof(*account)];
+	const uint8_t *certificate = &data[sizeof(account)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - sizeof(*account);
+	const size_t certificateLength = dataLength - sizeof(account);
 	
 	// Check if certificate type is invalid
 	if(certificate[sizeof(uint8_t)] != SIGNED_CERTIFICATE_TYPE) {
@@ -71,7 +72,8 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	}
 	
 	// Get certificate expiration
-	uint32_t certificateExpiration = *(uint32_t *)&certificate[sizeof(uint8_t) + sizeof(uint8_t)];
+	uint32_t certificateExpiration;
+	memcpy(&certificateExpiration, &certificate[sizeof(uint8_t) + sizeof(uint8_t)], sizeof(certificateExpiration));
 	
 	// Convert certificate expiration big endian to little endian
 	certificateExpiration = os_swap_u32(certificateExpiration);
@@ -106,7 +108,8 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		}
 	
 		// Get extension length
-		uint16_t extensionLength = *(uint16_t *)&certificate[currentExtensionIndex];
+		uint16_t extensionLength;
+		memcpy(&extensionLength, &certificate[currentExtensionIndex], sizeof(extensionLength));
 		
 		// Convert extension length big endian to little endian
 		extensionLength = os_swap_u16(extensionLength);
@@ -148,7 +151,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
-	getEd25519PublicKey(ed25519PublicKey, *account);
+	getEd25519PublicKey(ed25519PublicKey, account);
 	
 	// Check if the signing public key isn't the Ed25519 public key
 	if(memcmp(signingPublicKey, ed25519PublicKey, sizeof(ed25519PublicKey))) {
@@ -195,13 +198,14 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Get certificate from data
-	const uint8_t *certificate = &data[sizeof(*account)];
+	const uint8_t *certificate = &data[sizeof(account)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - sizeof(*account);
+	const size_t certificateLength = dataLength - sizeof(account);
 	
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -216,7 +220,7 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 		TRY {
 		
 			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&addressPrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get signature of the certificate
 			cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, certificate, certificateLength, NULL, 0, (uint8_t *)signature, sizeof(signature), NULL);

@@ -51,10 +51,11 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 	const enum PublicKeyType publicKeyType = firstParameter;
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -82,7 +83,7 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 				TRY {
 			
 					// Get private key
-					getPrivateKeyAndChainCode(&privateKey, NULL, *account);
+					getPrivateKeyAndChainCode(&privateKey, NULL, account);
 					
 					// Get root public key from the private key
 					getPublicKeyFromPrivateKey((uint8_t *)rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
@@ -121,7 +122,7 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			
 			// Get Tor address
 			uint8_t torAddress[TOR_ADDRESS_SIZE];
-			getTorAddress(torAddress, *account);
+			getTorAddress(torAddress, account);
 			
 			// Copy Tor address into the public key line buffer
 			memcpy(publicKeyLineBuffer, torAddress, sizeof(torAddress));
@@ -145,7 +146,7 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			
 			// Get MQS address
 			uint8_t mqsAddress[MQS_ADDRESS_SIZE];
-			getMqsAddress(mqsAddress, *account);
+			getMqsAddress(mqsAddress, account);
 			
 			// Copy MQS address into the public key line buffer
 			memcpy(publicKeyLineBuffer, mqsAddress, sizeof(mqsAddress));

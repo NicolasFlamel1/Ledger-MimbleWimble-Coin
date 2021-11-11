@@ -31,10 +31,11 @@ void processGetTorPublicKeyRequest(unsigned short *responseLength, __attribute__
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -42,7 +43,7 @@ void processGetTorPublicKeyRequest(unsigned short *responseLength, __attribute__
 	
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
-	getEd25519PublicKey(ed25519PublicKey, *account);
+	getEd25519PublicKey(ed25519PublicKey, account);
 	
 	// Check if response with the Ed25519 public key will overflow
 	if(willResponseOverflow(*responseLength, sizeof(ed25519PublicKey))) {

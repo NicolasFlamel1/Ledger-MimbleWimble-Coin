@@ -31,21 +31,22 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get requestor from data
-	uint8_t *requestor = &data[sizeof(*account)];
+	uint8_t *requestor = &data[sizeof(account)];
 	
 	// Get requestor length
-	size_t requestorLength = dataLength - sizeof(*account);
-
+	size_t requestorLength = dataLength - sizeof(account);
+	
 	// Go through characters in the requestor
 	for(size_t i = 0; i < requestorLength; ++i) {
 	
@@ -110,7 +111,8 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -125,7 +127,7 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 		TRY {
 	
 			// Get private key
-			getPrivateKeyAndChainCode(&privateKey, NULL, *account);
+			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 			
 			// Get root public key from the private key
 			getPublicKeyFromPrivateKey((uint8_t *)rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);

@@ -33,27 +33,29 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, __
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get value from data
-	const uint64_t *value = (uint64_t *)&data[sizeof(*account)];
+	uint64_t value;
+	memcpy(&value, &data[sizeof(account)], sizeof(value));
 	
 	// Check if value is invalid
-	if(!*value) {
+	if(!value) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get commitment from data
-	const uint8_t *commitment = &data[sizeof(*account) + sizeof(*value)];
+	const uint8_t *commitment = &data[sizeof(account) + sizeof(value)];
 	
 	// Check if commitment is invalid
 	if(!commitmentIsValid(commitment)) {
@@ -63,15 +65,15 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, __
 	}
 	
 	// Get sender address from data
-	const uint8_t *senderAddress = &data[sizeof(*account) + sizeof(*value) + COMMITMENT_SIZE];
+	const uint8_t *senderAddress = &data[sizeof(account) + sizeof(value) + COMMITMENT_SIZE];
 	
 	// Get sender address length
-	const size_t senderAddressLength = dataLength - (sizeof(*account) + sizeof(*value) + COMMITMENT_SIZE);
+	const size_t senderAddressLength = dataLength - (sizeof(account) + sizeof(value) + COMMITMENT_SIZE);
 	
 	// Get payment proof message
-	uint8_t paymentProofMessage[getPaymentProofMessageLength(*value, senderAddressLength)];
+	uint8_t paymentProofMessage[getPaymentProofMessageLength(value, senderAddressLength)];
 	
-	getPaymentProofMessage(paymentProofMessage, *value, commitment, senderAddress, senderAddressLength);
+	getPaymentProofMessage(paymentProofMessage, value, commitment, senderAddress, senderAddressLength);
 	
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -86,7 +88,7 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, __
 		TRY {
 		
 			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, *account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&addressPrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
 			
 			// Get address public key from address private key
 			cx_ecfp_public_key_t addressPublicKey;

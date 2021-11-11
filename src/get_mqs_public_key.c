@@ -39,10 +39,11 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, __attribute__
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -61,7 +62,7 @@ void processGetMqsPublicKeyRequest(unsigned short *responseLength, __attribute__
 		TRY {
 		
 			// Get address private key at the MQS address private key index
-			getAddressPrivateKey(&addressPrivateKey, *account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
+			getAddressPrivateKey(&addressPrivateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
 			
 			// Get address public key from the address private key
 			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);

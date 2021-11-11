@@ -30,10 +30,11 @@ void processGetSeedCookieRequest(unsigned short *responseLength, __attribute__((
 	}
 	
 	// Get account from data
-	const uint32_t *account = (uint32_t *)data;
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
 	
 	// Check if account is invalid
-	if(*account > MAXIMUM_ACCOUNT) {
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -52,7 +53,7 @@ void processGetSeedCookieRequest(unsigned short *responseLength, __attribute__((
 		TRY {
 
 			// Get private key
-			getPrivateKeyAndChainCode(&privateKey, NULL, *account);
+			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 
 			// Get public key from the private key
 			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
