@@ -127,15 +127,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	if(!isZeroArray(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Check if public nonce is invalid
-		bool zeroArray;
-		if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE, &zeroArray)) {
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-		}
-		
-		// Check if public nonce as a public key is a zero array
-		if(zeroArray) {
+		if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
@@ -146,7 +138,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check if public key is invalid
-	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
+	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -224,7 +216,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if commitment is invalid
-			if(!commitmentIsValid(commitment)) {
+			if(!isValidCommitment(commitment)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

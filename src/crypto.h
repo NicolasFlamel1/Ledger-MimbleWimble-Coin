@@ -163,8 +163,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 // Verify payment proof message
 bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
 
-// Commitment is valid
-bool commitmentIsValid(const uint8_t *commitment);
+// Is valid commitment
+bool isValidCommitment(const uint8_t *commitment);
 
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
@@ -173,7 +173,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
 bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length);
 
 // Is valid secp256k1 public key
-bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length, bool *zeroArray);
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length);
 
 // Uncompress secp256k1 public key
 void uncompressSecp256k1PublicKey(uint8_t *publicKey);

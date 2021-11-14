@@ -13,9 +13,6 @@ sudo apt-get install libc6-dev gcc-multilib g++-multilib
 Download the Ledger Nano X SDK:
 ```
 git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
-cd nanox-secure-sdk
-git reset --hard a79eaf92aef434a5e63caca6b238fd00db523c8f
-cd ..
 ```
 Download the ARM and Clang development tools:
 ```
@@ -508,7 +505,7 @@ D101: Internal error
 ```
 
 ### Notes
-* The emulator doesn't implement the `cx_pbkdf2_sha512` related system calls for the Ledger Nano X, so the `Start encrypting MQS data` and `Start decrypting MQS data` commands can't be tested on an emulator for the Ledger Nano X.
+* The emulator doesn't implement the `cx_pbkdf2_sha512`, `cx_ecfp_scalar_mult`, and `cx_ecfp_add_point` related system calls for the Ledger Nano X, so most commands can't be tested on an emulator for the Ledger Nano X.
 * The emulator doesn't implement the `cx_ecdh` and `cx_edwards_decompress_point` functions for `CX_CURVE_Curve25519` curves, so the `Start encrypting Slatepack data` and `Start decrypting Slatepack data` commands can't be tested on an emulator.
-* This app can be built for the Ledger Nano S, however most commands will crash the Ledger Nano S since it doesn't have enough ram.
+* This app can be built for the Ledger Nano S, however a few commands will crash the Ledger Nano S since it doesn't have enough ram.
 * The app will reset its internal Slatepack, MQS data, and/or transaction state when unrelated commands are requested. For example, performing a `Start transaction` command followed by a `Get commitment` command will reset the app's internal transaction state thus requiring another `Start transaction` command to be performed before a `Continue transaction include output` command can be performed.

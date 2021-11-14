@@ -58,7 +58,7 @@ void processGetTorTransactionSignatureRequest(unsigned short *responseLength, __
 	const uint8_t *commitment = &data[sizeof(account) + sizeof(value)];
 	
 	// Check if commitment is invalid
-	if(!commitmentIsValid(commitment)) {
+	if(!isValidCommitment(commitment)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

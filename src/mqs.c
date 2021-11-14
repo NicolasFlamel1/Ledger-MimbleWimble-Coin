@@ -127,7 +127,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 	}
 	
 	// Check if decoded MQS address is invalid
-	if(memcmp(currencyInformation.mqsVersion, decodedMqsAddress, sizeof(currencyInformation.mqsVersion)) || !isValidSecp256k1PublicKey(&decodedMqsAddress[sizeof(currencyInformation.mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE, NULL)) {
+	if(memcmp(currencyInformation.mqsVersion, decodedMqsAddress, sizeof(currencyInformation.mqsVersion)) || !isValidSecp256k1PublicKey(&decodedMqsAddress[sizeof(currencyInformation.mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Return false
 		return false;
