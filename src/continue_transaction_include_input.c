@@ -106,7 +106,7 @@ void processContinueTransactionIncludeInputRequest(__attribute__((unused)) unsig
 			deriveBlindingFactor(blindingFactor, transaction.account, value, identifierPath, identifierDepth, switchType);
 			
 			// Update transaction's blinding factor with the negative blinding factor
-			updateBlindingFactorSum(transaction.blindingFactor, (uint8_t *)blindingFactor, false);
+			updateBlindingFactorSum((uint8_t *)transaction.blindingFactor, (uint8_t *)blindingFactor, false);
 		}
 		
 		// Finally

@@ -265,7 +265,7 @@ LDFLAGS += -Oz
 LDLIBS += -lm -lgcc -lc
 
 # Compiler Secp256k1-zkp settings
-CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_AGGSIG -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
+CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
 
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
@@ -349,9 +349,6 @@ dependencies:
 	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_scalar_is_even(/int secp256k1_scalar_is_even_unused(/g" scalar_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/a->d\[/a->data[/g" scalar_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_scalar_inverse(/void secp256k1_scalar_inverse_unused(/g" scalar_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_scalar_get_b32(&output64\[0\]/swapEndianness((uint8_t *)\&r, sizeof(r));swapEndianness((uint8_t *)\&s, sizeof(s));secp256k1_scalar_get_b32(\&output64[0]/g" secp256k1.c
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ge_from_storage(ge, &s);/swapEndianness((uint8_t *)\&s.x, sizeof(s.x));swapEndianness((uint8_t *)\&s.y, sizeof(s.y));secp256k1_ge_from_storage(ge, \&s);/g" secp256k1.c
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ge_to_storage(&s, ge);/secp256k1_ge_to_storage(\&s, ge);swapEndianness((uint8_t *)\&s.x, sizeof(s.x));swapEndianness((uint8_t *)\&s.y, sizeof(s.y));/g" secp256k1.c
 	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal(/int secp256k1_fe_equal_unused(/g" field_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal_var(/int secp256k1_fe_equal_var_unused(/g" field_impl.h
 	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_fe_inv(/void secp256k1_fe_inv_unused(/g" field_impl.h
@@ -368,3 +365,4 @@ dep/%.d: %.c Makefile
 # List variants
 listvariants:
 	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet
+

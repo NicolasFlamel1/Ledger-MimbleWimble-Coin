@@ -63,14 +63,18 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			// Get private key at the MQS address private key index
 			getAddressPrivateKey(&privateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
 			
-			// Multiply the uncompressed public key by the private key
-			cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len);
+			// Check if the product of the uncompressed public key by the private key is infinity or its x component is zero
+			if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len) || cx_math_is_zero(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 			
 			// Check if CX API is at least level 12
 			#if CX_APILEVEL >= 12
 			
 				// Get shared private key from the tweaked uncompressed public key and salt
-				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			
 			// Otherwise
 			#else
@@ -82,7 +86,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 				// TODO test cx_pbkdf2_sha512 on real hardware to see if the padding is necessary
 				
 				// Get shared private key from the tweaked uncompressed public key and padded salt
-				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			#endif
 		}
 		

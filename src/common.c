@@ -105,24 +105,6 @@ char toLowercase(char character) {
 	}
 }
 
-// Is zero array
-bool isZeroArray(const uint8_t *array, size_t length) {
-
-	// Go through all values in the array
-	for(size_t i = 0; i < length; ++i) {
-	
-		// Check if value isn't zero
-		if(array[i]) {
-		
-			// Return false
-			return false;
-		}
-	}
-	
-	// Return true
-	return true;
-}
-
 // Swap endianness
 void swapEndianness(uint8_t *value, size_t length) {
 

@@ -483,7 +483,7 @@ Class: C7
 Instruction: 1D
 Parameters one: Address type (Tor 00, MQS 01, Ed25519 02)
 Parameter two: 00
-Data: Secret nonce (32 bytes) | public nonce (use provided 33 bytes, use NULL 000000000000000000000000000000000000000000000000000000000000000000) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Data: Secret nonce (32 bytes) | public nonce (33 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C71D00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201
@@ -499,8 +499,8 @@ B102: Device locked
 B103: Malformed request
 B104: User rejected
 B105: Invalid parameters
+B106: Internal error
 D100: Invalid state
-D101: Internal error
 9000: Success
 ```
 

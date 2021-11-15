@@ -98,7 +98,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, __attribute__((
 			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			
 			// Commit value with the blinding factor
-			commitValue(commitment, value, (uint8_t *)blindingFactor);
+			commitValue((uint8_t *)commitment, value, (uint8_t *)blindingFactor);
 		}
 		
 		// Finally

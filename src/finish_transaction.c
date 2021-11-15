@@ -120,18 +120,24 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Get secret nonce from data
+	const uint8_t *secretNonce = data;
+	
+	// Check if secret nonce is invalid
+	if(cx_math_is_zero(secretNonce, NONCE_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Get public nonce from data
 	const uint8_t *publicNonce = &data[NONCE_SIZE];
 	
-	// Check if public nonce is used
-	if(!isZeroArray(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	// Check if public nonce is invalid
+	if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
-		// Check if public nonce is invalid
-		if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-		}
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public key from data
@@ -206,7 +212,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Check if data is invalid
-			if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE + sizeof(uint8_t)) {
+			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -370,10 +376,10 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 
 	// Get request's data
-	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Get secret nonce from data
-	const uint8_t *secretNonce = data;
+	uint8_t *secretNonce = data;
 	
 	// Get public nonce from data
 	const uint8_t *publicNonce = &data[NONCE_SIZE];
@@ -499,35 +505,11 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	uint8_t message[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(message, sizeof(message), kernelData, kernelDataLength, NULL, 0);
 	
-	// Initialize private key
-	volatile cx_ecfp_private_key_t privateKey;
-
 	// Initialize signature
-	volatile uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
+	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
 
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-	
-			// Get private key from the transaction's blinding factor
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
-			
-			// Create single-signer signature from the message, private key, secret nonce, public nonce if used, and public key
-			createSingleSignerSignature(signature, message, (cx_ecfp_private_key_t *)&privateKey, secretNonce, isZeroArray(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE) ? NULL : publicNonce, publicKey);
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Clear the private key
-			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
-		}
-	}
-	
-	// End try
-	END_TRY;
+	// Create single-signer signature from the message, private key, secret nonce, public nonce if used, and public key
+	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, secretNonce, publicNonce, publicKey);
 	
 	// Check if response with the signature will overflow
 	if(willResponseOverflow(*responseLength, sizeof(signature))) {

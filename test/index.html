@@ -1602,9 +1602,6 @@
 			// Address type
 			const ADDRESS_TYPE = TOR_SENDER_ADDRESS_TYPE;
 			
-			// No public nonce
-			const NO_PUBLIC_NONCE = (new Uint8Array(Crypto.SECP256K1_PUBLIC_KEY_LENGTH)).fill(0);
-			
 			// Log output
 			console.log("Using output: " + OUTPUT.toFixed());
 			
@@ -1748,8 +1745,8 @@
 			// Check if features is coinbase
 			if(features === SlateKernel.COINBASE_FEATURES) {
 				
-				// Don't use a public nonce
-				var publicNonce = NO_PUBLIC_NONCE;
+				// Get public nonce from secret nonce
+				var publicNonce = Secp256k1Zkp.publicKeyFromSecretKey(secretNonce);
 				
 				// Get excess from commit and over commit
 				let excess = Secp256k1Zkp.pedersenCommitSum([
@@ -1848,7 +1845,7 @@
 			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
 			
 			// Check if signature is invalid
-			if(Secp256k1Zkp.verifySingleSignerSignature(response, messageToSign, (Common.arraysAreEqual(publicNonce, NO_PUBLIC_NONCE) === true) ? Secp256k1Zkp.NO_PUBLIC_NONCE : publicNonce, publicKey, publicKey, false) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(response, messageToSign, publicNonce, publicKey, publicKey, false) === false) {
 			
 				// Throw error
 				throw "Invalid signature: " + Common.toHexString(response);

@@ -50,6 +50,17 @@ void processGetBulletproofTOneAndTTwoRequest(unsigned short *responseLength, __a
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Get identifier path from data
+	uint32_t identifierPath[identifierDepth];
+	memcpy(identifierPath, &data[sizeof(account) + sizeof(identifierDepth)], sizeof(identifierPath));
+	
+	// Go through all parts in the identifier path
+	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
+	
+		// Convert part from big endian to little endian
+		identifierPath[i] = os_swap_u32(identifierPath[i]);
+	}
+	
 	// Get value from data
 	uint64_t value;
 	memcpy(&value, &data[sizeof(account) + IDENTIFIER_SIZE], sizeof(value));
@@ -69,17 +80,6 @@ void processGetBulletproofTOneAndTTwoRequest(unsigned short *responseLength, __a
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
-	// Get identifier path from data
-	uint32_t identifierPath[identifierDepth];
-	memcpy(identifierPath, &data[sizeof(account) + sizeof(identifierDepth)], sizeof(identifierPath));
-	
-	// Go through all parts in the identifier path
-	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
-	
-		// Convert part from big endian to little endian
-		identifierPath[i] = os_swap_u32(identifierPath[i]);
 	}
 	
 	// Initialize blinding factor

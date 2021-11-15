@@ -56,6 +56,13 @@ void processStartEncryptingMqsDataRequest(unsigned short *responseLength, __attr
 	// Get public key from data
 	uint8_t *publicKey = &data[sizeof(account)];
 	
+	// Check if public key is invalid
+	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Initialize salt
 	uint8_t salt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE];
 	

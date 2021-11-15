@@ -48,6 +48,13 @@ void processStartDecryptingSlatepackDataRequest(__attribute__((unused)) unsigned
 	// Get public key from data
 	const uint8_t *publicKey = &data[sizeof(account)];
 	
+	// Check if public key is invalid
+	if(!isValidEd25519PublicKey(publicKey, ED25519_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Get nonce from data
 	uint8_t nonce[CHACHA20_NONCE_SIZE];
 	memcpy(nonce, &data[sizeof(account) + ED25519_PUBLIC_KEY_SIZE], sizeof(nonce));

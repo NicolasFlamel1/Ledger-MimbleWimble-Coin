@@ -56,6 +56,13 @@ void processStartDecryptingMqsDataRequest(__attribute__((unused)) unsigned short
 	// Get public key from data
 	uint8_t *publicKey = &data[sizeof(account)];
 	
+	// Check if public key is invalid
+	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Get salt from data
 	uint8_t *salt = &data[sizeof(account) + COMPRESSED_PUBLIC_KEY_SIZE];
 	

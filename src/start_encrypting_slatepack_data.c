@@ -48,6 +48,13 @@ void processStartEncryptingSlatepackDataRequest(unsigned short *responseLength, 
 	// Get public key from data
 	const uint8_t *publicKey = &data[sizeof(account)];
 	
+	// Check if public key is invalid
+	if(!isValidEd25519PublicKey(publicKey, ED25519_PUBLIC_KEY_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Initialize shared private key
 	volatile uint8_t sharedPrivateKey[SLATEPACK_SHARED_PRIVATE_KEY_SIZE];
 	

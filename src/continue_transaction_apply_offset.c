@@ -21,7 +21,7 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength != BLINDING_FACTOR_SIZE) {
@@ -31,7 +31,7 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 	}
 	
 	// Get offset from data
-	const uint8_t *offset = data;
+	uint8_t *offset = data;
 	
 	// Check if offset is invalid
 	if(!isValidSecp256k1PrivateKey(offset, BLINDING_FACTOR_SIZE)) {
@@ -62,7 +62,7 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 	}
 	
 	// Update transaction's blinding factor with the offset as a negative blinding factor
-	updateBlindingFactorSum(transaction.blindingFactor, offset, false);
+	updateBlindingFactorSum((uint8_t *)transaction.blindingFactor, offset, false);
 	
 	// Set that transaction's offset was applied
 	transaction.offsetApplied = true;

@@ -107,15 +107,15 @@ static void secp256k1_fe_negate(secp256k1_fe *result, const secp256k1_fe *fieldE
 	// Otherwise
 	else {
 	
-		// Set the result to the curve prime minus the field element
-		cx_math_sub(result->data, SECP256K1_CURVE_PRIME, fieldElement->data, sizeof(result->data));
+		// Set the result to the curve prime minus the field element modulo the curve prime
+		cx_math_subm(result->data, SECP256K1_CURVE_PRIME, fieldElement->data, SECP256K1_CURVE_PRIME, sizeof(result->data));
 	}
 }
 
 // Secp256k1 field element multiply int
 static void secp256k1_fe_mul_int(secp256k1_fe *fieldElement, int value) {
 
-	// Set field element to the product of the field element and value modulo the curve  prime
+	// Set field element to the product of the field element and value modulo the curve prime
 	uint8_t temp[sizeof(fieldElement->data)] = {};
 	U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
 	

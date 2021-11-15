@@ -125,7 +125,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType);
 
 // Commit value
-void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor);
+void commitValue(uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor);
 
 // Get rewind nonce
 void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment);
@@ -137,10 +137,10 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve);
 
 // Update blinding factor sum
-void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive);
+void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive);
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
+void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
 
 // Get encrypted data length
 size_t getEncryptedDataLength(size_t dataLength);

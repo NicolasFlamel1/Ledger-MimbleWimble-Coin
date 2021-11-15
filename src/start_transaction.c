@@ -54,13 +54,6 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	// Get transaction's fee from data
 	memcpy(&transaction.fee, &data[sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input)], sizeof(transaction.fee));
 	
-	// Check if remaining output and input are invalid
-	if(!transaction.remainingOutput && !input) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
 	// Check if an input exists
 	if(input) {
 	
@@ -168,11 +161,22 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		transaction.send = input - transaction.remainingOutput;
 	}
 	
-	// Otherwise check if data is invalid
-	else if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee)) {
+	// Otherwise
+	else {
 	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
+		// Check if data is invalid
+		if(dataLength != sizeof(transaction.account) + sizeof(transaction.remainingOutput) + sizeof(input) + sizeof(transaction.fee)) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
+		// Check if remaining output is invalid
+		if(!transaction.remainingOutput) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
 	}
 	
 	// Set that transaction has been started

@@ -149,8 +149,8 @@ static void secp256k1_scalar_negate(secp256k1_scalar *result, const secp256k1_sc
 	// Otherwise
 	else {
 	
-		// Set result to the curve order minus the scalar
-		cx_math_sub(result->data, SECP256K1_CURVE_ORDER, scalar->data, sizeof(scalar->data));
+		// Set result to the curve order minus the scalar modulo the curve order
+		cx_math_subm(result->data, SECP256K1_CURVE_ORDER, scalar->data, SECP256K1_CURVE_ORDER, sizeof(scalar->data));
 	}
 }
 

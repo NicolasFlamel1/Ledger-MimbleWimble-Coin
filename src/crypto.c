@@ -5,7 +5,6 @@
 #include "crypto.h"
 #include "currency_information.h"
 #include "mqs.h"
-#include "secp256k1_aggsig.h"
 #include "secp256k1_bulletproofs.h"
 #include "secp256k1_preallocated.h"
 #include "tor.h"
@@ -112,9 +111,6 @@ static const size_t NODE_SIZE = 64;
 // Chain code size
 static const size_t CHAIN_CODE_SIZE = 32;
 
-// Single-signer seed size
-static const size_t SINGLE_SIGNER_SEED_SIZE = 32;
-
 // BIP32 path without coin type and account
 static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
 
@@ -183,13 +179,6 @@ static const uint8_t COMMITMENT_ODD_PREFIX = 9;
 // Get private key and chain code
 void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account) {
 
-	// Check if account is invalid
-	if(account > MAXIMUM_ACCOUNT) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-
 	// Copy BIP32 path without coin type and account
 	uint32_t bip32Path[ARRAYLEN(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT)];
 	memcpy(bip32Path, BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
@@ -245,8 +234,8 @@ void getPublicKeyFromPrivateKey(uint8_t *publicKey, const cx_ecfp_private_key_t 
 	// Set prefix in the public key
 	publicKey[0] = (uncompressedPublicKey.W[uncompressedPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 	
-	// Set X part in the public key
-	memcpy(&publicKey[PUBLIC_KEY_PREFIX_SIZE], &uncompressedPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], COMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+	// Set x component in the public key
+	memcpy(&publicKey[PUBLIC_KEY_PREFIX_SIZE], &uncompressedPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
 }
 
 // Derive child key
@@ -393,12 +382,12 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 					{
 					
 						// Get commitment from value and child's private key
-						volatile uint8_t *commitment = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
+						uint8_t commitment[COMMITMENT_SIZE];
 						commitValue(commitment, value, (uint8_t *)childPrivateKey.d);
 						
 						// Add commitment to the hash
 						cx_sha256_init((cx_sha256_t *)&hash);
-						cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, COMMITMENT_SIZE, NULL, 0);
+						cx_hash((cx_hash_t *)&hash, 0, commitment, sizeof(commitment), NULL, 0);
 						
 						// Get product of the generator public key and the child's private key
 						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_J_PUBLIC, sizeof(GENERATOR_J_PUBLIC));
@@ -407,19 +396,8 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 						volatile uint8_t *y = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 						swapEndianness((uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
 						
-						// Check if the result is infinity
-						if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, sizeof(publicKeyGenerator), (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE)) {
-						
-							// Throw internal error error
-							THROW(INTERNAL_ERROR_ERROR);
-						}
-						
-						// Normalize the result's components
-						cx_math_modm((uint8_t *)x, sizeof(PUBLIC_KEY_COMPONENT_SIZE), SECP256K1_CURVE_PRIME, sizeof(PUBLIC_KEY_COMPONENT_SIZE));
-						cx_math_modm((uint8_t *)y, sizeof(PUBLIC_KEY_COMPONENT_SIZE), SECP256K1_CURVE_PRIME, sizeof(PUBLIC_KEY_COMPONENT_SIZE));
-						
-						// Check if result's x component is zero
-						if(cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
+						// Check if the result is infinity or its x component is zero
+						if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, sizeof(publicKeyGenerator), (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE) || cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
 						
 							// Throw internal error error
 							THROW(INTERNAL_ERROR_ERROR);
@@ -440,6 +418,13 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 						
 						// Add the child's private key to the blinding factor
 						cx_math_addm((uint8_t *)blindingFactor, (uint8_t *)blindingFactor, (uint8_t *)childPrivateKey.d, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+						
+						// Check if blinding factor isn't a valid secret key
+						if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactor, BLINDING_FACTOR_SIZE)) {
+						
+							// Throw internal error error
+							THROW(INTERNAL_ERROR_ERROR);
+						}
 					}
 				
 					// Break
@@ -467,100 +452,68 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 }
 
 // Commit value
-void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor) {
+void commitValue(uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor) {
 
-	// Check if value is zero or the blinding factor overflowed
-	if(cx_math_cmp(blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE) >= 0) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
+	// Check if value isn't zero
+	uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	bool isInfinity = true;
+	if(value) {
+
+		// Get product of the value and its generator
+		memcpy(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_H, sizeof(GENERATOR_H));
+		uint8_t temp[BLINDING_FACTOR_SIZE] = {};
+		U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
+		U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+		
+		isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
 	}
 	
-	// Initialize generators
-	volatile uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-	volatile uint8_t blindGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-
-	// Begin try
-	BEGIN_TRY {
+	// Get product of the blind and its generator
+	uint8_t blindGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
 	
-		// Try
-		TRY {
-		
-			// Check if value isn't zero
-			bool isInfinity = true;
-			if(value) {
-		
-				// Get product of the value and its generator
-				memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_H, sizeof(GENERATOR_H));
-				uint8_t temp[BLINDING_FACTOR_SIZE] = {};
-				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
-				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
-				
-				isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
-			}
-			
-			// Get product of the blind and its generator
-			memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
-			
-			// Check if the result isn't infinity
-			if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE) && cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
-			
-				// Check if product of value and its generator isn't infinity
-				if(!isInfinity) {
-			
-					// Get sum of products
-					isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
-				}
-				
-				// Otherwise
-				else {
-				
-					// Get sum of products
-					memcpy((uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
-					
-					// Set that result isn't infinity
-					isInfinity = false;
-				}
-			}
-			
-			// Check if result is infinity
-			if(isInfinity) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Normalize the result's component
-			volatile uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
-			cx_math_modm((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			volatile uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-			cx_math_modm((uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			// Copy x component to the commitment
-			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			// Get the square of the result's y component's square root
-			volatile uint8_t *squareRootSquared = x;
-			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			const uint8_t two[] = {2};
-			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			// Set commitment's prefix
-			commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+	// Check if the result isn't infinity
+	if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE) && cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
+	
+		// Check if product of value and its generator isn't infinity or its x component is zero
+		if(!isInfinity && !cx_math_is_zero(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+			// Get sum of products
+			isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, valueGenerator, valueGenerator, blindGenerator, sizeof(valueGenerator));
 		}
 		
-		// Finally
-		FINALLY {
+		// Otherwise
+		else {
 		
-			// Clear the generators
-			explicit_bzero((uint8_t *)valueGenerator, sizeof(valueGenerator));
-			explicit_bzero((uint8_t *)blindGenerator, sizeof(blindGenerator));
+			// Get sum of products
+			memcpy(valueGenerator, blindGenerator, sizeof(valueGenerator));
+			
+			// Set that result isn't infinity
+			isInfinity = false;
 		}
 	}
 	
-	// End try
-	END_TRY;
+	// Check if result is infinity or its x component is zero
+	if(isInfinity || cx_math_is_zero(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
+	
+	// Copy x component to the commitment
+	uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
+	memcpy(&commitment[PUBLIC_KEY_PREFIX_SIZE], x, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Get the square of the result's y component's square root
+	uint8_t *squareRootSquared = x;
+	uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	const uint8_t two[] = {2};
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Set commitment's prefix
+	commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp(squareRootSquared, y, PUBLIC_KEY_COMPONENT_SIZE);
 }
 
 // Get rewind nonce
@@ -713,143 +666,84 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 }
 
 // Update blinding factor sum
-void updateBlindingFactorSum(volatile uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive) {
+void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive) {
 
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_NONE)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_NONE);
+	// Check if blinding factor isn't positive
+	if(!blindingFactorIsPositive) {
 	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-		
-			// Initialize blinding factors
-			const uint8_t *blindingFactors[] = {
-			
-				// Blinding factor sum
-				(uint8_t *)blindingFactorSum,
-				
-				// Blinding factor
-				blindingFactor
-			}; 
-	
-			// Check if performing Pedersen blind sum with the blinding factor sum and the blinding factor failed
-			if(!secp256k1_pedersen_blind_sum((secp256k1_context *)context, (uint8_t *)blindingFactorSum, blindingFactors, ARRAYLEN(blindingFactors), ARRAYLEN(blindingFactors) - (blindingFactorIsPositive ? 0 : 1))) {
-				
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-			
-			// Check if blinding factor sum isn't a zero blinding factor
-			if(!isZeroArray((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
-			
-				// Check if blinding factor sum isn't a valid secret key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactorSum, BLINDING_FACTOR_SIZE)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
-		}
+		// Negate the blinding factor
+		cx_math_subm(blindingFactor, SECP256K1_CURVE_ORDER, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
 	}
 	
-	// End try
-	END_TRY;
+	// Add blinding factor to the blinding factor sum
+	cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+	
+	// Check if blinding factor sum is invalid
+	if(!isValidSecp256k1PrivateKey(blindingFactorSum, BLINDING_FACTOR_SIZE)) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
 }
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const cx_ecfp_private_key_t *privateKey, const uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
+void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
 
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_SIGN)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_SIGN);
+	// Normalize the secret nonce
+	cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
+
+	// Get the product of the secret nonce and its generator
+	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
 	
-	// Initialize seed
-	volatile uint8_t seed[SINGLE_SIGNER_SEED_SIZE];
+	// Check if the result is infinity or its x component is zero
+	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretNonce, NONCE_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-		
-			// Create random seed
-			cx_rng((uint8_t *)seed, sizeof(seed));
-			
-			// Check if a public nonce is provided
-			secp256k1_pubkey publicNonceData;
-			if(publicNonce) {
-			
-				// Check if parsing public nonce failed
-				if(!secp256k1_ec_pubkey_parse((secp256k1_context *)context, &publicNonceData, publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
-				// Check if public nonce is a zero array
-				if(isZeroArray(publicNonceData.data, sizeof(publicNonceData.data))) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
-			
-			// Check if parsing public key failed
-			secp256k1_pubkey publicKeyData;
-			if(!secp256k1_ec_pubkey_parse((secp256k1_context *)context, &publicKeyData, publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Check if public key is a zero array
-			if(isZeroArray(publicKeyData.data, sizeof(publicKeyData.data))) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-		
-			// Check if creating single-signer signature failed
-			secp256k1_ecdsa_signature signatureData;
-			if(!secp256k1_aggsig_sign_single((secp256k1_context *)context, signatureData.data, message, privateKey->d, secretNonce, NULL, publicNonce ? &publicNonceData : NULL, publicNonce ? &publicNonceData : NULL, &publicKeyData, (uint8_t *)seed)) {
-			
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-			
-			// Check if serializing signature failed
-			if(!secp256k1_ecdsa_signature_serialize_compact((secp256k1_context *)context, (uint8_t *)signature, &signatureData)) {
-			
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Clear the seed
-			explicit_bzero((uint8_t *)seed, sizeof(seed));
-		
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
-		}
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
 	}
 	
-	// End try
-	END_TRY;
+	// Uncompress public nonce
+	uint8_t uncompressedPublicNonce[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+	memcpy(uncompressedPublicNonce, publicNonce, COMPRESSED_PUBLIC_KEY_SIZE);
+	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
+	
+	// Get the square root of the uncompressed public nonce's y component squared
+	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
+	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
+	
+	const uint8_t two[] = {2};
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
+	
+	// Check if the uncompressed public nonce's y component isn't a quadratic residue
+	if(memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+		// Negate the secret nonce
+		cx_math_subm(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE);
+	}
+	
+	// Get signature hash from the public nonce's x component, public key, and message
+	cx_sha256_t hash;
+	cx_sha256_init(&hash);
+	cx_hash((cx_hash_t *)&hash, 0, &publicNonce[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, NULL, 0);
+	cx_hash((cx_hash_t *)&hash, 0, publicKey, COMPRESSED_PUBLIC_KEY_SIZE, NULL, 0);
+	uint8_t signatureHash[CX_SHA256_SIZE];
+	cx_hash((cx_hash_t *)&hash, CX_LAST, message, SINGLE_SIGNER_MESSAGE_SIZE, signatureHash, sizeof(signatureHash));
+	
+	// Normalize the signature hash
+	cx_math_modm(signatureHash, sizeof(signatureHash), SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
+	
+	// Set signature's r component
+	uint8_t *r = signature;
+	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+	swapEndianness(r, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Calculate the signature's s component
+	uint8_t *s = &signature[PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_multm(s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_addm(s, s, secretNonce, SECP256K1_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	swapEndianness(s, PUBLIC_KEY_COMPONENT_SIZE);
 }
 
 // Get encrypted data length
@@ -1435,7 +1329,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 		if(!cx_math_is_zero(y, PUBLIC_KEY_COMPONENT_SIZE)) {
 		
 			// Negate the y component
-			cx_math_sub(y, SECP256K1_CURVE_PRIME, y, PUBLIC_KEY_COMPONENT_SIZE);
+			cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 		}
 	}
 	

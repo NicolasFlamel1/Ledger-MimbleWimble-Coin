@@ -46,11 +46,11 @@ enum Error {
 	// Invalid parameters error
 	INVALID_PARAMETERS_ERROR,
 	
-	// Invalid state error
-	INVALID_STATE_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01,
-	
 	// Internal error error
-	INTERNAL_ERROR_ERROR
+	INTERNAL_ERROR_ERROR,
+	
+	// Invalid state error
+	INVALID_STATE_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01
 };
 
 
@@ -70,9 +70,6 @@ char toUppercase(char character);
 
 // To lowercase
 char toLowercase(char character);
-
-// Is zero array
-bool isZeroArray(const uint8_t *array, size_t length);
 
 // Swap endianness
 void swapEndianness(uint8_t *value, size_t length);
