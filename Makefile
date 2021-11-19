@@ -264,9 +264,6 @@ LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -Oz
 LDLIBS += -lm -lgcc -lc
 
-# Compiler Secp256k1-zkp settings
-CFLAGS += -D USE_NUM_NONE -D USE_FIELD_INV_BUILTIN -D USE_SCALAR_INV_BUILTIN -D USE_ECMULT_STATIC_PRECOMPUTATION -D ENABLE_MODULE_GENERATOR -D ENABLE_MODULE_BULLETPROOF -I src/secp256k1-zkp-master
-
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
 
@@ -305,57 +302,6 @@ run: all
 	# Run application in emulator
 	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
 
-# Dependencies command
-dependencies:
-	
-	# Create Secp256k1-zkp dependency
-	wget "https://github.com/NicolasFlamel1/secp256k1-zkp/archive/master.zip"
-	cd src && unzip ../master.zip
-	cd src/secp256k1-zkp-master/src && rm -r asm java bench* test* gen_context.c hash.h hash_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_A 5/#define WINDOW_A 2/g" ecmult_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#define WINDOW_G 16/#define WINDOW_G 2/g" ecmult_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf/\/\/fprintf/g" secp256k1.c
-	cd src/secp256k1-zkp-master/src && sed -i "s/abort/\/\/abort/g" secp256k1.c
-	cd src/secp256k1-zkp-master/src && sed -i "s/fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);/\/*fprintf(stderr, \"%s:%d: %s\\\\n\", __FILE__, __LINE__, msg);*\//g" util.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/abort();/\/*abort();*\//g" util.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#include \"ecmult_static_context.h\"/\/\/#include \"ecmult_static_context.h\"/g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_static_context/NULL/g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/return ctx->prec != NULL;/return ctx->prec == NULL;/g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/secp256k1_ecmult_gen(const/secp256k1_ecmult_gen_unused(const/g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#endif \/\* SECP256K1_ECMULT_GEN_IMPL_H \*\///g" ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "#include \"crypto.h\"" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "#include \"device.h\"" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "static void secp256k1_ecmult_gen(__attribute__((unused)) const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    uint8_t n[SCALAR_DATA_SIZE];" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_scalar_get_b32(n, gn);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), n, sizeof(n));" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe x;" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&x, &generator[PUBLIC_KEY_PREFIX_SIZE]);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe y;" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_fe_set_b32(&y, &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE]);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge g;" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_ge_set_xy(&g, &x, &y);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    secp256k1_gej_set_ge(r, &g);" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "    memset(n, 0, sizeof(n));" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "}" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src && echo "#endif /* SECP256K1_ECMULT_GEN_IMPL_H */" >> ecmult_gen_impl.h
-	cd src/secp256k1-zkp-master/src/modules/bulletproofs && sed -i "s/commits == NULL) ||/commits == NULL) || 1 || /g" main_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select field implementation\"/#include \"field_ledger.h\"/g" field.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select field implementation\"/#include \"field_ledger_impl.h\"/g" field_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger.h\"/g" scalar.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/#error \"Please select scalar implementation\"/#include \"scalar_ledger_impl.h\"/g" scalar_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_scalar_is_even(/int secp256k1_scalar_is_even_unused(/g" scalar_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/a->d\[/a->data[/g" scalar_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_scalar_inverse(/void secp256k1_scalar_inverse_unused(/g" scalar_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal(/int secp256k1_fe_equal_unused(/g" field_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_equal_var(/int secp256k1_fe_equal_var_unused(/g" field_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/void secp256k1_fe_inv(/void secp256k1_fe_inv_unused(/g" field_impl.h
-	cd src/secp256k1-zkp-master/src && sed -i "s/int secp256k1_fe_sqrt(/int secp256k1_fe_sqrt_unused(/g" field_impl.h
-	cd src/secp256k1-zkp-master && grep -rlP "memset\([^,]+, 0," | xargs sed -i -E "s/memset\(([^,]+), 0(x00)?,/explicit_bzero(\1,/g"
-	rm master.zip
-
 # Include BOLOS SDK Makefile rules
 include $(BOLOS_SDK)/Makefile.rules
 
@@ -365,4 +311,3 @@ dep/%.d: %.c Makefile
 # List variants
 listvariants:
 	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet
-

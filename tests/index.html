@@ -53,14 +53,11 @@
 		// Request get commitment instruction
 		const REQUEST_GET_COMMITMENT_INSTRUCTION = REQUEST_GET_SEED_COOKIE_INSTRUCTION + 1;
 
-		// Request get bulletproof tau x instruction
-		const REQUEST_GET_BULLETPROOF_TAU_X_INSTRUCTION = REQUEST_GET_COMMITMENT_INSTRUCTION + 1;
-
-		// Request get bulletproof t one and t two instruction
-		const REQUEST_GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION = REQUEST_GET_BULLETPROOF_TAU_X_INSTRUCTION + 1;
+		// Request get bulletproof components instruction
+		const REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION = REQUEST_GET_COMMITMENT_INSTRUCTION + 1;
 
 		// Request get Tor public key instruction
-		const REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION + 1;
+		const REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION + 1;
 
 		// Request get Tor transaction signature instruction
 		const REQUEST_GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION = REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION + 1;
@@ -210,15 +207,6 @@
 					// Check transport method
 					switch(transportMethod) {
 					
-						// HTTP
-						case "HTTP":
-						
-							// Connect to the hardware wallet using HTTP
-							var hardwareWallet = await HttpTransport().open("http://localhost:9998");
-							
-							// Break
-							break;
-						
 						// USB
 						case "USB":
 						
@@ -234,6 +222,15 @@
 							// Connect to the hardware wallet using Bluetooth
 							var hardwareWallet = await BluetoothTransport.create();
 						
+							// Break
+							break;
+						
+						// HTTP
+						case "HTTP":
+						
+							// Connect to the hardware wallet using HTTP
+							var hardwareWallet = await HttpTransport().open("http://localhost:9998");
+							
 							// Break
 							break;
 					}
@@ -668,8 +665,8 @@
 			// Get expected bulletproof from the extended private key, amount, identifier, switch type, and proof builder
 			let expectedBulletproof = await Crypto.proof(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType, proofBuilder);
 			
-			// Get bulletproof tau x from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_TAU_X_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			// Get bulletproof components from the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 						
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
@@ -685,29 +682,13 @@
 			]));
 			
 			// Get tau x from response
-			let tauX = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Get bulletproof t one and t two from the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Identifier
-				Buffer.from(IDENTIFIER.getValue()),
-				
-				// Amount
-				Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Switch type
-				Buffer.from(new Uint8Array([switchType]))
-			]));
+			let tauX = response.subarray(0, Crypto.TAU_X_LENGTH);
 			
 			// Get t one from response
-			let tOne = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+			let tOne = response.subarray(Crypto.TAU_X_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 			
 			// Get t two from response
-			let tTwo = response.subarray(Crypto.SECP256K1_PUBLIC_KEY_LENGTH, Crypto.SECP256K1_PUBLIC_KEY_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+			let tTwo = response.subarray(Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 			
 			// Get commitment from the extended private key, amount, identifier, and switch type
 			let commitment = await Crypto.commit(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType);
@@ -1876,6 +1857,9 @@
 			// Input identifier
 			const INPUT_IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
 			
+			// Input switch type
+			const INPUT_SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
+			
 			// Log output
 			console.log("Using output: " + OUTPUT.toFixed());
 			
@@ -2000,7 +1984,7 @@
 			}
 			
 			// Get random commitment
-			let commit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, switchType);
+			let commit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
 			
 			// Set payment proof message
 			let paymentProofMessage = Slate.getPaymentProofMessage(INPUT.minus(OUTPUT), commit, senderAddress);
@@ -2067,7 +2051,7 @@
 			let outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
 			
 			// Get the input's blinding factor
-			let inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, switchType);
+			let inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
 			
 			// Get the sum of all the transaction's blinding factors
 			let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], [inputBlindingFactor]);
@@ -2117,7 +2101,7 @@
 				Buffer.from((INPUT.plus(FEE)).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 				
 				// Switch type
-				Buffer.from(new Uint8Array([switchType]))
+				Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
 			]));
 			
 			// Get the transaction public key from the hardware wallet
@@ -2314,14 +2298,14 @@
 	<form>
 		<p>Choose hardware wallet transport method:</p>
 		<div>
-			<input type="radio" id="transportMethodHttp" name="transportMethod" value="HTTP" checked>
-			<label for="transportMethodHttp">HTTP</label>
-
-			<input type="radio" id="transportMethodUsb" name="transportMethod" value="USB">
+			<input type="radio" id="transportMethodUsb" name="transportMethod" value="USB" checked>
 			<label for="transportMethodUsb">USB</label>
 
 			<input type="radio" id="transportMethodBluetooth" name="transportMethod" value="Bluetooth">
 			<label for="transportMethodBluetooth">Bluetooth</label>
+			
+			<input type="radio" id="transportMethodHttp" name="transportMethod" value="HTTP">
+			<label for="transportMethodHttp">HTTP</label>
 		</div>
 		<div>
 			<button type="submit" disabled>Loading…</button>

@@ -2,13 +2,7 @@
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
-#include "get_bulletproof_tau_x.h"
-
-
-// Definitions
-
-// Proof message size
-#define PROOF_MESSAGE_SIZE 20
+#include "get_bulletproof_components.h"
 
 
 // Constants
@@ -25,8 +19,8 @@ static const size_t TAU_X_SIZE = 32;
 
 // Supporting function implementation
 
-// Process get bulletproof tau x request
-void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process get bulletproof components request
+void processGetBulletproofComponentsRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -117,6 +111,10 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	// Initialize bulletproof tau x
 	volatile uint8_t bulletproofTauX[TAU_X_SIZE];
 	
+	// Initialize bulletproof t one and t two
+	volatile uint8_t bulletproofTOne[COMPRESSED_PUBLIC_KEY_SIZE];
+	volatile uint8_t bulletproofTTwo[COMPRESSED_PUBLIC_KEY_SIZE];
+	
 	// Begin try
 	BEGIN_TRY {
 	
@@ -127,8 +125,8 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			
 			// Commit value with the blinding factor
-			uint8_t commitment[COMMITMENT_SIZE];
-			commitValue(commitment, value, (uint8_t *)blindingFactor);
+			uint8_t commitment[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			commitValue(commitment, value, (uint8_t *)blindingFactor, false);
 			
 			// Get rewind nonce
 			uint8_t rewindNonce[NONCE_SIZE];
@@ -137,8 +135,8 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 			// Get private nonce
 			getPrivateNonce(privateNonce, account, commitment);
 			
-			// Calculate bulletproof tau x
-			calculateBulletproofTauX(bulletproofTauX, value, (uint8_t *)blindingFactor, rewindNonce, (uint8_t *)privateNonce, proofMessage);
+			// Calculate bulletproof components
+			calculateBulletproofComponents((uint8_t *)bulletproofTauX, (uint8_t *)bulletproofTOne, (uint8_t *)bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, rewindNonce, (uint8_t *)privateNonce, proofMessage);
 		}
 		
 		// Finally
@@ -155,17 +153,25 @@ void processGetBulletproofTauXRequest(unsigned short *responseLength, __attribut
 	// End try
 	END_TRY;
 	
-	// Check if response with the bulletproof tau x will overflow
-	if(willResponseOverflow(*responseLength, sizeof(bulletproofTauX))) {
+	// Check if response with the bulletproof tau x, t one, and t two will overflow
+	if(willResponseOverflow(*responseLength, sizeof(bulletproofTauX) + sizeof(bulletproofTOne) + sizeof(bulletproofTTwo))) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 
-	// Append bulletproof tau x to response
+	// Append bulletproof tau x, t one, and t two to response
 	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)bulletproofTauX, sizeof(bulletproofTauX));
 	
 	*responseLength += sizeof(bulletproofTauX);
+	
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)bulletproofTOne, sizeof(bulletproofTOne));
+	
+	*responseLength += sizeof(bulletproofTOne);
+	
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)bulletproofTTwo, sizeof(bulletproofTTwo));
+	
+	*responseLength += sizeof(bulletproofTTwo);
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

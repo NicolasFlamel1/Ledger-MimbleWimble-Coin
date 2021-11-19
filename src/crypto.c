@@ -2,15 +2,38 @@
 #include <os.h>
 #include <string.h>
 #include "blake2b.h"
+#include "chacha20_poly1305.h"
+#include "common.h"
 #include "crypto.h"
 #include "currency_information.h"
+#include "generators.h"
 #include "mqs.h"
-#include "secp256k1_bulletproofs.h"
-#include "secp256k1_preallocated.h"
 #include "tor.h"
 
 
+// Definitions
+
+// Scalar size
+#define SCALAR_SIZE 32
+
+
+// Structures
+
+// LR generator
+struct LrGenerator {
+
+	// Yn
+	uint8_t yn[SCALAR_SIZE];
+	
+	// Z22n
+	uint8_t z22n[SCALAR_SIZE];
+};
+
+
 // Constants
+
+// Public key component size
+const size_t PUBLIC_KEY_COMPONENT_SIZE = 32;
 
 // Nonce size
 const size_t NONCE_SIZE = 32;
@@ -45,32 +68,33 @@ const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 // Odd compressed public key prefix
 const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX = 0x03;
 
-// Uncompressed public key prefix
-const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04;
-
 // Ed25519 compressed public key prefix
 const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
 
 // Ed25519 signature size
 const size_t ED25519_SIGNATURE_SIZE = 64;
 
+// X25519 public key size
+const size_t X25519_PUBLIC_KEY_SIZE = 32;
+
+// X25519 compressed public key prefix
+const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
+
+// Uncompressed public key prefix
+static const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04;
+
 // Secp256k1 curve order
-const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE] = {
+static const uint8_t SECP256K1_CURVE_ORDER[] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B, 0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41
 };
 
-// Secp256k1 curve order half
-const uint8_t SECP256k1_CURVE_ORDER_HALF[CURVE_ORDER_SIZE] = {
-	0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x5D, 0x57, 0x6E, 0x73, 0x57, 0xA4, 0x50, 0x1D, 0xDF, 0xE9, 0x2F, 0x46, 0x68, 0x1B, 0x20, 0xA0
-};
-
 // Secp256k1 curve prime
-const uint8_t SECP256K1_CURVE_PRIME[CURVE_ORDER_SIZE] = {
+static const uint8_t SECP256K1_CURVE_PRIME[] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFC, 0x2F
 };
 
 // Secp256k1 curve square root exponent
-const uint8_t SECP256K1_CURVE_SQUARE_ROOT_EXPONENT[CURVE_ORDER_SIZE] = {
+static const uint8_t SECP256K1_CURVE_SQUARE_ROOT_EXPONENT[] = {
 	0x3F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xBF, 0xFF, 0xFF, 0x0C
 };
 
@@ -85,24 +109,14 @@ static const uint32_t HARDENED_PATH_MASK = 0x80000000;
 // Maximum account
 const uint32_t MAXIMUM_ACCOUNT = HARDENED_PATH_MASK - 1;
 
-// X25519 public key size
-const size_t X25519_PUBLIC_KEY_SIZE = 32;
-
-// X25519 compressed public key prefix
-const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
-
 // Generator G
-const secp256k1_generator GENERATOR_G = {
-	{
-		0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8
-	}
+static const uint8_t GENERATOR_G[] = {
+	0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8
 };
 
 // Generator H
-static const secp256k1_generator GENERATOR_H = {
-	{
-		0x50, 0x92, 0x9B, 0x74, 0xC1, 0xA0, 0x49, 0x54, 0xB7, 0x8B, 0x4B, 0x60, 0x35, 0xE9, 0x7A, 0x5E, 0x07, 0x8A, 0x5A, 0x0F, 0x28, 0xEC, 0x96, 0xD5, 0x47, 0xBF, 0xEE, 0x9A, 0xCE, 0x80, 0x3A, 0xC0, 0x31, 0xD3, 0xC6, 0x86, 0x39, 0x73, 0x92, 0x6E, 0x04, 0x9E, 0x63, 0x7C, 0xB1, 0xB5, 0xF4, 0x0A, 0x36, 0xDA, 0xC2, 0x8A, 0xF1, 0x76, 0x69, 0x68, 0xC3, 0x0C, 0x23, 0x13, 0xF3, 0xA3, 0x89, 0x04
-	}
+static const uint8_t GENERATOR_H[] = {
+	0x50, 0x92, 0x9B, 0x74, 0xC1, 0xA0, 0x49, 0x54, 0xB7, 0x8B, 0x4B, 0x60, 0x35, 0xE9, 0x7A, 0x5E, 0x07, 0x8A, 0x5A, 0x0F, 0x28, 0xEC, 0x96, 0xD5, 0x47, 0xBF, 0xEE, 0x9A, 0xCE, 0x80, 0x3A, 0xC0, 0x31, 0xD3, 0xC6, 0x86, 0x39, 0x73, 0x92, 0x6E, 0x04, 0x9E, 0x63, 0x7C, 0xB1, 0xB5, 0xF4, 0x0A, 0x36, 0xDA, 0xC2, 0x8A, 0xF1, 0x76, 0x69, 0x68, 0xC3, 0x0C, 0x23, 0x13, 0xF3, 0xA3, 0x89, 0x04
 };
 
 // Node size
@@ -140,10 +154,8 @@ static const size_t BIP32_PATH_ACCOUNT_INDEX = 2;
 static const char SEED_KEY[] = "IamVoldemort";
 
 // Generator J public
-static const secp256k1_pubkey GENERATOR_J_PUBLIC = {
-	{
-		0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
-	}
+static const uint8_t GENERATOR_J_PUBLIC[] = {
+	0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
 };
 
 // Address private key blinding factor value
@@ -155,23 +167,26 @@ static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = "Grinbox_seed";
 // Secp256k1 private key size
 static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
 
-// Bits proven per range
-static const size_t BITS_PROVEN_PER_RANGE = sizeof(uint64_t) * BITS_IN_A_BYTE;
-
-// Number of generators tau x
-static const size_t NUMBER_OF_GENERATORS_TAU_X = 256;
-
-// Number of generators t one and t two
-static const size_t NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO = 128;
-
-// Scratch space size
-static const size_t SCRATCH_SPACE_SIZE = 116;
-
 // Commitment even prefix
 static const uint8_t COMMITMENT_EVEN_PREFIX = 8;
 
 // Commitment odd prefix
 static const uint8_t COMMITMENT_ODD_PREFIX = 9;
+
+
+// Function prototypes
+
+// Bulletproof update commitment
+static void bulletproofUpdateCommitment(uint8_t *runningCommitment, const uint8_t *commitment, const uint8_t *generator);
+
+// Create scalars from ChaCha20
+static void createScalarsFromChaCha20(uint8_t *firstScalar, uint8_t *secondScalar, const uint8_t *seed, uint64_t index);
+
+// Initialize LR generator
+static void initializeLrGenerator(struct LrGenerator *lrGenerator);
+
+// Generate LR generator
+static void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
 
 
 // Supporting function implementation
@@ -382,15 +397,15 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 					{
 					
 						// Get commitment from value and child's private key
-						uint8_t commitment[COMMITMENT_SIZE];
-						commitValue(commitment, value, (uint8_t *)childPrivateKey.d);
+						volatile uint8_t *commitment = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
+						commitValue(commitment, value, (uint8_t *)childPrivateKey.d, true);
 						
 						// Add commitment to the hash
 						cx_sha256_init((cx_sha256_t *)&hash);
-						cx_hash((cx_hash_t *)&hash, 0, commitment, sizeof(commitment), NULL, 0);
+						cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, COMMITMENT_SIZE, NULL, 0);
 						
 						// Get product of the generator public key and the child's private key
-						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_J_PUBLIC, sizeof(GENERATOR_J_PUBLIC));
+						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_J_PUBLIC, sizeof(GENERATOR_J_PUBLIC));
 						volatile uint8_t *x = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
 						swapEndianness((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
 						volatile uint8_t *y = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
@@ -452,68 +467,96 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 }
 
 // Commit value
-void commitValue(uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor) {
+void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor, bool compress) {
 
-	// Check if value isn't zero
-	uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-	bool isInfinity = true;
-	if(value) {
+	// Initialize generators
+	volatile uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	volatile uint8_t blindGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 
-		// Get product of the value and its generator
-		memcpy(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_H, sizeof(GENERATOR_H));
-		uint8_t temp[BLINDING_FACTOR_SIZE] = {};
-		U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
-		U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
 		
-		isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
-	}
-	
-	// Get product of the blind and its generator
-	uint8_t blindGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-	memcpy(&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
-	
-	// Check if the result isn't infinity
-	if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE) && cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
-	
-		// Check if product of value and its generator isn't infinity or its x component is zero
-		if(!isInfinity && !cx_math_is_zero(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-	
-			// Get sum of products
-			isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, valueGenerator, valueGenerator, blindGenerator, sizeof(valueGenerator));
-		}
-		
-		// Otherwise
-		else {
-		
-			// Get sum of products
-			memcpy(valueGenerator, blindGenerator, sizeof(valueGenerator));
+			// Check if value isn't zero
+			bool isInfinity = true;
+			if(value) {
+
+				// Get product of the value and its generator
+				memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
+				uint8_t temp[BLINDING_FACTOR_SIZE] = {};
+				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
+				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+				
+				isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
+			}
 			
-			// Set that result isn't infinity
-			isInfinity = false;
+			// Get product of the blind and its generator
+			memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+			
+			// Check if the result isn't infinity
+			if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE) && cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
+			
+				// Check if product of value and its generator isn't infinity or its x component is zero
+				if(!isInfinity && !cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			
+					// Get sum of products
+					isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
+				}
+				
+				// Otherwise
+				else {
+				
+					// Get sum of products
+					memcpy((uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
+					
+					// Set that result isn't infinity
+					isInfinity = false;
+				}
+			}
+			
+			// Check if result is infinity or its x component is zero
+			if(isInfinity || cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
+			// Copy x component to the commitment
+			volatile uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
+			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Get the square of the result's y component's square root
+			volatile uint8_t *squareRootSquared = x;
+			volatile uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			const uint8_t two[] = {2};
+			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Set commitment's prefix
+			commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+			
+			// Check if not compressing the commitment
+			if(!compress) {
+			
+				// Copy y component to the commitment
+				memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the generators
+			explicit_bzero((uint8_t *)valueGenerator, sizeof(valueGenerator));
+			explicit_bzero((uint8_t *)blindGenerator, sizeof(blindGenerator));
 		}
 	}
 	
-	// Check if result is infinity or its x component is zero
-	if(isInfinity || cx_math_is_zero(&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-	
-		// Throw internal error error
-		THROW(INTERNAL_ERROR_ERROR);
-	}
-	
-	// Copy x component to the commitment
-	uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
-	memcpy(&commitment[PUBLIC_KEY_PREFIX_SIZE], x, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	// Get the square of the result's y component's square root
-	uint8_t *squareRootSquared = x;
-	uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	// Set commitment's prefix
-	commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp(squareRootSquared, y, PUBLIC_KEY_COMPONENT_SIZE);
+	// End try
+	END_TRY;
 }
 
 // Get rewind nonce
@@ -694,7 +737,7 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], &GENERATOR_G, sizeof(GENERATOR_G));
+	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 	
 	// Check if the result is infinity or its x component is zero
 	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretNonce, NONCE_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -736,14 +779,14 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	
 	// Set signature's r component
 	uint8_t *r = signature;
-	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
-	swapEndianness(r, PUBLIC_KEY_COMPONENT_SIZE);
+	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], SCALAR_SIZE);
+	swapEndianness(r, SCALAR_SIZE);
 	
 	// Calculate the signature's s component
-	uint8_t *s = &signature[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_multm(s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
-	cx_math_addm(s, s, secretNonce, SECP256K1_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
-	swapEndianness(s, PUBLIC_KEY_COMPONENT_SIZE);
+	uint8_t *s = &signature[SCALAR_SIZE];
+	cx_math_multm(s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_addm(s, s, secretNonce, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	swapEndianness(s, SCALAR_SIZE);
 }
 
 // Get encrypted data length
@@ -842,14 +885,14 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 
 	// Compute the X25519 public key as the sum of one and y divided by the difference of one and y
-	uint8_t one[PUBLIC_KEY_COMPONENT_SIZE] = {};
+	uint8_t one[SCALAR_SIZE] = {};
 	one[sizeof(one) - 1] = 1;
 	
-	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, ED25519_PUBLIC_KEY_SIZE);
 	cx_math_subm(y, one, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	cx_math_invprimem(y, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
-	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, ED25519_PUBLIC_KEY_SIZE);
 	
 	// Swap the X25519 public key's endianness
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
@@ -889,8 +932,6 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		
 		// Ed25519 address size
 		case ED25519_PUBLIC_KEY_SIZE:
-		
-			// TODO test Grin
 		
 			// Check currency doesn't allow Ed25519 addresses
 			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
@@ -976,8 +1017,6 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 		
 		// Ed25519 address size
 		case ED25519_PUBLIC_KEY_SIZE:
-		
-			// TODO test Grin
 			
 			// Check currency doesn't allow Ed25519 addresses
 			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
@@ -1097,8 +1136,6 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		// Ed25519 address size
 		case ED25519_PUBLIC_KEY_SIZE:
 		
-			// TODO test Grin
-		
 			// Check currency doesn't allow Ed25519 addresses
 			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
 			
@@ -1172,7 +1209,7 @@ bool isValidCommitment(const uint8_t *commitment) {
 	const uint8_t three[] = {3};
 	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	uint8_t seven[PUBLIC_KEY_COMPONENT_SIZE] = {};
+	uint8_t seven[SCALAR_SIZE] = {};
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
@@ -1270,7 +1307,7 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 	const uint8_t three[] = {3};
 	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	uint8_t seven[PUBLIC_KEY_COMPONENT_SIZE] = {};
+	uint8_t seven[SCALAR_SIZE] = {};
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
@@ -1303,7 +1340,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	const uint8_t three[] = {3};
 	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	uint8_t seven[PUBLIC_KEY_COMPONENT_SIZE] = {};
+	uint8_t seven[SCALAR_SIZE] = {};
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
@@ -1377,120 +1414,387 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
 	memcpy(ed25519PublicKey, (uint8_t *)&addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
 }
 
-// Calculate bulletproof tau x
-void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
+// Calculate bulletproof components
+void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
 
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
+	// TODO add error checking
 	
-	// Create scratch space
-	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
-	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
-	
-	// Create generators
-	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS_TAU_X)];
-	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS_TAU_X);
-	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-	
-			// Check if creating bulletproof tau x failed
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, (uint8_t *)bulletproofTauX, NULL, NULL, &value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, proofMessage)) {
+	// Get running commitment from the commitment and generator
+	uint8_t runningCommitment[CX_SHA256_SIZE] = {};
+	bulletproofUpdateCommitment(runningCommitment, &commitment[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H);
 
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Destroy generators
-			secp256k1_bulletproof_generators_preallocated_destroy((secp256k1_context *)context, (secp256k1_bulletproof_generators *)generators);
-			explicit_bzero((uint8_t *)generatorsBuffer, sizeof(generatorsBuffer));
-			
-			// Destroy scratch space
-			secp256k1_scratch_space_preallocated_destroy((secp256k1_scratch_space *)scratchSpace);
-			explicit_bzero((uint8_t *)scratchSpaceBuffer, sizeof(scratchSpaceBuffer));
-			
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
-		}
+	// Set value in value bytes
+	uint8_t valueBytes[SCALAR_SIZE] = {};
+	U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint32_t), value);
+	U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+
+	// Set proof message in value bytes
+	memcpy(&valueBytes[sizeof(valueBytes) - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
+
+	// Check if value bytes isn't zero
+	if(!cx_math_is_zero(valueBytes, sizeof(valueBytes))) {
+
+		// Negate the value bytes
+		cx_math_subm(valueBytes, SECP256K1_CURVE_ORDER, valueBytes, SECP256K1_CURVE_ORDER, sizeof(valueBytes));
 	}
 	
-	// End try
-	END_TRY;
+	// Create alhpa and rho from the rewind nonce
+	uint8_t alpha[SCALAR_SIZE];
+	uint8_t rho[SCALAR_SIZE];
+	createScalarsFromChaCha20(alpha, rho, rewindNonce, 0);
+
+	// Add value bytes to alpha
+	cx_math_addm(alpha, alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
+
+	// Get the producst of the alpha and its generator (Check for infinity and zero)
+	uint8_t alphaGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, alphaGenerator, sizeof(alphaGenerator), alpha, sizeof(alpha));
+
+	// Get the product of the rho and its generator
+	uint8_t rhoGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, rhoGenerator, sizeof(rhoGenerator), rho, sizeof(rho));
+
+	// Go through all bits to prove
+	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+
+		// Get bit
+		bool bit = value & ((uint64_t)1 << i);
+		
+		// Check if bit is set
+		uint8_t aterm[65] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+		if(bit) {
+		
+			// Set aterm to the generator
+			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+		}
+		
+		// Otherwise
+		else {
+		
+			// Set aterm to the other generator
+			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i + 256 / 2], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+			
+			// Negate the aterm's y component
+			cx_math_subm(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+		}
+		
+		// Add aterm to the alpha generator
+		cx_ecfp_add_point(CX_CURVE_SECP256K1, alphaGenerator, alphaGenerator, aterm, sizeof(alphaGenerator));
+		
+		// Create sl and sr from rewind nonce
+		uint8_t sl[SCALAR_SIZE];
+		uint8_t sr[SCALAR_SIZE];
+		createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
+		
+		uint8_t sterm[65] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i], sizeof(sterm) - PUBLIC_KEY_PREFIX_SIZE);
+		cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, sizeof(sterm), sl, sizeof(sl));
+		
+		cx_ecfp_add_point(CX_CURVE_SECP256K1, rhoGenerator, rhoGenerator, sterm, sizeof(rhoGenerator));
+		
+		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i + 256 / 2], sizeof(sterm) - PUBLIC_KEY_PREFIX_SIZE);
+		cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, sizeof(sterm), sr, sizeof(sr));
+		
+		cx_ecfp_add_point(CX_CURVE_SECP256K1, rhoGenerator, rhoGenerator, sterm, sizeof(rhoGenerator));
+	}
+
+	// Update running commitment with the alpha generator and rho generator
+	bulletproofUpdateCommitment(runningCommitment, &alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], &rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
+
+	// Check if running commitment overflows or is zero
+	if(cx_math_cmp(runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero(runningCommitment, sizeof(runningCommitment))) {
+
+		// bad
+	}
+
+	// Get y
+	uint8_t y[32];
+	memcpy(y, runningCommitment, sizeof(y));
+
+	// Update running commitment with the alpha generator and rho generator
+	bulletproofUpdateCommitment(runningCommitment, &alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], &rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
+
+	// Check if running commitment overflows or is zero
+	if(cx_math_cmp(runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero(runningCommitment, sizeof(runningCommitment))) {
+
+		// bad
+	}
+
+	// Get z
+	uint8_t z[32];
+	memcpy(z, runningCommitment, sizeof(z));
+	
+	struct LrGenerator lrGenerator;
+	initializeLrGenerator(&lrGenerator);
+	const uint8_t zero[32] = {};
+	uint8_t t0[32] = {};
+	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+
+		uint8_t l[32];
+		uint8_t r[32];
+		
+		generateLrGenerator(&lrGenerator, i, l, r, zero, y, z, rewindNonce, value);
+		
+		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
+		
+		cx_math_addm(t0, t0, l, SECP256K1_CURVE_ORDER, sizeof(t0));
+	}
+
+	initializeLrGenerator(&lrGenerator);
+	uint8_t one[32] = {};
+	one[sizeof(one) - 1] = 1;
+	uint8_t t1[32] = {};
+	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+
+		uint8_t l[32];
+		uint8_t r[32];
+		
+		generateLrGenerator(&lrGenerator, i, l, r, one, y, z, rewindNonce, value);
+		
+		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
+		
+		cx_math_addm(t1, t1, l, SECP256K1_CURVE_ORDER, sizeof(t1));
+	}
+
+	initializeLrGenerator(&lrGenerator);
+	cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
+	uint8_t t2[32] = {};
+	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+
+		uint8_t l[32];
+		uint8_t r[32];
+		
+		generateLrGenerator(&lrGenerator, i, l, r, one, y, z, rewindNonce, value);
+		
+		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
+		
+		cx_math_addm(t2, t2, l, SECP256K1_CURVE_ORDER, sizeof(t2));
+	}
+
+	uint8_t tmps[32] = {};
+	tmps[sizeof(tmps) - 1] = 2;
+	cx_math_invprimem(tmps, tmps, SECP256K1_CURVE_ORDER, sizeof(tmps));
+
+	if(!cx_math_is_zero(t2, sizeof(t2))) {
+		cx_math_subm(t2, SECP256K1_CURVE_ORDER, t2, SECP256K1_CURVE_ORDER, sizeof(t2));
+	}
+
+	cx_math_addm(t1, t1, t2, SECP256K1_CURVE_ORDER, sizeof(t1));
+
+	cx_math_multm(t1, t1, tmps, SECP256K1_CURVE_ORDER, sizeof(t1));
+
+	cx_math_addm(t2, t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2));
+	if(!cx_math_is_zero(t2, sizeof(t2))) {
+		cx_math_subm(t2, SECP256K1_CURVE_ORDER, t2, SECP256K1_CURVE_ORDER, sizeof(t2));
+	}
+	
+	cx_math_addm(t2, t2, t1, SECP256K1_CURVE_ORDER, sizeof(t2));
+	uint8_t *t1Generator = alphaGenerator;
+	memcpy(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, t1Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, t1, sizeof(t1));
+	
+	// Create tau1 and tau2 from the private nonce
+	uint8_t *tau1 = alpha;
+	uint8_t *tau2 = rho;
+	createScalarsFromChaCha20(tau1, tau2, privateNonce, 1);
+
+	uint8_t *tau1Generator = rhoGenerator;
+	memcpy(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, tau1Generator, sizeof(tau1Generator), tau1, SCALAR_SIZE);
+
+	// Check if &tau1[PUBLIC_KEY_PREFIX_SIZE] is not zero and not infinity
+	memcpy(&tOne[PUBLIC_KEY_PREFIX_SIZE], &tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+	tOne[0] = (tau1Generator[UNCOMPRESSED_PUBLIC_KEY_SIZE - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+
+	cx_ecfp_add_point(CX_CURVE_SECP256K1, t1Generator, tau1Generator, t1Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE);
+
+	uint8_t *t2Generator = rhoGenerator;
+	memcpy(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, t2Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, t2, sizeof(t2));
+
+	uint8_t tau2Generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, tau2Generator, sizeof(tau2Generator), tau2, SCALAR_SIZE);
+
+	// Check if &tau1[PUBLIC_KEY_PREFIX_SIZE] is not zero and not infinity
+	memcpy(&tTwo[PUBLIC_KEY_PREFIX_SIZE], &tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+	tTwo[0] = (tau2Generator[sizeof(tau2Generator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+
+	cx_ecfp_add_point(CX_CURVE_SECP256K1, t2Generator, tau2Generator, t2Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE);
+
+	bulletproofUpdateCommitment(runningCommitment, &t1Generator[PUBLIC_KEY_PREFIX_SIZE], &t2Generator[PUBLIC_KEY_PREFIX_SIZE]);
+	
+	// Check if running commitment overflows or is zero
+	if(cx_math_cmp(runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero(runningCommitment, sizeof(runningCommitment))) {
+
+		// bad
+	}
+	
+	uint8_t *x = runningCommitment;
+	cx_math_multm(tauX, tau1, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	const uint8_t two[] = {2};
+	cx_math_powm(x, x, two, sizeof(two), SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_multm(tmps, tau2, x, SECP256K1_CURVE_ORDER, sizeof(tmps));
+	cx_math_addm(tauX, tauX, tmps, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	
+	// Get z squared
+	cx_math_powm(z, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z));
+
+	cx_math_multm(tmps, z, blindingFactor, SECP256K1_CURVE_ORDER, sizeof(tmps));
+	cx_math_addm(tauX, tauX, tmps, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 }
 
-// Calculate bulletproof t one and t two
-void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce) {
+// Bulletproof update commitment
+void bulletproofUpdateCommitment(uint8_t *runningCommitment, const uint8_t *commitment, const uint8_t *generator) {
 
-	// Create context
-	volatile uint8_t contextBuffer[secp256k1_context_preallocated_size(SECP256K1_CONTEXT_VERIFY)];
-	volatile secp256k1_context *context = secp256k1_context_preallocated_create((uint8_t *)contextBuffer, SECP256K1_CONTEXT_VERIFY);
+	// Initialzie the hash
+	cx_sha256_t hash;
+	cx_sha256_init((cx_sha256_t *)&hash);
 	
-	// Create scratch space
-	volatile uint8_t scratchSpaceBuffer[SCRATCH_SPACE_SIZE];
-	volatile secp256k1_scratch_space *scratchSpace = secp256k1_scratch_space_preallocated_create((secp256k1_context *)context, (uint8_t *)scratchSpaceBuffer, SCRATCH_SPACE_SIZE);
+	// Add running commitment to the hash
+	cx_hash((cx_hash_t *)&hash, 0, runningCommitment, CX_SHA256_SIZE, NULL, 0);
 	
-	// Create generators
-	volatile uint8_t generatorsBuffer[secp256k1_bulletproof_generators_preallocated_size(NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO)];
-	volatile secp256k1_bulletproof_generators *generators = secp256k1_bulletproof_generators_preallocated_create((secp256k1_context *)context, (uint8_t *)generatorsBuffer, &GENERATOR_G, NUMBER_OF_GENERATORS_T_ONE_AND_T_TWO);
+	// Get the square root of the commitment's y component squared
+	uint8_t *squareRootSquared = runningCommitment;
+	const uint8_t *y = &commitment[PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
-	// Begin try
-	BEGIN_TRY {
+	const uint8_t two[] = {2};
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
-		// Try
-		TRY {
+	// Set parity to if the commitment's y component isn't quadratic residue
+	uint8_t parity = (bool)memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE) << 1;
 	
-			// Check if creating bulletproof t one and t two failed
-			secp256k1_pubkey tOneData;
-			secp256k1_pubkey tTwoData;
-			if(!secp256k1_bulletproof_rangeproof_preallocated_prove((secp256k1_context *)context, (secp256k1_scratch_space *)scratchSpace, (secp256k1_bulletproof_generators *)generators, NULL, NULL, NULL, &tOneData, &tTwoData, &value, NULL, &blindingFactor, NULL, 1, &GENERATOR_H, BITS_PROVEN_PER_RANGE, rewindNonce, (uint8_t *)privateNonce, NULL, 0, NULL)) {
+	// Get the square root of the generator's y component squared
+	y = &generator[PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Add to parity to if the generator's y component isn't quadratic residue
+	parity |= (bool)memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Add parity to the hash
+	cx_hash((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0);
+	
+	// Add commitment's x component to the hash
+	cx_hash((cx_hash_t *)&hash, 0, commitment, PUBLIC_KEY_COMPONENT_SIZE, NULL, 0);
+	
+	// Add generator's x component to the hash and set the running commitment to the result
+	cx_hash((cx_hash_t *)&hash, CX_LAST, generator, PUBLIC_KEY_COMPONENT_SIZE, runningCommitment, CX_SHA256_SIZE);
+}
 
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-			
-			// Check if serializing t one failed
-			size_t publicKeySize = COMPRESSED_PUBLIC_KEY_SIZE;
-			if(!secp256k1_ec_pubkey_serialize((secp256k1_context *)context, (uint8_t *)tOne, &publicKeySize, &tOneData, SECP256K1_EC_COMPRESSED)) {
-			
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-			
-			// Check if serializing ttwo failed
-			publicKeySize = COMPRESSED_PUBLIC_KEY_SIZE;
-			if(!secp256k1_ec_pubkey_serialize((secp256k1_context *)context, (uint8_t *)tTwo, &publicKeySize, &tTwoData, SECP256K1_EC_COMPRESSED)) {
-			
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
-			}
-		}
+// Create scalars from ChaCha20
+void createScalarsFromChaCha20(uint8_t *firstScalar, uint8_t *secondScalar, const uint8_t *seed, uint64_t index) {
+
+	// Go through counter values
+	for(uint32_t counter = 0;; ++counter) {
+	
+		// Initiaize ChaCha20 state with the seed, nonce, and index
+		struct ChaCha20Poly1305State chaCha20Poly1305State;
 		
-		// Finally
-		FINALLY {
+		const uint32_t nonce[] = {
 		
-			// Destroy generators
-			secp256k1_bulletproof_generators_preallocated_destroy((secp256k1_context *)context, (secp256k1_bulletproof_generators *)generators);
-			explicit_bzero((uint8_t *)generatorsBuffer, sizeof(generatorsBuffer));
+			// Index
+			index >> (sizeof(uint32_t) * BITS_IN_A_BYTE),
 			
-			// Destroy scratch space
-			secp256k1_scratch_space_preallocated_destroy((secp256k1_scratch_space *)scratchSpace);
-			explicit_bzero((uint8_t *)scratchSpaceBuffer, sizeof(scratchSpaceBuffer));
+			// Zero
+			0,
 			
-			// Destroy context
-			secp256k1_context_preallocated_destroy((secp256k1_context *)context);
-			explicit_bzero((uint8_t *)contextBuffer, sizeof(contextBuffer));
+			// Counter
+			counter
+		};
+		
+		initializeChaCha20Poly1305(&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index);
+
+		// Get ChaCha20 current state
+		uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State.chaCha20OriginalState)];
+		initializeChaCha20CurrentState(&chaCha20Poly1305State, chaCha20CurrentState);
+		
+		// Set scalars to the ChaCha20 current state
+		memcpy(firstScalar, chaCha20CurrentState, SCALAR_SIZE);
+		memcpy(secondScalar, &chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SCALAR_SIZE);
+		
+		// Check if scalars don't overflow
+		if(cx_math_cmp(firstScalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE) < 0 && cx_math_cmp(secondScalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE) < 0) {
+
+			// Break
+			break;
 		}
 	}
+}
+
+// Initialize LR generator
+void initializeLrGenerator(struct LrGenerator *lrGenerator) {
+
+	// Set LR generator's yn to one
+	explicit_bzero(lrGenerator->yn, sizeof(lrGenerator->yn));
+	lrGenerator->yn[sizeof(lrGenerator->yn) - 1] = 1;
+}
+
+// Generate LR generator
+void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
+
+	// Get bit in the value
+	const bool bit = (value >> count) & 1;
 	
-	// End try
-	END_TRY;
+	// Check if first run
+	if(!count) {
+	
+		// Square the LR generator's z22n
+		const uint8_t two[] = {2};
+		cx_math_powm(lrGenerator->z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
+	}
+	
+	// Set bit in lout
+	explicit_bzero(lout, SCALAR_SIZE);
+	lout[SCALAR_SIZE - 1] = bit;
+	
+	// Get the negation of z
+	uint8_t *negz = rout;
+	if(cx_math_is_zero(z, SCALAR_SIZE)) {
+	
+		explicit_bzero(negz, SCALAR_SIZE);
+	}
+	else {
+	
+		cx_math_subm(negz, SECP256K1_CURVE_ORDER, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	}
+	
+	// Update lout
+	cx_math_addm(lout, lout, negz, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	
+	// Create sl and sr
+	uint8_t *sl = rout;
+	uint8_t sr[SCALAR_SIZE];
+	createScalarsFromChaCha20(sl, sr, nonce, count + 2);
+	
+	// Multiply sl and sr by x
+	cx_math_multm(sl, sl, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_multm(sr, sr, x, SECP256K1_CURVE_ORDER, sizeof(sr));
+	
+	// Update lout
+	cx_math_addm(lout, lout, sl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	
+	// Set bit in rout
+	explicit_bzero(rout, SCALAR_SIZE);
+	rout[SCALAR_SIZE - 1] = 1 - bit;
+	
+	// Negate rout
+	if(!cx_math_is_zero(rout, SCALAR_SIZE)) {
+	
+		cx_math_subm(rout, SECP256K1_CURVE_ORDER, rout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	}
+	
+	// Update rout
+	cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_addm(rout, rout, sr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_multm(rout, rout, lrGenerator->yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	cx_math_addm(rout, rout, lrGenerator->z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+	
+	// Update the LR generator
+	cx_math_multm(lrGenerator->yn, lrGenerator->yn, y, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->yn));
+	cx_math_addm(lrGenerator->z22n, lrGenerator->z22n, lrGenerator->z22n, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
 }

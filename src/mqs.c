@@ -12,16 +12,6 @@
 struct MqsData mqsData;
 
 
-// Definitions
-
-// Check if CX API is less than level 12
-#if CX_APILEVEL < 12
-
-	// Salt padding size
-	#define SALT_PADDING_SIZE (sizeof("\x00\x00\x00\x00") - sizeof((char)'\0'))
-#endif
-
-
 // Constants
 
 // MQS address private key index
@@ -70,24 +60,8 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
-			// Check if CX API is at least level 12
-			#if CX_APILEVEL >= 12
-			
-				// Get shared private key from the tweaked uncompressed public key and salt
-				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
-			
-			// Otherwise
-			#else
-		
-				// Pad the salt
-				uint8_t paddedSalt[MQS_SHARED_PRIVATE_KEY_SALT_SIZE + SALT_PADDING_SIZE] = {};
-				memcpy(paddedSalt, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE);
-				
-				// TODO test cx_pbkdf2_sha512 on real hardware to see if the padding is necessary
-				
-				// Get shared private key from the tweaked uncompressed public key and padded salt
-				cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, paddedSalt, sizeof(paddedSalt), MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
-			#endif
+			// Get shared private key from the tweaked uncompressed public key and salt
+			cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 		}
 		
 		// Finally

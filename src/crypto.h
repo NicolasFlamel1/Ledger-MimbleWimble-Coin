@@ -4,10 +4,7 @@
 
 
 // Header files
-#include <os.h>
-#include <stdbool.h>
-#include "common.h"
-#include "secp256k1_generator.h"
+#include "device.h"
 
 
 // Definitions
@@ -21,17 +18,17 @@
 // Compressed public key size
 #define COMPRESSED_PUBLIC_KEY_SIZE 33
 
-// Curve order size
-#define CURVE_ORDER_SIZE 32
-
 // Public key prefix size
 #define PUBLIC_KEY_PREFIX_SIZE 1
 
-// Public key component size
-#define PUBLIC_KEY_COMPONENT_SIZE 32
+// Proof message size
+#define PROOF_MESSAGE_SIZE 20
 
 
 // Constants
+
+// Public key component size
+extern const size_t PUBLIC_KEY_COMPONENT_SIZE;
 
 // Nonce size
 extern const size_t NONCE_SIZE;
@@ -66,26 +63,11 @@ extern const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 // Odd compressed public key prefix
 extern const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX;
 
-// Uncompressed public key prefix
-extern const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX;
-
 // Ed25519 compressed public key prefix
 extern const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 
 // Ed25519 signature size
 extern const size_t ED25519_SIGNATURE_SIZE;
-
-// Secp256k1 curve order
-extern const uint8_t SECP256K1_CURVE_ORDER[CURVE_ORDER_SIZE];
-
-// Secp256k1 curve order half
-extern const uint8_t SECP256k1_CURVE_ORDER_HALF[CURVE_ORDER_SIZE];
-
-// Secp256k1 curve prime
-extern const uint8_t SECP256K1_CURVE_PRIME[CURVE_ORDER_SIZE];
-
-// Secp256k1 curve square root exponent
-extern const uint8_t SECP256K1_CURVE_SQUARE_ROOT_EXPONENT[CURVE_ORDER_SIZE];
 
 // Maximum account
 extern const uint32_t MAXIMUM_ACCOUNT;
@@ -95,9 +77,6 @@ extern const size_t X25519_PUBLIC_KEY_SIZE;
 
 // X25519 compressed public key prefix
 extern const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
-
-// Generator G
-extern const secp256k1_generator GENERATOR_G;
 
 // Switch type
 enum SwitchType {
@@ -125,7 +104,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType);
 
 // Commit value
-void commitValue(uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor);
+void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor, bool compress);
 
 // Get rewind nonce
 void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment);
@@ -181,11 +160,8 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey);
 // Get Ed25519 public key
 void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account);
 
-// Calculate bulletproof tau x
-void calculateBulletproofTauX(volatile uint8_t *bulletproofTauX, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
-
-// Calculate bulletproof t one and t two
-void calculateBulletproofTOneAndTTwo(volatile uint8_t *tOne, volatile uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *rewindNonce, const uint8_t *privateNonce);
+// Calculate bulletproof components
+void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
 
 #endif

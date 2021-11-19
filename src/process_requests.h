@@ -28,11 +28,8 @@ enum Instruction {
 	// Get commitment instruction
 	GET_COMMITMENT_INSTRUCTION,
 	
-	// Get bulletproof tau x instruction
-	GET_BULLETPROOF_TAU_X_INSTRUCTION,
-	
-	// Get bulletproof t one and t two instruction
-	GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION,
+	// Get bulletproof components instruction
+	GET_BULLETPROOF_COMPONENTS_INSTRUCTION,
 	
 	// Get Tor public key instruction
 	GET_TOR_PUBLIC_KEY_INSTRUCTION,

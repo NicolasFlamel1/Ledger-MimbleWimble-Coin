@@ -18,8 +18,7 @@
 #include "finish_transaction.h"
 #include "get_application_information.h"
 #include "get_commitment.h"
-#include "get_bulletproof_t_one_and_t_two.h"
-#include "get_bulletproof_tau_x.h"
+#include "get_bulletproof_components.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
 #include "get_public_key_verification.h"
@@ -126,20 +125,11 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get bulletproof tau x instruction
-				case GET_BULLETPROOF_TAU_X_INSTRUCTION:
+				// Get bulletproof components instruction
+				case GET_BULLETPROOF_COMPONENTS_INSTRUCTION:
 				
-					// Process get bulletproof tau x request
-					processGetBulletproofTauXRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Get bulletproof t one and t two instruction
-				case GET_BULLETPROOF_T_ONE_AND_T_TWO_INSTRUCTION:
-				
-					// Process get bulletproof t one and t two request
-					processGetBulletproofTOneAndTTwoRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get bulletproof components request
+					processGetBulletproofComponentsRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;
