@@ -33,7 +33,7 @@
 #define PUBLIC_KEY_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 // Public key type line buffer size
-#define PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE sizeof("Verify root")
+#define PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
 
 // Amount line buffer size
 #define AMOUNT_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
@@ -61,6 +61,9 @@ enum Menu {
 	
 	// Verify public key menu
 	VERIFY_PUBLIC_KEY_MENU,
+	
+	// Verify address menu
+	VERIFY_ADDRESS_MENU,
 	
 	// Sign Tor certificate menu
 	SIGN_TOR_CERTIFICATE_MENU,

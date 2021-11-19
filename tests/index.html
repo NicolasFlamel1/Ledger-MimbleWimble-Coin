@@ -44,11 +44,11 @@
 		// Request get root public key instruction
 		const REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION + 1;
 
-		// Request get public key verification instruction
-		const REQUEST_GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION = REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
+		// Request get public key or address verification instruction
+		const REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION = REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
 
 		// Request get seed cookie instruction
-		const REQUEST_GET_SEED_COOKIE_INSTRUCTION = REQUEST_GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION + 1;
+		const REQUEST_GET_SEED_COOKIE_INSTRUCTION = REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION + 1;
 
 		// Request get commitment instruction
 		const REQUEST_GET_COMMITMENT_INSTRUCTION = REQUEST_GET_SEED_COOKIE_INSTRUCTION + 1;
@@ -251,8 +251,8 @@
 					// Run get root public key test
 					await getRootPublicKeyTest(hardwareWallet, extendedPrivateKey);
 					
-					// Run get public key verification test
-					await getPublicKeyVerificationTest(hardwareWallet, extendedPrivateKey);
+					// Run get public key and address verification test
+					await getPublicKeyAndAddressVerificationTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run get seed cookie test
 					await getSeedCookieTest(hardwareWallet, extendedPrivateKey);
@@ -452,8 +452,8 @@
 			console.log("Passed getting root pubic key test");	
 		}
 		
-		// Get public key verification test
-		async function getPublicKeyVerificationTest(hardwareWallet, extendedPrivateKey) {
+		// Get public key and address verification test
+		async function getPublicKeyAndAddressVerificationTest(hardwareWallet, extendedPrivateKey) {
 		
 			// Log message
 			console.log("Running get public key verification test");
@@ -474,7 +474,7 @@
 			console.log("Verify that the root public key is: " + Common.toHexString(rootPublicKey));
 			
 			// Get root public key verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, ROOT_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, ROOT_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
 			
 			// Get Tor private key from the extended private key
 			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
@@ -486,10 +486,10 @@
 			let torAddress = Tor.publicKeyToTorAddress(torPublicKey);
 			
 			// Log message
-			console.log("Verify that the Tor public key is: " + torAddress);
+			console.log("Verify that the Tor address is: " + torAddress);
 			
-			// Get Tor public key verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, TOR_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
+			// Get Tor address verification from the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, TOR_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
 			
 			// Get MQS private key from the extended private key
 			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
@@ -501,10 +501,10 @@
 			let mqsAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
 			
 			// Log message
-			console.log("Verify that the MQS public key is: " + mqsAddress);
+			console.log("Verify that the MQS address is: " + mqsAddress);
 			
-			// Get MQS public key verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, MQS_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
+			// Get MQS address verification from the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, MQS_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
 			
 			// Log message
 			console.log("Passed getting pubic key verification test");

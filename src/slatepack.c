@@ -1,6 +1,8 @@
 // Header files
 #include <string.h>
+#include "bech32.h"
 #include "common.h"
+#include "currency_information.h"
 #include "crypto.h"
 #include "slatepack.h"
 #include "tor.h"
@@ -86,4 +88,15 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 	
 	// End try
 	END_TRY;
+}
+
+// Get Slatepack address
+void getSlatepackAddress(uint8_t *slatepackAddress, uint32_t account) {
+
+	// Get Ed25519 public key
+	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
+	getEd25519PublicKey(ed25519PublicKey, account);
+	
+	// Encode the address data to get the Slatepack address
+	bech32Encode(slatepackAddress, ed25519PublicKey, sizeof(ed25519PublicKey), currencyInformation.slatepackAddressHumanReadablePart);
 }

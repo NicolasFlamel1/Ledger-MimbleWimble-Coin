@@ -3,16 +3,6 @@
 #include "currency_information.h"
 
 
-// Constants
-
-// Check if MQS version doesn't exists
-#ifndef CURRENCY_MQS_VERSION
-
-	// No MQS version
-	static const uint8_t NO_MQS_VERSION[] = {0, 0};
-#endif
-
-
 // Global variables
 
 // Currency information
@@ -74,12 +64,6 @@ void getCurrencyInformation(struct CurrencyInformation *currencyInformation) {
 	
 		// Set currency information's MQS version
 		memcpy(currencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof(currencyInformation->mqsVersion));
-	
-	// Otherwise
-	#else
-	
-		// Set currency information's MQS version
-		memcpy(currencyInformation->mqsVersion, NO_MQS_VERSION, sizeof(currencyInformation->mqsVersion));
 	#endif
 	
 	// Set currency information's name
@@ -102,4 +86,11 @@ void getCurrencyInformation(struct CurrencyInformation *currencyInformation) {
 	
 	// Set currency information's icon bitmap
 	memcpy(&currencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currencyInformation->iconBitmap));
+	
+	// Check if Slatepack address human-readable part exists
+	#ifdef CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART
+	
+		// Set currency information's Slatepack address human readable part
+		strcpy(currencyInformation->slatepackAddressHumanReadablePart, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART);
+	#endif
 }

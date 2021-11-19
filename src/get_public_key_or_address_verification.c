@@ -1,9 +1,11 @@
 // Header files
 #include <string.h>
 #include "common.h"
-#include "get_public_key_verification.h"
+#include "currency_information.h"
+#include "get_public_key_or_address_verification.h"
 #include "menus.h"
 #include "mqs.h"
+#include "slatepack.h"
 #include "tor.h"
 
 
@@ -19,14 +21,17 @@ enum PublicKeyType {
 	TOR_PUBLIC_KEY_TYPE,
 	
 	// MQS public key type
-	MQS_PUBLIC_KEY_TYPE
+	MQS_PUBLIC_KEY_TYPE,
+	
+	// Ed25519 public key type
+	ED25519_PUBLIC_KEY_TYPE
 };
 
 
 // Supporting function implementation
 
-// Process get public key verification request
-void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+// Process get public key or address verification request
+void processGetPublicKeyOrAddressVerificationRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -62,6 +67,7 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 	}
 	
 	// Check public key type
+	enum Menu menu;
 	switch(publicKeyType) {
 	
 		// Root public key type
@@ -104,14 +110,17 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			toHexString(publicKeyLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
 			publicKeyLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 			
+			// Set menu to verify public key menu
+			menu = VERIFY_PUBLIC_KEY_MENU;
+			
 			// Break
 			break;
 		
 		// Tor public key type
 		case TOR_PUBLIC_KEY_TYPE:
 		
-			// Check currency doesn't allow Tor addresses and Ed25519 addresses
-			if(!currencyInformation.torAddressPaymentProofAllowed && !currencyInformation.ed25519AddressPaymentProofAllowed) {
+			// Check currency doesn't allow Tor addresses
+			if(!currencyInformation.torAddressPaymentProofAllowed) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -127,6 +136,9 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			// Copy Tor address into the public key line buffer
 			memcpy(publicKeyLineBuffer, torAddress, sizeof(torAddress));
 			publicKeyLineBuffer[sizeof(torAddress)] = '\0';
+			
+			// Set menu to verify address menu
+			menu = VERIFY_ADDRESS_MENU;
 		
 			// Break
 			break;
@@ -151,7 +163,40 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			// Copy MQS address into the public key line buffer
 			memcpy(publicKeyLineBuffer, mqsAddress, sizeof(mqsAddress));
 			publicKeyLineBuffer[sizeof(mqsAddress)] = '\0';
+			
+			// Set menu to verify address menu
+			menu = VERIFY_ADDRESS_MENU;
 		
+			// Break
+			break;
+		
+		// Ed25519 public key type
+		case ED25519_PUBLIC_KEY_TYPE:
+		
+			{
+		
+				// Check currency doesn't allow Ed25519 addresses
+				if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Set public key type line buffer
+				strcpy(publicKeyTypeLineBuffer, "Verify Slatepack");
+				
+				// Get Slatepack address
+				uint8_t slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
+				getSlatepackAddress(slatepackAddress, account);
+				
+				// Copy Slatepack address into the public key line buffer
+				memcpy(publicKeyLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+				publicKeyLineBuffer[sizeof(slatepackAddress)] = '\0';
+				
+				// Set menu to verify address menu
+				menu = VERIFY_ADDRESS_MENU;
+			}
+			
 			// Break
 			break;
 		
@@ -162,15 +207,15 @@ void processGetPublicKeyVerificationRequest(__attribute__((unused)) unsigned sho
 			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Show verify public key menu
-	showMenu(VERIFY_PUBLIC_KEY_MENU);
+	// Show menu
+	showMenu(menu);
 	
 	// Set response flags to send response later
 	*responseFlags |= IO_ASYNCH_REPLY;
 }
 
-// Process get public key user interaction
-void processGetPublicKeyVerificationUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
+// Process get public key or address user interaction
+void processGetPublicKeyOrAddressVerificationUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
 
 	// Throw success
 	THROW(SWO_SUCCESS);

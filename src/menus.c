@@ -336,7 +336,7 @@ static UX_STEP_NOCB(verifyPublicKeyMenuPublicKeyScreen,
 });
 
 // Verify public key menu valid screen
-static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, true), {
+static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -346,7 +346,7 @@ static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET
 });
 
 // Verify public key menu invalid screen
-static UX_STEP_CB(verifyPublicKeyMenuInvalidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION, false), {
+static UX_STEP_CB(verifyPublicKeyMenuInvalidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -363,6 +363,62 @@ static UX_FLOW(verifyPublicKeyMenu,
 	
 	// Verify public key menu public key screen
 	&verifyPublicKeyMenuPublicKeyScreen,
+
+	// Verify public key menu approve screen
+	&verifyPublicKeyMenuValidScreen,
+	
+	// Verify public key menu deny screen
+	&verifyPublicKeyMenuInvalidScreen,
+	
+	// Loop
+	FLOW_LOOP
+);
+
+// Verify address menu notify screen
+static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
+
+	// Picture
+	&C_icon_view,
+
+	// First line
+	publicKeyTypeLineBuffer,
+	
+	// Second line
+	"address?"
+});
+
+// Verify address menu address screen
+static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
+
+	// Check if target is the Nano X
+	#ifdef TARGET_NANOX
+	
+		// Layout
+		bnnn_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		nb_paging,
+	#endif
+{
+
+	// Title
+	.title = "Address",
+	
+	// Text
+	.text = publicKeyLineBuffer
+});
+
+// Verify address menu
+static UX_FLOW(verifyAddressMenu,
+
+	// Verify address menu notify screen
+	&verifyAddressMenuNotifyScreen,
+	
+	// Verify address menu public key screen
+	&verifyAddressMenuAddressScreen,
 
 	// Verify public key menu approve screen
 	&verifyPublicKeyMenuValidScreen,
@@ -764,6 +820,15 @@ void showMenu(enum Menu menu) {
 		
 			// Set menu steps to verify public key menu
 			menuSteps = verifyPublicKeyMenu;
+		
+			// Break
+			break;
+		
+		// Verify address menu
+		case VERIFY_ADDRESS_MENU:
+		
+			// Set menu steps to verify address menu
+			menuSteps = verifyAddressMenu;
 		
 			// Break
 			break;

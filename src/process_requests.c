@@ -21,7 +21,7 @@
 #include "get_bulletproof_components.h"
 #include "get_mqs_public_key.h"
 #include "get_mqs_transaction_signature.h"
-#include "get_public_key_verification.h"
+#include "get_public_key_or_address_verification.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
 #include "get_tor_public_key.h"
@@ -98,11 +98,11 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get public key verification instruction
-				case GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION:
+				// Get public key or address verification instruction
+				case GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION:
 				
-					// Process get public key verification request
-					processGetPublicKeyVerificationRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get public key or address verification request
+					processGetPublicKeyOrAddressVerificationRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
@@ -433,11 +433,11 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						// Break
 						break;
 					
-					// Get public key verification instruction
-					case GET_PUBLIC_KEY_VERIFICATION_INSTRUCTION:
+					// Get public key or address verification instruction
+					case GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION:
 					
-						// Process get public key verification user interaction
-						processGetPublicKeyVerificationUserInteraction((unsigned short *)&responseLength);
+						// Process get public key or address verification user interaction
+						processGetPublicKeyOrAddressVerificationUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
 						break;

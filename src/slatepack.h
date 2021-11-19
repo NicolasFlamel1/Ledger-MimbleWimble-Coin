@@ -13,6 +13,9 @@
 // Slatepack data session key size
 #define SLATEPACK_DATA_SESSION_KEY_SIZE 32
 
+// Slatepack address without human-readable part size 
+#define SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE 59
+
 
 // Constants
 
@@ -68,6 +71,9 @@ void resetSlatepackData(void);
 
 // Create Slatepack shared private key
 void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey);
+
+// Get Slatepack address
+void getSlatepackAddress(uint8_t *slatepackAddress, uint32_t account);
 
 
 #endif

@@ -28,6 +28,9 @@
 // Currency information icon bitmap size
 #define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
 
+// Currency information Slatepack address human-readable part size
+#define CURRENCY_INFORMATION_SLATEPACK_ADDRESS_HUMAN_READABLE_PART_SIZE sizeof("tgrin")
+
 // Currency information
 struct CurrencyInformation {
 
@@ -66,6 +69,9 @@ struct CurrencyInformation {
 	
 	// Icon details
 	bagl_icon_details_t iconDetails;
+	
+	// Slatepack human-readable part
+	char slatepackAddressHumanReadablePart[CURRENCY_INFORMATION_SLATEPACK_ADDRESS_HUMAN_READABLE_PART_SIZE];
 };
 
 

@@ -74,12 +74,12 @@ Example request: C701000012000000004E69636F6C617320466C616d656C
 Example response: 02CC4773277F41E7E10E1E28C1CC6A7E70D857E15CD677C5C8B65D98893D441C83
 ```
 
-* Get public key verification
+* Get public key or address verification
 ```
-Description: Returns if the user verifies that the public key is valid
+Description: Returns if the user verifies that the public key or address is valid
 Class: C7
 Instruction: 02
-Parameters one: Public key type (Root 00, Tor 01, MQS 02)
+Parameters one: Public key or address type (Root 00, Tor 01, MQS 02, Ed25519 03)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer)
 Response: N/A
@@ -151,7 +151,7 @@ Class: C7
 Instruction: 07
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes for MQS address, 56 bytes for Tor address)
+Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address, 32 bytes Ed25519 address)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: No
 Example request: C70700006500000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4657A656A33636A746B6D6576687079617969676F326370623537747534677174676B6933727066757A6D726E6C6272333574653365626164
@@ -277,7 +277,7 @@ Class: C7
 Instruction: 10
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address)
+Data: Account (unsigned 4 bytes little endian integer) | value (unsigned 8 bytes little endian integer) | commitment (33 bytes) | sender address (52 bytes MQS address, 56 bytes Tor address, 32 bytes Ed25519 address)
 Response: DER signature (at most 72 bytes)
 Requires user interaction: No
 Example request: C71000006100000000010000000000000008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02F4786D6A434A574B504C6265344470723156346B72446E776B327735484D42734667337942736538795255597946614C70534C4852
@@ -375,7 +375,7 @@ Class: C7
 Instruction: 17
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer) | [receiver address (52 bytes MQS address, 56 bytes Tor address)]
+Data: Account (unsigned 4 bytes little endian integer) | output (unsigned 8 bytes little endian integer) | input (unsigned 8 bytes little endian integer) | fee (unsigned 8 bytes little endian integer) | [receiver address (52 bytes MQS address, 56 bytes Tor address, 32 bytes Ed25519 address)]
 Response: N/A
 Requires user interaction: No
 Example request: C71700001C00000000020000000000000001000000000000000300000000000000
@@ -445,7 +445,7 @@ Class: C7
 Instruction: 1C
 Parameters one: Address type (Tor 00, MQS 01, Ed25519 02)
 Parameter two: 00
-Data: Secret nonce (32 bytes) | public nonce (33 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address)]
+Data: Secret nonce (32 bytes) | public nonce (33 bytes) | compressed secp256k1 pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor or Ed25519 receiver address)]
 Response: Single-signer signature (64 bytes)
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C71C00002203C1AA1FE1698AC85C309B0F80A367AF56AFA0F3AA09E40E4C10CDF32E73E7338201
