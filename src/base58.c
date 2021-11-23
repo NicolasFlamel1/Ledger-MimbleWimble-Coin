@@ -13,7 +13,7 @@ const size_t INVALID_BASE58_SIZE = SIZE_MAX;
 const size_t BASE58_CHECKSUM_SIZE = 4;
 
 // Characters
-static const uint8_t CHARACTERS[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+static const char CHARACTERS[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
 // Number base
 static const uint8_t NUMBER_BASE = 58;
@@ -28,10 +28,10 @@ static const uint16_t SIZE_PERCENT_DECREASE = 733;
 // Function prototypes
 
 // Base58 encode get length
-static size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t length);
+static size_t base58EncodeGetLength(char *result, const uint8_t *data, size_t length);
 
 // Base58 decode get length
-static size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length);
+static size_t base58DecodeGetLength(uint8_t *result, const char *data, size_t length);
 
 // Get checksum
 static void getChecksum(uint8_t *checksum, const uint8_t *data, size_t length);
@@ -47,7 +47,7 @@ size_t getBase58EncodedLength(const uint8_t *data, size_t length) {
 }
 
 // Base58 encode
-void base58Encode(uint8_t *result, const uint8_t *data, size_t length) {
+void base58Encode(char *result, const uint8_t *data, size_t length) {
 
 	// Get base58 encoding of the data
 	base58EncodeGetLength(result, data, length);
@@ -61,7 +61,7 @@ size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, size_t length) {
 }
 
 // Base58 encode with checksum
-void base58EncodeWithChecksum(uint8_t *result, uint8_t *data, size_t length) {
+void base58EncodeWithChecksum(char *result, uint8_t *data, size_t length) {
 
 	// Append checksum to the data
 	getChecksum(&data[length - BASE58_CHECKSUM_SIZE], data, length - BASE58_CHECKSUM_SIZE);
@@ -71,21 +71,21 @@ void base58EncodeWithChecksum(uint8_t *result, uint8_t *data, size_t length) {
 }
 
 // Get base58 decoded length
-size_t getBase58DecodedLength(const uint8_t *data, size_t length) {
+size_t getBase58DecodedLength(const char *data, size_t length) {
 
 	// Return base58 decoded length
 	return base58DecodeGetLength(NULL, data, length);
 }
 
 // Base58 decode
-void base58Decode(uint8_t *result, const uint8_t *data, size_t length) {
+void base58Decode(uint8_t *result, const char *data, size_t length) {
 
 	// Get base58 decoding of the data
 	base58DecodeGetLength(result, data, length);
 }
 
 // Get base58 decoded length with checksum
-size_t getBase58DecodedLengthWithChecksum(const uint8_t *data, size_t length) {
+size_t getBase58DecodedLengthWithChecksum(const char *data, size_t length) {
 
 	// Get base58 decoded length
 	const size_t resultLength = base58DecodeGetLength(NULL, data, length);
@@ -95,7 +95,7 @@ size_t getBase58DecodedLengthWithChecksum(const uint8_t *data, size_t length) {
 }
 
 // Base58 decode with checksum
-bool base58DecodeWithChecksum(uint8_t *result, const uint8_t *data, size_t length) {
+bool base58DecodeWithChecksum(uint8_t *result, const char *data, size_t length) {
 
 	// Get base58 decoding of the data
 	const size_t resultLength = base58DecodeGetLength(result, data, length);
@@ -109,7 +109,7 @@ bool base58DecodeWithChecksum(uint8_t *result, const uint8_t *data, size_t lengt
 }
 
 // Base58 encode get length
-size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t length) {
+size_t base58EncodeGetLength(char *result, const uint8_t *data, size_t length) {
 
 	// Go through all leading zeros in the data
 	size_t numberOfLeadingZeros = 0;
@@ -181,7 +181,7 @@ size_t base58EncodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 }
 
 // Base58 decode get length
-size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length) {
+size_t base58DecodeGetLength(uint8_t *result, const char *data, size_t length) {
 
 	// Go through all leading zeros in base58 in the string
 	size_t numberOfLeadingZeros = 0;
@@ -203,7 +203,7 @@ size_t base58DecodeGetLength(uint8_t *result, const uint8_t *data, size_t length
 	for(size_t i = numberOfLeadingZeros; i < length; ++i) {
 	
 		// Get position of character in the characters
-		const uint8_t *characterOffset = (uint8_t *)memchr(CHARACTERS, data[i], sizeof(CHARACTERS));
+		const char *characterOffset = (char *)memchr(CHARACTERS, data[i], sizeof(CHARACTERS));
 		
 		// Check if character is invalid
 		if(!characterOffset) {

@@ -3,38 +3,31 @@
 #include <string.h>
 #include <ux.h>
 #include "common.h"
-#include "continue_decrypting_mqs_data.h"
-#include "continue_decrypting_slatepack_data.h"
-#include "continue_encrypting_mqs_data.h"
-#include "continue_encrypting_slatepack_data.h"
+#include "continue_decrypting_slate.h"
+#include "continue_encrypting_slate.h"
 #include "continue_transaction_apply_offset.h"
 #include "continue_transaction_get_public_key.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
-#include "finish_decrypting_mqs_data.h"
-#include "finish_decrypting_slatepack_data.h"
-#include "finish_encrypting_mqs_data.h"
-#include "finish_encrypting_slatepack_data.h"
+#include "finish_decrypting_slate.h"
+#include "finish_encrypting_slate.h"
 #include "finish_transaction.h"
+#include "get_address.h"
 #include "get_application_information.h"
 #include "get_commitment.h"
 #include "get_bulletproof_components.h"
-#include "get_mqs_public_key.h"
-#include "get_mqs_transaction_signature.h"
-#include "get_public_key_or_address_verification.h"
+#include "get_mqs_timestamp_signature.h"
 #include "get_root_public_key.h"
 #include "get_seed_cookie.h"
-#include "get_tor_public_key.h"
 #include "get_tor_certificate_signature.h"
-#include "get_tor_transaction_signature.h"
 #include "menus.h"
 #include "process_requests.h"
-#include "start_decrypting_mqs_data.h"
-#include "start_decrypting_slatepack_data.h"
-#include "start_encrypting_mqs_data.h"
-#include "start_encrypting_slatepack_data.h"
+#include "start_decrypting_slate.h"
+#include "start_encrypting_slate.h"
 #include "start_transaction.h"
 #include "state.h"
+#include "verify_address.h"
+#include "verify_root_public_key.h"
 
 
 // Constants
@@ -98,11 +91,11 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get public key or address verification instruction
-				case GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION:
+				// Get address instruction
+				case GET_ADDRESS_INSTRUCTION:
 				
-					// Process get public key or address verification request
-					processGetPublicKeyOrAddressVerificationRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get address request
+					processGetAddressRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
@@ -134,155 +127,74 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					// Break
 					break;
 				
-				// Get Tor public key instruction
-				case GET_TOR_PUBLIC_KEY_INSTRUCTION:
+				// Verify root public key instruction
+				case VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION:
 				
-					// Process get Tor public key request
-					processGetTorPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process verify root public key request
+					processVerifyRootPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
 				
-				// Get Tor transaction signature instruction
-				case GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION:
+				// Verify address instruction
+				case VERIFY_ADDRESS_INSTRUCTION:
 				
-					// Process get Tor transaction signature request
-					processGetTorTransactionSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// break
-					break;
-				
-				// Get Tor certificate signature instruction
-				case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
-				
-					// Process get Tor certificate signature request
-					processGetTorCertificateSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// break
-					break;
-				
-				// Start encrypting Slatepack data instruction
-				case START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process start encrypting Slatepack data request
-					processStartEncryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Continue encrypting Slatepack data instruction
-				case CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process continue encrypting Slatepack data request
-					processContinueEncryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Finish encrypting Slatepack data instruction
-				case FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process finish encrypting Slatepack data request
-					processFinishEncryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Start decrypting Slatepack data instruction
-				case START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process start decrypting Slatepack data request
-					processStartDecryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Continue decrypting Slatepack data instruction
-				case CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process continue decrypting Slatepack data request
-					processContinueDecryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Finish decrypting Slatepack data instruction
-				case FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-				
-					// Process finish decrypting Slatepack data request
-					processFinishDecryptingSlatepackDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Get MQS public key instruction
-				case GET_MQS_PUBLIC_KEY_INSTRUCTION:
-				
-					// Process get MQS public key request
-					processGetMqsPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process verify address request
+					processVerifyAddressRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
 				
-				// Get MQS transaction signature instruction
-				case GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION:
+				// Start encrypting slate instruction
+				case START_ENCRYPTING_SLATE_INSTRUCTION:
 				
-					// Process get MQS transaction signature request
-					processGetMqsTransactionSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// break
-					break;
-					
-				// Start encrypting MQS data instruction
-				case START_ENCRYPTING_MQS_DATA_INSTRUCTION:
-				
-					// Process start encrypting MQS data request
-					processStartEncryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process start encrypting slate request
+					processStartEncryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;
 				
-				// Continue encrypting MQS data instruction
-				case CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION:
+				// Continue encrypting slate instruction
+				case CONTINUE_ENCRYPTING_SLATE_INSTRUCTION:
 				
-					// Process continue encrypting MQS data request
-					processContinueEncryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Finish encrypting MQS data instruction
-				case FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION:
-				
-					// Process finish encrypting MQS data request
-					processFinishEncryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process continue encrypting slate request
+					processContinueEncryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;
 				
-				// Start decrypting MQS data instruction
-				case START_DECRYPTING_MQS_DATA_INSTRUCTION:
+				// Finish encrypting slate instruction
+				case FINISH_ENCRYPTING_SLATE_INSTRUCTION:
 				
-					// Process start decrypting MQS data request
-					processStartDecryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// Break
-					break;
-				
-				// Continue decrypting MQS data instruction
-				case CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION:
-				
-					// Process continue decrypting MQS data request
-					processContinueDecryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process finish encrypting slate request
+					processFinishEncryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;
 				
-				// Finish decrypting MQS data instruction
-				case FINISH_DECRYPTING_MQS_DATA_INSTRUCTION:
+				// Start decrypting slate instruction
+				case START_DECRYPTING_SLATE_INSTRUCTION:
 				
-					// Process finish decrypting MQS data request
-					processFinishDecryptingMqsDataRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process start decrypting slate request
+					processStartDecryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
+					// Break
+					break;
+				
+				// Continue decrypting slate instruction
+				case CONTINUE_DECRYPTING_SLATE_INSTRUCTION:
+				
+					// Process continue decrypting slate request
+					processContinueDecryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
+					// Break
+					break;
+				
+				// Finish decrypting slate instruction
+				case FINISH_DECRYPTING_SLATE_INSTRUCTION:
+				
+					// Process finish decrypting slate request
+					processFinishDecryptingSlateRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// Break
 					break;
@@ -339,6 +251,24 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					processFinishTransactionRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
+					break;
+				
+				// Get MQS timestamp signature instruction
+				case GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION:
+				
+					// Process get MQS timestamp signature request
+					processGetMqsTimestampSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
+					// break
+					break;
+				
+				// Get Tor certificate signature instruction
+				case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
+				
+					// Process get Tor certificate signature request
+					processGetTorCertificateSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
+					// break
 					break;
 
 				// Default
@@ -433,22 +363,22 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						// Break
 						break;
 					
-					// Get public key or address verification instruction
-					case GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION:
+					// Verify root public key instruction
+					case VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION:
 					
-						// Process get public key or address verification user interaction
-						processGetPublicKeyOrAddressVerificationUserInteraction((unsigned short *)&responseLength);
+						// Process verify root public key user interaction
+						processVerifyRootPublicKeyUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
 						break;
 					
-					// Get Tor certificate signature instruction
-					case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
+					// Verify address instruction
+					case VERIFY_ADDRESS_INSTRUCTION:
 					
-						// Process get Tor certificate signature user interaction
-						processGetTorCertificateSignatureUserInteraction((unsigned short *)&responseLength);
-					
-						// break
+						// Process verify address user interaction
+						processVerifyAddressUserInteraction((unsigned short *)&responseLength);
+						
+						// Break
 						break;
 					
 					// Finish transaction instruction
@@ -458,6 +388,24 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 						processFinishTransactionUserInteraction((unsigned short *)&responseLength);
 						
 						// Break
+						break;
+					
+					// Get MQS timestamp signature instruction
+					case GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION:
+					
+						// Process get MQS timestamp signature user interaction
+						processGetMqsTimestampSignatureUserInteraction((unsigned short *)&responseLength);
+					
+						// break
+						break;
+					
+					// Get Tor certificate signature instruction
+					case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
+					
+						// Process get Tor certificate signature user interaction
+						processGetTorCertificateSignatureUserInteraction((unsigned short *)&responseLength);
+					
+						// break
 						break;
 				}
 			}
@@ -490,17 +438,22 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 			// Check error type
 			switch(error & ERROR_TYPE_MASK) {
 				
-				// Default
+				// Higher application errors or default
+				case ERR_APP_RANGE_03:
+				case ERR_APP_RANGE_04:
 				default:
 				
 					// Set error to internal error error
 					error = INTERNAL_ERROR_ERROR;
 				
-				// Application errors or success
+				// Lower application errors
 				case ERR_APP_RANGE_01:
 				case ERR_APP_RANGE_02:
-				case ERR_APP_RANGE_03:
-				case ERR_APP_RANGE_04:
+				
+					// Reset state
+					resetState();
+				
+				// Success
 				case SWO_SUCCESS:
 				
 					// Check if response with the error will overflow

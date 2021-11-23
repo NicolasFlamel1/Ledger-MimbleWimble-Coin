@@ -15,20 +15,17 @@ char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
 // Time line buffer
 char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
-// Public key line buffer
-char publicKeyLineBuffer[PUBLIC_KEY_LINE_BUFFER_SIZE];
+// Public key or address line buffer
+char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Public key type line buffer
-char publicKeyTypeLineBuffer[PUBLIC_KEY_TYPE_LINE_BUFFER_SIZE];
+// Address type line buffer
+char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
 
 // Amount line buffer
 char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
-
-// Receiver line buffer
-char receiverLineBuffer[RECEIVER_LINE_BUFFER_SIZE];
 
 
 // Constants
@@ -298,21 +295,21 @@ static UX_FLOW(exportRootPublicKeyMenu,
 	FLOW_LOOP
 );
 
-// Verify public key menu notify screen
-static UX_STEP_NOCB(verifyPublicKeyMenuNotifyScreen, pnn, {
+// Verify root public key menu notify screen
+static UX_STEP_NOCB(verifyRootPublicKeyMenuNotifyScreen, pnn, {
 
 	// Picture
 	&C_icon_view,
 
 	// First line
-	publicKeyTypeLineBuffer,
+	"Verify root",
 	
 	// Second line
 	"public key?"
 });
 
-// Verify public key menu public key screen
-static UX_STEP_NOCB(verifyPublicKeyMenuPublicKeyScreen,
+// Verify root public key menu public key screen
+static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -332,11 +329,11 @@ static UX_STEP_NOCB(verifyPublicKeyMenuPublicKeyScreen,
 	.title = "Public key",
 	
 	// Text
-	.text = publicKeyLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
-// Verify public key menu valid screen
-static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, true), {
+// Verify root public key menu valid screen
+static UX_STEP_CB(verifyRootPublicKeyMenuValidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -345,8 +342,8 @@ static UX_STEP_CB(verifyPublicKeyMenuValidScreen, pb, processUserInteraction(GET
 	"Valid"
 });
 
-// Verify public key menu invalid screen
-static UX_STEP_CB(verifyPublicKeyMenuInvalidScreen, pb, processUserInteraction(GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, false), {
+// Verify root public key menu invalid screen
+static UX_STEP_CB(verifyRootPublicKeyMenuInvalidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -355,20 +352,20 @@ static UX_STEP_CB(verifyPublicKeyMenuInvalidScreen, pb, processUserInteraction(G
 	"Invalid"
 });
 
-// Verify public key menu
-static UX_FLOW(verifyPublicKeyMenu,
+// Verify root public key menu
+static UX_FLOW(verifyRootPublicKeyMenu,
 
-	// Verify public key menu notify screen
-	&verifyPublicKeyMenuNotifyScreen,
+	// Verify root public key menu notify screen
+	&verifyRootPublicKeyMenuNotifyScreen,
 	
-	// Verify public key menu public key screen
-	&verifyPublicKeyMenuPublicKeyScreen,
+	// Verify root public key menu public key screen
+	&verifyRootPublicKeyMenuPublicKeyScreen,
 
-	// Verify public key menu approve screen
-	&verifyPublicKeyMenuValidScreen,
+	// Verify root public key menu approve screen
+	&verifyRootPublicKeyMenuValidScreen,
 	
-	// Verify public key menu deny screen
-	&verifyPublicKeyMenuInvalidScreen,
+	// Verify root public key menu deny screen
+	&verifyRootPublicKeyMenuInvalidScreen,
 	
 	// Loop
 	FLOW_LOOP
@@ -381,7 +378,7 @@ static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 	&C_icon_view,
 
 	// First line
-	publicKeyTypeLineBuffer,
+	addressTypeLineBuffer,
 	
 	// Second line
 	"address?"
@@ -408,7 +405,27 @@ static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 	.title = "Address",
 	
 	// Text
-	.text = publicKeyLineBuffer
+	.text = publicKeyOrAddressLineBuffer
+});
+
+// Verify address menu valid screen
+static UX_STEP_CB(verifyAddressMenuValidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true), {
+
+	// Picture
+	&C_icon_approve,
+	
+	// Bold line
+	"Valid"
+});
+
+// Verify address menu invalid screen
+static UX_STEP_CB(verifyAddressMenuInvalidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false), {
+
+	// Picture
+	&C_icon_reject,
+	
+	// Bold line
+	"Invalid"
 });
 
 // Verify address menu
@@ -420,11 +437,93 @@ static UX_FLOW(verifyAddressMenu,
 	// Verify address menu public key screen
 	&verifyAddressMenuAddressScreen,
 
-	// Verify public key menu approve screen
-	&verifyPublicKeyMenuValidScreen,
+	// Verify address menu approve screen
+	&verifyAddressMenuValidScreen,
 	
-	// Verify public key menu deny screen
-	&verifyPublicKeyMenuInvalidScreen,
+	// Verify address menu deny screen
+	&verifyAddressMenuInvalidScreen,
+	
+	// Loop
+	FLOW_LOOP
+);
+
+// Sign MQS timestamp menu notify screen
+static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
+
+	// Picture
+	&C_icon_view,
+
+	// First line
+	"Sign MQS",
+	
+	// Second line
+	"timestamp?"
+});
+
+// Sign MQS timestamp menu date and time screen
+static UX_STEP_NOCB(signMqsTimestampMenuDateAndTimeScreen,
+
+	// Check if target is the Nano X
+	#ifdef TARGET_NANOX
+	
+		// Layout
+		bnnn_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		nb_paging,
+	#endif
+{
+
+	// Title
+	.title = "Date and time",
+	
+	// Text
+	.text = timeLineBuffer
+});
+
+// Sign MQS timestamp menu approve screen
+static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pbb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true), {
+
+	// Picture
+	&C_icon_approve,
+	
+	// First bold line
+	"Approve",
+	
+	// Second bold line
+	"request"
+});
+
+// Sign MQS timestamp menu deny screen
+static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pbb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false), {
+
+	// Picture
+	&C_icon_reject,
+	
+	// First bold line
+	"Deny",
+	
+	// Second bold line
+	"request"
+});
+
+// Sign MQS timestamp menu
+static UX_FLOW(signMqsTimestampMenu,
+
+	// Sign MQS timestamp menu notify screen
+	&signMqsTimestampMenuNotifyScreen,
+	
+	// Sign MQS timestamp menu date and time screen
+	&signMqsTimestampMenuDateAndTimeScreen,
+	
+	// Sign MQS timestamp menu approve screen
+	&signMqsTimestampMenuApproveScreen,
+	
+	// Sign MQS timestamp menu deny screen
+	&signMqsTimestampMenuDenyScreen,
 	
 	// Loop
 	FLOW_LOOP
@@ -437,13 +536,13 @@ static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 	&C_icon_view,
 
 	// First line
-	"Sign temporary",
+	"Sign Tor",
 	
 	// Second line
-	"Tor certificate?"
+	"certificate?"
 });
 
-// Sign Tor certificate menu requestor screen
+// Sign Tor certificate menu expiration screen
 static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 
 	// Check if target is the Nano X
@@ -467,8 +566,8 @@ static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 	.text = timeLineBuffer
 });
 
-// Sign Tor certificate menu public key screen
-static UX_STEP_NOCB(signTorCertificateMenuPublicKeyScreen,
+// Sign Tor certificate menu address screen
+static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -485,10 +584,10 @@ static UX_STEP_NOCB(signTorCertificateMenuPublicKeyScreen,
 {
 
 	// Title
-	.title = "Public key",
+	.title = "Address",
 	
 	// Text
-	.text = publicKeyLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Sign Tor certificate menu approve screen
@@ -526,8 +625,8 @@ static UX_FLOW(signTorCertificateMenu,
 	// Sign Tor certificate menu expiration screen
 	&signTorCertificateMenuExpirationScreen,
 	
-	// Sign Tor certificate menu public key screen
-	&signTorCertificateMenuPublicKeyScreen,
+	// Sign Tor certificate menu address screen
+	&signTorCertificateMenuAddressScreen,
 
 	// Sign Tor certificate menu approve screen
 	&signTorCertificateMenuApproveScreen,
@@ -621,7 +720,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuReceiverScreen,
 	.title = "To",
 	
 	// Text
-	.text = receiverLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Finalize transaction menu no payment proof screen
@@ -742,20 +841,17 @@ void clearMenuBuffers(void) {
 	// Clear the time line buffer
 	explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
 	
-	// Clear the public key line buffer
-	explicit_bzero(publicKeyLineBuffer, sizeof(publicKeyLineBuffer));
+	// Clear the public key or address line buffer
+	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
-	// Clear the public key type line buffer
-	explicit_bzero(publicKeyTypeLineBuffer, sizeof(publicKeyTypeLineBuffer));
+	// Clear the address type line buffer
+	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
 	
 	// Clear the amount line buffer
 	explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
 	
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
-	
-	// Clear the receiver line buffer
-	explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
 }
 
 // Show main menu
@@ -815,11 +911,11 @@ void showMenu(enum Menu menu) {
 			// Break
 			break;
 		
-		// Verify public key menu
-		case VERIFY_PUBLIC_KEY_MENU:
+		// Verify root public key menu
+		case VERIFY_ROOT_PUBLIC_KEY_MENU:
 		
-			// Set menu steps to verify public key menu
-			menuSteps = verifyPublicKeyMenu;
+			// Set menu steps to verify root public key menu
+			menuSteps = verifyRootPublicKeyMenu;
 		
 			// Break
 			break;
@@ -830,6 +926,15 @@ void showMenu(enum Menu menu) {
 			// Set menu steps to verify address menu
 			menuSteps = verifyAddressMenu;
 		
+			// Break
+			break;
+		
+		// Sign MQS timestamp menu
+		case SIGN_MQS_TIMESTAMP_MENU:
+		
+			// Set menu steps to sign MQS timestamp menu
+			menuSteps = signMqsTimestampMenu;
+			
 			// Break
 			break;
 		
@@ -845,8 +950,8 @@ void showMenu(enum Menu menu) {
 		// Finalize transaction menu
 		case FINALIZE_TRANSACTION_MENU:
 		
-			// Check if receiver line buffer isn't empty
-			if(strlen(receiverLineBuffer)) {
+			// Check if public key or address line buffer isn't empty
+			if(strlen(publicKeyOrAddressLineBuffer)) {
 			
 				// Set menu steps to finalize transaction receiver menu
 				menuSteps = finalizeTransactionReceiverMenu;

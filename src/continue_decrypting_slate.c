@@ -2,15 +2,15 @@
 #include <string.h>
 #include "chacha20_poly1305.h"
 #include "common.h"
-#include "continue_decrypting_slatepack_data.h"
+#include "continue_decrypting_slate.h"
 #include "crypto.h"
-#include "slatepack.h"
+#include "slate.h"
 
 
 // Supporting function implementation
 
-// Process continue decrypting Slatepack data request
-void processContinueDecryptingSlatepackDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process continue decrypting slate request
+void processContinueDecryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -31,8 +31,8 @@ void processContinueDecryptingSlatepackDataRequest(unsigned short *responseLengt
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Check if Slatepack data decrypting state isn't ready or active
-	if(slatepackData.decryptingState != READY_SLATEPACK_DATA_STATE && slatepackData.decryptingState != ACTIVE_SLATEPACK_DATA_STATE) {
+	// Check if slate decrypting state isn't ready or active
+	if(slate.decryptingState != READY_SLATE_STATE && slate.decryptingState != ACTIVE_SLATE_STATE) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
@@ -51,10 +51,10 @@ void processContinueDecryptingSlatepackDataRequest(unsigned short *responseLengt
 		TRY {
 	
 			// Decrypt ChaCha20 Poly1305 data
-			decryptChaCha20Poly1305Data(&slatepackData.chaCha20Poly1305State, (uint8_t *)decryptedData, data, dataLength);
+			decryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)decryptedData, data, dataLength);
 			
 			// Encrypt the decrypted data
-			encryptData(encryptedData, (uint8_t *)decryptedData, sizeof(decryptedData), slatepackData.sessionKey, sizeof(slatepackData.sessionKey));
+			encryptData(encryptedData, (uint8_t *)decryptedData, sizeof(decryptedData), slate.sessionKey, sizeof(slate.sessionKey));
 		}
 		
 		// Finally
@@ -83,15 +83,15 @@ void processContinueDecryptingSlatepackDataRequest(unsigned short *responseLengt
 	// Check if at the last data 
 	if(dataLength < CHACHA20_BLOCK_SIZE) {
 	
-		// Set that Slatepack data decrypting state is complete
-		slatepackData.decryptingState = COMPLETE_SLATEPACK_DATA_STATE;
+		// Set that slate decrypting state is complete
+		slate.decryptingState = COMPLETE_SLATE_STATE;
 	}
 	
 	// Otherwise
 	else {
 	
-		// Set that Slatepack data decrypting state is active
-		slatepackData.decryptingState = ACTIVE_SLATEPACK_DATA_STATE;
+		// Set that slate decrypting state is active
+		slate.decryptingState = ACTIVE_SLATE_STATE;
 	}
 	
 	// Throw success

@@ -20,13 +20,13 @@ extern const size_t INVALID_BASE32_SIZE;
 size_t getBase32EncodedLength(size_t length);
 
 // Base32 encode
-void base32Encode(uint8_t *result, const uint8_t *data, size_t length);
+void base32Encode(char *result, const uint8_t *data, size_t length);
 
 // Get base32 decoded length
-size_t getBase32DecodedLength(const uint8_t *data, size_t length);
+size_t getBase32DecodedLength(const char *data, size_t length);
 
 // Base32 decode
-void base32Decode(uint8_t *result, const uint8_t *data, size_t length);
+void base32Decode(uint8_t *result, const char *data, size_t length);
 
 
 #endif

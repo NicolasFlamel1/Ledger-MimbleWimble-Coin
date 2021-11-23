@@ -58,12 +58,12 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 		}
 	}
 	
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if requestor wont fit in the requestor line buffer
+	if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 	
-		// Check if requestor wont fit in the requestor line buffer
-		if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
-		
+		// Check if target is the Nano X
+		#ifdef TARGET_NANOX
+	
 			// Go through all characters in the middle of the requestor that wont fit in the requestor line buffer
 			while(requestorLength != sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
 			
@@ -73,25 +73,17 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 				// Decrement requestor's length
 				--requestorLength;
 			}
-		}
-	
-	// Otherwise
-	#else
-	
-		// Check if requestor wont fit in the requestor line buffer with an ellipsis
-		if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0') - (sizeof(ELLIPSIS) - sizeof((char)'\0'))) {
 		
-			// Check if requestor wont fit in the requestor line buffer without an ellipsis
-			if(requestorLength > sizeof(requestorLineBuffer) - sizeof((char)'\0')) {
+		// Otherwise
+		#else
 		
-				// Reduce requestor's length to fit in the requestor line buffer
-				requestorLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
-				
-				// Change end of requestor to be an ellipsis
-				memcpy(&requestor[requestorLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
-			}
-		}
-	#endif
+			// Reduce requestor's length to fit in the requestor line buffer
+			requestorLength = sizeof(requestorLineBuffer) - sizeof((char)'\0');
+			
+			// Change end of requestor to be an ellipsis
+			memcpy(&requestor[requestorLength - (sizeof(ELLIPSIS) - sizeof((char)'\0'))], ELLIPSIS, sizeof(ELLIPSIS) - sizeof((char)'\0'));
+		#endif
+	}
 	
 	// Copy requestor into the requestor line buffer
 	memcpy(requestorLineBuffer, requestor, requestorLength);

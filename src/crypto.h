@@ -137,10 +137,10 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength);
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, size_t senderAddressLength);
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength);
 
 // Is valid commitment
 bool isValidCommitment(const uint8_t *commitment);
@@ -158,7 +158,7 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length);
 void uncompressSecp256k1PublicKey(uint8_t *publicKey);
 
 // Get Ed25519 public key
-void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account);
+void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t index);
 
 // Calculate bulletproof components
 void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);

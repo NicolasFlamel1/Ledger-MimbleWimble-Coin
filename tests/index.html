@@ -44,71 +44,44 @@
 		// Request get root public key instruction
 		const REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION + 1;
 
-		// Request get public key or address verification instruction
-		const REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION = REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
-
+		// Request get address instruction
+		const REQUEST_GET_ADDRESS_INSTRUCTION = REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
+		
 		// Request get seed cookie instruction
-		const REQUEST_GET_SEED_COOKIE_INSTRUCTION = REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION + 1;
+		const REQUEST_GET_SEED_COOKIE_INSTRUCTION = REQUEST_GET_ADDRESS_INSTRUCTION + 1;
 
 		// Request get commitment instruction
 		const REQUEST_GET_COMMITMENT_INSTRUCTION = REQUEST_GET_SEED_COOKIE_INSTRUCTION + 1;
 
 		// Request get bulletproof components instruction
 		const REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION = REQUEST_GET_COMMITMENT_INSTRUCTION + 1;
+		
+		// Request verify root public key instruction
+		const REQUEST_VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION + 1;
 
-		// Request get Tor public key instruction
-		const REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION + 1;
+		// Request verify address instruction
+		const REQUEST_VERIFY_ADDRESS_INSTRUCTION = REQUEST_VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
 
-		// Request get Tor transaction signature instruction
-		const REQUEST_GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION = REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION + 1;
+		// Request start encrypting slate instruction
+		const REQUEST_START_ENCRYPTING_SLATE_INSTRUCTION = REQUEST_VERIFY_ADDRESS_INSTRUCTION + 1;
 
-		// Request get Tor certificate signature instruction
-		const REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION = REQUEST_GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION + 1;
+		// Request continue encrypting slate data instruction
+		const REQUEST_CONTINUE_ENCRYPTING_SLATE_INSTRUCTION = REQUEST_START_ENCRYPTING_SLATE_INSTRUCTION + 1;
 
-		// Request start encrypting Slatepack data instruction
-		const REQUEST_START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION + 1;
+		// Request finish encrypting slate data instruction
+		const REQUEST_FINISH_ENCRYPTING_SLATE_INSTRUCTION = REQUEST_CONTINUE_ENCRYPTING_SLATE_INSTRUCTION + 1;
 
-		// Request continue encrypting Slatepack data instruction
-		const REQUEST_CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
+		// Request start decrypting slate data instruction
+		const REQUEST_START_DECRYPTING_SLATE_INSTRUCTION = REQUEST_FINISH_ENCRYPTING_SLATE_INSTRUCTION + 1;
 
-		// Request finish encrypting Slatepack data instruction
-		const REQUEST_FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
+		// Request continue decrypting slate data instruction
+		const REQUEST_CONTINUE_DECRYPTING_SLATE_INSTRUCTION = REQUEST_START_DECRYPTING_SLATE_INSTRUCTION + 1;
 
-		// Request start decrypting Slatepack data instruction
-		const REQUEST_START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
-
-		// Request continue decrypting Slatepack data instruction
-		const REQUEST_CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
-
-		// Request finish decrypting Slatepack data instruction
-		const REQUEST_FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION = REQUEST_CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
-
-		// Request get MQS public key instruction
-		const REQUEST_GET_MQS_PUBLIC_KEY_INSTRUCTION = REQUEST_FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION + 1;
-
-		// Request get MQS transaction signature instruction
-		const REQUEST_GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION = REQUEST_GET_MQS_PUBLIC_KEY_INSTRUCTION + 1;
-
-		// Request start encrypting MQS data instruction
-		const REQUEST_START_ENCRYPTING_MQS_DATA_INSTRUCTION = REQUEST_GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION + 1;
-
-		// Request continue encrypting MQS data instruction
-		const REQUEST_CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION = REQUEST_START_ENCRYPTING_MQS_DATA_INSTRUCTION + 1;
-
-		// Request finish encrypting MQS data instruction
-		const REQUEST_FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION = REQUEST_CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION + 1;
-
-		// Request start decrypting MQS data instruction
-		const REQUEST_START_DECRYPTING_MQS_DATA_INSTRUCTION = REQUEST_FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION + 1;
-
-		// Request continue decrypting MQS data instruction
-		const REQUEST_CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION = REQUEST_START_DECRYPTING_MQS_DATA_INSTRUCTION + 1;
-
-		// Request finish decrypting MQS data instruction
-		const REQUEST_FINISH_DECRYPTING_MQS_DATA_INSTRUCTION = REQUEST_CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION + 1;
+		// Request finish decrypting slate data instruction
+		const REQUEST_FINISH_DECRYPTING_SLATE_INSTRUCTION = REQUEST_CONTINUE_DECRYPTING_SLATE_INSTRUCTION + 1;
 
 		// Request start transaction instruction
-		const REQUEST_START_TRANSACTION_INSTRUCTION = REQUEST_FINISH_DECRYPTING_MQS_DATA_INSTRUCTION + 1;
+		const REQUEST_START_TRANSACTION_INSTRUCTION = REQUEST_FINISH_DECRYPTING_SLATE_INSTRUCTION + 1;
 
 		// Request continue transaction include output instruction
 		const REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION = REQUEST_START_TRANSACTION_INSTRUCTION + 1;
@@ -125,6 +98,12 @@
 		// Request finish transaction instruction
 		const REQUEST_FINISH_TRANSACTION_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
 		
+		// Request get MQS timestamp signature instruction
+		const REQUEST_GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION = REQUEST_FINISH_TRANSACTION_INSTRUCTION + 1;
+		
+		// Request get Tor certificate signature instruction
+		const REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION = REQUEST_GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION + 1;
+		
 		// No parameter
 		const NO_PARAMETER = 0;
 		
@@ -140,29 +119,26 @@
 		// Account
 		const ACCOUNT = new BigNumber(0);
 		
+		// Index
+		const INDEX = new BigNumber(0);
+		
 		// Response delimiter length
 		const RESPONSE_DELIMITER_LENGTH = (new Uint8Array([0x00, 0x00]))["length"];
-		
-		// Tor address key index
-		const TOR_ADDRESS_KEY_INDEX = 0;
-		
-		// MQS address key index
-		const MQS_ADDRESS_KEY_INDEX = 0;
-		
-		// Tor sender address type
-		const TOR_SENDER_ADDRESS_TYPE = 0;
-		
-		// MQS sender address type parameter
-		const MQS_SENDER_ADDRESS_TYPE = TOR_SENDER_ADDRESS_TYPE + 1;
 		
 		// No payment proof type
 		const NO_PAYMENT_PROOF_TYPE = 0;
 		
-		// Tor payment proof type
-		const TOR_PAYMENT_PROOF_TYPE = NO_PAYMENT_PROOF_TYPE + 1;
-		
 		// MQS payment proof type
-		const MQS_PAYMENT_PROOF_TYPE = TOR_PAYMENT_PROOF_TYPE + 1;
+		const MQS_PAYMENT_PROOF_TYPE = NO_PAYMENT_PROOF_TYPE + 1;
+		
+		// Tor payment proof type
+		const TOR_PAYMENT_PROOF_TYPE = MQS_PAYMENT_PROOF_TYPE + 1;
+		
+		// MQS address type
+		const MQS_ADDRESS_TYPE = 0;
+		
+		// Tor address type
+		const TOR_ADDRESS_TYPE = MQS_ADDRESS_TYPE + 1;
 		
 		
 		// Main function
@@ -251,8 +227,9 @@
 					// Run get root public key test
 					await getRootPublicKeyTest(hardwareWallet, extendedPrivateKey);
 					
-					// Run get public key and address verification test
-					await getPublicKeyAndAddressVerificationTest(hardwareWallet, extendedPrivateKey);
+					// Run get address test
+					await getAddressTest(hardwareWallet, extendedPrivateKey, MQS_ADDRESS_TYPE);
+					await getAddressTest(hardwareWallet, extendedPrivateKey, TOR_ADDRESS_TYPE);
 					
 					// Run get seed cookie test
 					await getSeedCookieTest(hardwareWallet, extendedPrivateKey);
@@ -265,86 +242,126 @@
 					await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE);
 					await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
 					
-					// Run get Tor public key test
-					await getTorPublicKeyTest(hardwareWallet, extendedPrivateKey);
+					// Run verify root public key test
+					await verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey);
 					
-					// Run get Tor transaction signature test
-					await getTorTransactionSignatureTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE);
-					await getTorTransactionSignatureTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
+					// Run verify address test
+					await verifyAddressTest(hardwareWallet, extendedPrivateKey, TOR_ADDRESS_TYPE);
+					await verifyAddressTest(hardwareWallet, extendedPrivateKey, MQS_ADDRESS_TYPE);
+					
+					// Run encrypt slate test
+					await encryptSlateTest(hardwareWallet, extendedPrivateKey, MQS_ADDRESS_TYPE);
+					await encryptSlateTest(hardwareWallet, extendedPrivateKey, TOR_ADDRESS_TYPE);
+				
+					// Run decrypt slate test
+					await decryptSlateTest(hardwareWallet, extendedPrivateKey, MQS_ADDRESS_TYPE);
+					await decryptSlateTest(hardwareWallet, extendedPrivateKey, TOR_ADDRESS_TYPE);
+					
+					// Run receive transaction test
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					
+					// Run send transaction test
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+					
+					// Run get MQS timestamp signature test
+					await getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey);
 					
 					// Run get Tor certificate signature test
 					await getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run encrypt Slatepack data test
-					await encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run decrypt Slatepack data test
-					await decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run get MQS public key test
-					await getMqsPublicKeyTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run get MQS transaction signature test
-					await getMqsTransactionSignatureTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE);
-					await getMqsTransactionSignatureTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
-					
-					// Run encrypt MQS data test
-					await encryptMqsDataTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run decrypt MQS data test
-					await decryptMqsDataTest(hardwareWallet, extendedPrivateKey);
-					
-					// Run receive transaction test
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT);
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)));
-					await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)));
-					
-					// Run send transaction test
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_SENDER_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-					await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_SENDER_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
 					
 					// Log message
 					console.log("Passed running all tests");
@@ -452,62 +469,77 @@
 			console.log("Passed getting root pubic key test");	
 		}
 		
-		// Get public key and address verification test
-		async function getPublicKeyAndAddressVerificationTest(hardwareWallet, extendedPrivateKey) {
+		// Get address test
+		async function getAddressTest(hardwareWallet, extendedPrivateKey, addressType) {
 		
 			// Log message
-			console.log("Running get public key verification test");
+			console.log("Running get address test");
 			
-			// Root public key parameter
-			const ROOT_PUBLIC_KEY_PARAMETER = 0;
+			// Check address type
+			switch(addressType) {
 			
-			// Tor public key parameter
-			const TOR_PUBLIC_KEY_PARAMETER = ROOT_PUBLIC_KEY_PARAMETER + 1;
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using address type: MQS");
+					
+					// Get MQS private key from the extended private key
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get MQS public key from the MQS private key
+					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+					
+					// Get expected address from the MQS public key
+					var expectedAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+					
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using address type: Tor");
+					
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Get expected address from the Tor public key
+					var expectedAddress = Tor.publicKeyToTorAddress(torPublicKey);
+					
+					// Break
+					break;
+			}
 			
-			// MQS public key parameter
-			const MQS_PUBLIC_KEY_PARAMETER = TOR_PUBLIC_KEY_PARAMETER + 1;
+			// Get the address from the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_ADDRESS_INSTRUCTION, addressType, NO_PARAMETER, Buffer.concat([
 			
-			// Get the root public key from the extended private key
-			let rootPublicKey = await Crypto.rootPublicKey(extendedPrivateKey);
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32))
+			]));
+			
+			// Remove response code from response
+			response = (new TextDecoder()).decode(response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH));
+			
+			// Log address
+			console.log("Address: " + response);
+			
+			// Check if address is invalid
+			if(response !== expectedAddress) {
+			
+				// Throw error
+				throw "Invalid address: " + response;
+			}
 			
 			// Log message
-			console.log("Verify that the root public key is: " + Common.toHexString(rootPublicKey));
-			
-			// Get root public key verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, ROOT_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
-			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Get Tor address from the Tor public key
-			let torAddress = Tor.publicKeyToTorAddress(torPublicKey);
-			
-			// Log message
-			console.log("Verify that the Tor address is: " + torAddress);
-			
-			// Get Tor address verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, TOR_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get MQS public key from the MQS private key
-			let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Get MQS address from the MQS public key
-			let mqsAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-			
-			// Log message
-			console.log("Verify that the MQS address is: " + mqsAddress);
-			
-			// Get MQS address verification from the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION, MQS_PUBLIC_KEY_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
-			
-			// Log message
-			console.log("Passed getting pubic key verification test");
+			console.log("Passed getting address test");	
 		}
 		
 		// Get seed cookie test
@@ -716,265 +748,93 @@
 			console.log("Passed getting bulletproof test");
 		}
 		
-		// Get Tor public key test
-		async function getTorPublicKeyTest(hardwareWallet, extendedPrivateKey) {
+		// Verify root public key test
+		async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 		
 			// Log message
-			console.log("Running get Tor public key test");
+			console.log("Running verify root public key test");
 			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-			
-			// Get expected Tor public key from the Tor private key
-			let expectedTorPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Get the Tor public key from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log Tor public key
-			console.log("Tor public key: " + Common.toHexString(response));
-			
-			// Check if Tor public key is invalid
-			if(Common.arraysAreEqual(response, expectedTorPublicKey) === false) {
-			
-				// Throw error
-				throw "Invalid Tor public key: " + Common.toHexString(response);
-			}
+			// Get the root public key from the extended private key
+			let rootPublicKey = await Crypto.rootPublicKey(extendedPrivateKey);
 			
 			// Log message
-			console.log("Passed getting Tor pubic key test");	
+			console.log("Verify that the root public key is: " + Common.toHexString(rootPublicKey));
+			
+			// Verify root public key on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
+			
+			// Log message
+			console.log("Passed verifying root pubic key test");
 		}
 		
-		// Get Tor transaction signature test
-		async function getTorTransactionSignatureTest(hardwareWallet, extendedPrivateKey, switchType) {
+		// Verify address test
+		async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType) {
 		
 			// Log message
-			console.log("Running get Tor transaction signature test");
+			console.log("Running verify address test");
 			
-			// Amount
-			const AMOUNT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+			// Check address type
+			switch(addressType) {
 			
-			// Identifier
-			const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-			
-			// Log amount
-			console.log("Using amount: " + AMOUNT.toFixed());
-			
-			// Log identifier
-			console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
-			
-			// Check switch type
-			switch(switchType) {
-			
-				// Switch type none
-				case Crypto.SWITCH_TYPE_NONE:
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
 				
-					// Log switch type
-					console.log("Using switch type: none");
-				
+					// Log message
+					console.log("Using address type: MQS");
+					
+					// Get MQS private key from the extended private key
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get MQS public key from the MQS private key
+					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+					
+					// Get address from the MQS public key
+					var address = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+					
 					// Break
 					break;
 				
-				// Regular switch type
-				case Crypto.SWITCH_TYPE_REGULAR:
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
 				
-					// Log switch type
-					console.log("Using switch type: regular");
-				
+					// Log message
+					console.log("Using address type: Tor");
+					
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Get address from the Tor public key
+					var address = Tor.publicKeyToTorAddress(torPublicKey);
+					
 					// Break
 					break;
 			}
 			
-			// Get the commitment from the extended private key, amount, identifier, and switch type
-			let commitment = await Crypto.commit(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType);
+			// Log message
+			console.log("Verify that the address is: " + address);
 			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
+			// Verify address on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_VERIFY_ADDRESS_INSTRUCTION, addressType, NO_PARAMETER, Buffer.concat([
 			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Get Tor sender address from the Tor public key
-			let torSenderAddress = Tor.publicKeyToTorAddress(torPublicKey);
-			
-			// Get transaction message from amount, commitment, and Tor sender address
-			let transactionMessage = Slate.getPaymentProofMessage(AMOUNT, commitment, torSenderAddress);
-			
-			// Get the expected Tor transaction signature from the transaction message and Tor private key
-			let expectedTorTransactionSignature = Ed25519.sign(transactionMessage, torPrivateKey);
-			
-			// Get the Tor transaction signature from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
-				// Amount
-				Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Commitment
-				Buffer.from(commitment),
-				
-				// Sender address
-				Buffer.from(torSenderAddress)
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32))
 			]));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log Tor transaction signature
-			console.log("Tor transaction signature with Tor sender address: " + Common.toHexString(response));
-			
-			// Check if Tor transaction signature is invalid
-			if(Common.arraysAreEqual(response, expectedTorTransactionSignature) === false) {
-			
-				// Throw error
-				throw "Invalid Tor transaction signature: " + Common.toHexString(response);
-			}
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get MQS public key from the MQS private key
-			let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Get MQS sender address from the MQS public key
-			let mqsSenderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-			
-			// Get transaction message from amount, commitment, and MQS sender address
-			transactionMessage = Slate.getPaymentProofMessage(AMOUNT, commitment, mqsSenderAddress);
-			
-			// Get the expected Tor transaction signature from the transaction message and Tor private key
-			expectedTorTransactionSignature = Ed25519.sign(transactionMessage, torPrivateKey);
-			
-			// Get the Tor transaction signature from the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Amount
-				Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Commitment
-				Buffer.from(commitment),
-				
-				// Sender address
-				Buffer.from(mqsSenderAddress)
-			]));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log Tor transaction signature
-			console.log("Tor transaction signature with MQS sender address: " + Common.toHexString(response));
-			
-			// Check if Tor transaction signature is invalid
-			if(Common.arraysAreEqual(response, expectedTorTransactionSignature) === false) {
-			
-				// Throw error
-				throw "Invalid Tor transaction signature: " + Common.toHexString(response);
-			}
 			
 			// Log message
-			console.log("Passed getting Tor transaction signature test");	
+			console.log("Passed verifying address test");
 		}
 		
-		// Get Tor certificate signature test
-		async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey) {
+		// Encrypt slate test
+		async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType) {
 		
 			// Log message
-			console.log("Running get Tor certificate signature test");
-			
-			// Certificate header length
-			const CERTIFICATE_HEADER_LENGTH = 32;
-			
-			// Certificate expiration offset
-			const CERTIFICATE_EXPIRATION_OFFSET = CERTIFICATE_HEADER_LENGTH + 2;
-			
-			// Certificate public key offset
-			const CERTIFICATE_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 7;
-			
-			// Certificate signing public key offset
-			const CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 44;
-			
-			// Certificate signature offset
-			const CERTIFICATE_SIGNATURE_OFFSET = CERTIFICATE_HEADER_LENGTH + 76;
-			
-			// Certificate expiration to epoch time scalar
-			const CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR = 60 * 60;
-			
-			// Certificate (contents of an ed25519_signing_cert file created with the command `tor --keygen --SigningKeyLifetime '6 months'`)
-			const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d0000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd4582410100200400b3ee07b33145c47278e7f35468247a4d13905595fe98a533f1b5120609229429fafef1e44a3f25add4570fb3bd0806a9b6a6afeaf32fffd3a40152e5abb6e763069e76ceec0b4027d8a88e37443d304ef963003d44c48c27235f71494778d60d");
-			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Replace signing public key in certificate with the Tor public key
-			let certificate = Common.mergeArrays([CERTIFICATE.subarray(0, CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET), torPublicKey, CERTIFICATE.subarray(CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET + torPublicKey["length"])]);
-			
-			// Log certificate
-			console.log("Using certificate: " + Common.toHexString(CERTIFICATE));
-			
-			// Get the expected Tor certificate signature from the certificate and Tor private key
-			let expectedTorCertificateSignature = Ed25519.sign(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
-			
-			// Get certification's expiration
-			let expiration = certificate.subarray(CERTIFICATE_EXPIRATION_OFFSET, CERTIFICATE_EXPIRATION_OFFSET + Uint32Array["BYTES_PER_ELEMENT"]).slice().reverse();
-			
-			// Get expiration as a timestamp
-			let expirationTimestamp = (new Uint32Array(expiration["buffer"]))[0] * CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR;
-			
-			// Get timestamp as a date
-			let expirationDate = (new Date(expirationTimestamp * Common.MILLISECONDS_IN_A_SECOND));
-			
-			// Log message
-			console.log("Verify that the certificate expires on: " + expirationDate.getUTCHours().toFixed().padStart(2, "0") + ":" + expirationDate.getUTCMinutes().toFixed().padStart(2, "0") + ":" + expirationDate.getUTCSeconds().toFixed().padStart(2, "0") + " on " + expirationDate.getUTCFullYear().toFixed() + "-" + (expirationDate.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + expirationDate.getUTCDate().toFixed().padStart(2, "0") + " UTC");
-			
-			// Log message
-			console.log("Verify that the certificate's public key is: " + Common.toHexString(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH)));
-			
-			// Get the Tor certificate signature from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Certificate
-				Buffer.from(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET))
-			]));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log Tor certificate signature
-			console.log("Tor certificate signature: " + Common.toHexString(response));
-			
-			// Check if Tor certificate signature is invalid
-			if(Common.arraysAreEqual(response, expectedTorCertificateSignature) === false) {
-			
-				// Throw error
-				throw "Invalid Tor certificate signature: " + Common.toHexString(response);
-			}
-			
-			// Log signed Tor certificate
-			console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
-			
-			// Log message
-			console.log("Passed getting Tor certificate signature test");	
-		}
-		
-		// Encrypt Slatepack data test
-		async function encryptSlatepackDataTest(hardwareWallet, extendedPrivateKey) {
-		
-			// Log message
-			console.log("Running encrypt Slatepack data test");
+			console.log("Running encrypt slate test");
 			
 			// Data
 			const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
@@ -994,31 +854,72 @@
 				
 			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
 			
-			// Get Tor private key from the random private key
-			let otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), TOR_ADDRESS_KEY_INDEX);
+			// Check address type
+			switch(addressType) {
 			
-			// Get Tor public key from the Tor private key
-			let otherTorPublicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using encryption type: MQS");
+				
+					{
+						// Get MQS public key from the private key
+						let publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
+						
+						// Get address from the MQS public key
+						var address = Mqs.publicKeyToMqsAddress(publicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+					}
+					
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using encryption type: Tor");
+					
+					{
+						// Get Tor private key from the random private key
+						var otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), INDEX.toNumber());
+						
+						// Get Tor public key from the Tor private key
+						let publicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+						
+						// Get address from the public key
+						var address = Tor.publicKeyToTorAddress(publicKey);
+					}
+					
+					// Break
+					break;
+			}
 			
-			// Start encrypting Slatepack data on the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			// Start encrypting slate on the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_ENCRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 						
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
-				// Public key
-				Buffer.from(otherTorPublicKey)
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Address
+				Buffer.from(address)
 			]));
 			
 			// Get nonce from response
 			let nonce = response.subarray(0, Slatepack.NONCE_LENGTH);
 			
+			// Get salt from response
+			let salt = response.subarray(Slatepack.NONCE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
 			// Go through all chunks of the data
 			let encryptedData = new Uint8Array([]);
 			for(let i = 0; i <= DATA["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
 			
-				// Continue encrypting Slatepack data on the hardware wallet
-				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(DATA.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
+				// Continue encrypting slate on the hardware wallet
+				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_ENCRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(DATA.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
 				
 				// Remove response code from response
 				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
@@ -1027,8 +928,8 @@
 				encryptedData = Common.mergeArrays([encryptedData, response]);
 			}
 			
-			// Finish encrypting Slatepack data on the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+			// Finish encrypting slate on the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_ENCRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
 			
 			// Remove response code from response
 			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
@@ -1036,37 +937,62 @@
 			// Append tag to encrypted data
 			encryptedData = Common.mergeArrays([encryptedData, response]);
 			
-			// Log encrypted Slatepack data
-			console.log("Encrypted Slatepack data: " + Common.toHexString(encryptedData));
+			// Log encrypted slate
+			console.log("Encrypted slate: " + Common.toHexString(encryptedData));
 			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
+			// Check address type
+			switch(addressType) {
 			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Get MQS private key from the extended private key
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get MQS public key from the MQS private key
+					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+					
+					// Decrypt the encrypted data
+					var decryptedData = await Mqs.decryptMessage(privateKey, mqsPublicKey, encryptedData, salt, nonce);
+				
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
 			
-			// Decrypt the encrypted data
-			let decryptedData = await Slatepack.decryptMessage(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Decrypt the encrypted data
+					var decryptedData = await Slatepack.decryptMessage(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
+					
+					// Break
+					break;
+			}
 			
-			// Log decrypted Slatepack data
-			console.log("Decrypted Slatepack data: " + Common.toHexString(decryptedData));
+			// Log decrypted slate
+			console.log("Decrypted slate: " + Common.toHexString(decryptedData));
 			
 			// Check if decrypted data is invalid
 			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
 			
 				// Throw error
-				throw "Invalid decrypted Slatepack data: " + Common.toHexString(decryptedData);
+				throw "Invalid decrypted slate: " + Common.toHexString(decryptedData);
 			}
 			
 			// Log message
-			console.log("Passed running encrypt Slatepack data test");
+			console.log("Passed running encrypt slate test");
 		}
 		
-		// Decrypt Slatepack data test
-		async function decryptSlatepackDataTest(hardwareWallet, extendedPrivateKey) {
+		// Decrypt slate test
+		async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType) {
 		
 			// Log message
-			console.log("Running decrypt Slatepack data test");
+			console.log("Running decrypt slate test");
 			
 			// Data
 			const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
@@ -1089,437 +1015,114 @@
 				
 			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
 			
-			// Get Tor private key from the random private key
-			let otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), TOR_ADDRESS_KEY_INDEX);
+			// Check address type
+			switch(addressType) {
 			
-			// Get Tor public key from the Tor private key
-			let otherTorPublicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using decryption type: MQS");
+				
+					{
+						// Get public key from the private key
+						let publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
+						
+						// Get address from the public key
+						var address = Mqs.publicKeyToMqsAddress(publicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+						
+						// Get MQS private key from the extended private key
+						let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+						
+						// Get MQS public key from the MQS private key
+						let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+						
+						// Encrypt the data
+						let encryptedData = await Mqs.encryptMessage(privateKey, mqsPublicKey, DATA);
+						
+						// Get salt from encrypted data
+						var salt = encryptedData[Mqs.ENCRYPTED_MESSAGE_SALT_INDEX];
+						
+						// Get nonce from encrypted data
+						var nonce = encryptedData[Mqs.ENCRYPTED_MESSAGE_NONCE_INDEX];
+						
+						// Get encrypted message from encrypted data
+						var encryptedMessage = encryptedData[Mqs.ENCRYPTED_MESSAGE_DATA_INDEX];
+					}
+				
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Log message
+					console.log("Using decryption type: Tor");
+				
+					{
+						// Get Tor private key from the random private key
+						let otherTorPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), INDEX.toNumber());
+						
+						let publicKey = Ed25519.publicKeyFromSecretKey(otherTorPrivateKey);
+						
+						// Get address from the public key
+						var address = Tor.publicKeyToTorAddress(publicKey);
+						
+						// Get Tor private key from the extended private key
+						let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+						
+						// Get Tor public key from the Tor private key
+						let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+						
+						// Encrypt the data
+						let encryptedData = await Slatepack.encryptMessage(otherTorPrivateKey, torPublicKey, DATA);
+						
+						// Set salt to nothing
+						var salt = new Uint8Array([]);
+						
+						// Get nonce from encrypted data
+						var nonce = encryptedData[Slatepack.ENCRYPTED_MESSAGE_NONCE_INDEX];
+						
+						// Get encrypted message from encrypted data
+						var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX];
+					}
+					
+					// Break
+					break;
+			}
 			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Encrypt the data
-			let encryptedData = await Slatepack.encryptMessage(otherTorPrivateKey, torPublicKey, DATA);
-			
-			// Get nonce from encrypted data
-			let nonce = encryptedData[Slatepack.ENCRYPTED_MESSAGE_NONCE_INDEX];
-			
-			// Get encrypted message from encrypted data
-			let encryptedMessage = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX];
-			
-			// Log encrypted Slatepack data
-			console.log("Encrypted Slatepack data: " + Common.toHexString(encryptedMessage));
+			// Log encrypted slate
+			console.log("Encrypted slate: " + Common.toHexString(encryptedMessage));
 			
 			// Remove tag from the encrypted message
 			let tag = encryptedMessage.subarray(encryptedMessage["length"] - Slatepack.TAG_LENGTH);
 			encryptedMessage = encryptedMessage.subarray(0, encryptedMessage["length"] - Slatepack.TAG_LENGTH);
 			
-			// Start decrypting Slatepack data on the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			// Start decrypting slate on the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_DECRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 						
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
-				// Public key
-				Buffer.from(otherTorPublicKey),
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
 				// Nonce
 				Buffer.from(nonce),
-			]));
-			
-			// Go through all chunks of the encrypted message
-			let decryptedDataChunks = [];
-			for(let i = 0; i <= encryptedMessage["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
-			
-				// Continue decrypting Slatepack data on the hardware wallet
-				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedMessage.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
 				
-				// Remove response code from response
-				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-				
-				// Append decrypted data chunk to list
-				decryptedDataChunks.push(response);
-			}
-			
-			// Finish decrypting Slatepack data on the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(tag));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Create AES key from response
-			let aesKey = await crypto["subtle"].importKey("raw", response, {"name": "AES-CBC"}, false, ["decrypt"]);
-			
-			// Go through all decrypted data chunks
-			let decryptedData = new Uint8Array([]);
-			for(let i = 0; i < decryptedDataChunks["length"]; ++i) {
-			
-				// Decrypt the data chunk with the AES key
-				let data = new Uint8Array(await crypto["subtle"].decrypt({"name": "AES-CBC", "iv": new Uint8Array(AES_IV_SIZE)}, aesKey, decryptedDataChunks[i]));
-				
-				// Append decrypted data chunk to list
-				decryptedData = Common.mergeArrays([decryptedData, data]);
-			}
-			
-			// Log decrypted Slatepack data
-			console.log("Decrypted Slatepack data: " + Common.toHexString(decryptedData));
-			
-			// Check if decrypted data is invalid
-			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
-			
-				// Throw error
-				throw "Invalid decrypted Slatepack data: " + Common.toHexString(decryptedData);
-			}
-			
-			// Log message
-			console.log("Passed running decrypt Slatepack data test");
-		}
-		
-		// Get MQS public key test
-		async function getMqsPublicKeyTest(hardwareWallet, extendedPrivateKey) {
-		
-			// Log message
-			console.log("Running get MQS public key test");
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get expected MQS public key from the MQS private key
-			let expectedMqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Get the MQS public key from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_MQS_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log MQS public key
-			console.log("MQS public key: " + Common.toHexString(response));
-			
-			// Check if MQS public key is invalid
-			if(Common.arraysAreEqual(response, expectedMqsPublicKey) === false) {
-			
-				// Throw error
-				throw "Invalid MQS public key: " + Common.toHexString(response);
-			}
-			
-			// Log message
-			console.log("Passed getting MQS pubic key test");	
-		}
-		
-		// Get MQS transaction signature test
-		async function getMqsTransactionSignatureTest(hardwareWallet, extendedPrivateKey, switchType) {
-		
-			// Log message
-			console.log("Running get MQS transaction signature test");
-			
-			// Amount
-			const AMOUNT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
-			
-			// Identifier
-			const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-			
-			// Log amount
-			console.log("Using amount: " + AMOUNT.toFixed());
-			
-			// Log identifier
-			console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
-			
-			// Check switch type
-			switch(switchType) {
-			
-				// Switch type none
-				case Crypto.SWITCH_TYPE_NONE:
-				
-					// Log switch type
-					console.log("Using switch type: none");
-				
-					// Break
-					break;
-				
-				// Regular switch type
-				case Crypto.SWITCH_TYPE_REGULAR:
-				
-					// Log switch type
-					console.log("Using switch type: regular");
-				
-					// Break
-					break;
-			}
-			
-			// Get the commitment from the extended private key, amount, identifier, and switch type
-			let commitment = await Crypto.commit(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType);
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get MQS public key from the MQS private key
-			let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Get MQS sender address from the MQS public key
-			let mqsSenderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-			
-			// Get transaction message from amount, commitment, and MQS sender address
-			let transactionMessage = Slate.getPaymentProofMessage(AMOUNT, commitment, mqsSenderAddress);
-			
-			// Get transaction message hash from the transaction message
-			let transactionMessageHash = new Uint8Array(sha256.arrayBuffer(transactionMessage));
-			
-			// Get the expected MQS transaction signature from the transaction message hash and MQS private key
-			let expectedMqsTransactionSignature = Secp256k1Zkp.createMessageHashSignature(transactionMessageHash, mqsPrivateKey);
-			
-			// Get the MQS transaction signature from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Amount
-				Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Commitment
-				Buffer.from(commitment),
-				
-				// Sender address
-				Buffer.from(mqsSenderAddress)
-			]));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log MQS transaction signature
-			console.log("MQS transaction signature with MQS sender address: " + Common.toHexString(response));
-			
-			// Check if MQS transaction signature is invalid
-			if(Common.arraysAreEqual(response, expectedMqsTransactionSignature) === false) {
-			
-				// Throw error
-				throw "Invalid MQS transaction signature: " + Common.toHexString(response);
-			}
-			
-			// Get Tor private key from the extended private key
-			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-			
-			// Get Tor public key from the Tor private key
-			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-			
-			// Get Tor sender address from the Tor public key
-			let torSenderAddress = Tor.publicKeyToTorAddress(torPublicKey);
-			
-			// Get transaction message from amount, commitment, and Tor sender address
-			transactionMessage = Slate.getPaymentProofMessage(AMOUNT, commitment, torSenderAddress);
-			
-			// Get transaction message hash from the transaction message
-			transactionMessageHash = new Uint8Array(sha256.arrayBuffer(transactionMessage));
-			
-			// Get the expected MQS transaction signature from the transaction message hash and MQS private key
-			expectedMqsTransactionSignature = Secp256k1Zkp.createMessageHashSignature(transactionMessageHash, mqsPrivateKey);
-			
-			// Get the MQS transaction signature from the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Amount
-				Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Commitment
-				Buffer.from(commitment),
-				
-				// Sender address
-				Buffer.from(torSenderAddress)
-			]));
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log MQS transaction signature
-			console.log("MQS transaction signature with Tor sender address: " + Common.toHexString(response));
-			
-			// Check if MQS transaction signature is invalid
-			if(Common.arraysAreEqual(response, expectedMqsTransactionSignature) === false) {
-			
-				// Throw error
-				throw "Invalid MQS transaction signature: " + Common.toHexString(response);
-			}
-			
-			// Log message
-			console.log("Passed getting MQS transaction signature test");	
-		}
-		
-		// Encrypt MQS data test
-		async function encryptMqsDataTest(hardwareWallet, extendedPrivateKey) {
-		
-			// Log message
-			console.log("Running encrypt MQS data test");
-			
-			// Data
-			const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
-			
-			// Maximum chunk size
-			const MAXIMUM_CHUNK_SIZE = 64;
-			
-			// Log data
-			console.log("Using data: " + Common.toHexString(DATA));
-			
-			// While random private key isn't a valid secret key
-			let privateKey = new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH);
-			do {
-			
-				// Fill offset with random values
-				crypto.getRandomValues(privateKey);
-				
-			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
-			
-			// Get public key from the private key
-			let publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
-			
-			// Start encrypting MQS data on the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_ENCRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Public key
-				Buffer.from(publicKey)
-			]));
-			
-			// Get salt from response
-			let salt = response.subarray(0, Mqs.SALT_LENGTH);
-			
-			// Get nonce from response
-			let nonce = response.subarray(Mqs.SALT_LENGTH, Mqs.SALT_LENGTH + Mqs.NONCE_LENGTH);
-			
-			// Go through all chunks of the data
-			let encryptedData = new Uint8Array([]);
-			for(let i = 0; i <= DATA["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
-			
-				// Continue encrypting MQS data on the hardware wallet
-				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(DATA.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
-				
-				// Remove response code from response
-				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-				
-				// Append encrypted data to list
-				encryptedData = Common.mergeArrays([encryptedData, response]);
-			}
-			
-			// Finish encrypting MQS data on the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Append tag to encrypted data
-			encryptedData = Common.mergeArrays([encryptedData, response]);
-			
-			// Log encrypted MQS data
-			console.log("Encrypted MQS data: " + Common.toHexString(encryptedData));
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get MQS public key from the MQS private key
-			let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Decrypt the encrypted data
-			let decryptedData = await Mqs.decryptMessage(privateKey, mqsPublicKey, encryptedData, salt, nonce);
-			
-			// Log decrypted MQS data
-			console.log("Decrypted MQS data: " + Common.toHexString(decryptedData));
-			
-			// Check if decrypted data is invalid
-			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
-			
-				// Throw error
-				throw "Invalid decrypted MQS data: " + Common.toHexString(decryptedData);
-			}
-			
-			// Log message
-			console.log("Passed running encrypt MQS data test");
-		}
-		
-		// Decrypt MQS data test
-		async function decryptMqsDataTest(hardwareWallet, extendedPrivateKey) {
-		
-			// Log message
-			console.log("Running decrypt MQS data test");
-			
-			// Data
-			const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
-			
-			// Maximum chunk size
-			const MAXIMUM_CHUNK_SIZE = 64;
-			
-			// AES IV size
-			const AES_IV_SIZE = 16;
-			
-			// Log data
-			console.log("Using data: " + Common.toHexString(DATA));
-			
-			// While random private key isn't a valid secret key
-			let privateKey = new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH);
-			do {
-			
-				// Fill offset with random values
-				crypto.getRandomValues(privateKey);
-				
-			} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
-			
-			// Get public key from the private key
-			let publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
-			
-			// Get MQS private key from the extended private key
-			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
-			
-			// Get MQS public key from the MQS private key
-			let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-			
-			// Encrypt the data
-			let encryptedData = await Mqs.encryptMessage(privateKey, mqsPublicKey, DATA);
-			
-			// Get salt from encrypted data
-			let salt = encryptedData[Mqs.ENCRYPTED_MESSAGE_SALT_INDEX];
-			
-			// Get nonce from encrypted data
-			let nonce = encryptedData[Mqs.ENCRYPTED_MESSAGE_NONCE_INDEX];
-			
-			// Get encrypted message from encrypted data
-			let encryptedMessage = encryptedData[Mqs.ENCRYPTED_MESSAGE_DATA_INDEX];
-			
-			// Log encrypted MQS data
-			console.log("Encrypted MQS data: " + Common.toHexString(encryptedMessage));
-			
-			// Remove tag from the encrypted message
-			let tag = encryptedMessage.subarray(encryptedMessage["length"] - Mqs.TAG_LENGTH);
-			encryptedMessage = encryptedMessage.subarray(0, encryptedMessage["length"] - Mqs.TAG_LENGTH);
-			
-			// Start decrypting MQS data on the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_DECRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-						
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Public key
-				Buffer.from(publicKey),
+				// Address
+				Buffer.from(address),
 				
 				// Salt
-				Buffer.from(salt),
-				
-				// Nonce
-				Buffer.from(nonce),
+				Buffer.from(salt)
 			]));
 			
 			// Go through all chunks of the encrypted message
 			let decryptedDataChunks = [];
 			for(let i = 0; i <= encryptedMessage["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
 			
-				// Continue decrypting MQS data on the hardware wallet
-				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedMessage.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
+				// Continue decrypting slate on the hardware wallet
+				response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_DECRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedMessage.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
 				
 				// Remove response code from response
 				response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
@@ -1528,8 +1131,8 @@
 				decryptedDataChunks.push(response);
 			}
 			
-			// Finish decrypting MQS data on the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_DECRYPTING_MQS_DATA_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(tag));
+			// Finish decrypting slate on the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_DECRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(tag));
 			
 			// Remove response code from response
 			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
@@ -1548,22 +1151,22 @@
 				decryptedData = Common.mergeArrays([decryptedData, data]);
 			}
 			
-			// Log decrypted MQS data
-			console.log("Decrypted MQS data: " + Common.toHexString(decryptedData));
+			// Log decrypted slate
+			console.log("Decrypted slate: " + Common.toHexString(decryptedData));
 			
 			// Check if decrypted data is invalid
 			if(Common.arraysAreEqual(decryptedData, DATA) === false) {
 			
 				// Throw error
-				throw "Invalid decrypted MQS data: " + Common.toHexString(decryptedData);
+				throw "Invalid decrypted slate: " + Common.toHexString(decryptedData);
 			}
 			
 			// Log message
-			console.log("Passed running decrypt MQS data test");
+			console.log("Passed running decrypt slate test");
 		}
 		
 		// Receive transaction test
-		async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switchType, features, lockHeight, relativeHeight) {
+		async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switchType, features, lockHeight, relativeHeight, senderAddressType, paymentProofType) {
 		
 			// Log message
 			console.log("Running receive transaction test");
@@ -1579,9 +1182,6 @@
 			
 			// Identifier
 			const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-			
-			// Address type
-			const ADDRESS_TYPE = TOR_SENDER_ADDRESS_TYPE;
 			
 			// Log output
 			console.log("Using output: " + OUTPUT.toFixed());
@@ -1666,6 +1266,107 @@
 					break;
 			}
 			
+			// Check sender address type
+			switch(senderAddressType) {
+			
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
+				
+					// Log sender address type
+					console.log("Using sender address type: MQS");
+					
+					// Get MQS private key from the extended private key
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get MQS public key from the MQS private key
+					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+					
+					// Get sender address from the MQS public key
+					var senderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+				
+					// Break
+					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Log sender address type
+					console.log("Using sender address type: Tor");
+					
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Get sender address from the Tor public key
+					var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
+				
+					// Break
+					break;
+			}
+			
+			// Get random kernel commitment
+			let kernelCommit = await Crypto.commit(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
+			
+			// Check payment proof type
+			switch(paymentProofType) {
+			
+				// No payment proof type
+				case NO_PAYMENT_PROOF_TYPE:
+				
+					// Log payment proof type
+					console.log("Using payment proof type: none");
+				
+					// Break
+					break;
+				
+				// MQS payment proof type
+				case MQS_PAYMENT_PROOF_TYPE:
+				
+					// Log payment proof type
+					console.log("Using payment proof type: MQS");
+					
+					// Set receiver address type
+					var receiverAddressType = MQS_ADDRESS_TYPE;
+				
+					// Get MQS private key from the extended private key
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Set payment proof message
+					var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
+					
+					// Get payment proof message hash
+					let paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
+					
+					// Set expected payment proof as the payment proof message hash signed by the MQS private key
+					var expectedPaymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
+					
+					// Break
+					break;
+				
+				// Tor payment proof type
+				case TOR_PAYMENT_PROOF_TYPE:
+				
+					// Log payment proof type
+					console.log("Using payment proof type: Tor");
+					
+					// Set receiver address type
+					var receiverAddressType = TOR_ADDRESS_TYPE;
+				
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Set payment proof message
+					var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
+					
+					// Set expected payment proof as the payment proof message signed by the Tor private key
+					var expectedPaymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
+				
+					// Break
+					break;
+			}
+			
 			// Get the output's blinding factor
 			let outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
 			
@@ -1681,6 +1382,9 @@
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
 				// Output
 				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 				
@@ -1688,7 +1392,10 @@
 				Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 				
 				// Fee
-				Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
+				Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+				
+				// Address
+				Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? senderAddress : [])
 			]));
 			
 			// Include output in the transaction on the hardware wallet
@@ -1801,7 +1508,7 @@
 			}
 			
 			// Get signature for the transaction from the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, ADDRESS_TYPE, NO_PARAMETER, Buffer.concat([
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, receiverAddressType, NO_PARAMETER, Buffer.concat([
 			
 				// Secret nonce
 				Buffer.from(secretNonce),
@@ -1814,22 +1521,42 @@
 				
 				// Kernel information
 				Buffer.from(kernelInformation),
+				
+				// Kernel commitment
+				Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? kernelCommit : [])
 			]));
 			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			// Get signature from response
+			let signature = response.subarray(0, Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH);
+			
+			// Get payment proof from response
+			let paymentProof = response.subarray(Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
 			
 			// Log transaction signature
-			console.log("Transaction signature: " + Common.toHexString(response));
+			console.log("Transaction signature: " + Common.toHexString(signature));
 			
 			// Get message to sign
 			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
 			
 			// Check if signature is invalid
-			if(Secp256k1Zkp.verifySingleSignerSignature(response, messageToSign, publicNonce, publicKey, publicKey, false) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(signature, messageToSign, publicNonce, publicKey, publicKey, false) === false) {
 			
 				// Throw error
-				throw "Invalid signature: " + Common.toHexString(response);
+				throw "Invalid signature: " + Common.toHexString(signature);
+			}
+			
+			// Check if using a payment proof
+			if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+			
+				// Log transaction payment proof
+				console.log("Transaction payment proof: " + Common.toHexString(paymentProof));
+				
+				// Check if payment proof is invalid
+				if(Common.arraysAreEqual(paymentProof, expectedPaymentProof) === false) {
+				
+					// Throw error
+					throw "Invalid payment proof: " + Common.toHexString(paymentProof);
+				}
 			}
 			
 			// Log message
@@ -1946,32 +1673,14 @@
 			// Check sender address type
 			switch(senderAddressType) {
 			
-				// Tor sender address type
-				case TOR_SENDER_ADDRESS_TYPE:
-				
-					// Log sender address type
-					console.log("Using sender address type: Tor");
-					
-					// Get Tor private key from the extended private key
-					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-					
-					// Get Tor public key from the Tor private key
-					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-					
-					// Get sender address from the Tor public key
-					var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
-				
-					// Break
-					break;
-				
-				// MQS sender address type
-				case MQS_SENDER_ADDRESS_TYPE:
+				// MQS address type
+				case MQS_ADDRESS_TYPE:
 				
 					// Log sender address type
 					console.log("Using sender address type: MQS");
 					
 					// Get MQS private key from the extended private key
-					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
 					
 					// Get MQS public key from the MQS private key
 					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
@@ -1981,13 +1690,31 @@
 				
 					// Break
 					break;
+				
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+				
+					// Log sender address type
+					console.log("Using sender address type: Tor");
+					
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Get sender address from the Tor public key
+					var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
+				
+					// Break
+					break;
 			}
 			
-			// Get random commitment
-			let commit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
+			// Get random kernel commitment
+			let kernelCommit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
 			
 			// Set payment proof message
-			let paymentProofMessage = Slate.getPaymentProofMessage(INPUT.minus(OUTPUT), commit, senderAddress);
+			let paymentProofMessage = Slate.getPaymentProofMessage(INPUT.minus(OUTPUT), kernelCommit, senderAddress);
 			
 			// Check payment proof type
 			switch(paymentProofType) {
@@ -2001,27 +1728,6 @@
 					// Break
 					break;
 				
-				// Tor payment proof type
-				case TOR_PAYMENT_PROOF_TYPE:
-				
-					// Log payment proof type
-					console.log("Using payment proof type: Tor");
-				
-					// Get Tor private key from the extended private key
-					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, TOR_ADDRESS_KEY_INDEX);
-					
-					// Get Tor public key from the Tor private key
-					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-					
-					// Get receiver address from the Tor public key
-					var receiverAddress = Tor.publicKeyToTorAddress(torPublicKey);
-					
-					// Set recever signature as the payment proof message signed by the Tor private key
-					var receiverSignature = Ed25519.sign(paymentProofMessage, torPrivateKey);
-				
-					// Break
-					break;
-				
 				// MQS payment proof type
 				case MQS_PAYMENT_PROOF_TYPE:
 				
@@ -2029,7 +1735,7 @@
 					console.log("Using payment proof type: MQS");
 				
 					// Get MQS private key from the extended private key
-					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, MQS_ADDRESS_KEY_INDEX);
+					let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
 					
 					// Get MQS public key from the MQS private key
 					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
@@ -2040,9 +1746,30 @@
 					// Get payment proof message hash
 					let paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
 					
-					// Set recever signature as the payment proof message hash signed by the MQS private key
-					var receiverSignature = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
+					// Set payment proof as the payment proof message hash signed by the MQS private key
+					var paymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
 					
+					// Break
+					break;
+				
+				// Tor payment proof type
+				case TOR_PAYMENT_PROOF_TYPE:
+				
+					// Log payment proof type
+					console.log("Using payment proof type: Tor");
+				
+					// Get Tor private key from the extended private key
+					let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+					
+					// Get Tor public key from the Tor private key
+					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+					
+					// Get receiver address from the Tor public key
+					var receiverAddress = Tor.publicKeyToTorAddress(torPublicKey);
+					
+					// Set payment proof as the payment proof message signed by the Tor private key
+					var paymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
+				
 					// Break
 					break;
 			}
@@ -2065,6 +1792,9 @@
 				// Account
 				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 				
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
 				// Output
 				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 				
@@ -2074,7 +1804,7 @@
 				// Fee
 				Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 				
-				// Receiver address
+				// Address
 				Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? receiverAddress : [])
 			]));
 			
@@ -2224,11 +1954,11 @@
 				// Set payment proof information
 				paymentProofInformation = Buffer.concat([
 				
-					// Commit
-					Buffer.from(commit),
+					// Kernel commit
+					Buffer.from(kernelCommit),
 					
-					// Receiver signature
-					Buffer.from(receiverSignature)
+					// Payment proof
+					Buffer.from(paymentProof)
 				]);
 				
 				// Log message
@@ -2279,6 +2009,150 @@
 			
 			// Log message
 			console.log("Passed running send transaction test");
+		}
+		
+		// Get MQS timestamp signature test
+		async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) {
+		
+			// Log message
+			console.log("Running get MQS timestamp signature test");
+			
+			// Timestamp
+			const TIMESTAMP = new BigNumber(Math.round(Math.random() * Common.UINT32_MAX_VALUE));
+			
+			// Get MQS private key from the extended private key
+			let mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get timestamp hash
+			let timestampHash = new Uint8Array(sha256.arrayBuffer((new TextEncoder()).encode(TIMESTAMP.toFixed())));
+			
+			// Set expected MQS timestamp signature as the timestamp hash signed by the MQS private key
+			var expectedMqsTimestampSignature = Secp256k1Zkp.createMessageHashSignature(timestampHash, mqsPrivateKey);
+			
+			// Get timestamp as a date
+			let date = new Date(TIMESTAMP.toNumber() * Common.MILLISECONDS_IN_A_SECOND);
+			
+			// Log message
+			console.log("Verify that the date and time is: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC");
+			
+			// Get the MQS timestamp signature from the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+						
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Timestamp
+				Buffer.from(TIMESTAMP.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
+			]));
+			
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Log MQS timestamp signature
+			console.log("MQS timestamp signature: " + Common.toHexString(response));
+			
+			// Check if MQS timestamp signature is invalid
+			if(Common.arraysAreEqual(response, expectedMqsTimestampSignature) === false) {
+			
+				// Throw error
+				throw "Invalid MQS timestamp signature: " + Common.toHexString(response);
+			}
+			
+			// Log message
+			console.log("Passed getting MQS timestamp signature test");	
+		}
+		
+		// Get Tor certificate signature test
+		async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey) {
+		
+			// Log message
+			console.log("Running get Tor certificate signature test");
+			
+			// Certificate header length
+			const CERTIFICATE_HEADER_LENGTH = 32;
+			
+			// Certificate expiration offset
+			const CERTIFICATE_EXPIRATION_OFFSET = CERTIFICATE_HEADER_LENGTH + 2;
+			
+			// Certificate public key offset
+			const CERTIFICATE_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 7;
+			
+			// Certificate signing public key offset
+			const CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 44;
+			
+			// Certificate signature offset
+			const CERTIFICATE_SIGNATURE_OFFSET = CERTIFICATE_HEADER_LENGTH + 76;
+			
+			// Certificate expiration to epoch time scalar
+			const CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR = 60 * 60;
+			
+			// Certificate (contents of an ed25519_signing_cert file created with the command `tor --keygen --SigningKeyLifetime '6 months'`)
+			const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d0000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd4582410100200400b3ee07b33145c47278e7f35468247a4d13905595fe98a533f1b5120609229429fafef1e44a3f25add4570fb3bd0806a9b6a6afeaf32fffd3a40152e5abb6e763069e76ceec0b4027d8a88e37443d304ef963003d44c48c27235f71494778d60d");
+			
+			// Get Tor private key from the extended private key
+			let torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get Tor public key from the Tor private key
+			let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Replace signing public key in certificate with the Tor public key
+			let certificate = Common.mergeArrays([CERTIFICATE.subarray(0, CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET), torPublicKey, CERTIFICATE.subarray(CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET + torPublicKey["length"])]);
+			
+			// Log certificate
+			console.log("Using certificate: " + Common.toHexString(CERTIFICATE));
+			
+			// Get the expected Tor certificate signature from the certificate and Tor private key
+			let expectedTorCertificateSignature = Ed25519.sign(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
+			
+			// Get certification's expiration
+			let expiration = certificate.subarray(CERTIFICATE_EXPIRATION_OFFSET, CERTIFICATE_EXPIRATION_OFFSET + Uint32Array["BYTES_PER_ELEMENT"]).slice().reverse();
+			
+			// Get expiration as a timestamp
+			let expirationTimestamp = (new Uint32Array(expiration["buffer"]))[0] * CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR;
+			
+			// Get timestamp as a date
+			let expirationDate = new Date(expirationTimestamp * Common.MILLISECONDS_IN_A_SECOND);
+			
+			// Log message
+			console.log("Verify that the certificate expires on: " + expirationDate.getUTCHours().toFixed().padStart(2, "0") + ":" + expirationDate.getUTCMinutes().toFixed().padStart(2, "0") + ":" + expirationDate.getUTCSeconds().toFixed().padStart(2, "0") + " on " + expirationDate.getUTCFullYear().toFixed() + "-" + (expirationDate.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + expirationDate.getUTCDate().toFixed().padStart(2, "0") + " UTC");
+			
+			// Log message
+			console.log("Verify that the certificate's address is: " + Tor.publicKeyToTorAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH)));
+			
+			// Get the Tor certificate signature from the hardware wallet
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+						
+				// Account
+				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Index
+				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+				
+				// Certificate
+				Buffer.from(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET))
+			]));
+			
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Log Tor certificate signature
+			console.log("Tor certificate signature: " + Common.toHexString(response));
+			
+			// Check if Tor certificate signature is invalid
+			if(Common.arraysAreEqual(response, expectedTorCertificateSignature) === false) {
+			
+				// Throw error
+				throw "Invalid Tor certificate signature: " + Common.toHexString(response);
+			}
+			
+			// Log signed Tor certificate
+			console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
+			
+			// Log message
+			console.log("Passed getting Tor certificate signature test");	
 		}
 		
 		// Find text delimiter

@@ -40,14 +40,14 @@ struct CurrencyInformation {
 	// Fractional digits
 	uint8_t fractionalDigits;
 	
-	// MQS address payment proof allowed
-	bool mqsAddressPaymentProofAllowed;
+	// Enable MQS address
+	bool enableMqsAddress;
 	
-	// Tor address payment proof allowed
-	bool torAddressPaymentProofAllowed;
+	// Enable Tor address
+	bool enableTorAddress;
 	
-	// Ed25519 address payment proof allowed
-	bool ed25519AddressPaymentProofAllowed;
+	// Enable Slatepack address
+	bool enableSlatepackAddress;
 	
 	// MQS version
 	uint8_t mqsVersion[CURRENCY_MQS_VERSION_SIZE];

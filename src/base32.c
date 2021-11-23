@@ -10,7 +10,7 @@
 const size_t INVALID_BASE32_SIZE = SIZE_MAX;
 
 // Characters
-static const uint8_t CHARACTER[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
+static const char CHARACTERS[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
 
 // Bits per character
 static const size_t BITS_PER_CHARACTER = 5;
@@ -21,8 +21,8 @@ static const uint8_t PADDING_CHARACTER = '=';
 
 // Function prototypes
 
-// Get number of padding bytes
-static size_t getNumberOfPaddingBytes(size_t length);
+// Get number of padding characters
+static size_t getNumberOfPaddingCharacters(size_t length);
 
 
 // Supporting function implementation
@@ -31,21 +31,21 @@ static size_t getNumberOfPaddingBytes(size_t length);
 size_t getBase32EncodedLength(size_t length) {
 
 	// Return base32 encoded length
-	return length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + getNumberOfPaddingBytes(length);
+	return length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + getNumberOfPaddingCharacters(length);
 }
 
 // Base32 encode
-void base32Encode(uint8_t *result, const uint8_t *data, size_t length) {
+void base32Encode(char *result, const uint8_t *data, size_t length) {
 
-	// Get number of padding bytes
-	const size_t numberOfPaddingBytes = getNumberOfPaddingBytes(length);
+	// Get number of padding characters
+	const size_t numberOfPaddingCharacters = getNumberOfPaddingCharacters(length);
 	
-	// Get number of character bytes
-	const size_t numberOfCharacterBytes = getBase32EncodedLength(length) - numberOfPaddingBytes;
+	// Get number of characters
+	const size_t numberOfCharacters = getBase32EncodedLength(length) - numberOfPaddingCharacters;
 	
-	// Go through all character bytes
+	// Go through all characters
 	size_t index;
-	for(index = 0; index < numberOfCharacterBytes; ++index) {
+	for(index = 0; index < numberOfCharacters; ++index) {
 	
 		// Get position in the data
 		const size_t position = index * BITS_PER_CHARACTER / BITS_IN_A_BYTE;
@@ -134,11 +134,11 @@ void base32Encode(uint8_t *result, const uint8_t *data, size_t length) {
 		}
 		
 		// Append quantum as a character to the result
-		result[index] = CHARACTER[quantum];
+		result[index] = CHARACTERS[quantum];
 	}
 	
-	// Go through all padding bytes
-	for(size_t i = 0; i < numberOfPaddingBytes; ++i) {
+	// Go through all padding characters
+	for(size_t i = 0; i < numberOfPaddingCharacters; ++i) {
 	
 		// Append padding character to the result
 		result[index + i] = PADDING_CHARACTER;
@@ -146,13 +146,13 @@ void base32Encode(uint8_t *result, const uint8_t *data, size_t length) {
 }
 
 // Get base32 decoded length
-size_t getBase32DecodedLength(const uint8_t *data, size_t length) {
+size_t getBase32DecodedLength(const char *data, size_t length) {
 
 	// Get start of padding in the data
-	const uint8_t *startOfPadding = memchr(data, PADDING_CHARACTER, length);
+	const char *startOfPadding = memchr(data, PADDING_CHARACTER, length);
 	
 	// Go through all padding
-	for(const uint8_t *i = startOfPadding; i && i != data + length; ++i) {
+	for(const char *i = startOfPadding; i && i != data + length; ++i) {
 	
 		// Check if padding isn't a padding character
 		if(*i != PADDING_CHARACTER) {
@@ -165,30 +165,31 @@ size_t getBase32DecodedLength(const uint8_t *data, size_t length) {
 	// Get number of bytes
 	const size_t numberOfBytes = (startOfPadding ? startOfPadding - data : length) * BITS_PER_CHARACTER / BITS_IN_A_BYTE;
 	
-	// Check if the number of padding bytes is invalid
-	if(getNumberOfPaddingBytes(numberOfBytes) != (size_t)(startOfPadding ? data + length - startOfPadding : 0)) {
+	// Check if the number of padding characters is invalid
+	const size_t numberOfPaddingCharacters = getNumberOfPaddingCharacters(numberOfBytes);
+	if(numberOfPaddingCharacters != (size_t)(startOfPadding ? data + length - startOfPadding : 0)) {
 	
 		// Return invalid base32 size
 		return INVALID_BASE32_SIZE;
 	}
 	
-	// Go through all non-padding bytes
-	for(size_t i = 0; i < numberOfBytes; ++i) {
+	// Go through all non-padding characters
+	for(size_t i = 0; i < length - numberOfPaddingCharacters; ++i) {
 	
-		// Check if byte isn't a valid character
-		if(!memchr(CHARACTER, toUppercase(data[i]), sizeof(CHARACTER))) {
+		// Check if character isn't a valid character
+		if(!memchr(CHARACTERS, toUppercase(data[i]), sizeof(CHARACTERS))) {
 		
 			// Return invalid base32 size
 			return INVALID_BASE32_SIZE;
 		}
 	}
 	
-	// Return base32 decoded length
+	// Return number of bytes
 	return numberOfBytes;
 }
 
 // Base32 decode
-void base32Decode(uint8_t *result, const uint8_t *data, size_t length) {
+void base32Decode(uint8_t *result, const char *data, size_t length) {
 
 	// Get number of bytes
 	const size_t numberOfBytes = getBase32DecodedLength(data, length);
@@ -200,13 +201,13 @@ void base32Decode(uint8_t *result, const uint8_t *data, size_t length) {
 		const size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER;
 		
 		// Get first quantum
-		const uint8_t firstQuantum = (uint8_t *)memchr(CHARACTER, toUppercase(data[position]), sizeof(CHARACTER)) - CHARACTER;
+		const char firstQuantum = (char *)memchr(CHARACTERS, toUppercase(data[position]), sizeof(CHARACTERS)) - CHARACTERS;
 		
 		// Get second quantum
-		const uint8_t secondQuantum = (position + 1 < length) ? (uint8_t *)memchr(CHARACTER, toUppercase(data[position + 1]), sizeof(CHARACTER)) - CHARACTER : 0;
+		const char secondQuantum = (position + 1 < length) ? (char *)memchr(CHARACTERS, toUppercase(data[position + 1]), sizeof(CHARACTERS)) - CHARACTERS : 0;
 		
 		// Get third quantum
-		const uint8_t thirdQuantum = (position + 2 < length) ? (uint8_t *)memchr(CHARACTER, toUppercase(data[position + 2]), sizeof(CHARACTER)) - CHARACTER : 0;
+		const char thirdQuantum = (position + 2 < length) ? (char *)memchr(CHARACTERS, toUppercase(data[position + 2]), sizeof(CHARACTERS)) - CHARACTERS : 0;
 		
 		// Check quantum position in group
 		uint8_t byte;
@@ -263,8 +264,8 @@ void base32Decode(uint8_t *result, const uint8_t *data, size_t length) {
 	}
 }
 
-// Get number of padding bytes
-size_t getNumberOfPaddingBytes(size_t length) {
+// Get number of padding characters
+size_t getNumberOfPaddingCharacters(size_t length) {
 
 	// Check how many bits the final quantum represents
 	switch(length % BITS_PER_CHARACTER) {
@@ -272,31 +273,31 @@ size_t getNumberOfPaddingBytes(size_t length) {
 		// One
 		case 1:
 		
-			// Return number of padding bytes
+			// Return number of padding characters
 			return 6;
 		
 		// Two
 		case 2:
 		
-			// Return number of padding bytes
+			// Return number of padding characters
 			return 4;
 		
 		// Three
 		case 3:
 		
-			// Return number of padding bytes
+			// Return number of padding characters
 			return 3;
 		
 		// Four
 		case 4:
 		
-			// Return number of padding bytes
+			// Return number of padding characters
 			return 1;
 		
 		// Default
 		default:
 		
-			// Return number of padding bytes
+			// Return number of padding characters
 			return 0;
 	}
 }

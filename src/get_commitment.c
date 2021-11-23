@@ -20,7 +20,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, __attribute__((
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {

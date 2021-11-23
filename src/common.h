@@ -43,14 +43,27 @@ enum Error {
 	// User rejected error
 	USER_REJECTED_ERROR,
 	
-	// Invalid parameters error
-	INVALID_PARAMETERS_ERROR,
-	
 	// Internal error error
 	INTERNAL_ERROR_ERROR,
 	
+	// Invalid parameters error
+	INVALID_PARAMETERS_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01,
+	
 	// Invalid state error
-	INVALID_STATE_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01
+	INVALID_STATE_ERROR
+};
+
+// Address type
+enum AddressType {
+
+	// MQS address type
+	MQS_ADDRESS_TYPE,
+	
+	// Tor ddress type
+	TOR_ADDRESS_TYPE,
+	
+	// Slatepack address type
+	SLATEPACK_ADDRESS_TYPE
 };
 
 

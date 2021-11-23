@@ -8,6 +8,7 @@
 #include "currency_information.h"
 #include "generators.h"
 #include "mqs.h"
+#include "slatepack.h"
 #include "tor.h"
 
 
@@ -98,8 +99,8 @@ static const uint8_t SECP256K1_CURVE_SQUARE_ROOT_EXPONENT[] = {
 	0x3F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xBF, 0xFF, 0xFF, 0x0C
 };
 
-// Ed25519 curve order
-static const uint8_t ED25519_CURVE_ORDER[] = {
+// Ed25519 curve prime
+static const uint8_t ED25519_CURVE_PRIME[] = {
 	0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xED
 };
 
@@ -799,10 +800,8 @@ size_t getEncryptedDataLength(size_t dataLength) {
 // Encrypt data
 void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
 
-	// Pad the data
-	uint8_t paddedData[getEncryptedDataLength(dataLength)];
-	memcpy(paddedData, data, dataLength);
-	memset(&paddedData[dataLength], sizeof(paddedData) - dataLength, sizeof(paddedData) - dataLength);
+	// Initialize padded data
+	volatile uint8_t paddedData[getEncryptedDataLength(dataLength)];
 	
 	// Initialize encryption key
 	volatile cx_aes_key_t encryptionKey;
@@ -813,11 +812,15 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLengt
 		// Try
 		TRY {
 		
+			// Pad the data
+			memcpy((uint8_t *)paddedData, data, dataLength);
+			memset((uint8_t *)&paddedData[dataLength], sizeof(paddedData) - dataLength, sizeof(paddedData) - dataLength);
+		
 			// Initialize the encryption key with the key
 			cx_aes_init_key(key, keyLength, (cx_aes_key_t *)&encryptionKey);
 			
 			// Encrypt the padded data with the encryption key
-			cx_aes((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, paddedData, sizeof(paddedData), (uint8_t *)result, sizeof(paddedData));
+			cx_aes((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, (uint8_t *)paddedData, sizeof(paddedData), (uint8_t *)result, sizeof(paddedData));
 		}
 		
 		// Finally
@@ -825,6 +828,9 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLengt
 		
 			// Clear the encryption key
 			explicit_bzero((cx_aes_key_t *)&encryptionKey, sizeof(encryptionKey));
+			
+			// Clear the padded data
+			explicit_bzero((uint8_t *)paddedData, sizeof(paddedData));
 		}
 	}
 	
@@ -888,11 +894,11 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	uint8_t one[SCALAR_SIZE] = {};
 	one[sizeof(one) - 1] = 1;
 	
-	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_ORDER, ED25519_PUBLIC_KEY_SIZE);
-	cx_math_subm(y, one, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, ED25519_PUBLIC_KEY_SIZE);
+	cx_math_subm(y, one, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
-	cx_math_invprimem(y, y, ED25519_CURVE_ORDER, PUBLIC_KEY_COMPONENT_SIZE);
-	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_ORDER, ED25519_PUBLIC_KEY_SIZE);
+	cx_math_invprimem(y, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_PRIME, ED25519_PUBLIC_KEY_SIZE);
 	
 	// Swap the X25519 public key's endianness
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
@@ -908,7 +914,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -920,8 +926,8 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow TOR addresses
-			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			// Check currency doesn't allow Tor addresses
+			if(!currencyInformation.enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -930,29 +936,37 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 			// Return payment proof message length
 			return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
 		
-		// Ed25519 address size
-		case ED25519_PUBLIC_KEY_SIZE:
+		// Default
+		default:
 		
-			// Check currency doesn't allow Ed25519 addresses
-			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+			// Check if sender address length is a Slatepack address's length
+			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+		
+				// Check currency doesn't allow Slatepack addresses
+				if(!currencyInformation.enableSlatepackAddress) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Return payment proof message length
+				return sizeof(value) + COMMITMENT_SIZE + ED25519_PUBLIC_KEY_SIZE;
+			}
 			
+			// Otherwise
+			else {
+		
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Return payment proof message length
-			return sizeof(value) + COMMITMENT_SIZE + senderAddressLength;
-		
-		// Default
-		default:
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
+			// Break
+			break;
 	}
 }
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *commitment, const uint8_t *senderAddress, size_t senderAddressLength) {
+void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, size_t senderAddressLength) {
 
 	// Check sender address length
 	switch(senderAddressLength) {
@@ -961,7 +975,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -974,8 +988,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Append commitment as a hex string to the message
-			toHexString((char *)message, commitment, COMMITMENT_SIZE);
+			// Append kernel commitment as a hex string to the message
+			toHexString((char *)message, kernelCommitment, COMMITMENT_SIZE);
 			
 			// Append sender address to the message
 			memcpy(&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE], senderAddress, senderAddressLength);
@@ -989,8 +1003,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow TOR addresses
-			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			// Check currency doesn't allow Tor addresses
+			if(!currencyInformation.enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1003,8 +1017,8 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		
-			// Append commitment as a hex string to the message
-			toHexString((char *)message, commitment, COMMITMENT_SIZE);
+			// Append kernel commitment as a hex string to the message
+			toHexString((char *)message, kernelCommitment, COMMITMENT_SIZE);
 			
 			// Append sender address to the message
 			memcpy(&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE], senderAddress, senderAddressLength);
@@ -1015,34 +1029,46 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 			// Break
 			break;
 		
-		// Ed25519 address size
-		case ED25519_PUBLIC_KEY_SIZE:
-			
-			// Check currency doesn't allow Ed25519 addresses
-			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
+		// Default
+		default:
 		
-			// Check if the sender address isn't a valid Ed25519 public key
-			if(!isValidEd25519PublicKey(senderAddress, senderAddressLength)) {
+			// Check if sender address length is a Slatepack address's length
+			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			
+				// Check currency doesn't allow Slatepack addresses
+				if(!currencyInformation.enableSlatepackAddress) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			
+				// Check if sender address isn't a valid Slatepack address
+				cx_ecfp_public_key_t senderPublicKey;
+				if(!getPublicKeyFromSlatepackAddress(&senderPublicKey, senderAddress, senderAddressLength)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Convert value to big endian
+				swapEndianness((uint8_t *)&value, sizeof(value));
+				
+				// Append value to the message
+				memcpy(message, &value, sizeof(value));
+				
+				// Append kernel commitment to the message
+				memcpy(&message[sizeof(value)], kernelCommitment, COMMITMENT_SIZE);
+				
+				// Append sender address to the message
+				memcpy(&message[sizeof(value) + COMMITMENT_SIZE], &senderPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
+			}
+			
+			// Otherwise
+			else {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
-			
-			// Convert value to big endian
-			swapEndianness((uint8_t *)&value, sizeof(value));
-			
-			// Append value to the message
-			memcpy(message, &value, sizeof(value));
-			
-			// Append commitment to the message
-			memcpy(&message[sizeof(value)], commitment, COMMITMENT_SIZE);
-			
-			// Append sender address to the message
-			memcpy(&message[sizeof(value) + COMMITMENT_SIZE], senderAddress, senderAddressLength);
 			
 			// Break
 			break;
@@ -1050,7 +1076,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *com
 }
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const uint8_t *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength) {
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
 
 	// Check receiver address length
 	switch(receiverAddressLength) {
@@ -1059,7 +1085,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1100,7 +1126,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1133,42 +1159,34 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 			// Break
 			break;
 		
-		// Ed25519 address size
-		case ED25519_PUBLIC_KEY_SIZE:
+		// Default
+		default:
 		
-			// Check currency doesn't allow Ed25519 addresses
-			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
+			// Check if receiver address length is a Slatepack address's length
+			if(receiverAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
 		
-			// Check if signature length is invalid
-			if(signatureLength != ED25519_SIGNATURE_SIZE) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			// Check if the receiver address isn't a valid Ed25519 public key
-			if(!isValidEd25519PublicKey(receiverAddress, receiverAddressLength)) {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-			
-			{
-				// Uncompress the receiver address to a public key
-				uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-				uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
-				memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], receiverAddress, receiverAddressLength);
+				// Check currency doesn't allow Slatepack addresses
+				if(!currencyInformation.enableSlatepackAddress) {
 				
-				cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			
+				// Check if signature length is invalid
+				if(signatureLength != ED25519_SIGNATURE_SIZE) {
 				
-				// Initialize the receiver public key with the uncompressed public key
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Check if getting receiver public key from receiver's Slatepack address failed
 				cx_ecfp_public_key_t receiverPublicKey;
-				cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), &receiverPublicKey);
-			
+				if(!getPublicKeyFromSlatepackAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
 				// Check if verifying the message with the receiver public key and signature failed
 				if(!cx_eddsa_verify(&receiverPublicKey, CX_LAST, CX_SHA512, message, messageLength, NULL, 0, signature, signatureLength)) {
 				
@@ -1177,14 +1195,15 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 				}
 			}
 			
+			// Otherwise
+			else {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
 			// Break
 			break;
-		
-		// Default
-		default:
-		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Return true
@@ -1375,7 +1394,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 }
 
 // Get Ed25519 public key
-void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
+void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t index) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -1389,8 +1408,8 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account) {
 		// Try
 		TRY {
 		
-			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			// Get address private key
+			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_Ed25519);
 			
 			// Get address public key from address private key
 			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);

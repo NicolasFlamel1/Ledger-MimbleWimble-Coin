@@ -3,6 +3,7 @@
 #include <os_io_seproxyhal.h>
 #include <string.h>
 #include "common.h"
+#include "menus.h"
 #include "state.h"
 
 
@@ -34,6 +35,9 @@ void exitApplication(void) {
 
 	// Reset state
 	resetState();
+	
+	// Clear menu buffers
+	clearMenuBuffers();
 
 	// Begin try
 	BEGIN_TRY_L(exit) {

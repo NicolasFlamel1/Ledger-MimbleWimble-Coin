@@ -2,23 +2,15 @@
 #include <string.h>
 #include "chacha20_poly1305.h"
 #include "common.h"
-#include "continue_encrypting_mqs_data.h"
-#include "currency_information.h"
-#include "mqs.h"
+#include "continue_encrypting_slate.h"
+#include "slate.h"
 
 
 // Supporting function implementation
 
-// Process continue encrypting MQS data request
-void processContinueEncryptingMqsDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process continue encrypting slate request
+void processContinueEncryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
-	// Check currency doesn't allow MQS addresses
-	if(!currencyInformation.mqsAddressPaymentProofAllowed) {
-	
-		// Throw unknown instruction error
-		THROW(UNKNOWN_INSTRUCTION_ERROR);
-	}
-	
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	
@@ -38,8 +30,8 @@ void processContinueEncryptingMqsDataRequest(unsigned short *responseLength, __a
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Check if MQS data encrypting state isn't ready or active
-	if(mqsData.encryptingState != READY_MQS_DATA_STATE && mqsData.encryptingState != ACTIVE_MQS_DATA_STATE) {
+	// Check if slate encrypting state isn't ready or active
+	if(slate.encryptingState != READY_SLATE_STATE && slate.encryptingState != ACTIVE_SLATE_STATE) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
@@ -49,7 +41,7 @@ void processContinueEncryptingMqsDataRequest(unsigned short *responseLength, __a
 	uint8_t encryptedData[dataLength];
 	
 	// Encrypt ChaCha20 Poly1305 data
-	encryptChaCha20Poly1305Data(&mqsData.chaCha20Poly1305State, encryptedData, data, dataLength);
+	encryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, encryptedData, data, dataLength);
 	
 	// Check if response with the encrypted data will overflow
 	if(willResponseOverflow(*responseLength, sizeof(encryptedData))) {
@@ -66,15 +58,15 @@ void processContinueEncryptingMqsDataRequest(unsigned short *responseLength, __a
 	// Check if at the last data 
 	if(dataLength < CHACHA20_BLOCK_SIZE) {
 	
-		// Set that MQS data encrypting state is complete
-		mqsData.encryptingState = COMPLETE_MQS_DATA_STATE;
+		// Set thatslate encrypting state is complete
+		slate.encryptingState = COMPLETE_SLATE_STATE;
 	}
 	
 	// Otherwise
 	else {
 	
-		// Set that MQS data encrypting state is active
-		mqsData.encryptingState = ACTIVE_MQS_DATA_STATE;
+		// Set that slate encrypting state is active
+		slate.encryptingState = ACTIVE_SLATE_STATE;
 	}
 	
 	// Throw success

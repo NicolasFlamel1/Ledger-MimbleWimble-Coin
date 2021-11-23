@@ -1,8 +1,7 @@
 // Header files
-#include "slatepack.h"
+#include "slate.h"
 #include "state.h"
 #include "transaction.h"
-#include "mqs.h"
 
 
 // Supporting function implementation
@@ -13,11 +12,8 @@ void resetState(void) {
 	// Reset transaction
 	resetTransaction();
 	
-	// Reset MQS data
-	resetMqsData();
-	
-	// Reset Slatepack data
-	resetSlatepackData();
+	// Reset slate
+	resetSlate();
 }
 
 // Reset unrelated state
@@ -50,13 +46,13 @@ void resetUnrelatedState(enum Instruction instruction) {
 	// Check instruction
 	switch(instruction) {
 	
-		// MQS data related instruction
-		case START_ENCRYPTING_MQS_DATA_INSTRUCTION:
-		case CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION:
-		case FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION:
-		case START_DECRYPTING_MQS_DATA_INSTRUCTION:
-		case CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION:
-		case FINISH_DECRYPTING_MQS_DATA_INSTRUCTION:
+		// Slate related instruction
+		case START_ENCRYPTING_SLATE_INSTRUCTION:
+		case CONTINUE_ENCRYPTING_SLATE_INSTRUCTION:
+		case FINISH_ENCRYPTING_SLATE_INSTRUCTION:
+		case START_DECRYPTING_SLATE_INSTRUCTION:
+		case CONTINUE_DECRYPTING_SLATE_INSTRUCTION:
+		case FINISH_DECRYPTING_SLATE_INSTRUCTION:
 		
 			// Break
 			break;
@@ -64,32 +60,8 @@ void resetUnrelatedState(enum Instruction instruction) {
 		// Default
 		default:
 		
-			// Reset MQS data
-			resetMqsData();
-			
-			// Break
-			break;
-	}
-	
-	// Check instruction
-	switch(instruction) {
-	
-		// Slatepack data related instruction
-		case START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		case CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		case FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		case START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		case CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		case FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION:
-		
-			// Break
-			break;
-		
-		// Default
-		default:
-		
-			// Reset Slatepack data
-			resetSlatepackData();
+			// Reset slate
+			resetSlate();
 			
 			// Break
 			break;

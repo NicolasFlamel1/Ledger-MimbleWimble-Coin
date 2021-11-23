@@ -20,43 +20,43 @@ void getCurrencyInformation(struct CurrencyInformation *currencyInformation) {
 	// Set currency information's fractional digits
 	currencyInformation->fractionalDigits = CURRENCY_FRACTIONAL_DIGITS;
 	
-	// Check if MQS address payment proof is allowed
-	#ifdef CURRENCY_MQS_ADDRESS_PAYMENT_PROOF_ALLOWED
+	// Check if enable MQS address
+	#ifdef CURRENCY_ENABLE_MQS_ADDRESS
 	
-		// Set currency information's MQS address payment proof allowed
-		currencyInformation->mqsAddressPaymentProofAllowed = true;
+		// Set currency information's enable MQS address
+		currencyInformation->enableMqsAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's MQS address payment proof allowed
-		currencyInformation->mqsAddressPaymentProofAllowed = false;
+		// Set currency information's enable MQS address
+		currencyInformation->enableMqsAddress = false;
 	#endif
 	
-	// Check if Tor address payment proof is allowed
-	#ifdef CURRENCY_TOR_ADDRESS_PAYMENT_PROOF_ALLOWED
+	// Check if enable TOR address
+	#ifdef CURRENCY_ENABLE_TOR_ADDRESS
 	
-		// Set currency information's Tor address payment proof allowed
-		currencyInformation->torAddressPaymentProofAllowed = true;
+		// Set currency information's enable Tor address
+		currencyInformation->enableTorAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's Tor address payment proof allowed
-		currencyInformation->torAddressPaymentProofAllowed = false;
+		// Set currency information's enable Tor address
+		currencyInformation->enableTorAddress = false;
 	#endif
 	
-	// Check if Ed25519 address payment proof is allowed
-	#ifdef CURRENCY_ED25519_ADDRESS_PAYMENT_PROOF_ALLOWED
+	// Check if enable Slatepack address
+	#ifdef CURRENCY_ENABLE_Slatepack_ADDRESS
 	
-		// Set currency information's Ed25519 address payment proof allowed
-		currencyInformation->ed25519AddressPaymentProofAllowed = true;
+		// Set currency information's enable Slatepack address
+		currencyInformation->enableSlatepackAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's Ed25519 address payment proof allowed
-		currencyInformation->ed25519AddressPaymentProofAllowed = false;
+		// Set currency information's enable Slatepack address
+		currencyInformation->enableSlatepackAddress = false;
 	#endif
 	
 	// Check if MQS version exists

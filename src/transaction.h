@@ -6,7 +6,7 @@
 // Header files
 #include <stdbool.h>
 #include "crypto.h"
-#include "tor.h"
+#include "slatepack.h"
 
 
 // Structures
@@ -23,8 +23,14 @@ struct Transaction {
 	// Account
 	uint32_t account;
 	
+	// Index
+	uint32_t index;
+	
 	// Send
 	uint64_t send;
+	
+	// receive
+	uint64_t receive;
 	
 	// Fee
 	uint64_t fee;
@@ -38,11 +44,11 @@ struct Transaction {
 	// Blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
 	
-	// Receiver address length
-	size_t receiverAddressLength;
+	// Address length
+	size_t addressLength;
 	
-	// Receiver address
-	uint8_t receiverAddress[TOR_ADDRESS_SIZE];
+	// Address
+	char address[sizeof("tgrin") - sizeof((char)'\0') + SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE];
 };
 
 

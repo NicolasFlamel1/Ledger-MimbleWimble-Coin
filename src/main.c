@@ -45,6 +45,9 @@
 		
 			// Reset state
 			resetState();
+			
+			// Clear menu buffers
+			clearMenuBuffers();
 		
 			// Initialize UX
 			UX_INIT();
@@ -206,10 +209,13 @@
 							// Reset state
 							resetState();
 						
-						// Higher application errors and success
+						// Higher application errors or success
 						case ERR_APP_RANGE_03:
 						case ERR_APP_RANGE_04:
 						case SWO_SUCCESS:
+						
+							// Clear menu buffers
+							clearMenuBuffers();
 						
 							// Check if response with the error will overflow
 							if(willResponseOverflow(responseLength, sizeof(uint16_t))) {

@@ -7,6 +7,12 @@
 #include <stdint.h>
 
 
+// Constants
+
+// Maximum epoch
+extern const uint64_t MAXIMUM_EPOCH;
+
+
 // Structures
 
 // Time

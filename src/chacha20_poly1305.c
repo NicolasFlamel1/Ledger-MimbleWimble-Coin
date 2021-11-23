@@ -169,22 +169,46 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 // Get ChaCha20 Poly1305 tag
 void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *tag) {
 
-	// Append additional authenticated data length and encrypted data length
-	uint8_t lengths[sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength) + sizeof(chaCha20Poly1305State->dataLength)];
-	memcpy(lengths, (uint8_t *)&chaCha20Poly1305State->additionalAuthenticatedDataLength, sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength));
-	memcpy(&lengths[sizeof(chaCha20Poly1305State->additionalAuthenticatedDataLength)], (uint8_t *)&chaCha20Poly1305State->dataLength, sizeof(chaCha20Poly1305State->dataLength));
+	// Initialize copy
+	volatile ChaCha20Poly1305State copy;
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Copy the ChaCha20 Poly1305 state
+			memcpy((ChaCha20Poly1305State *)&copy, chaCha20Poly1305State, sizeof(copy));
 
-	// Update Poly1305 accumulator with the lengths
-	updatePoly1305Accumulator(chaCha20Poly1305State, lengths, sizeof(lengths));
+			// Append additional authenticated data length and encrypted data length
+			uint8_t lengths[sizeof(copy.additionalAuthenticatedDataLength) + sizeof(copy.dataLength)];
+			memcpy(lengths, (uint8_t *)&copy.additionalAuthenticatedDataLength, sizeof(copy.additionalAuthenticatedDataLength));
+			memcpy(&lengths[sizeof(copy.additionalAuthenticatedDataLength)], (uint8_t *)&copy.dataLength, sizeof(copy.dataLength));
+
+			// Update Poly1305 accumulator with the lengths
+			updatePoly1305Accumulator((ChaCha20Poly1305State *)&copy, lengths, sizeof(lengths));
+			
+			// Add Poly1305 s to the Poly1305 accumulator
+			cx_math_add((uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305S, sizeof(copy.poly1305Accumulator));
+			
+			// Convert the Poly1305 accumulator to little endian
+			swapEndianness((uint8_t *)copy.poly1305Accumulator, sizeof(copy.poly1305Accumulator));
+			
+			// Set tag to the Poly1305 accumulator
+			memcpy(tag, (uint8_t *)copy.poly1305Accumulator, POLY1305_TAG_SIZE);
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the copy
+			explicit_bzero((ChaCha20Poly1305State *)&copy, sizeof(copy));
+		}
+	}
 	
-	// Add Poly1305 s to the Poly1305 accumulator
-	cx_math_add(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305Accumulator));
-	
-	// Convert the Poly1305 accumulator to little endian
-	swapEndianness(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
-	
-	// Set tag to the Poly1305 accumulator
-	memcpy(tag, chaCha20Poly1305State->poly1305Accumulator, POLY1305_TAG_SIZE);
+	// End try
+	END_TRY;
 }
 
 // Quarter round

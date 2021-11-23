@@ -8,12 +8,6 @@
 #include "tor.h"
 
 
-// Global variables
-
-// Slatepack data
-struct SlatepackData slatepackData;
-
-
 // Constants
 
 // Slatepack shared private key size
@@ -22,15 +16,53 @@ const size_t SLATEPACK_SHARED_PRIVATE_KEY_SIZE = 32;
 
 // Supporting function implementation
 
-// Reset Slatepack data
-void resetSlatepackData(void) {
-
-	// Clear the Slatepack data
-	explicit_bzero(&slatepackData, sizeof(slatepackData));
-}
-
 // Create Slatepack shared private key
-void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey) {
+void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, size_t addressLength) {
+
+	// Check address length
+	cx_ecfp_public_key_t publicKey;
+	switch(addressLength) {
+	
+		// Tor address size
+		case TOR_ADDRESS_SIZE:
+		
+			// Check if getting public key from address failed
+			if(!getPublicKeyFromTorAddress(&publicKey, address, addressLength)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Check if address length is a Slatepack address length
+			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			
+				// Check if getting public key from address failed
+				if(!getPublicKeyFromSlatepackAddress(&publicKey, address, addressLength)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+			}
+			
+			// Otherwise
+			else {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Break
+			break;
+	}
+	
+	// Compress the public key
+	cx_edwards_compress_point(CX_CURVE_Ed25519, publicKey.W, publicKey.W_len);
 
 	// Initialize Ed25519 private key
 	volatile cx_ecfp_private_key_t ed25519PrivateKey;
@@ -45,14 +77,14 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 		TRY {
 		
 			// Get Ed25519 private key
-			getAddressPrivateKey(&ed25519PrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			getAddressPrivateKey(&ed25519PrivateKey, account, index, CX_CURVE_Ed25519);
 			
 			// Get X25519 private key from the Ed25519 private key
 			getX25519PrivateKeyFromEd25519PrivateKey(&x25519PrivateKey, (cx_ecfp_private_key_t *)&ed25519PrivateKey);
 			
 			// Get X25519 public key from the public key
 			uint8_t x25519PublicKey[X25519_PUBLIC_KEY_SIZE];
-			getX25519PublicKeyFromEd25519PublicKey(x25519PublicKey, publicKey);
+			getX25519PublicKeyFromEd25519PublicKey(x25519PublicKey, &publicKey.W[PUBLIC_KEY_PREFIX_SIZE]);
 			
 			// Uncompress the X25519 public key
 			uint8_t uncompressedX25519PublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
@@ -90,13 +122,76 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 	END_TRY;
 }
 
+// Get public key from Slatepack address
+bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const char *slatepackAddress, size_t length) {
+
+	// Check if length is invalid
+	if(length != SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Check if Slatepack adderss's human-readable part is invalid
+	if(memcmp(slatepackAddress, currencyInformation.slatepackAddressHumanReadablePart, strlen(currencyInformation.slatepackAddressHumanReadablePart))) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Get decoded Slatepack address length
+	const size_t decodedSlatepackAddressLength = getBech32DecodedLength(slatepackAddress, length);
+	
+	// Check if decoded Slatepack address length is invalid
+	if(decodedSlatepackAddressLength != ED25519_PUBLIC_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Decode Slatepack address
+	uint8_t decodedSlatepackAddress[decodedSlatepackAddressLength];
+	bech32Decode(decodedSlatepackAddress, slatepackAddress, length);
+	
+	// Check if the decoded Slatepack address isn't a valid Ed25519 public key
+	if(!isValidEd25519PublicKey(decodedSlatepackAddress, ED25519_PUBLIC_KEY_SIZE)) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Check if getting the public key
+	if(publicKey) {
+	
+		// Uncompress the decoded Slatepack address to an Ed25519 public key
+		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+		uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedSlatepackAddress, ED25519_PUBLIC_KEY_SIZE);
+		
+		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		
+		// Initialize the public key with the uncompressed public key
+		cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
+	}
+	
+	// Return true
+	return true;
+}
+
+// Get Slatepack address from public key
+void getSlatepackAddressFromPublicKey(char *slatepackAddress, const uint8_t *publicKey) {
+
+	// Encode the public key to get the Slatepack address
+	bech32Encode(slatepackAddress, publicKey, ED25519_PUBLIC_KEY_SIZE, currencyInformation.slatepackAddressHumanReadablePart);
+}
+
 // Get Slatepack address
-void getSlatepackAddress(uint8_t *slatepackAddress, uint32_t account) {
+void getSlatepackAddress(char *slatepackAddress, uint32_t account, uint32_t index) {
 
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
-	getEd25519PublicKey(ed25519PublicKey, account);
+	getEd25519PublicKey(ed25519PublicKey, account, index);
 	
-	// Encode the address data to get the Slatepack address
-	bech32Encode(slatepackAddress, ed25519PublicKey, sizeof(ed25519PublicKey), currencyInformation.slatepackAddressHumanReadablePart);
+	// Get Slatepack address from the Ed25519 public key
+	getSlatepackAddressFromPublicKey(slatepackAddress, ed25519PublicKey);
 }

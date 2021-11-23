@@ -2,14 +2,14 @@
 #include <string.h>
 #include "chacha20_poly1305.h"
 #include "common.h"
-#include "finish_encrypting_slatepack_data.h"
-#include "slatepack.h"
+#include "finish_encrypting_slate.h"
+#include "slate.h"
 
 
 // Supporting function implementation
 
-// Process finish encrypting Slatepack data request
-void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process finish encrypting slate request
+void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -27,8 +27,8 @@ void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength,
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Check if Slatepack data encrypting state isn't active or complete
-	if(slatepackData.encryptingState != ACTIVE_SLATEPACK_DATA_STATE && slatepackData.encryptingState != COMPLETE_SLATEPACK_DATA_STATE) {
+	// Check if slate encrypting state isn't active or complete
+	if(slate.encryptingState != ACTIVE_SLATE_STATE && slate.encryptingState != COMPLETE_SLATE_STATE) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
@@ -36,7 +36,7 @@ void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength,
 	
 	// Get ChaCha20 Poly1305 tag
 	uint8_t tag[POLY1305_TAG_SIZE];
-	getChaCha20Poly1305Tag(&slatepackData.chaCha20Poly1305State, tag);
+	getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, tag);
 	
 	// Check if response with the tag will overflow
 	if(willResponseOverflow(*responseLength, sizeof(tag))) {
@@ -50,8 +50,8 @@ void processFinishEncryptingSlatepackDataRequest(unsigned short *responseLength,
 	
 	*responseLength += sizeof(tag);
 	
-	// Reset the Slatepack data
-	resetSlatepackData();
+	// Reset the slate
+	resetSlate();
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

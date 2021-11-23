@@ -1,12 +1,11 @@
 // Header files
 #include <os_io_seproxyhal.h>
-#include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include "common.h"
 #include "crypto.h"
 #include "get_tor_certificate_signature.h"
 #include "menus.h"
+#include "slatepack.h"
 #include "time.h"
 #include "tor.h"
 
@@ -28,6 +27,13 @@ static const uint16_t CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR = 60 * 60;
 // Process get Tor certificate signature request
 void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
+	// Check currency doesn't allow Tor and Slatepack addresses
+	if(!currencyInformation.enableTorAddress && !currencyInformation.enableSlatepackAddress) {
+	
+		// Throw unknown instruction error
+		THROW(UNKNOWN_INSTRUCTION_ERROR);
+	}
+	
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	
@@ -41,7 +47,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -58,11 +64,15 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Get index from data
+	uint32_t index;
+	memcpy(&index, &data[sizeof(account)], sizeof(index));
+	
 	// Get certificate from data
-	const uint8_t *certificate = &data[sizeof(account)];
+	const uint8_t *certificate = &data[sizeof(account) + sizeof(index)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - sizeof(account);
+	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index));
 	
 	// Check if certificate type is invalid
 	if(certificate[sizeof(uint8_t)] != SIGNED_CERTIFICATE_TYPE) {
@@ -151,7 +161,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
-	getEd25519PublicKey(ed25519PublicKey, account);
+	getEd25519PublicKey(ed25519PublicKey, account, index);
 	
 	// Check if the signing public key isn't the Ed25519 public key
 	if(memcmp(signingPublicKey, ed25519PublicKey, sizeof(ed25519PublicKey))) {
@@ -177,9 +187,29 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
 	#endif
 	
-	// Copy signed public key into the public key line buffer
-	toHexString(publicKeyLineBuffer, signedPublicKey, ED25519_PUBLIC_KEY_SIZE);
-	publicKeyLineBuffer[ED25519_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE] = '\0';
+	// Check currency allows Tor addresses
+	if(currencyInformation.enableTorAddress) {
+	
+		// Get Tor address from the signed public key
+		char torAddress[TOR_ADDRESS_SIZE];
+		getTorAddressFromPublicKey(torAddress, signedPublicKey);
+		
+		// Copy Tor address into the public key or address line buffer
+		memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
+		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
+	}
+	
+	// Check currency allows Slatepack addresses
+	else if(currencyInformation.enableSlatepackAddress) {
+	
+		// Get Slatepack address
+		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
+		getSlatepackAddress(slatepackAddress, account, index);
+		
+		// Copy Slatepack address into the public key or address line buffer
+		memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+	}
 	
 	// Show sign Tor certificate menu
 	showMenu(SIGN_TOR_CERTIFICATE_MENU);
@@ -201,11 +231,15 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 	uint32_t account;
 	memcpy(&account, data, sizeof(account));
 	
+	// Get index from data
+	uint32_t index;
+	memcpy(&index, &data[sizeof(account)], sizeof(index));
+	
 	// Get certificate from data
-	const uint8_t *certificate = &data[sizeof(account)];
+	const uint8_t *certificate = &data[sizeof(account) + sizeof(index)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - sizeof(account);
+	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index));
 	
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -219,8 +253,8 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 		// Try
 		TRY {
 		
-			// Get address private key at the Tor address private key index
-			getAddressPrivateKey(&addressPrivateKey, account, TOR_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_Ed25519);
+			// Get address private key
+			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_Ed25519);
 			
 			// Get signature of the certificate
 			cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, certificate, certificateLength, NULL, 0, (uint8_t *)signature, sizeof(signature), NULL);

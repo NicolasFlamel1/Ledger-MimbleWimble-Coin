@@ -2,20 +2,12 @@
 #include <string.h>
 #include "base58.h"
 #include "common.h"
+#include "crypto.h"
 #include "currency_information.h"
 #include "mqs.h"
 
 
-// Global variables
-
-// MQS data
-struct MqsData mqsData;
-
-
 // Constants
-
-// MQS address private key index
-const uint32_t MQS_ADDRESS_PRIVATE_KEY_INDEX = 0;
 
 // MQS shared private key size
 const size_t MQS_SHARED_PRIVATE_KEY_SIZE = 32;
@@ -26,15 +18,16 @@ const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
 
 // Supporting function implementation
 
-// Reset MQS data
-void resetMqsData(void) {
-
-	// Clear the MQS data
-	explicit_bzero(&mqsData, sizeof(mqsData));
-}
-
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, const uint8_t *publicKey, uint8_t *salt) {
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, uint8_t *salt) {
+
+	// Check if getting public key from address failed
+	cx_ecfp_public_key_t publicKey;
+	if(!getPublicKeyFromMqsAddress(&publicKey, address, MQS_ADDRESS_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -45,23 +38,18 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 		// Try
 		TRY {
 
-			// Uncompress the public key
-			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-			memcpy(uncompressedPublicKey, publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
-			uncompressSecp256k1PublicKey(uncompressedPublicKey);
+			// Get private key
+			getAddressPrivateKey(&privateKey, account, index, CX_CURVE_SECP256K1);
 			
-			// Get private key at the MQS address private key index
-			getAddressPrivateKey(&privateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
-			
-			// Check if the product of the uncompressed public key by the private key is infinity or its x component is zero
-			if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, uncompressedPublicKey, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)privateKey.d, privateKey.d_len) || cx_math_is_zero(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			// Check if the product of the public key by the private key is infinity or its x component is zero
+			if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, publicKey.W, publicKey.W_len, (uint8_t *)privateKey.d, privateKey.d_len) || cx_math_is_zero(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
-			// Get shared private key from the tweaked uncompressed public key and salt
-			cx_pbkdf2_sha512(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			// Get shared private key from the tweaked public key and salt
+			cx_pbkdf2_sha512(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 		}
 		
 		// Finally
@@ -77,7 +65,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 }
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *mqsAddress, size_t length) {
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqsAddress, size_t length) {
 
 	// Check if length is invalid
 	if(length != MQS_ADDRESS_SIZE) {
@@ -128,7 +116,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 }
 
 // Get MQS address from public key
-void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey) {
+void getMqsAddressFromPublicKey(char *mqsAddress, const uint8_t *publicKey) {
 
 	// Get address data from version and the public key
 	uint8_t addressData[sizeof(currencyInformation.mqsVersion) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
@@ -140,7 +128,7 @@ void getMqsAddressFromPublicKey(uint8_t *mqsAddress, const uint8_t *publicKey) {
 }
 
 // Get Mqs address
-void getMqsAddress(uint8_t *mqsAddress, uint32_t account) {
+void getMqsAddress(char *mqsAddress, uint32_t account, uint32_t index) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -154,8 +142,8 @@ void getMqsAddress(uint8_t *mqsAddress, uint32_t account) {
 		// Try
 		TRY {
 		
-			// Get address private key at the MQS address private key index
-			getAddressPrivateKey(&addressPrivateKey, account, MQS_ADDRESS_PRIVATE_KEY_INDEX, CX_CURVE_SECP256K1);
+			// Get address private key
+			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_SECP256K1);
 			
 			// Get address public key from the address private key
 			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);

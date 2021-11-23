@@ -1,6 +1,8 @@
 // Header files
-#include <alloca.h>
+#define _GNU_SOURCE
 #include <string.h>
+#undef _GNU_SOURCE
+#include <alloca.h>
 #include "blake2b.h"
 #include "common.h"
 #include "crypto.h"
@@ -9,6 +11,7 @@
 #include "menus.h"
 #include "mqs.h"
 #include "transaction.h"
+#include "slatepack.h"
 #include "tor.h"
 
 
@@ -30,19 +33,6 @@ enum KernelFeatures {
 	NO_RECENT_DUPLICATE_FEATURES
 };
 
-// Address type
-enum AddressType {
-
-	// Tor address type
-	TOR_ADDRESS_TYPE,
-	
-	// MQS address type
-	MQS_ADDRESS_TYPE,
-	
-	// Ed25519 address type
-	ED25519_ADDRESS_TYPE
-};
-
 
 // Supporting function implementation
 
@@ -59,7 +49,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Check if parameters or data are invalid
 	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
@@ -78,7 +68,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		case MQS_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.mqsAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -91,7 +81,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		case TOR_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.torAddressPaymentProofAllowed) {
+			if(!currencyInformation.enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -100,11 +90,11 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Break
 			break;
 		
-		// Ed25519 address type
-		case ED25519_ADDRESS_TYPE:
+		// Slatepack address type
+		case SLATEPACK_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow Ed25519 addresses
-			if(!currencyInformation.ed25519AddressPaymentProofAllowed) {
+			// Check currency doesn't allow Slatepack addresses
+			if(!currencyInformation.enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -218,25 +208,25 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Get commitment from data
-			const uint8_t *commitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			// Get kernel commitment from data
+			const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
-			// Check if commitment is invalid
-			if(!isValidCommitment(commitment)) {
+			// Check if kernel commitment is invalid
+			if(!isValidCommitment(kernelCommitment)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get signature from data
-			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			const uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Get signature length
 			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
 			
 			// Check address type
 			size_t addressLength;
-			uint8_t *address;
+			char *address;
 			switch(addressType) {
 			
 				// MQS address type
@@ -249,7 +239,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 					address = alloca(addressLength);
 					
 					// Get MQS address
-					getMqsAddress(address, transaction.account);
+					getMqsAddress(address, transaction.account, transaction.index);
 					
 					// Break
 					break;
@@ -264,22 +254,22 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 					address = alloca(addressLength);
 					
 					// Get Tor address
-					getTorAddress(address, transaction.account);
+					getTorAddress(address, transaction.account, transaction.index);
 				
 					// Break
 					break;
 				
-				// Ed25519 address type
-				case ED25519_ADDRESS_TYPE:
+				// Slatepack address type
+				case SLATEPACK_ADDRESS_TYPE:
 				
 					// Set address length
-					addressLength = ED25519_PUBLIC_KEY_SIZE;
+					addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart);
 					
 					// Allocate memory for the address
 					address = alloca(addressLength);
 					
-					// Get Ed25519 public key
-					getEd25519PublicKey(address, transaction.account);
+					// Get Slatepack public key
+					getSlatepackAddress(address, transaction.account, transaction.index);
 				
 					// Break
 					break;
@@ -287,46 +277,25 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			
 			// Get payment proof message
 			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.send, addressLength)];
-			getPaymentProofMessage(paymentProofMessage, transaction.send, commitment, address, addressLength);
+			getPaymentProofMessage(paymentProofMessage, transaction.send, kernelCommitment, address, addressLength);
 			
 			// Check if verifying payment proof failed
-			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.receiverAddress, transaction.receiverAddressLength, signature, signatureLength)) {
+			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.address, transaction.addressLength, signature, signatureLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Check receiver address length
-			switch(transaction.receiverAddressLength) {
-			
-				// MQS address size or Tor address size
-				case MQS_ADDRESS_SIZE:
-				case TOR_ADDRESS_SIZE:
-				
-					// Copy receiver address into the receiver line buffer
-					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
-					memcpy(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
-				
-					// Break
-					break;
-			
-				// Ed25519 address size
-				case ED25519_PUBLIC_KEY_SIZE:
-				
-					// Copy receiver address into the receiver line buffer
-					explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
-					toHexString(receiverLineBuffer, transaction.receiverAddress, transaction.receiverAddressLength);
-				
-					// Break
-					break;
-			}
+			// Copy address into the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
 		else {
 			
-			// Clear receiver line buffer
-			explicit_bzero(receiverLineBuffer, sizeof(receiverLineBuffer));
+			// Clear the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
 		// Check if transaction offset wasn't applied
@@ -360,8 +329,29 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	// Otherwise
 	else {
 	
-		// Check if data is invalid
-		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		// Check if a kernel commitment is provided
+		if(dataLength == NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
+		
+			// Check if a transaction address doesn't exist
+			if(!transaction.addressLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Get kernel commitment from data
+			const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			
+			// Check if kernel commitment is invalid
+			if(!isValidCommitment(kernelCommitment)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		}
+	
+		// Otherwise check if data is invalid
+		else if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
@@ -375,8 +365,17 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 // Process finish transaction user interaction
 void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 
+	// Get request's first parameter
+	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
+	
+	// Get request's data length
+	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
+	
 	// Get request's data
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	
+	// Get address type from first parameter
+	const enum AddressType addressType = firstParameter;
 	
 	// Get secret nonce from data
 	uint8_t *secretNonce = data;
@@ -390,6 +389,9 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Get kernel features from data
 	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
+	// Initialize kernel features length
+	size_t kernelFeaturesLength;
+	
 	// Initialize kernel data
 	uint8_t *kernelData;
 	
@@ -401,6 +403,9 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	
 		// Plain features
 		case PLAIN_FEATURES:
+		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t);
 		
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t);
@@ -423,6 +428,9 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		// Coinbase features
 		case COINBASE_FEATURES:
 		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t);
+		
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t);
 			
@@ -437,6 +445,9 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		
 		// Height locked features
 		case HEIGHT_LOCKED_FEATURES:
+		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint64_t);
 		
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
@@ -469,6 +480,9 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		
 		// No recent duplicate features
 		case NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint64_t);
 		
 			// Set kernel data length
 			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
@@ -511,17 +525,140 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Create single-signer signature from the message, private key, secret nonce, public nonce if used, and public key
 	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, secretNonce, publicNonce, publicKey);
 	
-	// Check if response with the signature will overflow
-	if(willResponseOverflow(*responseLength, sizeof(signature))) {
+	// Initialize payment proof
+	volatile uint8_t *paymentProof;
+	
+	// Initialize payment proof length
+	volatile size_t paymentProofLength = 0;
+	
+	// Check if transaction is receiving and a kernel commitment is provided
+	if(transaction.receive && dataLength == NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
+	
+		// Get kernel commitment from data
+		const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+		
+		// Get payment proof message
+		uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.receive, transaction.addressLength)];
+		
+		getPaymentProofMessage(paymentProofMessage, transaction.receive, kernelCommitment, transaction.address, transaction.addressLength);
+		
+		// Initialize address private key
+		volatile cx_ecfp_private_key_t addressPrivateKey;
+		
+		// Begin try
+		BEGIN_TRY {
+		
+			// Try
+			TRY {
+		
+				// Check address type
+				cx_ecfp_public_key_t addressPublicKey;
+				switch(addressType) {
+					
+					// MQS address type
+					case MQS_ADDRESS_TYPE:
+					
+						// Set payment proof length
+						paymentProofLength = MAXIMUM_DER_SIGNATURE_SIZE;
+						
+						// Allocate memory for the payment proof
+						paymentProof = alloca(paymentProofLength);
+						
+						// Get hash of the payment proof message
+						uint8_t hash[CX_SHA256_SIZE];
+						cx_hash_sha256(paymentProofMessage, sizeof(paymentProofMessage), hash, sizeof(hash));
+						
+						// Get address private key
+						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_SECP256K1);
+						
+						// Get address public key from the address private key
+						cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+						
+						// Check if the address public key is in the payment proof message
+						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
+						
+							// Throw internal error error
+							THROW(INTERNAL_ERROR_ERROR);
+						}
+						
+						// Compress the address public key
+						addressPublicKey.W[0] = (addressPublicKey.W[addressPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+						
+						// Check if the compressed address public key is in the payment proof message
+						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, COMPRESSED_PUBLIC_KEY_SIZE)) {
+						
+							// Throw internal error error
+							THROW(INTERNAL_ERROR_ERROR);
+						}
+				
+						// Get signature of the hash
+						paymentProofLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)paymentProof, paymentProofLength, NULL);
+					
+						// Break
+						break;
+					
+					// Tor or Slatepack address type
+					case TOR_ADDRESS_TYPE:
+					case SLATEPACK_ADDRESS_TYPE:
+					
+						// Set payment proof length
+						paymentProofLength = ED25519_SIGNATURE_SIZE;
+						
+						// Allocate memory for the payment proof
+						paymentProof = alloca(paymentProofLength);
+						
+						// Get address private key
+						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_Ed25519);
+						
+						// Get address public key from address private key
+						cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+						
+						// Compress the address public key
+						cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
+						
+						// Check if the address public key is in the payment proof message
+						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
+						
+							// Throw internal error error
+							THROW(INTERNAL_ERROR_ERROR);
+						}
+					
+						// Get signature of the payment proof message
+						cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, paymentProofMessage, sizeof(paymentProofMessage), NULL, 0, (uint8_t *)paymentProof, paymentProofLength, NULL);
+					
+						// Break
+						break;
+				}
+			}
+			
+			// Finally
+			FINALLY {
+			
+				// Clear the address private key
+				explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
+			}
+		}
+		
+		// End try
+		END_TRY;
+		
+	}
+	
+	// Check if response with the signature and payment proof will overflow
+	if(willResponseOverflow(*responseLength, sizeof(signature) + paymentProofLength)) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 	
-	// Append signature to response
+	// Append signature and payment proof to response
 	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));
 	
 	*responseLength += sizeof(signature);
+	
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)paymentProof, paymentProofLength);
+	
+	*responseLength += paymentProofLength;
 	
 	// Reset the transaction
 	resetTransaction();

@@ -19,8 +19,8 @@ enum Instruction {
 	// Get root public key instruction
 	GET_ROOT_PUBLIC_KEY_INSTRUCTION,
 	
-	// Get public key or address verification instruction
-	GET_PUBLIC_KEY_OR_ADDRESS_VERIFICATION_INSTRUCTION,
+	// Get address instruction
+	GET_ADDRESS_INSTRUCTION,
 	
 	// Get seed cookie instruction
 	GET_SEED_COOKIE_INSTRUCTION,
@@ -31,56 +31,29 @@ enum Instruction {
 	// Get bulletproof components instruction
 	GET_BULLETPROOF_COMPONENTS_INSTRUCTION,
 	
-	// Get Tor public key instruction
-	GET_TOR_PUBLIC_KEY_INSTRUCTION,
+	// Verify root public key instruction
+	VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION,
 	
-	// Get Tor transaction signature instruction
-	GET_TOR_TRANSACTION_SIGNATURE_INSTRUCTION,
+	// Verify address instruction
+	VERIFY_ADDRESS_INSTRUCTION,
 	
-	// Get Tor certificate signature instruction
-	GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION,
+	// Start encrypting slate instruction
+	START_ENCRYPTING_SLATE_INSTRUCTION,
 	
-	// Start encrypting Slatepack data instruction
-	START_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION,
+	// Continue encrypting slate instruction
+	CONTINUE_ENCRYPTING_SLATE_INSTRUCTION,
 	
-	// Continue encrypting Slatepack data instruction
-	CONTINUE_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION,
+	// Finish encrypting slate instruction
+	FINISH_ENCRYPTING_SLATE_INSTRUCTION,
 	
-	// Finish encrypting Slatepack data instruction
-	FINISH_ENCRYPTING_SLATEPACK_DATA_INSTRUCTION,
+	// Start decrypting slate instruction
+	START_DECRYPTING_SLATE_INSTRUCTION,
 	
-	// Start decrypting Slatepack data instruction
-	START_DECRYPTING_SLATEPACK_DATA_INSTRUCTION,
+	// Continue decrypting slate instruction
+	CONTINUE_DECRYPTING_SLATE_INSTRUCTION,
 	
-	// Continue decrypting Slatepack data instruction
-	CONTINUE_DECRYPTING_SLATEPACK_DATA_INSTRUCTION,
-	
-	// Finish decrypting Slatepack data instruction
-	FINISH_DECRYPTING_SLATEPACK_DATA_INSTRUCTION,
-	
-	// Get MQS public key instruction
-	GET_MQS_PUBLIC_KEY_INSTRUCTION,
-	
-	// Get MQS transaction signature instruction
-	GET_MQS_TRANSACTION_SIGNATURE_INSTRUCTION,
-	
-	// Start encrypting MQS data instruction
-	START_ENCRYPTING_MQS_DATA_INSTRUCTION,
-	
-	// Continue encrypting MQS data instruction
-	CONTINUE_ENCRYPTING_MQS_DATA_INSTRUCTION,
-	
-	// Finish encrypting MQS data instruction
-	FINISH_ENCRYPTING_MQS_DATA_INSTRUCTION,
-	
-	// Start decrypting MQS data instruction
-	START_DECRYPTING_MQS_DATA_INSTRUCTION,
-	
-	// Continue decrypting MQS data instruction
-	CONTINUE_DECRYPTING_MQS_DATA_INSTRUCTION,
-	
-	// Finish decrypting MQS data instruction
-	FINISH_DECRYPTING_MQS_DATA_INSTRUCTION,
+	// Finish decrypting slate instruction
+	FINISH_DECRYPTING_SLATE_INSTRUCTION,
 	
 	// Start transaction instruction
 	START_TRANSACTION_INSTRUCTION,
@@ -98,7 +71,13 @@ enum Instruction {
 	CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
 	
 	// Finish transaction instruction
-	FINISH_TRANSACTION_INSTRUCTION
+	FINISH_TRANSACTION_INSTRUCTION,
+	
+	// Get MQS timestamp signature instruction
+	GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION,
+	
+	// Get Tor certificate signature instruction
+	GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION
 };
 
 

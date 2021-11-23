@@ -12,6 +12,9 @@
 
 // Constants
 
+// Maximum epoch
+const uint64_t MAXIMUM_EPOCH = (uint64_t)UINT32_MAX * 60 * 60;
+
 // Days since January first
 static const uint32_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
 

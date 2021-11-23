@@ -9,9 +9,6 @@
 
 // Constants
 
-// Tor address private key index
-const uint32_t TOR_ADDRESS_PRIVATE_KEY_INDEX = 0;
-
 // Address checksum size
 static const size_t ADDRESS_CHECKSUM_SIZE = 2;
 
@@ -25,13 +22,13 @@ static const uint8_t ADDRESS_CHECKSUM_SEED[] = {'.', 'o', 'n', 'i', 'o', 'n', ' 
 // Function prototypes
 
 // Get checksum
-void getChecksum(uint8_t *checksum, const uint8_t *address);
+void getChecksum(uint8_t *checksum, const uint8_t *data);
 
 
 // Supporting function implementation
 
 // Get public key from Tor address
-bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *torAddress, size_t length) {
+bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const char *torAddress, size_t length) {
 
 	// Check if length is invalid
 	if(length != TOR_ADDRESS_SIZE) {
@@ -98,7 +95,7 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const uint8_t *
 }
 
 // Get Tor address from public key
-void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey) {
+void getTorAddressFromPublicKey(char *torAddress, const uint8_t *publicKey) {
 
 	// Get checksum from the public key
 	uint8_t checksum[ADDRESS_CHECKSUM_SIZE];
@@ -122,23 +119,23 @@ void getTorAddressFromPublicKey(uint8_t *torAddress, const uint8_t *publicKey) {
 }
 
 // Get Tor address
-void getTorAddress(uint8_t *torAddress, uint32_t account) {
+void getTorAddress(char *torAddress, uint32_t account, uint32_t index) {
 
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];
-	getEd25519PublicKey(ed25519PublicKey, account);
+	getEd25519PublicKey(ed25519PublicKey, account, index);
 	
 	// Get Tor address from the Ed25519 public key
 	getTorAddressFromPublicKey(torAddress, ed25519PublicKey);
 }
 
 // Get checksum
-void getChecksum(uint8_t *checksum, const uint8_t *address) {
+void getChecksum(uint8_t *checksum, const uint8_t *data) {
 
 	// Create checksum data
 	uint8_t checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE + sizeof(ADDRESS_VERSION)];
 	memcpy(checksumData, ADDRESS_CHECKSUM_SEED, sizeof(ADDRESS_CHECKSUM_SEED));
-	memcpy(&checksumData[sizeof(ADDRESS_CHECKSUM_SEED)], address, ED25519_PUBLIC_KEY_SIZE);
+	memcpy(&checksumData[sizeof(ADDRESS_CHECKSUM_SEED)], data, ED25519_PUBLIC_KEY_SIZE);
 	checksumData[sizeof(ADDRESS_CHECKSUM_SEED) + ED25519_PUBLIC_KEY_SIZE] = ADDRESS_VERSION;
 	
 	// Get hash of the checksum data
