@@ -73,12 +73,12 @@ Class: C7
 Instruction: 01
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | requestor's name (ASCII string varying length)
+Data: Account (unsigned 4 bytes little endian integer)
 Response: Compressed secp256k1 public key (33 bytes)
 Requires user interaction: Yes
-Example request: C701000012000000004E69636F6C617320466C616d656C
+Example request: C70100000400000000
 Example response: 037ED6CE5A1C46C5F74F73CCDC23C7B90C1BF7DDD9EC8FBAD6D4E1851634754F439000
-Test: printf "\xC7\x01\x00\x00\x12\x00\x00\x00\x00\x4E\x69\x63\x6F\x6C\x61\x73\x20\x46\x6C\x61\x6d\x65\x6C" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x01\x00\x00\x04\x00\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
 ```
 
 * Get address
@@ -358,7 +358,7 @@ Class: C7
 Instruction: 14
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | timestamp (unsigned 8 byte little endian)
+Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | timestamp (unsigned 8 byte little endian) | time zone offset (signed 2 byte little endian)
 Response: DER signature (at most 72 bytes)
 Requires user interaction: Yes
 Example request: C71400001000000000000000006642762100000000
@@ -373,7 +373,7 @@ Class: C7
 Instruction: 15
 Parameters one: 00
 Parameter two: 00
-Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size Ed25519_signing_cert without header and signature)
+Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size Ed25519_signing_cert without header and signature) | time zone offset (signed 2 byte little endian)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: Yes
 Example request: C7150000540000000000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd45824101002004002c425da6a34d075d0b576a6e5d4a66f524a2751eebe74e98b8bb29f025137c2a

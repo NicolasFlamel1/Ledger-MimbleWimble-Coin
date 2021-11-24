@@ -1,4 +1,5 @@
 // Header files
+#include <stdlib.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
 #include "common.h"
@@ -47,7 +48,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t) + sizeof(int16_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -72,7 +73,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	const uint8_t *certificate = &data[sizeof(account) + sizeof(index)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index));
+	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(int16_t));
 	
 	// Check if certificate type is invalid
 	if(certificate[sizeof(uint8_t)] != SIGNED_CERTIFICATE_TYPE) {
@@ -170,21 +171,39 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Convert certificate expiration to time
+	// Get time zone offset from data
+	int16_t timeZoneOffset;
+	memcpy(&timeZoneOffset, &data[sizeof(account) + sizeof(index) + certificateLength], sizeof(timeZoneOffset));
+	
+	// Check if time zone offset is invalid
+	if(timeZoneOffset <= MINIMUM_TIME_ZONE_OFFSET || timeZoneOffset >= MAXIMUM_TIME_ZONE_OFFSET) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Check if time zone offset will underflow the certificate expiration
+	if(timeZoneOffset * SECONDS_IN_A_MINUTE > (int64_t)certificateExpiration * CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR) {
+	
+		// Don't use a time zone offset
+		timeZoneOffset = 0;
+	}
+	
+	// Convert certificate expiration adjusted by the time zone offset to time
 	struct Time time;
-	epochToTime(&time, (uint64_t)certificateExpiration * CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR);
+	epochToTime(&time, (uint64_t)certificateExpiration * CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR - timeZoneOffset * SECONDS_IN_A_MINUTE);
 	
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
 	
 		// Copy time into the time line buffer
-		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
+		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	
 	// Otherwise
 	#else
 	
 		// Copy time into the time line buffer
-		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC", time.hour, time.minute, time.second, time.year, time.month, time.day);
+		SPRINTF(timeLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
 	// Check currency allows Tor addresses
@@ -197,18 +216,24 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		// Copy Tor address into the public key or address line buffer
 		memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
 		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
+		
+		// Set address type line buffer
+		strcpy(addressTypeLineBuffer, "Tor Address");
 	}
 	
 	// Check currency allows Slatepack addresses
 	else if(currencyInformation.enableSlatepackAddress) {
 	
-		// Get Slatepack address
+		// Get Slatepack address from the signed public key
 		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
-		getSlatepackAddress(slatepackAddress, account, index);
+		getSlatepackAddressFromPublicKey(slatepackAddress, signedPublicKey);
 		
 		// Copy Slatepack address into the public key or address line buffer
 		memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
 		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+		
+		// Set address type line buffer
+		strcpy(addressTypeLineBuffer, "Slatepack Address");
 	}
 	
 	// Show sign Tor certificate menu
@@ -239,7 +264,7 @@ void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLe
 	const uint8_t *certificate = &data[sizeof(account) + sizeof(index)];
 	
 	// Get certificate length
-	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index));
+	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(int16_t));
 	
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;

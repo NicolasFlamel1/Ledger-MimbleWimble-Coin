@@ -49,7 +49,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Check if parameters or data are invalid
 	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
@@ -219,7 +219,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			}
 			
 			// Get signature from data
-			const uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Get signature length
 			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
@@ -289,6 +289,41 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Copy address into the public key or address line buffer
 			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
+			
+			// Check transaction's address length
+			switch(transaction.addressLength) {
+			
+				// MQS address size
+				case MQS_ADDRESS_SIZE:
+				
+					// Set address type line buffer
+					strcpy(addressTypeLineBuffer, "To MQS Address");
+					
+					// Break
+					break;
+				
+				// Tor address size
+				case TOR_ADDRESS_SIZE:
+				
+					// Set address type line buffer
+					strcpy(addressTypeLineBuffer, "To Tor Address");
+					
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Check if transaction's address length is a Slatepack address length
+					if(transaction.addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+					
+						// Set address type line buffer
+						strcpy(addressTypeLineBuffer, "To Slatepack Address");
+					}
+				
+					// Break
+					break;
+			}
 		}
 		
 		// Otherwise
@@ -466,13 +501,13 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			
 			{
 				// Get lock height from data
-				uint64_t *lockHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint8_t *lockHeight = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert lock height to big endian
-				swapEndianness((uint8_t *)lockHeight, sizeof(*lockHeight));
+				swapEndianness(lockHeight, sizeof(uint64_t));
 				
 				// Append lock height to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], lockHeight, sizeof(*lockHeight));
+				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], lockHeight, sizeof(uint64_t));
 			}
 			
 			// Break
@@ -502,13 +537,13 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			{
 				
 				// Get relative height from data
-				uint64_t *relativeHeight = (uint64_t *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint8_t *relativeHeight = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert relative height to big endian
-				swapEndianness((uint8_t *)relativeHeight, sizeof(*relativeHeight));
+				swapEndianness(relativeHeight, sizeof(uint64_t));
 				
 				// Append relative height to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], relativeHeight, sizeof(*relativeHeight));
+				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], relativeHeight, sizeof(uint64_t));
 			}
 			
 			// Break
@@ -552,12 +587,37 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			TRY {
 		
 				// Check address type
-				cx_ecfp_public_key_t addressPublicKey;
 				switch(addressType) {
 					
 					// MQS address type
 					case MQS_ADDRESS_TYPE:
 					
+						// Get address private key
+						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_SECP256K1);
+						
+						{
+							// Get address public key from the address private key
+							cx_ecfp_public_key_t addressPublicKey;
+							cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+							
+							// Check if the address public key is in the payment proof message
+							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
+							
+								// Throw internal error error
+								THROW(INTERNAL_ERROR_ERROR);
+							}
+							
+							// Compress the address public key
+							addressPublicKey.W[0] = (addressPublicKey.W[addressPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+							
+							// Check if the compressed address public key is in the payment proof message
+							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, COMPRESSED_PUBLIC_KEY_SIZE)) {
+							
+								// Throw internal error error
+								THROW(INTERNAL_ERROR_ERROR);
+							}
+						}
+						
 						// Set payment proof length
 						paymentProofLength = MAXIMUM_DER_SIGNATURE_SIZE;
 						
@@ -567,29 +627,6 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						// Get hash of the payment proof message
 						uint8_t hash[CX_SHA256_SIZE];
 						cx_hash_sha256(paymentProofMessage, sizeof(paymentProofMessage), hash, sizeof(hash));
-						
-						// Get address private key
-						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_SECP256K1);
-						
-						// Get address public key from the address private key
-						cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
-						
-						// Check if the address public key is in the payment proof message
-						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
-						
-							// Throw internal error error
-							THROW(INTERNAL_ERROR_ERROR);
-						}
-						
-						// Compress the address public key
-						addressPublicKey.W[0] = (addressPublicKey.W[addressPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
-						
-						// Check if the compressed address public key is in the payment proof message
-						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, COMPRESSED_PUBLIC_KEY_SIZE)) {
-						
-							// Throw internal error error
-							THROW(INTERNAL_ERROR_ERROR);
-						}
 				
 						// Get signature of the hash
 						paymentProofLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)paymentProof, paymentProofLength, NULL);
@@ -601,27 +638,30 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 					case TOR_ADDRESS_TYPE:
 					case SLATEPACK_ADDRESS_TYPE:
 					
+						// Get address private key
+						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_Ed25519);
+						
+						{
+							// Get address public key from address private key
+							cx_ecfp_public_key_t addressPublicKey;
+							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+							
+							// Compress the address public key
+							cx_edwards_compress_point(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len);
+							
+							// Check if the address public key is in the payment proof message
+							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
+							
+								// Throw internal error error
+								THROW(INTERNAL_ERROR_ERROR);
+							}
+						}
+						
 						// Set payment proof length
 						paymentProofLength = ED25519_SIGNATURE_SIZE;
 						
 						// Allocate memory for the payment proof
 						paymentProof = alloca(paymentProofLength);
-						
-						// Get address private key
-						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_Ed25519);
-						
-						// Get address public key from address private key
-						cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
-						
-						// Compress the address public key
-						cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
-						
-						// Check if the address public key is in the payment proof message
-						if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
-						
-							// Throw internal error error
-							THROW(INTERNAL_ERROR_ERROR);
-						}
 					
 						// Get signature of the payment proof message
 						cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, paymentProofMessage, sizeof(paymentProofMessage), NULL, 0, (uint8_t *)paymentProof, paymentProofLength, NULL);
@@ -641,7 +681,6 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		
 		// End try
 		END_TRY;
-		
 	}
 	
 	// Check if response with the signature and payment proof will overflow

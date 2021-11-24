@@ -9,14 +9,14 @@
 
 // Global variables
 
-// Requestor line buffer
-char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
-
 // Time line buffer
 char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+
+// Verify address line buffer
+char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
@@ -215,65 +215,24 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 	"public key?"
 });
 
-// Export root public key menu requestor screen
-static UX_STEP_NOCB(exportRootPublicKeyMenuRequestorScreen,
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Requestor",
-			
-			// Second line
-			requestorLineBuffer
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Requestor",
-			
-			// Text
-			.text = requestorLineBuffer
-		}
-	#endif
-);
-
 // Export root public key menu approve screen
-static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pbb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true), {
+static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
 	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Approve"
 });
 
 // Export root public key menu deny screen
-static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pbb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false), {
+static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
 	
-	// First bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Deny"
 });
 
 // Export root public key menu
@@ -281,9 +240,6 @@ static UX_FLOW(exportRootPublicKeyMenu,
 
 	// Export root public key menu notify screen
 	&exportRootPublicKeyMenuNotifyScreen,
-	
-	// Export root public key menu requestor screen
-	&exportRootPublicKeyMenuRequestorScreen,
 
 	// Export root public key menu approve screen
 	&exportRootPublicKeyMenuApproveScreen,
@@ -305,7 +261,7 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuNotifyScreen, pnn, {
 	"Verify root",
 	
 	// Second line
-	"public key?"
+	"public key"
 });
 
 // Verify root public key menu public key screen
@@ -326,7 +282,7 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 {
 
 	// Title
-	.title = "Public key",
+	.title = "Root Public Key",
 	
 	// Text
 	.text = publicKeyOrAddressLineBuffer
@@ -378,10 +334,10 @@ static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 	&C_icon_view,
 
 	// First line
-	addressTypeLineBuffer,
+	verifyAddressLineBuffer,
 	
 	// Second line
-	"address?"
+	"address"
 });
 
 // Verify address menu address screen
@@ -402,7 +358,7 @@ static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 {
 
 	// Title
-	.title = "Address",
+	.title = addressTypeLineBuffer,
 	
 	// Text
 	.text = publicKeyOrAddressLineBuffer
@@ -460,8 +416,8 @@ static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
 	"timestamp?"
 });
 
-// Sign MQS timestamp menu date and time screen
-static UX_STEP_NOCB(signMqsTimestampMenuDateAndTimeScreen,
+// Sign MQS timestamp menu time and date screen
+static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -478,36 +434,30 @@ static UX_STEP_NOCB(signMqsTimestampMenuDateAndTimeScreen,
 {
 
 	// Title
-	.title = "Date and time",
+	.title = "Time And Date",
 	
 	// Text
 	.text = timeLineBuffer
 });
 
 // Sign MQS timestamp menu approve screen
-static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pbb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true), {
+static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
 	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Approve"
 });
 
 // Sign MQS timestamp menu deny screen
-static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pbb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false), {
+static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
 	
-	// First bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Deny"
 });
 
 // Sign MQS timestamp menu
@@ -516,8 +466,8 @@ static UX_FLOW(signMqsTimestampMenu,
 	// Sign MQS timestamp menu notify screen
 	&signMqsTimestampMenuNotifyScreen,
 	
-	// Sign MQS timestamp menu date and time screen
-	&signMqsTimestampMenuDateAndTimeScreen,
+	// Sign MQS timestamp menu time and date screen
+	&signMqsTimestampMenuTimeAndDateScreen,
 	
 	// Sign MQS timestamp menu approve screen
 	&signMqsTimestampMenuApproveScreen,
@@ -584,36 +534,30 @@ static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 {
 
 	// Title
-	.title = "Address",
+	.title = addressTypeLineBuffer,
 	
 	// Text
 	.text = publicKeyOrAddressLineBuffer
 });
 
 // Sign Tor certificate menu approve screen
-static UX_STEP_CB(signTorCertificateMenuApproveScreen, pbb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true), {
+static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
 	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Approve"
 });
 
 // Sign Tor certificate menu deny screen
-static UX_STEP_CB(signTorCertificateMenuDenyScreen, pbb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false), {
+static UX_STEP_CB(signTorCertificateMenuDenyScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
 	
-	// First bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Deny"
 });
 
 // Sign Tor certificate menu
@@ -717,15 +661,18 @@ static UX_STEP_NOCB(finalizeTransactionMenuReceiverScreen,
 {
 
 	// Title
-	.title = "To",
+	.title = addressTypeLineBuffer,
 	
 	// Text
 	.text = publicKeyOrAddressLineBuffer
 });
 
 // Finalize transaction menu no payment proof screen
-static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, nn, {
+static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, pnn, {
 
+	// Picture
+	&C_icon_warning,
+	
 	// First line
 	"No payment",
 	
@@ -734,29 +681,23 @@ static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, nn, {
 });
 
 // Finalize transaction menu approve screen
-static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pbb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true), {
+static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true), {
 
 	// Picture
 	&C_icon_approve,
 	
-	// First bold line
-	"Approve",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Approve"
 });
 
 // Finalize transaction menu deny screen
-static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pbb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false), {
+static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false), {
 
 	// Picture
 	&C_icon_reject,
 	
-	// First bold line
-	"Deny",
-	
-	// Second bold line
-	"request"
+	// Bold line
+	"Deny"
 });
 
 // Finalize transaction receiver menu
@@ -834,15 +775,15 @@ static UX_FLOW(processingMenu,
 
 // Clear menu buffers
 void clearMenuBuffers(void) {
-
-	// Clear the requestor line buffer
-	explicit_bzero(requestorLineBuffer, sizeof(requestorLineBuffer));
 	
 	// Clear the time line buffer
 	explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
 	
 	// Clear the public key or address line buffer
 	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+	
+	// Clear the verify address line buffer
+	explicit_bzero(verifyAddressLineBuffer, sizeof(verifyAddressLineBuffer));
 	
 	// Clear the address type line buffer
 	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));

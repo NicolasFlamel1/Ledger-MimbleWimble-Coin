@@ -10,36 +10,23 @@
 
 // Definitions
 
-// Check if target is the Nano X
-#ifdef TARGET_NANOX
-
-	// Line character size
-	#define LINE_CHARACTER_SIZE 20
-
-// Otherwise
-#else
-
-	// Line character size
-	#define LINE_CHARACTER_SIZE 14
-#endif
-
-// Requestor line buffer size
-#define REQUESTOR_LINE_BUFFER_SIZE (LINE_CHARACTER_SIZE * 2 + sizeof((char)'\0'))
-
 // Time line buffer size
-#define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd ZZZ")
+#define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
 // Public key or address line buffer size
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
+// Verify address line buffer size
+#define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+
 // Address type line buffer size
-#define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+#define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("To Slatepack address")
 
 // Amount line buffer size
-#define AMOUNT_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+#define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
 // Fee line buffer size
-#define FEE_LINE_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0') + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+#define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
 
 // Constants
@@ -91,14 +78,14 @@ enum MainMenuScreen {
 
 // Global variables
 
-// Requestor line buffer
-extern char requestorLineBuffer[REQUESTOR_LINE_BUFFER_SIZE];
-
 // Time line buffer
 extern char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+
+// Verify address line buffer
+extern char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 extern char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];

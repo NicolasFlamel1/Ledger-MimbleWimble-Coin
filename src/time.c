@@ -12,8 +12,20 @@
 
 // Constants
 
+// Seconds in a minute
+const uint8_t SECONDS_IN_A_MINUTE = 60;
+
+// Minutes in an hour
+const uint8_t MINUTES_IN_AN_HOUR = 60;
+
 // Maximum epoch
 const uint64_t MAXIMUM_EPOCH = (uint64_t)UINT32_MAX * 60 * 60;
+
+// Minimum time zone offset
+const int64_t MINIMUM_TIME_ZONE_OFFSET = -13 * MINUTES_IN_AN_HOUR;
+
+// Maximum time zone offset
+const int64_t MAXIMUM_TIME_ZONE_OFFSET = 15 * MINUTES_IN_AN_HOUR;
 
 // Days since January first
 static const uint32_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
@@ -48,9 +60,6 @@ static const uint32_t SECONDS_IN_A_DAY = 86400;
 
 // Seconds in an hour
 static const uint16_t SECONDS_IN_AN_HOUR = 3600;
-
-// Seconds in a minute
-static const uint8_t SECONDS_IN_A_MINUTE = 60;
 
 // Maximum centennials
 static const uint8_t MAXIMUM_CENTENNIALS = 3;

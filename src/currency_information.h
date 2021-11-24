@@ -17,7 +17,7 @@
 #define CURRENCY_INFORMATION_NAME_SIZE sizeof("MimbleWimble Coin Floonet")
 
 // Currency information abbreviation size
-#define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("GRIN")
+#define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("Testnet GRIN")
 
 // Currency information version size
 #define CURRENCY_INFORMATION_VERSION_SIZE sizeof("0.0.1")
@@ -30,6 +30,9 @@
 
 // Currency information Slatepack address human-readable part size
 #define CURRENCY_INFORMATION_SLATEPACK_ADDRESS_HUMAN_READABLE_PART_SIZE sizeof("tgrin")
+
+
+// Structures
 
 // Currency information
 struct CurrencyInformation {

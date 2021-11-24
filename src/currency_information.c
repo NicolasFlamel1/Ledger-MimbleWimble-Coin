@@ -12,85 +12,85 @@ struct CurrencyInformation currencyInformation;
 // Supporting function implementation
 
 // Get currency information
-void getCurrencyInformation(struct CurrencyInformation *currencyInformation) {
+void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformation) {
 
-	// Set currency information's BIP44 coin type
-	currencyInformation->bip44CoinType = CURRENCY_BIP44_COIN_TYPE;
+	// Set current currency information's BIP44 coin type
+	currentCurrencyInformation->bip44CoinType = CURRENCY_BIP44_COIN_TYPE;
 	
-	// Set currency information's fractional digits
-	currencyInformation->fractionalDigits = CURRENCY_FRACTIONAL_DIGITS;
+	// Set current currency information's fractional digits
+	currentCurrencyInformation->fractionalDigits = CURRENCY_FRACTIONAL_DIGITS;
 	
 	// Check if enable MQS address
 	#ifdef CURRENCY_ENABLE_MQS_ADDRESS
 	
-		// Set currency information's enable MQS address
-		currencyInformation->enableMqsAddress = true;
+		// Set current currency information's enable MQS address
+		currentCurrencyInformation->enableMqsAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's enable MQS address
-		currencyInformation->enableMqsAddress = false;
+		// Set current currency information's enable MQS address
+		currentCurrencyInformation->enableMqsAddress = false;
 	#endif
 	
 	// Check if enable TOR address
 	#ifdef CURRENCY_ENABLE_TOR_ADDRESS
 	
-		// Set currency information's enable Tor address
-		currencyInformation->enableTorAddress = true;
+		// Set current currency information's enable Tor address
+		currentCurrencyInformation->enableTorAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's enable Tor address
-		currencyInformation->enableTorAddress = false;
+		// Set current currency information's enable Tor address
+		currentCurrencyInformation->enableTorAddress = false;
 	#endif
 	
 	// Check if enable Slatepack address
-	#ifdef CURRENCY_ENABLE_Slatepack_ADDRESS
+	#ifdef CURRENCY_ENABLE_SLATEPACK_ADDRESS
 	
-		// Set currency information's enable Slatepack address
-		currencyInformation->enableSlatepackAddress = true;
+		// Set current currency information's enable Slatepack address
+		currentCurrencyInformation->enableSlatepackAddress = true;
 	
 	// Otherwise
 	#else
 	
-		// Set currency information's enable Slatepack address
-		currencyInformation->enableSlatepackAddress = false;
+		// Set current currency information's enable Slatepack address
+		currentCurrencyInformation->enableSlatepackAddress = false;
 	#endif
 	
 	// Check if MQS version exists
 	#ifdef CURRENCY_MQS_VERSION
 	
-		// Set currency information's MQS version
-		memcpy(currencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof(currencyInformation->mqsVersion));
+		// Set current currency information's MQS version
+		memcpy(currentCurrencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof(currentCurrencyInformation->mqsVersion));
 	#endif
 	
-	// Set currency information's name
-	strcpy(currencyInformation->name, CURRENCY_NAME);
+	// Set current currency information's name
+	strcpy(currentCurrencyInformation->name, CURRENCY_NAME);
 	
-	// Set currency information's abbreviation
-	strcpy(currencyInformation->abbreviation, CURRENCY_ABBREVIATION);
+	// Set current currency information's abbreviation
+	strcpy(currentCurrencyInformation->abbreviation, CURRENCY_ABBREVIATION);
 	
-	// Set currency information's version
-	strcpy(currencyInformation->version, CURRENCY_VERSION);
+	// Set current currency information's version
+	strcpy(currentCurrencyInformation->version, CURRENCY_VERSION);
 	
-	// Set currency information's icon details
-	memcpy(&currencyInformation->iconDetails, &CURRENCY_ICON_DETAILS, sizeof(CURRENCY_ICON_DETAILS));
+	// Set current currency information's icon details
+	memcpy(&currentCurrencyInformation->iconDetails, &CURRENCY_ICON_DETAILS, sizeof(CURRENCY_ICON_DETAILS));
 	
-	currencyInformation->iconDetails.colors = currencyInformation->iconColors;
-	currencyInformation->iconDetails.bitmap = currencyInformation->iconBitmap;
+	currentCurrencyInformation->iconDetails.colors = currentCurrencyInformation->iconColors;
+	currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
 	
-	// Set currency information's icon colors
-	memcpy(&currencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currencyInformation->iconColors));
+	// Set current currency information's icon colors
+	memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
 	
-	// Set currency information's icon bitmap
-	memcpy(&currencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currencyInformation->iconBitmap));
+	// Set current currency information's icon bitmap
+	memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
 	
 	// Check if Slatepack address human-readable part exists
 	#ifdef CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART
 	
-		// Set currency information's Slatepack address human readable part
-		strcpy(currencyInformation->slatepackAddressHumanReadablePart, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART);
+		// Set current currency information's Slatepack address human readable part
+		strcpy(currentCurrencyInformation->slatepackAddressHumanReadablePart, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART);
 	#endif
 }

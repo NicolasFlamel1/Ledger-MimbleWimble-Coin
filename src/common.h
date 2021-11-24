@@ -16,14 +16,14 @@
 // Bits in a byte
 #define BITS_IN_A_BYTE 8
 
+// Uint64 buffer size
+#define UINT64_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0'))
+
 
 // Constants
 
 // Error type mask
 extern const uint16_t ERROR_TYPE_MASK;
-
-// Ellipsis
-extern const char ELLIPSIS[sizeof("...")];
 
 // Error
 enum Error {
@@ -74,9 +74,6 @@ void exitApplication(void);
 
 // Will response overflow
 bool willResponseOverflow(unsigned short currentLength, size_t change);
-
-// Is printable character
-bool isPrintableCharacter(char character);
 
 // To uppercase
 char toUppercase(char character);

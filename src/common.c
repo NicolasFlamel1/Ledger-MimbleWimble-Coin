@@ -12,20 +12,8 @@
 // Error type mask
 const uint16_t ERROR_TYPE_MASK = 0xF000;
 
-// Ellipsis
-const char ELLIPSIS[] = "...";
-
-// First printable character
-static const char FIRST_PRINTABLE_CHARACTER = ' ';
-
-// Last printable character
-static const char LAST_PRINTABLE_CHARACTER = '~';
-
 // Hexadecimal characters
 static const char HEXADECIMAL_CHARACTERS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-// Uint64 buffer size
-static const size_t UINT64_BUFFER_SIZE = sizeof("18446744073709551615") - sizeof((char)'\0');
 
 
 // Supporting function implementation
@@ -64,13 +52,6 @@ bool willResponseOverflow(unsigned short currentLength, size_t lengthChange) {
 					
 	// Return if response's length with the change will overflow
 	return USHRT_MAX - currentLength < lengthChange || currentLength + lengthChange >= sizeof(G_io_apdu_buffer);
-}
-
-// Is printable character
-bool isPrintableCharacter(char character) {
-
-	// Return if character is printable
-	return character >= FIRST_PRINTABLE_CHARACTER && character <= LAST_PRINTABLE_CHARACTER;
 }
 
 // To uppercase

@@ -140,7 +140,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, size_t senderAddressLength);
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength);
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
 
 // Is valid commitment
 bool isValidCommitment(const uint8_t *commitment);

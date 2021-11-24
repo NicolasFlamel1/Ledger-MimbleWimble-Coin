@@ -50,6 +50,9 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	
+	# Icon
+	ICON = mimblewimble_coin
 
 # Otherwise check if currency is MimbleWimble Coin floonet
 else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
@@ -69,7 +72,7 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS
 	DEFINES += CURRENCY_MQS_VERSION=\{1,121\}
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
-	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
+	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
@@ -77,6 +80,9 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	
+	# Icon
+	ICON = mimblewimble_coin
 	
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
@@ -107,6 +113,9 @@ else ifeq ($(CURRENCY),grin)
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
 	
+	# Icon
+	ICON = grin
+	
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
@@ -127,7 +136,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
 	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"tgrin\"
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
-	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
+	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
@@ -135,6 +144,9 @@ else ifeq ($(CURRENCY),grin_testnet)
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	
+	# Icon
+	ICON = grin
 	
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
@@ -150,13 +162,13 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
-	ICONNAME=icons/nanox_app_$(CURRENCY).gif
+	ICONNAME=icons/nanox_app_$(ICON).gif
 
 # Otherwise
 else
 
 	# Icon name
-	ICONNAME=icons/nanos_app_$(CURRENCY).gif
+	ICONNAME=icons/nanos_app_$(ICON).gif
 endif
 
 # Make command

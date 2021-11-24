@@ -747,18 +747,23 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 		THROW(INTERNAL_ERROR_ERROR);
 	}
 	
+	// Set signature's r component
+	uint8_t *r = signature;
+	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], SCALAR_SIZE);
+	swapEndianness(r, SCALAR_SIZE);
+	
 	// Uncompress public nonce
-	uint8_t uncompressedPublicNonce[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+	uint8_t *uncompressedPublicNonce = generator;
 	memcpy(uncompressedPublicNonce, publicNonce, COMPRESSED_PUBLIC_KEY_SIZE);
 	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
 	
 	// Get the square root of the uncompressed public nonce's y component squared
-	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
+	uint8_t *squareRootSquared = &signature[SCALAR_SIZE];
 	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
+	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
 	// Check if the uncompressed public nonce's y component isn't a quadratic residue
 	if(memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -777,11 +782,6 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	
 	// Normalize the signature hash
 	cx_math_modm(signatureHash, sizeof(signatureHash), SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
-	
-	// Set signature's r component
-	uint8_t *r = signature;
-	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], SCALAR_SIZE);
-	swapEndianness(r, SCALAR_SIZE);
 	
 	// Calculate the signature's s component
 	uint8_t *s = &signature[SCALAR_SIZE];
@@ -1042,13 +1042,16 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 					THROW(INVALID_PARAMETERS_ERROR);
 				}
 			
-				// Check if sender address isn't a valid Slatepack address
+				// Check if getting sender public key from sender address failed
 				cx_ecfp_public_key_t senderPublicKey;
 				if(!getPublicKeyFromSlatepackAddress(&senderPublicKey, senderAddress, senderAddressLength)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
 				}
+				
+				// Compress the sender public key
+				cx_edwards_compress_point(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len);
 				
 				// Convert value to big endian
 				swapEndianness((uint8_t *)&value, sizeof(value));
@@ -1076,7 +1079,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 }
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength) {
 
 	// Check receiver address length
 	switch(receiverAddressLength) {

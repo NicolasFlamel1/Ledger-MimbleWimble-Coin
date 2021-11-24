@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "common.h"
 #include "crypto.h"
@@ -66,13 +67,14 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Get MQS address
-			char mqsAddress[MQS_ADDRESS_SIZE];
-			getMqsAddress(mqsAddress, account, index);
+			// Set address length
+			addressLength = MQS_ADDRESS_SIZE;
 			
-			// Set address and address length
-			address = mqsAddress;
-			addressLength = sizeof(mqsAddress);
+			// Allocate memory for address
+			address = alloca(addressLength);
+			
+			// Get MQS address
+			getMqsAddress(address, account, index);
 		
 			// Break
 			break;
@@ -87,13 +89,14 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Get Tor address
-			char torAddress[TOR_ADDRESS_SIZE];
-			getTorAddress(torAddress, account, index);
+			// Set address length
+			addressLength = TOR_ADDRESS_SIZE;
 			
-			// Set address and address length
-			address = torAddress;
-			addressLength = sizeof(torAddress);
+			// Allocate memory for address
+			address = alloca(addressLength);
+			
+			// Get Tor address
+			getTorAddress(address, account, index);
 			
 			// Break
 			break;
@@ -108,15 +111,14 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			{
-				// Get Slatepack address
-				char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
-				getSlatepackAddress(slatepackAddress, account, index);
-				
-				// Set address and address length
-				address = slatepackAddress;
-				addressLength = sizeof(slatepackAddress);
-			}
+			// Set address length
+			addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart);
+			
+			// Allocate memory for address
+			address = alloca(addressLength);
+			
+			// Get Slatepack address
+			getSlatepackAddress(address, account, index);
 			
 			// Break
 			break;
