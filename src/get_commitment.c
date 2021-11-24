@@ -51,11 +51,11 @@ void processGetCommitmentRequest(unsigned short *responseLength, __attribute__((
 	}
 	
 	// Get identifier path from data
-	uint32_t identifierPath[identifierDepth];
+	uint32_t identifierPath[IDENTIFIER_MAXIMUM_DEPTH];
 	memcpy(identifierPath, &data[sizeof(account) + sizeof(identifierDepth)], sizeof(identifierPath));
 	
 	// Go through all parts in the identifier path
-	for(size_t i = 0; i < IDENTIFIER_MAXIMUM_DEPTH; ++i) {
+	for(size_t i = 0; i < ARRAYLEN(identifierPath); ++i) {
 	
 		// Convert part from big endian to little endian
 		identifierPath[i] = os_swap_u32(identifierPath[i]);

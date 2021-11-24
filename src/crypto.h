@@ -24,6 +24,9 @@
 // Proof message size
 #define PROOF_MESSAGE_SIZE 20
 
+// Uncompressed public key size
+#define UNCOMPRESSED_PUBLIC_KEY_SIZE 65
+
 
 // Constants
 
@@ -35,9 +38,6 @@ extern const size_t NONCE_SIZE;
 
 // Commitment size
 extern const size_t COMMITMENT_SIZE;
-
-// Uncompressed public key size
-extern const size_t UNCOMPRESSED_PUBLIC_KEY_SIZE;
 
 // Identifier maximum depth
 extern const size_t IDENTIFIER_MAXIMUM_DEPTH;
