@@ -58,7 +58,7 @@ bool willResponseOverflow(unsigned short currentLength, size_t lengthChange) {
 char toUppercase(char character) {
 
 	// Check if character is lowercase
-	if(character >= 'a' && character <= 'z') {
+	if(isLowercase(character)) {
 	
 		// Return character as uppercase
 		return character -= 'a' - 'A';
@@ -88,6 +88,20 @@ char toLowercase(char character) {
 		// Return character
 		return character;
 	}
+}
+
+// Is lowercase
+bool isLowercase(char character) {
+
+	// Return if the character is lowercase
+	return character >= 'a' && character <= 'z';
+}
+
+// Is numeric
+bool isNumeric(char character) {
+
+	// Return if the character is numeric
+	return character >= '0' && character <= '9';
 }
 
 // Swap endianness

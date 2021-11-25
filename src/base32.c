@@ -177,7 +177,7 @@ size_t getBase32DecodedLength(const char *data, size_t length) {
 	for(size_t i = 0; i < length - numberOfPaddingCharacters; ++i) {
 	
 		// Check if character isn't a valid character
-		if(!memchr(CHARACTERS, toUppercase(data[i]), sizeof(CHARACTERS))) {
+		if((!isLowercase(data[i]) && !isNumeric(data[i])) || !memchr(CHARACTERS, toUppercase(data[i]), sizeof(CHARACTERS))) {
 		
 			// Return invalid base32 size
 			return INVALID_BASE32_SIZE;

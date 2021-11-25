@@ -1793,8 +1793,11 @@
 			// Get message to sign
 			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
 			
+			// Get expected signature
+			let expectedSignature = Secp256k1Zkp.createSingleSignerSignature(messageToSign, transactionBlindingFactor, secretNonce, publicKey, publicNonce, publicNonce);
+			
 			// Check if signature is invalid
-			if(Secp256k1Zkp.verifySingleSignerSignature(signature, messageToSign, publicNonce, publicKey, publicKey, false) === false) {
+			if(Common.arraysAreEqual(signature, expectedSignature) === false) {
 			
 				// Throw error
 				throw "Invalid signature: " + Common.toHexString(signature);
@@ -2294,8 +2297,11 @@
 			// Get message to sign
 			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
 			
+			// Get expected signature
+			let expectedSignature = Secp256k1Zkp.createSingleSignerSignature(messageToSign, transactionBlindingFactor, secretNonce, publicKey, publicNonce, publicNonce);
+			
 			// Check if signature is invalid
-			if(Secp256k1Zkp.verifySingleSignerSignature(response, messageToSign, publicNonce, publicKey, publicKey, false) === false) {
+			if(Common.arraysAreEqual(response, expectedSignature) === false) {
 			
 				// Throw error
 				throw "Invalid signature: " + Common.toHexString(response);

@@ -224,7 +224,7 @@ Instruction: 0B
 Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | nonce (12 bytes) | address (52 bytes MQS address, 56 bytes Tor address, at least 60 bytes Slatepack address) | [salt (8 bytes)]
-Response: 9000
+Response: N/A
 Requires user interaction: No
 Example request: C70B00005000000000000000008467084FA49F24E62B256CF57135613476757666614E5150445961746433736A72636A59645A4B537159434151646467513445346D6D414E4476594D37394375D01312F4AC0BFBD1
 Example response: 9000

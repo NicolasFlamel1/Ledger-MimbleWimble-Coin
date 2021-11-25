@@ -81,6 +81,12 @@ char toUppercase(char character);
 // To lowercase
 char toLowercase(char character);
 
+// Is lowercase
+bool isLowercase(char character);
+
+// Is numeric
+bool isNumeric(char character);
+
 // Swap endianness
 void swapEndianness(uint8_t *value, size_t length);
 
