@@ -9,17 +9,20 @@
 
 // Definitions
 
-// Number of generators
-#define NUMBER_OF_GENERATORS 256
-
 // Generator size
 #define GENERATOR_SIZE 64
+
+// Bits to prove
+#define BITS_TO_PROVE (sizeof(uint64_t) * BITS_IN_A_BYTE)
 
 
 // Constants
 
-// Generators
-extern const uint8_t GENERATORS[NUMBER_OF_GENERATORS][GENERATOR_SIZE];
+// Generators first half
+extern const uint8_t GENERATORS_FIRST_HALF[BITS_TO_PROVE][GENERATOR_SIZE];
+
+// Generators second half
+extern const uint8_t GENERATORS_SECOND_HALF[BITS_TO_PROVE][GENERATOR_SIZE];
 
 
 #endif

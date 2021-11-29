@@ -55,6 +55,12 @@ static const size_t HEXADECIMAL_CHARACTER_SIZE = sizeof("FF") - sizeof('\0');
 // Hexadecimal padding character
 static const char HEXADECIMAL_PADDING_CHARACTER = '0';
 
+// Bits in a byte
+static const uint8_t BITS_IN_A_BYTE = 8;
+
+// Bits to prove
+static const uint8_t BITS_TO_PROVE = sizeof(uint64_t) * BITS_IN_A_BYTE;
+
 
 // Main function
 int main() {
@@ -76,13 +82,15 @@ int main() {
 	file << endl;
 	file << "// Constants" << endl;
 	file << endl;
-	file << "// Generators" << endl;
-	file << "const uint8_t GENERATORS[NUMBER_OF_GENERATORS][GENERATOR_SIZE] = {" << endl;
 	
-	// Go through all generators
-	for(size_t i = 0; i < generators->numberOfGenerators; ++i) {
+	// Write start of generators first half to file
+	file << "// Generators first half" << endl;
+	file << "const uint8_t GENERATORS_FIRST_HALF[BITS_TO_PROVE][GENERATOR_SIZE] = {" << endl;
 	
-		// Get generator
+	// Go through bits to prove
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	
+		// Get generator from first half
 		const secp256k1_ge &generator = generators->generators[i];
 		
 		// Get generator's components
@@ -102,10 +110,44 @@ int main() {
 		}
 		
 		// Write end of generator to file
-		file << '}' << ((i != generators->numberOfGenerators - 1) ? "," : "") << endl;
+		file << '}' << ((i != BITS_TO_PROVE - 1) ? "," : "") << endl;
 	}
 	
-	// Write end of file to file
+	// Write end of generators first half to file
+	file << "};" << endl;
+	file << endl;
+	
+	// Write start of generators second half to file
+	file << "// Generators second half" << endl;
+	file << "const uint8_t GENERATORS_SECOND_HALF[BITS_TO_PROVE][GENERATOR_SIZE] = {" << endl;
+	
+	// Go through bits to prove
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	
+		// Get generator from second half
+		const secp256k1_ge &generator = generators->generators[i + generators->numberOfGenerators / 2];
+		
+		// Get generator's components
+		uint8_t components[COMPONENT_SIZE + COMPONENT_SIZE];
+		
+		secp256k1_fe_get_b32(components, &generator.x);
+		secp256k1_fe_get_b32(&components[COMPONENT_SIZE], &generator.y);
+		
+		// Write start of generator to file
+		file << "\t{";
+		
+		// Go through bytes in the generator's components
+		for(size_t j = 0; j < sizeof(components); ++j) {
+		
+			// Write byte to file
+			file << "0x" << hex << uppercase << setfill(HEXADECIMAL_PADDING_CHARACTER) << setw(HEXADECIMAL_CHARACTER_SIZE) << right << static_cast<uint16_t>(components[j]) << ((j != sizeof(components) - 1) ? ", " : "");
+		}
+		
+		// Write end of generator to file
+		file << '}' << ((i != BITS_TO_PROVE - 1) ? "," : "") << endl;
+	}
+	
+	// Write end of generators second half to file
 	file << "};";
 	
 	// Display message

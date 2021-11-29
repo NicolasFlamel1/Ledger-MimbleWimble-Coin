@@ -1486,21 +1486,21 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	}
 
 	// Go through all bits to prove
-	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
 
 		// Check if bit is set
 		uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 		if(value & ((uint64_t)1 << i)) {
 		
 			// Set aterm to the generator
-			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 		}
 		
 		// Otherwise
 		else {
 		
 			// Set aterm to the other generator
-			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i + NUMBER_OF_GENERATORS / 2], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 			
 			// Negate the aterm's y component
 			cx_math_subm(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
@@ -1520,7 +1520,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 		
 		// Get the product of the generator and sl
 		uint8_t *sterm = aterm;
-		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 		
 		// Check if the result is infinity or its x component is zero
 		if(cx_math_is_zero(sl, sizeof(sl)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, UNCOMPRESSED_PUBLIC_KEY_SIZE, sl, sizeof(sl)) || cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1537,7 +1537,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 		}
 		
 		// Get the product of the generator and sr
-		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i + NUMBER_OF_GENERATORS / 2], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+		memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 		
 		// Check if the result is infinity or its x component is zero
 		if(cx_math_is_zero(sr, sizeof(sr)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, UNCOMPRESSED_PUBLIC_KEY_SIZE, sr, sizeof(sr)) || cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1589,7 +1589,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	// Go through all bits to prove
 	const uint8_t zero[SCALAR_SIZE] = {};
 	uint8_t t0[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
 	
 		// Generate l and r
 		uint8_t l[SCALAR_SIZE];
@@ -1608,7 +1608,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	uint8_t one[SCALAR_SIZE] = {};
 	one[sizeof(one) - 1] = 1;
 	uint8_t t1[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
 	
 		// Generate l and r
 		uint8_t l[SCALAR_SIZE];
@@ -1626,7 +1626,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	// Go through all bits to prove
 	cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
 	uint8_t t2[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
 	
 		// Generate l and r
 		uint8_t l[SCALAR_SIZE];
