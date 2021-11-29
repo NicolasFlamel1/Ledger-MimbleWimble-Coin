@@ -1455,7 +1455,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 		cx_math_subm(valueBytes, SECP256K1_CURVE_ORDER, valueBytes, SECP256K1_CURVE_ORDER, sizeof(valueBytes));
 	}
 	
-	// Create alhpa and rho from the rewind nonce
+	// Create alpha and rho from the rewind nonce
 	uint8_t alpha[SCALAR_SIZE];
 	uint8_t rho[SCALAR_SIZE];
 	createScalarsFromChaCha20(alpha, rho, rewindNonce, 0);
@@ -1488,12 +1488,9 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	// Go through all bits to prove
 	for(size_t i = 0; i < sizeof(value) * BITS_IN_A_BYTE; ++i) {
 
-		// Get bit
-		bool bit = value & ((uint64_t)1 << i);
-		
 		// Check if bit is set
 		uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-		if(bit) {
+		if(value & ((uint64_t)1 << i)) {
 		
 			// Set aterm to the generator
 			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
