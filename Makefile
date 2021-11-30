@@ -272,7 +272,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -std=gnu17 -Oz -Wall -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main
+CFLAGS += -std=gnu17 -Oz -Wall -Wextra -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main -Wno-unused-label -mfloat-abi=soft
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -Oz
