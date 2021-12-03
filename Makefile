@@ -15,7 +15,7 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 # Application version
 APPVERSION_M = 0
 APPVERSION_N = 0
-APPVERSION_P = 1
+APPVERSION_P = 2
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Emulator flags
@@ -272,7 +272,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -std=gnu17 -Oz -Wall -Wextra -D HAVE_BOLOS_NO_DEFAULT_APDU -Wno-main -Wno-unused-label -mfloat-abi=soft
+CFLAGS += -std=gnu17 -Oz -Wall -Wextra -Wno-main -Wno-unused-label -mfloat-abi=soft
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -Oz
