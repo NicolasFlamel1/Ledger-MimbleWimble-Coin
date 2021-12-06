@@ -226,7 +226,7 @@
 					await seed.initialize(MNEMONIC);
 					
 					// Get the extended private key from the seed
-					let extendedPrivateKey = await seed.getExtendedPrivateKey(SEED_KEY);
+					let extendedPrivateKey = await seed.getExtendedPrivateKey(SEED_KEY, true);
 					
 					// Run get application information test
 					await getApplicationInformationTest(hardwareWallet);

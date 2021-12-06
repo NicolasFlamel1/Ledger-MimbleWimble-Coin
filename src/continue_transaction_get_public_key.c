@@ -57,7 +57,7 @@ void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLengt
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
 	
 			// Get public key from the private key
-			getPublicKeyFromPrivateKey((uint8_t *)publicKey, (cx_ecfp_private_key_t *)&privateKey);
+			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
 		}
 		
 		// Finally

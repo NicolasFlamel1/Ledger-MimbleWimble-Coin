@@ -56,11 +56,18 @@ void processVerifyRootPublicKeyRequest(__attribute__((unused)) unsigned short *r
 			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 			
 			// Get root public key from the private key
-			getPublicKeyFromPrivateKey((uint8_t *)rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
+			getPublicKeyFromPrivateKey(rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
+			
+			// Copy root public key into the public key or address line buffer
+			toHexString(publicKeyOrAddressLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
+			publicKeyOrAddressLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 		}
 		
 		// Finally
 		FINALLY {
+		
+			// Clear the root public key
+			explicit_bzero((uint8_t *)rootPublicKey, sizeof(rootPublicKey));
 		
 			// Clear the private key
 			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
@@ -69,10 +76,6 @@ void processVerifyRootPublicKeyRequest(__attribute__((unused)) unsigned short *r
 	
 	// End try
 	END_TRY;
-	
-	// Copy root public key into the public key or address line buffer
-	toHexString(publicKeyOrAddressLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
-	publicKeyOrAddressLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 	
 	// Show verify root public key menu
 	showMenu(VERIFY_ROOT_PUBLIC_KEY_MENU);

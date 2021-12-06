@@ -43,8 +43,11 @@ void processGetSeedCookieRequest(unsigned short *responseLength, __attribute__((
 	// Get seed cookie
 	volatile uint8_t seedCookie[CX_SHA512_SIZE];
 	
-	// Initialize child private key
+	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
+	
+	// Initialize public key
+	volatile uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Begin try
 	BEGIN_TRY {
@@ -56,16 +59,18 @@ void processGetSeedCookieRequest(unsigned short *responseLength, __attribute__((
 			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 
 			// Get public key from the private key
-			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
 			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
 			
 			// Get seed cookie from the public key
-			cx_hash_sha512(publicKey, sizeof(publicKey), (uint8_t *)seedCookie, sizeof(seedCookie));
+			cx_hash_sha512((uint8_t *)publicKey, sizeof(publicKey), (uint8_t *)seedCookie, sizeof(seedCookie));
 		}
 		
 		// Finally
 		FINALLY {
 		
+			// Clear the public key
+			explicit_bzero((uint8_t *)publicKey, sizeof(publicKey));
+			
 			// Clear the private key
 			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
 		}

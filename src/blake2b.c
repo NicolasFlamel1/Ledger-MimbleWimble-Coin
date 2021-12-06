@@ -84,8 +84,8 @@ static const uint8_t PARAMETER_DEPTH_VALUE = 1;
 void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size_t inputLength, const uint8_t *key, size_t keyLength) {
 
 	// Initialize hash
-	cx_blake2b_t hash;
-	cx_blake2b_init(&hash, BITS_SIZE);
+	volatile cx_blake2b_t hash;
+	cx_blake2b_init((cx_blake2b_t *)&hash, BITS_SIZE);
 	
 	// Initialize parameter
 	struct Parameter parameter;
@@ -98,39 +98,42 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 	parameter.depth = PARAMETER_DEPTH_VALUE;
 	
 	// Set hash to the initialization vector XORed with the parameter
-	os_xor(hash.ctx.h, (void *)INITIALIZATION_VECTOR, &parameter, sizeof(hash.ctx.h));
+	os_xor((uint64_t *)hash.ctx.h, (void *)INITIALIZATION_VECTOR, &parameter, sizeof(hash.ctx.h));
 	
-	// Check if a key is provided
-	if(key) {
+	// Initialize key block
+	volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES] = {};
 	
-		// Initialize key block
-		volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES] = {};
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
 		
-		// Begin try
-		BEGIN_TRY {
-		
-			// Try
-			TRY {
+			// Check if a key is provided
+			if(key) {
 			
 				// Set key at the start of the key block
 				memcpy((uint8_t *)keyBlock, key, keyLength);
 				
 				// Update the hash with the block
-				cx_hash(&hash.header, 0, (uint8_t *)keyBlock, sizeof(keyBlock), NULL, 0);
+				cx_hash((cx_hash_t *)&hash.header, 0, (uint8_t *)keyBlock, sizeof(keyBlock), NULL, 0);
 			}
-		
-			// Finally
-			FINALLY {
-			
-				// Clear the key block
-				explicit_bzero((uint8_t *)keyBlock, sizeof(keyBlock));
-			}
+	
+			// Get hash
+			cx_hash((cx_hash_t *)&hash.header, CX_LAST, input, inputLength, output, outputLength);
 		}
 		
-		// End try
-		END_TRY;
+		// Finally
+		FINALLY {
+		
+			// Clear the key block
+			explicit_bzero((uint8_t *)keyBlock, sizeof(keyBlock));
+			
+			// Clear the hash
+			explicit_bzero((cx_blake2b_t *)&hash, sizeof(hash));
+		}
 	}
 	
-	// Get hash
-	cx_hash(&hash.header, CX_LAST, input, inputLength, output, outputLength);
+	// End try
+	END_TRY;
 }

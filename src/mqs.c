@@ -146,7 +146,7 @@ void getMqsAddress(char *mqsAddress, uint32_t account, uint32_t index) {
 			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_SECP256K1);
 			
 			// Get address public key from the address private key
-			getPublicKeyFromPrivateKey((uint8_t *)addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
+			getPublicKeyFromPrivateKey(addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey);
 		}
 		
 		// Finally

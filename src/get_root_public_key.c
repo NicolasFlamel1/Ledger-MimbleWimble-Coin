@@ -74,11 +74,26 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 			
 			// Get root public key from the private key
-			getPublicKeyFromPrivateKey((uint8_t *)rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
+			getPublicKeyFromPrivateKey(rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
+			
+			// Check if response with the root public key will overflow
+			if(willResponseOverflow(*responseLength, sizeof(rootPublicKey))) {
+			
+				// Throw length error
+				THROW(ERR_APD_LEN);
+			}
+			
+			// Append root public key to response
+			memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
+			
+			*responseLength += sizeof(rootPublicKey);
 		}
 		
 		// Finally
 		FINALLY {
+		
+			// Clear the root public key
+			explicit_bzero((uint8_t *)rootPublicKey, sizeof(rootPublicKey));
 		
 			// Clear the private key
 			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
@@ -87,18 +102,6 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 	
 	// End try
 	END_TRY;
-	
-	// Check if response with the root public key will overflow
-	if(willResponseOverflow(*responseLength, sizeof(rootPublicKey))) {
-	
-		// Throw length error
-		THROW(ERR_APD_LEN);
-	}
-	
-	// Append root public key to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
-	
-	*responseLength += sizeof(rootPublicKey);
 
 	// Throw success
 	THROW(SWO_SUCCESS);

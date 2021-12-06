@@ -238,17 +238,37 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 }
 
 // Get public key from private key
-void getPublicKeyFromPrivateKey(uint8_t *publicKey, const cx_ecfp_private_key_t *privateKey) {
+void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_private_key_t *privateKey) {
+
+	// Initialize uncompressed public key
+	volatile cx_ecfp_public_key_t uncompressedPublicKey;
 	
-	// Get uncompressed public key from the private key
-	cx_ecfp_public_key_t uncompressedPublicKey;
-	cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, KEEP_PRIVATE_KEY);
+	// Begin try
+	BEGIN_TRY {
 	
-	// Set prefix in the public key
-	publicKey[0] = (uncompressedPublicKey.W[uncompressedPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+		// Try
+		TRY {
 	
-	// Set x component in the public key
-	memcpy(&publicKey[PUBLIC_KEY_PREFIX_SIZE], &uncompressedPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+			// Get uncompressed public key from the private key
+			cx_ecfp_generate_pair(CX_CURVE_SECP256K1, (cx_ecfp_public_key_t *)&uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, KEEP_PRIVATE_KEY);
+			
+			// Set prefix in the public key
+			publicKey[0] = (uncompressedPublicKey.W[uncompressedPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+			
+			// Set x component in the public key
+			memcpy((uint8_t *)&publicKey[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&uncompressedPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the uncompressed public key
+			explicit_bzero((cx_ecfp_public_key_t *)&uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		}
+	}
+	
+	// End try
+	END_TRY;
 }
 
 // Derive child key
@@ -297,7 +317,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 					privateKey->curve = CX_CURVE_SECP256K1;
 				
 					// Get compressed public key from the private key set it in the data
-					getPublicKeyFromPrivateKey((uint8_t *)data, (cx_ecfp_private_key_t *)privateKey);
+					getPublicKeyFromPrivateKey(data, (cx_ecfp_private_key_t *)privateKey);
 					
 					// Restore the private key's curve
 					privateKey->curve = curve;
@@ -534,7 +554,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 			
 			// Set commitment's prefix
-			commitment[0] = COMMITMENT_ODD_PREFIX ^ !memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+			commitment[0] = memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE) ? COMMITMENT_ODD_PREFIX : COMMITMENT_EVEN_PREFIX;
 			
 			// Check if not compressing the commitment
 			if(!compress) {
@@ -560,8 +580,14 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 // Get rewind nonce
 void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment) {
 
-	// Initialize child private key
+	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
+	
+	// Initialize public key
+	volatile uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE]; 
+	
+	// Initialize rewind hash
+	volatile uint8_t rewindHash[NONCE_SIZE];
 	
 	// Begin try
 	BEGIN_TRY {
@@ -573,15 +599,13 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 
 			// Get public key from the private key
-			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
 			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
 			
 			// Get rewind hash from the public key
-			uint8_t rewindHash[NONCE_SIZE];
-			getBlake2b(rewindHash, sizeof(rewindHash), publicKey, sizeof(publicKey), NULL, 0);
+			getBlake2b((uint8_t *)rewindHash, sizeof(rewindHash), (uint8_t *)publicKey, sizeof(publicKey), NULL, 0);
 			
 			// Get rewind nonce from the rewind hash and the commitment
-			getBlake2b((uint8_t *)rewindNonce, NONCE_SIZE, rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
+			getBlake2b((uint8_t *)rewindNonce, NONCE_SIZE, (uint8_t *)rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
 			
 			// Check if rewind nonce isn't a valid secret key
 			if(!isValidSecp256k1PrivateKey((uint8_t *)rewindNonce, NONCE_SIZE)) {
@@ -593,6 +617,12 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 		
 		// Finally
 		FINALLY {
+		
+			// Clear the rewind hash
+			explicit_bzero((uint8_t *)rewindHash, sizeof(rewindHash));
+		
+			// Clear the public key
+			explicit_bzero((uint8_t *)publicKey, sizeof(publicKey));
 		
 			// Clear the private key
 			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
@@ -606,9 +636,11 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 // Get private nonce
 void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uint8_t *commitment) {
 
-	// Initialize child private key and chain code
-	volatile cx_ecfp_private_key_t childPrivateKey;
-	volatile uint8_t childChainCode[CHAIN_CODE_SIZE];
+	// Initialize private root key
+	volatile uint8_t privateRootKey[SECP256k1_PRIVATE_KEY_SIZE];
+	
+	// Initialize private hash
+	volatile uint8_t privateHash[NONCE_SIZE];
 	
 	// Begin try
 	BEGIN_TRY {
@@ -616,15 +648,14 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 		// Try
 		TRY {
 		
-			// Derive child's private key and chain code at root path
-			deriveChildKey(&childPrivateKey, childChainCode, account, NULL, 0, false);
+			// Derive private root key
+			deriveBlindingFactor(privateRootKey, account, 0, NULL, 0, NO_SWITCH_TYPE);
 			
-			// Get private hash from the child's private key
-			uint8_t privateHash[NONCE_SIZE];
-			getBlake2b(privateHash, sizeof(privateHash), (uint8_t *)childPrivateKey.d, childPrivateKey.d_len, NULL, 0);
+			// Get private hash from the private root key
+			getBlake2b((uint8_t *)privateHash, sizeof(privateHash), (uint8_t *)privateRootKey, sizeof(privateRootKey), NULL, 0);
 			
 			// Get private nonce from the private hash and the commitment
-			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
+			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, (uint8_t *)privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
 			
 			// Check if private nonce isn't a valid secret key
 			if(!isValidSecp256k1PrivateKey((uint8_t *)privateNonce, NONCE_SIZE)) {
@@ -637,9 +668,11 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 		// Finally
 		FINALLY {
 		
-			// Clear the child private key and chain code
-			explicit_bzero((cx_ecfp_private_key_t *)&childPrivateKey, sizeof(childPrivateKey));
-			explicit_bzero((uint8_t *)childChainCode, sizeof(childChainCode));
+			// Clear the private hash
+			explicit_bzero((uint8_t *)privateHash, sizeof(privateHash));
+		
+			// Clear the private root key
+			explicit_bzero((uint8_t *)privateRootKey, sizeof(privateRootKey));
 		}
 	}
 	

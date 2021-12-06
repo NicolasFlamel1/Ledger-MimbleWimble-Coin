@@ -108,6 +108,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	// Initialize private nonce
 	volatile uint8_t privateNonce[NONCE_SIZE];
 	
+	// Initialize rewind nonce
+	volatile uint8_t rewindNonce[NONCE_SIZE];
+	
 	// Initialize bulletproof tau x
 	volatile uint8_t bulletproofTauX[TAU_X_SIZE];
 	
@@ -129,14 +132,13 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 			commitValue(commitment, value, (uint8_t *)blindingFactor, false);
 			
 			// Get rewind nonce
-			uint8_t rewindNonce[NONCE_SIZE];
 			getRewindNonce(rewindNonce, account, commitment);
 			
 			// Get private nonce
 			getPrivateNonce(privateNonce, account, commitment);
 			
 			// Calculate bulletproof components
-			calculateBulletproofComponents((uint8_t *)bulletproofTauX, (uint8_t *)bulletproofTOne, (uint8_t *)bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, rewindNonce, (uint8_t *)privateNonce, proofMessage);
+			calculateBulletproofComponents((uint8_t *)bulletproofTauX, (uint8_t *)bulletproofTOne, (uint8_t *)bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, (uint8_t *)rewindNonce, (uint8_t *)privateNonce, proofMessage);
 		}
 		
 		// Finally
@@ -144,6 +146,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
+			
+			// Clear the private nonce
+			explicit_bzero((uint8_t *)rewindNonce, sizeof(rewindNonce));
 			
 			// Clear the private nonce
 			explicit_bzero((uint8_t *)privateNonce, sizeof(privateNonce));
