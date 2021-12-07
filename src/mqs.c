@@ -50,6 +50,13 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			
 			// Get shared private key from the tweaked public key and salt
 			cx_pbkdf2_sha512(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			
+			// Check if shared private key is zero
+			if(cx_math_is_zero((uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 		}
 		
 		// Finally
