@@ -33,9 +33,6 @@ struct LrGenerator {
 
 // Constants
 
-// Public key component size
-const size_t PUBLIC_KEY_COMPONENT_SIZE = 32;
-
 // Nonce size
 const size_t NONCE_SIZE = 32;
 
@@ -185,6 +182,15 @@ static void initializeLrGenerator(struct LrGenerator *lrGenerator);
 
 // Generate LR generator
 static void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
+
+// Conditional negate scalar
+static void conditionalNegateScalar(uint8_t *scalar, bool negate);
+
+// Conditional negate component
+static void conditionalNegateComponent(uint8_t *component, bool negate);
+
+// Is quadratic residue
+static bool isQuadraticResidue(const uint8_t *component);
 
 
 // Supporting function implementation
@@ -545,16 +551,9 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 			volatile uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
 			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
 			
-			// Get the square of the result's y component's square root
-			volatile uint8_t *squareRootSquared = x;
+			// Set commitment's prefix to if the y component is quadratic residue
 			volatile uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			const uint8_t two[] = {2};
-			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-			
-			// Set commitment's prefix
-			commitment[0] = memcmp((uint8_t *)squareRootSquared, (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE) ? COMMITMENT_ODD_PREFIX : COMMITMENT_EVEN_PREFIX;
+			commitment[0] = isQuadraticResidue((uint8_t *)y) ? COMMITMENT_EVEN_PREFIX : COMMITMENT_ODD_PREFIX;
 			
 			// Check if not compressing the commitment
 			if(!compress) {
@@ -742,12 +741,8 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 // Update blinding factor sum
 void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive) {
 
-	// Check if blinding factor isn't positive
-	if(!blindingFactorIsPositive) {
-	
-		// Negate the blinding factor
-		cx_math_subm(blindingFactor, SECP256K1_CURVE_ORDER, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
-	}
+	// Negate the blinding factor if it isn't positive
+	conditionalNegateScalar(blindingFactor, !blindingFactorIsPositive);
 	
 	// Add blinding factor to the blinding factor sum
 	cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
@@ -787,20 +782,9 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	memcpy(uncompressedPublicNonce, publicNonce, COMPRESSED_PUBLIC_KEY_SIZE);
 	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
 	
-	// Get the square root of the uncompressed public nonce's y component squared
-	uint8_t *squareRootSquared = &signature[SCALAR_SIZE];
+	// Negate the secret nonce if the uncompressed public nonce's y component isn't quadratic residue
 	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	// Check if the uncompressed public nonce's y component isn't a quadratic residue
-	if(memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE)) {
-	
-		// Negate the secret nonce
-		cx_math_subm(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE);
-	}
+	conditionalNegateScalar(secretNonce, !isQuadraticResidue(y));
 	
 	// Get signature hash from the public nonce's x component, public key, and message
 	cx_sha256_t hash;
@@ -1265,15 +1249,8 @@ bool isValidCommitment(const uint8_t *commitment) {
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	// Get the square root of y squared
-	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
-	
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
-	
-	// Return if the calculated y exists for the x component
-	return !memcmp(squareRootSquared, ySquared, sizeof(squareRootSquared));
+	// Return if the y squared is quadratic residue
+	return isQuadraticResidue(ySquared);
 }
 
 // Is valid Ed25519 public key
@@ -1363,15 +1340,8 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	// Get the square root of y squared
-	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
-	
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
-	
-	// Return if the calculated y exists for the x component
-	return !memcmp(squareRootSquared, ySquared, sizeof(squareRootSquared));
+	// Return if the y squared is quadratic residue
+	return isQuadraticResidue(ySquared);
 }
 
 // Uncompress secp256k1 public key
@@ -1396,30 +1366,22 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	// Get the square root of y squared
-	uint8_t *y = &publicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(y, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, y, two, sizeof(two), SECP256K1_CURVE_PRIME, sizeof(squareRootSquared));
-	
-	// Return if the calculated y doesn't exist for the x component
-	if(memcmp(squareRootSquared, ySquared, sizeof(squareRootSquared))) {
+	// Return if the y squared isn't quadratic residue
+	if(!isQuadraticResidue(ySquared)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Get the square root of y squared
+	uint8_t *y = &publicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(y, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
 	// Check if the y component's oddness doesn't match the expected oddness
 	if((y[PUBLIC_KEY_COMPONENT_SIZE - 1] & 1) != (publicKey[0] == ODD_COMPRESSED_PUBLIC_KEY_PREFIX)) {
 	
-		// Check if the y component isn't zero
-		if(!cx_math_is_zero(y, PUBLIC_KEY_COMPONENT_SIZE)) {
-		
-			// Negate the y component
-			cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-		}
+		// Negate the y component
+		conditionalNegateComponent(y, true);
 	}
 	
 	// Set public key's prefix to be uncompressed
@@ -1481,12 +1443,8 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	// Set proof message in value bytes
 	memcpy(&valueBytes[sizeof(valueBytes) - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
 
-	// Check if value bytes isn't zero
-	if(!cx_math_is_zero(valueBytes, sizeof(valueBytes))) {
-
-		// Negate the value bytes
-		cx_math_subm(valueBytes, SECP256K1_CURVE_ORDER, valueBytes, SECP256K1_CURVE_ORDER, sizeof(valueBytes));
-	}
+	// Negate the value bytes
+	conditionalNegateScalar(valueBytes, true);
 	
 	// Create alpha and rho from the rewind nonce
 	uint8_t alpha[SCALAR_SIZE];
@@ -1520,24 +1478,16 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 
 	// Go through all bits to prove
 	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	
+		// Get bit in the value
+		const bool bit = value & ((uint64_t)1 << i);
 
-		// Check if bit is set
+		// Set aterm to the generator
 		uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-		if(value & ((uint64_t)1 << i)) {
+		memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 		
-			// Set aterm to the generator
-			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
-		}
-		
-		// Otherwise
-		else {
-		
-			// Set aterm to the other generator
-			memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
-			
-			// Negate the aterm's y component
-			cx_math_subm(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-		}
+		// Negate the aterm's y component if the bit isn't set
+		conditionalNegateComponent(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], !bit);
 		
 		// Check if adding aterm to the alpha generator is infinity or its x component is zero
 		if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, alphaGenerator, alphaGenerator, aterm, sizeof(alphaGenerator)) || cx_math_is_zero(&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1672,9 +1622,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	}
 	
 	// Get the difference of t1 and t2
-	if(!cx_math_is_zero(t2, sizeof(t2))) {
-		cx_math_subm(t2, SECP256K1_CURVE_ORDER, t2, SECP256K1_CURVE_ORDER, sizeof(t2));
-	}
+	conditionalNegateScalar(t2, true);
 
 	cx_math_addm(t1, t1, t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 	
@@ -1689,9 +1637,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	cx_math_addm(t2, t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2));
 	
 	// Negate t2
-	if(!cx_math_is_zero(t2, sizeof(t2))) {
-		cx_math_subm(t2, SECP256K1_CURVE_ORDER, t2, SECP256K1_CURVE_ORDER, sizeof(t2));
-	}
+	conditionalNegateScalar(t2, true);
 	
 	// Add t1 to t2
 	cx_math_addm(t2, t2, t1, SECP256K1_CURVE_ORDER, sizeof(t2));
@@ -1812,25 +1758,13 @@ void bulletproofUpdateCommitment(uint8_t *commitment, const uint8_t *leftPart, c
 	// Add commitment to the hash
 	cx_hash((cx_hash_t *)&hash, 0, commitment, CX_SHA256_SIZE, NULL, 0);
 	
-	// Get the square root of the left part's y component squared
-	uint8_t *squareRootSquared = commitment;
-	const uint8_t *y = &leftPart[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	const uint8_t two[] = {2};
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
 	// Set parity to if the left part's y component isn't quadratic residue
-	uint8_t parity = (bool)memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE) << 1;
-	
-	// Get the square root of the right part's y component squared
-	y = &rightPart[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(squareRootSquared, y, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	
-	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	const uint8_t *y = &leftPart[PUBLIC_KEY_COMPONENT_SIZE];
+	uint8_t parity = (bool)!isQuadraticResidue(y) << 1;
 	
 	// Add to parity to if the right part's y component isn't quadratic residue
-	parity |= (bool)memcmp(y, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE);
+	y = &rightPart[PUBLIC_KEY_COMPONENT_SIZE];
+	parity |= (bool)!isQuadraticResidue(y);
 	
 	// Add parity to the hash
 	cx_hash((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0);
@@ -1912,9 +1846,6 @@ void initializeLrGenerator(struct LrGenerator *lrGenerator) {
 // Generate LR generator
 void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
 
-	// Get bit in the value
-	const bool bit = (value >> count) & 1;
-	
 	// Check if first run
 	if(!count) {
 	
@@ -1923,20 +1854,18 @@ void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t 
 		cx_math_powm(lrGenerator->z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
 	}
 	
+	// Get bit in the value
+	const bool bit = (value >> count) & 1;
+	
 	// Set bit in lout
 	explicit_bzero(lout, SCALAR_SIZE);
 	lout[SCALAR_SIZE - 1] = bit;
 	
 	// Get the negation of z
 	uint8_t *negz = rout;
-	if(cx_math_is_zero(z, SCALAR_SIZE)) {
+	memcpy(negz, z, SCALAR_SIZE);
 	
-		explicit_bzero(negz, SCALAR_SIZE);
-	}
-	else {
-	
-		cx_math_subm(negz, SECP256K1_CURVE_ORDER, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	}
+	conditionalNegateScalar(negz, true);
 	
 	// Update lout
 	cx_math_addm(lout, lout, negz, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
@@ -1958,10 +1887,7 @@ void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t 
 	rout[SCALAR_SIZE - 1] = 1 - bit;
 	
 	// Negate rout
-	if(!cx_math_is_zero(rout, SCALAR_SIZE)) {
-	
-		cx_math_subm(rout, SECP256K1_CURVE_ORDER, rout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	}
+	conditionalNegateScalar(rout, true);
 	
 	// Update rout
 	cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
@@ -1972,4 +1898,34 @@ void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t 
 	// Update the LR generator
 	cx_math_multm(lrGenerator->yn, lrGenerator->yn, y, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->yn));
 	cx_math_addm(lrGenerator->z22n, lrGenerator->z22n, lrGenerator->z22n, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
+}
+
+// Conditional negate scalar
+void conditionalNegateScalar(uint8_t *scalar, bool negate) {
+
+	// Negate the scalar if it's not zero and negating in a way that tries to mitigate timing attacks
+	uint8_t temp[SCALAR_SIZE];
+	cx_math_subm((cx_math_is_zero(scalar, SCALAR_SIZE) || !negate) ? temp : scalar, SECP256K1_CURVE_ORDER, scalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+}
+
+// Conditional negate component
+void conditionalNegateComponent(uint8_t *component, bool negate) {
+
+	// Negate the component if it's not zero and negating in a way that tries to mitigate timing attacks
+	uint8_t temp[PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_subm((cx_math_is_zero(component, PUBLIC_KEY_COMPONENT_SIZE) || !negate) ? temp : component, SECP256K1_CURVE_PRIME, component, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+}
+
+// Is quadratic residue
+bool isQuadraticResidue(const uint8_t *component) {
+
+	// Get the square root of the component squared
+	uint8_t squareRootSquared[PUBLIC_KEY_COMPONENT_SIZE];
+	cx_math_powm(squareRootSquared, component, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	const uint8_t two[] = {2};
+	cx_math_powm(squareRootSquared, squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	
+	// Return if the component is quadratic residue
+	return !cx_math_cmp(component, squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE);
 }

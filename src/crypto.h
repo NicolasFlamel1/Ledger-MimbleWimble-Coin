@@ -27,11 +27,11 @@
 // Uncompressed public key size
 #define UNCOMPRESSED_PUBLIC_KEY_SIZE 65
 
+// Public key component size
+#define PUBLIC_KEY_COMPONENT_SIZE 32
+
 
 // Constants
-
-// Public key component size
-extern const size_t PUBLIC_KEY_COMPONENT_SIZE;
 
 // Nonce size
 extern const size_t NONCE_SIZE;
