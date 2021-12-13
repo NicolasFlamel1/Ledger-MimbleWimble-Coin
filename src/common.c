@@ -149,7 +149,7 @@ size_t getStringLength(uint64_t value) {
 void toString(char *result, uint64_t value, uint8_t fractionalDigits) {
 
 	// Initialize buffer
-	char buffer[UINT64_BUFFER_SIZE + sizeof('.')];
+	char buffer[UINT64_BUFFER_SIZE + sizeof((char)'.')];
 	
 	// Initialize length
 	size_t length = sizeof(buffer);

@@ -14,6 +14,9 @@
 // Checksum size
 #define CHECKSUM_SIZE 6
 
+// Separator size
+#define SEPARATOR_SIZE 1
+
 // Separator
 #define SEPARATOR '1'
 
@@ -48,7 +51,7 @@ static uint32_t updateChecksum(uint32_t checksum);
 size_t getBech32EncodedLength(size_t length, const char *humanReadablePart) {
 
 	// Return Bech32 encoded length
-	return strlen(humanReadablePart) + sizeof(SEPARATOR) + length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + CHECKSUM_SIZE;
+	return strlen(humanReadablePart) + SEPARATOR_SIZE + length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + CHECKSUM_SIZE;
 }
 
 // Bech32 encode
@@ -84,7 +87,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 	}
 
 	// Get number of characters
-	const size_t numberOfCharacters = getBech32EncodedLength(length, humanReadablePart) - humanReadablePartLength - sizeof(SEPARATOR) - CHECKSUM_SIZE;
+	const size_t numberOfCharacters = getBech32EncodedLength(length, humanReadablePart) - humanReadablePartLength - SEPARATOR_SIZE - CHECKSUM_SIZE;
 	
 	// Go through all character
 	size_t index;
@@ -177,7 +180,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 		}
 		
 		// Append quantum as a character to the result
-		result[index + humanReadablePartLength + sizeof(SEPARATOR)] = CHARACTERS[quantum];
+		result[index + humanReadablePartLength + SEPARATOR_SIZE] = CHARACTERS[quantum];
 		
 		// Update checksum with the quantum
 		checksum = updateChecksum(checksum) ^ quantum;
@@ -197,7 +200,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 	for(size_t i = 0; i < CHECKSUM_SIZE; ++i) {
 	
 		// Append checksum character to the result
-		result[index + humanReadablePartLength + sizeof(SEPARATOR) + i] = CHARACTERS[(checksum >> ((BITS_PER_CHARACTER - i) * BITS_PER_CHARACTER)) & 0b11111];
+		result[index + humanReadablePartLength + SEPARATOR_SIZE + i] = CHARACTERS[(checksum >> ((BITS_PER_CHARACTER - i) * BITS_PER_CHARACTER)) & 0b11111];
 	}
 }
 
@@ -245,7 +248,7 @@ size_t getBech32DecodedLength(const char *data, size_t length) {
 	}
 	
 	// Go through all characters after the separator
-	for(size_t i = separatorIndex - data + sizeof(SEPARATOR); i < length; ++i) {
+	for(size_t i = separatorIndex - data + SEPARATOR_SIZE; i < length; ++i) {
 	
 		// Check if character isn't a valid character
 		const char *characterIndex = (char *)memchr(CHARACTERS, data[i], sizeof(CHARACTERS));
@@ -285,7 +288,7 @@ size_t getBech32DecodedLength(const char *data, size_t length) {
 	}
 	
 	// Return number of bytes
-	return (length - (separatorIndex - data) - sizeof(SEPARATOR) - CHECKSUM_SIZE) * BITS_PER_CHARACTER / BITS_IN_A_BYTE;
+	return (length - (separatorIndex - data) - SEPARATOR_SIZE - CHECKSUM_SIZE) * BITS_PER_CHARACTER / BITS_IN_A_BYTE;
 }
 
 // Bech32 decode
@@ -295,7 +298,7 @@ void bech32Decode(uint8_t *result, const char *data, size_t length) {
 	const size_t numberOfBytes = getBech32DecodedLength(data, length);
 	
 	// Get start of data
-	const size_t startOfData = (char *)memrchr(data, SEPARATOR, length) - data + sizeof(SEPARATOR);
+	const size_t startOfData = (char *)memrchr(data, SEPARATOR, length) - data + SEPARATOR_SIZE;
 	
 	// Go through all bytes
 	for(size_t i = 0; i < numberOfBytes; ++i) {

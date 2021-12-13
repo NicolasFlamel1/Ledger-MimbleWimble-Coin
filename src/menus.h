@@ -23,10 +23,10 @@
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("To Slatepack address")
 
 // Amount line buffer size
-#define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+#define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
 // Fee line buffer size
-#define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof('.') + sizeof(' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+#define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
 
 // Constants
