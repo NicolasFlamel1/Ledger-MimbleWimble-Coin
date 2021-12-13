@@ -30,10 +30,10 @@
 #include "verify_root_public_key.h"
 
 
-// Constants
+// Definitions
 
 // Request class
-static const uint8_t REQUEST_CLASS = 0xC7;
+#define REQUEST_CLASS 0xC7
 
 
 // Supporting function implementation

@@ -8,10 +8,10 @@
 #include <stdint.h>
 
 
-// Constants
+// Definitions
 
 // Invalid base32 size
-extern const size_t INVALID_BASE32_SIZE;
+#define INVALID_BASE32_SIZE SIZE_MAX
 
 
 // Function prototypes

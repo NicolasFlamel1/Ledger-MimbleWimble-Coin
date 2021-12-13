@@ -30,53 +30,56 @@
 // Public key component size
 #define PUBLIC_KEY_COMPONENT_SIZE 32
 
-
-// Constants
-
 // Nonce size
-extern const size_t NONCE_SIZE;
+#define NONCE_SIZE 32
 
 // Commitment size
-extern const size_t COMMITMENT_SIZE;
+#define COMMITMENT_SIZE 33
 
 // Identifier maximum depth
-extern const size_t IDENTIFIER_MAXIMUM_DEPTH;
+#define IDENTIFIER_MAXIMUM_DEPTH 4
 
 // Identifier size
-extern const size_t IDENTIFIER_SIZE;
+#define IDENTIFIER_SIZE (sizeof(uint8_t) + IDENTIFIER_MAXIMUM_DEPTH * sizeof(uint32_t))
 
 // Single-signer compact signature size
-extern const size_t SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE;
+#define SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE 64
 
 // Single-signer message size
-extern const size_t SINGLE_SIGNER_MESSAGE_SIZE;
+#define SINGLE_SIGNER_MESSAGE_SIZE 32
 
 // Maximum DER signature size
-extern const size_t MAXIMUM_DER_SIGNATURE_SIZE;
+#define MAXIMUM_DER_SIGNATURE_SIZE 72
 
 // Keep private
-extern const int KEEP_PRIVATE_KEY;
+#define KEEP_PRIVATE_KEY 1
 
 // Even compressed public key prefix
-extern const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+#define EVEN_COMPRESSED_PUBLIC_KEY_PREFIX 0x02
 
 // Odd compressed public key prefix
-extern const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX;
+#define ODD_COMPRESSED_PUBLIC_KEY_PREFIX 0x03
 
 // Ed25519 compressed public key prefix
-extern const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+#define ED25519_COMPRESSED_PUBLIC_KEY_PREFIX 0x02
 
 // Ed25519 signature size
-extern const size_t ED25519_SIGNATURE_SIZE;
+#define ED25519_SIGNATURE_SIZE 64
+
+// Hardened path mask
+#define HARDENED_PATH_MASK 0x80000000
 
 // Maximum account
-extern const uint32_t MAXIMUM_ACCOUNT;
+#define MAXIMUM_ACCOUNT (HARDENED_PATH_MASK - 1)
 
 // X25519 public key size
-extern const size_t X25519_PUBLIC_KEY_SIZE;
+#define X25519_PUBLIC_KEY_SIZE 32
 
 // X25519 compressed public key prefix
-extern const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+#define X25519_COMPRESSED_PUBLIC_KEY_PREFIX 0x02
+
+
+// Constants
 
 // Switch type
 enum SwitchType {
@@ -143,7 +146,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
 
 // Is valid commitment
-bool isValidCommitment(const uint8_t *commitment);
+bool isValidCommitment(uint8_t *commitment);
 
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);

@@ -5,22 +5,19 @@
 #include "common.h"
 
 
-// Constants
-
-// ChaCha20 nonce size
-const size_t CHACHA20_NONCE_SIZE = 12;
-
-// Poly1305 tag size
-const size_t POLY1305_TAG_SIZE = 16;
-
-// ChaCha20 state constant
-static const char CHACHA20_STATE_CONSTANT[] = "expand 32-byte k";
+// Definitions
 
 // ChaCha20 state block counter index
-static const size_t CHACHA20_STATE_BLOCK_COUNTER_INDEX = 12;
+#define CHACHA20_STATE_BLOCK_COUNTER_INDEX 12
 
 // Poly1305 block size size
-static const size_t POLY1305_BLOCK_SIZE = 16;
+#define POLY1305_BLOCK_SIZE 16
+
+
+// Constants
+
+// ChaCha20 state constant
+static const char CHACHA20_STATE_CONSTANT[] = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'};
 
 // Poly1305 p
 static const uint8_t POLY1305_P[] = {0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFB};

@@ -10,6 +10,15 @@
 // Parameter reserved size
 #define PARAMETER_RESERVED_SIZE 14
 
+// Bits size
+#define BITS_SIZE (32 * BITS_IN_A_BYTE)
+
+// Parameter fanout value
+#define PARAMETER_FANOUT_VALUE 1
+
+// Parameter depth value
+#define PARAMETER_DEPTH_VALUE 1
+
 
 // Structures
 
@@ -56,9 +65,6 @@ struct Parameter {
 
 // Constants
 
-// Bits size
-static const size_t BITS_SIZE = 32 * BITS_IN_A_BYTE;
-
 // Initialization vector
 static const uint64_t INITIALIZATION_VECTOR[] = {
 	0x6A09E667F3BCC908,
@@ -71,12 +77,6 @@ static const uint64_t INITIALIZATION_VECTOR[] = {
 	0x5BE0CD19137E2179
 };
 
-// Parameter fanout value
-static const uint8_t PARAMETER_FANOUT_VALUE = 1;
-
-// Parameter depth value
-static const uint8_t PARAMETER_DEPTH_VALUE = 1;
-
 
 // Supporting function implementation
 
@@ -88,14 +88,20 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 	cx_blake2b_init((cx_blake2b_t *)&hash, BITS_SIZE);
 	
 	// Initialize parameter
-	struct Parameter parameter;
+	struct Parameter parameter = {
 	
-	// Set parameter's values
-	explicit_bzero(&parameter, sizeof(parameter));
-	parameter.digestLength = hash.ctx.outlen;
-	parameter.keyLength = key ? keyLength : 0;
-	parameter.fanout = PARAMETER_FANOUT_VALUE;
-	parameter.depth = PARAMETER_DEPTH_VALUE;
+		// Digest length
+		.digestLength = hash.ctx.outlen,
+		
+		// Key length
+		.keyLength = key ? keyLength : 0,
+		
+		// Fan out
+		.fanout = PARAMETER_FANOUT_VALUE,
+		
+		// Depth
+		.depth = PARAMETER_DEPTH_VALUE
+	};
 	
 	// Set hash to the initialization vector XORed with the parameter
 	os_xor((uint64_t *)hash.ctx.h, (void *)INITIALIZATION_VECTOR, &parameter, sizeof(hash.ctx.h));

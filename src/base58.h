@@ -9,13 +9,13 @@
 #include <stdint.h>
 
 
-// Constants
+// Definitions
 
 // Invalid base58 size
-extern const size_t INVALID_BASE58_SIZE;
+#define INVALID_BASE58_SIZE SIZE_MAX
 
 // Base58 checksum size
-extern const size_t BASE58_CHECKSUM_SIZE;
+#define BASE58_CHECKSUM_SIZE 4
 
 
 // Function prototypes

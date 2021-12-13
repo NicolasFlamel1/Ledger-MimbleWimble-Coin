@@ -209,7 +209,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			}
 			
 			// Get kernel commitment from data
-			const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if kernel commitment is invalid
 			if(!isValidCommitment(kernelCommitment)) {
@@ -375,7 +375,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			}
 		
 			// Get kernel commitment from data
-			const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if kernel commitment is invalid
 			if(!isValidCommitment(kernelCommitment)) {

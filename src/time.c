@@ -9,26 +9,53 @@
 // Months in a year
 #define MONTHS_IN_A_YEAR 12
 
+// Rebase year
+#define REBEASE_YEAR 1601
+
+// Seconds from 1601 to 1970
+#define SECONDS_FROM_1601_TO_1970 11644473600
+
+// Seconds in a quadricentennial
+#define SECONDS_IN_A_QUADRICENTENNIAL 12622780800
+
+// Seconds in a centennial
+#define SECONDS_IN_A_CENTENNIAL 3155673600
+
+// Seconds in a quadrennial
+#define SECONDS_IN_A_QUADRENNIAL 126230400
+
+// Seconds in an annual
+#define SECONDS_IN_AN_ANNUAL 31536000
+
+// Seconds in a day
+#define SECONDS_IN_A_DAY 86400
+
+// Seconds in an hour
+#define SECONDS_IN_AN_HOUR 3600
+
+// Maximum centennials
+#define MAXIMUM_CENTENNIALS 3
+
+// Maximum quadrennials
+#define MAXIMUM_QUADRENNIALS 24
+
+// Maximum annuals
+#define MAXIMUM_ANNUALS 3
+
+// Years in a quadricentennial
+#define YEARS_IN_A_QUADRICENTENNIAL 400
+
+// Years in a centennial
+#define YEARS_IN_A_CENTENNIAL 100
+
+// Years in a quadrennial
+#define YEARS_IN_A_QUADRENNIAL 4
+
 
 // Constants
 
-// Seconds in a minute
-const uint8_t SECONDS_IN_A_MINUTE = 60;
-
-// Minutes in an hour
-const uint8_t MINUTES_IN_AN_HOUR = 60;
-
-// Maximum epoch
-const uint64_t MAXIMUM_EPOCH = (uint64_t)UINT32_MAX * 60 * 60;
-
-// Minimum time zone offset
-const int64_t MINIMUM_TIME_ZONE_OFFSET = -13 * MINUTES_IN_AN_HOUR;
-
-// Maximum time zone offset
-const int64_t MAXIMUM_TIME_ZONE_OFFSET = 15 * MINUTES_IN_AN_HOUR;
-
 // Days since January first
-static const uint32_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
+static const uint16_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
 
 	// 365 days non-leap
 	{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
@@ -36,48 +63,6 @@ static const uint32_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
 	// 366 days leap
 	{0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}
 };
-
-// Rebase year
-static const uint16_t REBEASE_YEAR = 1601;
-
-// Seconds from 1601 to 1970
-static const uint64_t SECONDS_FROM_1601_TO_1970 = 11644473600;
-
-// Seconds in a quadricentennial
-static const uint64_t SECONDS_IN_A_QUADRICENTENNIAL = 12622780800;
-
-// Seconds in a centennial
-static const uint32_t SECONDS_IN_A_CENTENNIAL = 3155673600;
-
-// Seconds in a quadrennial
-static const uint32_t SECONDS_IN_A_QUADRENNIAL = 126230400;
-
-// Seconds in an annual
-static const uint32_t SECONDS_IN_AN_ANNUAL = 31536000;
-
-// Seconds in a day
-static const uint32_t SECONDS_IN_A_DAY = 86400;
-
-// Seconds in an hour
-static const uint16_t SECONDS_IN_AN_HOUR = 3600;
-
-// Maximum centennials
-static const uint8_t MAXIMUM_CENTENNIALS = 3;
-
-// Maximum quadrennials
-static const uint8_t MAXIMUM_QUADRENNIALS = 24;
-
-// Maximum annuals
-static const uint8_t MAXIMUM_ANNUALS = 3;
-
-// Years in a quadricentennial
-static const uint16_t YEARS_IN_A_QUADRICENTENNIAL = 400;
-
-// Years in a centennial
-static const uint8_t YEARS_IN_A_CENTENNIAL = 100;
-
-// Years in a quadrennial
-static const uint8_t YEARS_IN_A_QUADRENNIAL = 4;
 
 
 // Function prototypes

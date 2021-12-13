@@ -7,15 +7,6 @@
 #include "mqs.h"
 
 
-// Constants
-
-// MQS shared private key size
-const size_t MQS_SHARED_PRIVATE_KEY_SIZE = 32;
-
-// MQS shared private key number of iterations
-const unsigned int MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS = 100;
-
-
 // Supporting function implementation
 
 // Create MQS shared private key

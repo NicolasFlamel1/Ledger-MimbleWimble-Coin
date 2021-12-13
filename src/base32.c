@@ -4,19 +4,19 @@
 #include "common.h"
 
 
-// Constants
+// Definitions
 
-// Invalid base32 size
-const size_t INVALID_BASE32_SIZE = SIZE_MAX;
+// Bits per character
+#define BITS_PER_CHARACTER 5
+
+// Padding character
+#define PADDING_CHARACTER '='
+
+
+// Constants
 
 // Characters
 static const char CHARACTERS[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
-
-// Bits per character
-static const size_t BITS_PER_CHARACTER = 5;
-
-// Padding character
-static const uint8_t PADDING_CHARACTER = '=';
 
 
 // Function prototypes

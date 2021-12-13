@@ -8,12 +8,6 @@
 #include "tor.h"
 
 
-// Constants
-
-// Slatepack shared private key size
-const size_t SLATEPACK_SHARED_PRIVATE_KEY_SIZE = 32;
-
-
 // Supporting function implementation
 
 // Create Slatepack shared private key

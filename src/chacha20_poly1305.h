@@ -16,6 +16,12 @@
 // Poly1305 number size
 #define POLY1305_NUMBER_SIZE 17
 
+// ChaCha20 nonce size
+#define CHACHA20_NONCE_SIZE 12
+
+// Poly1305 tag size
+#define POLY1305_TAG_SIZE 16
+
 
 // Structures
 
@@ -41,15 +47,6 @@ typedef struct ChaCha20Poly1305State {
 	uint64_t dataLength;
 
 } ChaCha20Poly1305State;
-
-
-// Constants
-
-// ChaCha20 nonce size
-extern const size_t CHACHA20_NONCE_SIZE;
-
-// Poly1305 tag size
-extern const size_t POLY1305_TAG_SIZE;
 
 
 // Function prototypes

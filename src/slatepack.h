@@ -13,11 +13,8 @@
 // Slatepack address without human-readable part size 
 #define SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE 59
 
-
-// Constants
-
 // Slatepack shared private key size
-extern const size_t SLATEPACK_SHARED_PRIVATE_KEY_SIZE;
+#define SLATEPACK_SHARED_PRIVATE_KEY_SIZE 32
 
 
 // Function prototypes

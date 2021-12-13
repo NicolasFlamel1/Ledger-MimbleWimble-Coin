@@ -19,11 +19,11 @@
 // Uint64 buffer size
 #define UINT64_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0'))
 
+// Error type mask
+#define ERROR_TYPE_MASK 0xF000
+
 
 // Constants
-
-// Error type mask
-extern const uint16_t ERROR_TYPE_MASK;
 
 // Error
 enum Error {

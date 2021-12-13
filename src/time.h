@@ -7,22 +7,22 @@
 #include <stdint.h>
 
 
-// Constants
+// Definitions
 
 // Seconds in a minute
-extern const uint8_t SECONDS_IN_A_MINUTE;
+#define SECONDS_IN_A_MINUTE 60
 
 // Minutes in an hour
-extern const uint8_t MINUTES_IN_AN_HOUR;
+#define MINUTES_IN_AN_HOUR 60
 
 // Maximum epoch
-extern const uint64_t MAXIMUM_EPOCH;
+#define MAXIMUM_EPOCH ((uint64_t)UINT32_MAX * 60 * 60)
 
 // Minimum time zone offset
-extern const int64_t MINIMUM_TIME_ZONE_OFFSET;
+#define MINIMUM_TIME_ZONE_OFFSET (-13 * MINUTES_IN_AN_HOUR)
 
 // Maximum time zone offset
-extern const int64_t MAXIMUM_TIME_ZONE_OFFSET;
+#define MAXIMUM_TIME_ZONE_OFFSET (15 * MINUTES_IN_AN_HOUR)
 
 
 // Structures

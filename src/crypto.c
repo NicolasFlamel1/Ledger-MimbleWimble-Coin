@@ -17,6 +17,33 @@
 // Scalar size
 #define SCALAR_SIZE 32
 
+// Uncompressed public key prefix
+#define UNCOMPRESSED_PUBLIC_KEY_PREFIX 0x04
+
+// Node size
+#define NODE_SIZE 64
+
+// Chain code size
+#define CHAIN_CODE_SIZE 32
+
+// BIP32 path coin type index
+#define BIP32_PATH_COIN_TYPE_INDEX 1
+
+// BIP32 path account index
+#define BIP32_PATH_ACCOUNT_INDEX 2
+
+// Address private key blinding factor value
+#define ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE 713
+
+// Secp256k1 private key size
+#define SECP256k1_PRIVATE_KEY_SIZE 32
+
+// Commitment even prefix
+#define COMMITMENT_EVEN_PREFIX 8
+
+// Commitment odd prefix
+#define COMMITMENT_ODD_PREFIX 9
+
 
 // Structures
 
@@ -32,51 +59,6 @@ struct LrGenerator {
 
 
 // Constants
-
-// Nonce size
-const size_t NONCE_SIZE = 32;
-
-// Commitment size
-const size_t COMMITMENT_SIZE = 33;
-
-// Identifier maximum depth
-const size_t IDENTIFIER_MAXIMUM_DEPTH = 4;
-
-// Identifier size
-const size_t IDENTIFIER_SIZE = sizeof(uint8_t) + IDENTIFIER_MAXIMUM_DEPTH * sizeof(uint32_t);
-
-// Single-signer compact signature size
-const size_t SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE = 64;
-
-// Single-signer message size
-const size_t SINGLE_SIGNER_MESSAGE_SIZE = 32;
-
-// Maximum DER signature size
-const size_t MAXIMUM_DER_SIGNATURE_SIZE = 72;
-
-// Keep private
-const int KEEP_PRIVATE_KEY = 1;
-
-// Even compressed public key prefix
-const uint8_t EVEN_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
-
-// Odd compressed public key prefix
-const uint8_t ODD_COMPRESSED_PUBLIC_KEY_PREFIX = 0x03;
-
-// Ed25519 compressed public key prefix
-const uint8_t ED25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
-
-// Ed25519 signature size
-const size_t ED25519_SIGNATURE_SIZE = 64;
-
-// X25519 public key size
-const size_t X25519_PUBLIC_KEY_SIZE = 32;
-
-// X25519 compressed public key prefix
-const uint8_t X25519_COMPRESSED_PUBLIC_KEY_PREFIX = 0x02;
-
-// Uncompressed public key prefix
-static const uint8_t UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04;
 
 // Secp256k1 curve order
 static const uint8_t SECP256K1_CURVE_ORDER[] = {
@@ -98,12 +80,6 @@ static const uint8_t ED25519_CURVE_PRIME[] = {
 	0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xED
 };
 
-// Hardened path mask
-static const uint32_t HARDENED_PATH_MASK = 0x80000000;
-
-// Maximum account
-const uint32_t MAXIMUM_ACCOUNT = HARDENED_PATH_MASK - 1;
-
 // Generator G
 static const uint8_t GENERATOR_G[] = {
 	0x79, 0xBE, 0x66, 0x7E, 0xF9, 0xDC, 0xBB, 0xAC, 0x55, 0xA0, 0x62, 0x95, 0xCE, 0x87, 0x0B, 0x07, 0x02, 0x9B, 0xFC, 0xDB, 0x2D, 0xCE, 0x28, 0xD9, 0x59, 0xF2, 0x81, 0x5B, 0x16, 0xF8, 0x17, 0x98, 0x48, 0x3A, 0xDA, 0x77, 0x26, 0xA3, 0xC4, 0x65, 0x5D, 0xA4, 0xFB, 0xFC, 0x0E, 0x11, 0x08, 0xA8, 0xFD, 0x17, 0xB4, 0x48, 0xA6, 0x85, 0x54, 0x19, 0x9C, 0x47, 0xD0, 0x8F, 0xFB, 0x10, 0xD4, 0xB8
@@ -114,11 +90,10 @@ static const uint8_t GENERATOR_H[] = {
 	0x50, 0x92, 0x9B, 0x74, 0xC1, 0xA0, 0x49, 0x54, 0xB7, 0x8B, 0x4B, 0x60, 0x35, 0xE9, 0x7A, 0x5E, 0x07, 0x8A, 0x5A, 0x0F, 0x28, 0xEC, 0x96, 0xD5, 0x47, 0xBF, 0xEE, 0x9A, 0xCE, 0x80, 0x3A, 0xC0, 0x31, 0xD3, 0xC6, 0x86, 0x39, 0x73, 0x92, 0x6E, 0x04, 0x9E, 0x63, 0x7C, 0xB1, 0xB5, 0xF4, 0x0A, 0x36, 0xDA, 0xC2, 0x8A, 0xF1, 0x76, 0x69, 0x68, 0xC3, 0x0C, 0x23, 0x13, 0xF3, 0xA3, 0x89, 0x04
 };
 
-// Node size
-static const size_t NODE_SIZE = 64;
-
-// Chain code size
-static const size_t CHAIN_CODE_SIZE = 32;
+// Generator J public
+static const uint8_t GENERATOR_J_PUBLIC[] = {
+	0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
+};
 
 // BIP32 path without coin type and account
 static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
@@ -139,34 +114,11 @@ static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
 	0
 };
 
-// BIP32 path coin type index
-static const size_t BIP32_PATH_COIN_TYPE_INDEX = 1;
-
-// BIP32 path account index
-static const size_t BIP32_PATH_ACCOUNT_INDEX = 2;
-
 // Seed key
-static const char SEED_KEY[] = "IamVoldemort";
-
-// Generator J public
-static const uint8_t GENERATOR_J_PUBLIC[] = {
-	0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
-};
-
-// Address private key blinding factor value
-static uint64_t ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE = 713;
+static const char SEED_KEY[] = {'I', 'a', 'm', 'V', 'o', 'l', 'd', 'e', 'm', 'o', 'r', 't'};
 
 // Address private key hash key
-static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = "Grinbox_seed";
-
-// Secp256k1 private key size
-static const size_t SECP256k1_PRIVATE_KEY_SIZE = 32;
-
-// Commitment even prefix
-static const uint8_t COMMITMENT_EVEN_PREFIX = 8;
-
-// Commitment odd prefix
-static const uint8_t COMMITMENT_ODD_PREFIX = 9;
+static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = {'G', 'r', 'i', 'n', 'b', 'o', 'x', '_', 's', 'e', 'e', 'd'};
 
 
 // Function prototypes
@@ -177,17 +129,11 @@ static void bulletproofUpdateCommitment(uint8_t *commitment, const uint8_t *left
 // Create scalars from ChaCha20
 static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index);
 
-// Initialize LR generator
-static void initializeLrGenerator(struct LrGenerator *lrGenerator);
+// Use LR generator
+static void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
 
-// Generate LR generator
-static void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
-
-// Conditional negate scalar
-static void conditionalNegateScalar(uint8_t *scalar, bool negate);
-
-// Conditional negate component
-static void conditionalNegateComponent(uint8_t *component, bool negate);
+// Conditional negate
+static void conditionalNegate(uint8_t *scalar, bool negate, const uint8_t *modulo);
 
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
@@ -218,7 +164,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 		TRY {
 
 			// Derive node and chain code from path and seed key
-			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip32Path, ARRAYLEN(bip32Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY) - sizeof((char)'\0'));
+			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip32Path, ARRAYLEN(bip32Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY));
 			
 			// Get private key from node
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);
@@ -742,7 +688,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive) {
 
 	// Negate the blinding factor if it isn't positive
-	conditionalNegateScalar(blindingFactor, !blindingFactorIsPositive);
+	conditionalNegate(blindingFactor, !blindingFactorIsPositive, SECP256K1_CURVE_ORDER);
 	
 	// Add blinding factor to the blinding factor sum
 	cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
@@ -784,7 +730,7 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	
 	// Negate the secret nonce if the uncompressed public nonce's y component isn't quadratic residue
 	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	conditionalNegateScalar(secretNonce, !isQuadraticResidue(y));
+	conditionalNegate(secretNonce, !isQuadraticResidue(y), SECP256K1_CURVE_ORDER);
 	
 	// Get signature hash from the public nonce's x component, public key, and message
 	cx_sha256_t hash;
@@ -1228,29 +1174,19 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 }
 
 // Is valid commitment
-bool isValidCommitment(const uint8_t *commitment) {
+bool isValidCommitment(uint8_t *commitment) {
 
-	// Get commitment's x component
-	const uint8_t *x = &commitment[PUBLIC_KEY_PREFIX_SIZE];
-
-	// Check if commitment's prefix is invalid or its x component overflows
-	if((commitment[0] != COMMITMENT_EVEN_PREFIX && commitment[0] != COMMITMENT_ODD_PREFIX) || cx_math_cmp(x, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE) >= 0) {
+	// Change commitment's prefix to its corresponding public key prefix
+	commitment[0] -= COMMITMENT_EVEN_PREFIX - EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 	
-		// Return false
-		return false;
-	}
+	// Set result to if the commitment is valid
+	bool result = isValidSecp256k1PublicKey(commitment, COMMITMENT_SIZE);
 	
-	// Get y squared as x cubed plus seven
-	uint8_t ySquared[PUBLIC_KEY_COMPONENT_SIZE];
-	const uint8_t three[] = {3};
-	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
+	// Revetn the commitment's prefix
+	commitment[0] += COMMITMENT_EVEN_PREFIX - EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 	
-	uint8_t seven[SCALAR_SIZE] = {};
-	seven[sizeof(seven) - 1] = 7;
-	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
-	
-	// Return if the y squared is quadratic residue
-	return isQuadraticResidue(ySquared);
+	// Return the result
+	return result;
 }
 
 // Is valid Ed25519 public key
@@ -1320,28 +1256,38 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 		// Return false
 		return false;
 	}
-	
-	// Get public key's x component
-	const uint8_t *x = &publicKey[PUBLIC_KEY_PREFIX_SIZE];
 
-	// Check if public key's prefix is invalid or its x component overflows
-	if((publicKey[0] != EVEN_COMPRESSED_PUBLIC_KEY_PREFIX && publicKey[0] != ODD_COMPRESSED_PUBLIC_KEY_PREFIX) || cx_math_cmp(x, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE) >= 0) {
+	// Begin try
+	BEGIN_TRY {
 	
-		// Return false
-		return false;
+		// Try
+		TRY {
+		
+			// Uncompress the public key
+			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			memcpy(uncompressedPublicKey, publicKey, length);
+			
+			uncompressSecp256k1PublicKey(uncompressedPublicKey);
+		}
+		
+		// Catch all errors
+		CATCH_ALL {
+			
+			// Return false
+			return false;
+		}
+		
+		// Finally
+		FINALLY {
+		
+		}
 	}
 	
-	// Get y squared as x cubed plus seven
-	uint8_t ySquared[PUBLIC_KEY_COMPONENT_SIZE];
-	const uint8_t three[] = {3};
-	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
+	// End try
+	END_TRY;
 	
-	uint8_t seven[SCALAR_SIZE] = {};
-	seven[sizeof(seven) - 1] = 7;
-	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
-	
-	// Return if the y squared is quadratic residue
-	return isQuadraticResidue(ySquared);
+	// Return true
+	return true;
 }
 
 // Uncompress secp256k1 public key
@@ -1381,7 +1327,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	if((y[PUBLIC_KEY_COMPONENT_SIZE - 1] & 1) != (publicKey[0] == ODD_COMPRESSED_PUBLIC_KEY_PREFIX)) {
 	
 		// Negate the y component
-		conditionalNegateComponent(y, true);
+		conditionalNegate(y, true, SECP256K1_CURVE_PRIME);
 	}
 	
 	// Set public key's prefix to be uncompressed
@@ -1444,7 +1390,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	memcpy(&valueBytes[sizeof(valueBytes) - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
 
 	// Negate the value bytes
-	conditionalNegateScalar(valueBytes, true);
+	conditionalNegate(valueBytes, true, SECP256K1_CURVE_ORDER);
 	
 	// Create alpha and rho from the rewind nonce
 	uint8_t alpha[SCALAR_SIZE];
@@ -1487,7 +1433,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 		memcpy(&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 		
 		// Negate the aterm's y component if the bit isn't set
-		conditionalNegateComponent(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], !bit);
+		conditionalNegate(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], !bit, SECP256K1_CURVE_PRIME);
 		
 		// Check if adding aterm to the alpha generator is infinity or its x component is zero
 		if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, alphaGenerator, alphaGenerator, aterm, sizeof(alphaGenerator)) || cx_math_is_zero(&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1565,64 +1511,24 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	uint8_t z[sizeof(runningCommitment)];
 	memcpy(z, runningCommitment, sizeof(z));
 	
-	// Initialize LR generator
-	struct LrGenerator lrGenerator;
-	initializeLrGenerator(&lrGenerator);
-	
-	// Go through all bits to prove
+	// Create t0 with an LR generator
 	const uint8_t zero[SCALAR_SIZE] = {};
 	uint8_t t0[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	useLrGenerator(t0, zero, y, z, rewindNonce, value);
 	
-		// Generate l and r
-		uint8_t l[SCALAR_SIZE];
-		uint8_t r[SCALAR_SIZE];
-		generateLrGenerator(&lrGenerator, i, l, r, zero, y, z, rewindNonce, value);
-		
-		// Update t0 with l and r
-		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
-		cx_math_addm(t0, t0, l, SECP256K1_CURVE_ORDER, sizeof(t0));
-	}
-	
-	// Initialize LR generator
-	initializeLrGenerator(&lrGenerator);
-	
-	// Go through all bits to prove
+	// Create t1 with an LR generator
 	uint8_t one[SCALAR_SIZE] = {};
 	one[sizeof(one) - 1] = 1;
 	uint8_t t1[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	useLrGenerator(t1, one, y, z, rewindNonce, value);
 	
-		// Generate l and r
-		uint8_t l[SCALAR_SIZE];
-		uint8_t r[SCALAR_SIZE];
-		generateLrGenerator(&lrGenerator, i, l, r, one, y, z, rewindNonce, value);
-		
-		// Update t1 with l and r
-		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
-		cx_math_addm(t1, t1, l, SECP256K1_CURVE_ORDER, sizeof(t1));
-	}
-	
-	// Initialize LR generator
-	initializeLrGenerator(&lrGenerator);
-	
-	// Go through all bits to prove
+	// Create t2 with an LR generator
 	cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
 	uint8_t t2[SCALAR_SIZE] = {};
-	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
-	
-		// Generate l and r
-		uint8_t l[SCALAR_SIZE];
-		uint8_t r[SCALAR_SIZE];
-		generateLrGenerator(&lrGenerator, i, l, r, one, y, z, rewindNonce, value);
-		
-		// Update t2 with l and r
-		cx_math_multm(l, l, r, SECP256K1_CURVE_ORDER, sizeof(l));
-		cx_math_addm(t2, t2, l, SECP256K1_CURVE_ORDER, sizeof(t2));
-	}
+	useLrGenerator(t2, one, y, z, rewindNonce, value);
 	
 	// Get the difference of t1 and t2
-	conditionalNegateScalar(t2, true);
+	conditionalNegate(t2, true, SECP256K1_CURVE_ORDER);
 
 	cx_math_addm(t1, t1, t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 	
@@ -1637,7 +1543,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	cx_math_addm(t2, t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2));
 	
 	// Negate t2
-	conditionalNegateScalar(t2, true);
+	conditionalNegate(t2, true, SECP256K1_CURVE_ORDER);
 	
 	// Add t1 to t2
 	cx_math_addm(t2, t2, t1, SECP256K1_CURVE_ORDER, sizeof(t2));
@@ -1835,85 +1741,81 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 	}
 }
 
-// Initialize LR generator
-void initializeLrGenerator(struct LrGenerator *lrGenerator) {
+// Use LR generator
+void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
 
+	// Initialize LR generator
+	struct LrGenerator lrGenerator;
+	
 	// Set LR generator's yn to one
-	explicit_bzero(lrGenerator->yn, sizeof(lrGenerator->yn));
-	lrGenerator->yn[sizeof(lrGenerator->yn) - 1] = 1;
-}
-
-// Generate LR generator
-void generateLrGenerator(struct LrGenerator *lrGenerator, size_t count, uint8_t *lout, uint8_t *rout, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
-
-	// Check if first run
-	if(!count) {
+	explicit_bzero(lrGenerator.yn, sizeof(lrGenerator.yn));
+	lrGenerator.yn[sizeof(lrGenerator.yn) - 1] = 1;
 	
-		// Square the LR generator's z22n
-		const uint8_t two[] = {2};
-		cx_math_powm(lrGenerator->z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
+	// Set LR generator's z22n to z squared
+	const uint8_t two[] = {2};
+	cx_math_powm(lrGenerator.z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(lrGenerator.z22n));
+
+	// Go through all bits to prove
+	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+	
+		// Get bit in the value
+		const bool bit = (value >> i) & 1;
+		
+		// Set bit in lout
+		uint8_t lout[SCALAR_SIZE] = {};
+		lout[SCALAR_SIZE - 1] = bit;
+		
+		// Get the negation of z
+		uint8_t negz[SCALAR_SIZE];
+		memcpy(negz, z, sizeof(negz));
+		
+		conditionalNegate(negz, true, SECP256K1_CURVE_ORDER);
+		
+		// Update lout
+		cx_math_addm(lout, lout, negz, SECP256K1_CURVE_ORDER, sizeof(negz));
+		
+		// Create sl and sr
+		uint8_t *sl = negz;
+		uint8_t sr[SCALAR_SIZE];
+		createScalarsFromChaCha20(sl, sr, nonce, i + 2);
+		
+		// Multiply sl and sr by x
+		cx_math_multm(sl, sl, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_multm(sr, sr, x, SECP256K1_CURVE_ORDER, sizeof(sr));
+		
+		// Update lout
+		cx_math_addm(lout, lout, sl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		
+		// Set bit in rout
+		uint8_t *rout = negz;
+		explicit_bzero(rout, SCALAR_SIZE);
+		rout[SCALAR_SIZE - 1] = 1 - bit;
+		
+		// Negate rout
+		conditionalNegate(rout, true, SECP256K1_CURVE_ORDER);
+		
+		// Update rout
+		cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_addm(rout, rout, sr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_multm(rout, rout, lrGenerator.yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_addm(rout, rout, lrGenerator.z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		
+		// Update the LR generator
+		cx_math_multm(lrGenerator.yn, lrGenerator.yn, y, SECP256K1_CURVE_ORDER, sizeof(lrGenerator.yn));
+		cx_math_addm(lrGenerator.z22n, lrGenerator.z22n, lrGenerator.z22n, SECP256K1_CURVE_ORDER, sizeof(lrGenerator.z22n));
+		
+		// Update result with lout and rout
+		cx_math_multm(lout, lout, rout, SECP256K1_CURVE_ORDER, sizeof(lout));
+		cx_math_addm(result, result, lout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 	}
-	
-	// Get bit in the value
-	const bool bit = (value >> count) & 1;
-	
-	// Set bit in lout
-	explicit_bzero(lout, SCALAR_SIZE);
-	lout[SCALAR_SIZE - 1] = bit;
-	
-	// Get the negation of z
-	uint8_t *negz = rout;
-	memcpy(negz, z, SCALAR_SIZE);
-	
-	conditionalNegateScalar(negz, true);
-	
-	// Update lout
-	cx_math_addm(lout, lout, negz, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	
-	// Create sl and sr
-	uint8_t *sl = rout;
-	uint8_t sr[SCALAR_SIZE];
-	createScalarsFromChaCha20(sl, sr, nonce, count + 2);
-	
-	// Multiply sl and sr by x
-	cx_math_multm(sl, sl, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	cx_math_multm(sr, sr, x, SECP256K1_CURVE_ORDER, sizeof(sr));
-	
-	// Update lout
-	cx_math_addm(lout, lout, sl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	
-	// Set bit in rout
-	explicit_bzero(rout, SCALAR_SIZE);
-	rout[SCALAR_SIZE - 1] = 1 - bit;
-	
-	// Negate rout
-	conditionalNegateScalar(rout, true);
-	
-	// Update rout
-	cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	cx_math_addm(rout, rout, sr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	cx_math_multm(rout, rout, lrGenerator->yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	cx_math_addm(rout, rout, lrGenerator->z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-	
-	// Update the LR generator
-	cx_math_multm(lrGenerator->yn, lrGenerator->yn, y, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->yn));
-	cx_math_addm(lrGenerator->z22n, lrGenerator->z22n, lrGenerator->z22n, SECP256K1_CURVE_ORDER, sizeof(lrGenerator->z22n));
 }
 
-// Conditional negate scalar
-void conditionalNegateScalar(uint8_t *scalar, bool negate) {
+// Conditional negate
+void conditionalNegate(uint8_t *scalar, bool negate, const uint8_t *modulo) {
 
 	// Negate the scalar if it's not zero and negating in a way that tries to mitigate timing attacks
 	uint8_t temp[SCALAR_SIZE];
-	cx_math_subm((cx_math_is_zero(scalar, SCALAR_SIZE) || !negate) ? temp : scalar, SECP256K1_CURVE_ORDER, scalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-}
-
-// Conditional negate component
-void conditionalNegateComponent(uint8_t *component, bool negate) {
-
-	// Negate the component if it's not zero and negating in a way that tries to mitigate timing attacks
-	uint8_t temp[PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_subm((cx_math_is_zero(component, PUBLIC_KEY_COMPONENT_SIZE) || !negate) ? temp : component, SECP256K1_CURVE_PRIME, component, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	cx_math_subm((cx_math_is_zero(scalar, SCALAR_SIZE) || !negate) ? temp : scalar, modulo, scalar, modulo, SCALAR_SIZE);
 }
 
 // Is quadratic residue

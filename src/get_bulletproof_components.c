@@ -5,16 +5,16 @@
 #include "get_bulletproof_components.h"
 
 
-// Constants
+// Definitions
 
 // Proof message switch type index
-static const size_t PROOF_MESSAGE_SWITCH_TYPE_INDEX = 2;
+#define PROOF_MESSAGE_SWITCH_TYPE_INDEX 2
 
 // Proof message identifier index
-static const size_t PROOF_MESSAGE_IDENTIFIER_INDEX = 3;
+#define PROOF_MESSAGE_IDENTIFIER_INDEX 3
 
 // Tau x size
-static const size_t TAU_X_SIZE = 32;
+#define TAU_X_SIZE 32
 
 
 // Supporting function implementation

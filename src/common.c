@@ -9,9 +9,6 @@
 
 // Constants
 
-// Error type mask
-const uint16_t ERROR_TYPE_MASK = 0xF000;
-
 // Hexadecimal characters
 static const char HEXADECIMAL_CHARACTERS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 

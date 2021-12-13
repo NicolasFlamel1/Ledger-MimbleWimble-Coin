@@ -7,10 +7,10 @@
 #include <stdint.h>
 
 
-// Constants
+// Definitions
 
 // Invalid Bech32 size
-extern const size_t INVALID_BECH32_SIZE;
+#define INVALID_BECH32_SIZE SIZE_MAX
 
 
 // Function prototypes

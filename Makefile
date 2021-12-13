@@ -228,6 +228,9 @@ ifneq ($(DEBUG),0)
 		# Define target specific printf
 		DEFINES += PRINTF=screen_printf
 	endif
+	
+	# Define stack canary
+	DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
 # Otherwise
 else
@@ -235,9 +238,6 @@ else
 	# Define printf as nothing
 	DEFINES += PRINTF\(...\)=
 endif
-
-# Define stack canary
-DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
 # Check if BOLOS environment is defined
 ifneq ($(BOLOS_ENV),)

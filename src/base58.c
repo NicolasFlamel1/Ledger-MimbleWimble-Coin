@@ -4,25 +4,22 @@
 #include "common.h"
 
 
+// Definitions
+
+// Number base
+#define NUMBER_BASE 58
+
+// Size percent increase
+#define SIZE_PERCENT_INCREASE 138
+
+// Size percent decrease
+#define SIZE_PERCENT_DECREASE 733
+
+
 // Constants
-
-// Invalid base58 size
-const size_t INVALID_BASE58_SIZE = SIZE_MAX;
-
-// Base58 checksum size
-const size_t BASE58_CHECKSUM_SIZE = 4;
 
 // Characters
 static const char CHARACTERS[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
-// Number base
-static const uint8_t NUMBER_BASE = 58;
-
-// Size percent increase
-static const uint8_t SIZE_PERCENT_INCREASE = 138;
-
-// Size percent decrease
-static const uint16_t SIZE_PERCENT_DECREASE = 733;
 
 
 // Function prototypes

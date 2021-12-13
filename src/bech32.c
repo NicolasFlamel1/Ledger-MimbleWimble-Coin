@@ -6,25 +6,25 @@
 #include "common.h"
 
 
-// Constants
+// Definitions
 
-// Invalid Bech32 size
-const size_t INVALID_BECH32_SIZE = SIZE_MAX;
+// Bits per character
+#define BITS_PER_CHARACTER 5
+
+// Checksum size
+#define CHECKSUM_SIZE 6
+
+// Separator
+#define SEPARATOR '1'
+
+// Checksum final constant
+#define CHECKSUM_FINAL_CONSTANT 1
+
+
+// Constants
 
 // Characters
 static const char CHARACTERS[] = {'q', 'p', 'z', 'r', 'y', '9', 'x', '8', 'g', 'f', '2', 't', 'v', 'd', 'w', '0', 's', '3', 'j', 'n', '5', '4', 'k', 'h', 'c', 'e', '6', 'm', 'u', 'a', '7', 'l'};
-
-// Bits per character
-static const size_t BITS_PER_CHARACTER = 5;
-
-// Checksum size
-static const size_t CHECKSUM_SIZE = 6;
-
-// Separator
-static const char SEPARATOR = '1';
-
-// Checksum final constant
-static const uint32_t CHECKSUM_FINAL_CONSTANT = 1;
 
 // Generators
 static const uint32_t GENERATORS[] = {

@@ -11,16 +11,16 @@
 #include "tor.h"
 
 
-// Constants
+// Definitions
 
 // Signed certificate type
-static const uint8_t SIGNED_CERTIFICATE_TYPE = 4;
+#define SIGNED_CERTIFICATE_TYPE 4
 
 // Signing public key extension type
-static const uint8_t SIGNING_PUBLIC_KEY_EXTENSION_TYPE = 4;
+#define SIGNING_PUBLIC_KEY_EXTENSION_TYPE 4
 
 // Certificate time to Epoch time scalar
-static const uint16_t CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR = 60 * 60;
+#define CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR (60 * 60)
 
 
 // Supporting function implementation
