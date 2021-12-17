@@ -20,7 +20,7 @@
 #define SIGNING_PUBLIC_KEY_EXTENSION_TYPE 4
 
 // Certificate time to Epoch time scalar
-#define CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR (60 * 60)
+#define CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR (MINUTES_IN_AN_HOUR * SECONDS_IN_A_MINUTE)
 
 
 // Supporting function implementation

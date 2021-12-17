@@ -45,19 +45,6 @@
 #define COMMITMENT_ODD_PREFIX 9
 
 
-// Structures
-
-// LR generator
-struct LrGenerator {
-
-	// Yn
-	uint8_t yn[SCALAR_SIZE];
-	
-	// Z22n
-	uint8_t z22n[SCALAR_SIZE];
-};
-
-
 // Constants
 
 // Secp256k1 curve order
@@ -1305,8 +1292,8 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	
 	// Get y squared as x cubed plus seven
 	uint8_t ySquared[PUBLIC_KEY_COMPONENT_SIZE];
-	const uint8_t three[] = {3};
-	cx_math_powm(ySquared, x, three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
+	const uint8_t three = 3;
+	cx_math_powm(ySquared, x, &three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
 	uint8_t seven[SCALAR_SIZE] = {};
 	seven[sizeof(seven) - 1] = 7;
@@ -1426,7 +1413,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
 	
 		// Get bit in the value
-		const bool bit = value & ((uint64_t)1 << i);
+		const bool bit = (value >> i) & 1;
 
 		// Set aterm to the generator
 		uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -1744,16 +1731,14 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 // Use LR generator
 void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
 
-	// Initialize LR generator
-	struct LrGenerator lrGenerator;
+	// Initializer yn to one
+	uint8_t yn[SCALAR_SIZE] = {};
+	yn[sizeof(yn) - 1] = 1;
 	
-	// Set LR generator's yn to one
-	explicit_bzero(lrGenerator.yn, sizeof(lrGenerator.yn));
-	lrGenerator.yn[sizeof(lrGenerator.yn) - 1] = 1;
-	
-	// Set LR generator's z22n to z squared
+	// Initialize z22n to z squared
+	uint8_t z22n[SCALAR_SIZE];
 	const uint8_t two[] = {2};
-	cx_math_powm(lrGenerator.z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(lrGenerator.z22n));
+	cx_math_powm(z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n));
 
 	// Go through all bits to prove
 	for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
@@ -1788,7 +1773,7 @@ void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const u
 		
 		// Set bit in rout
 		uint8_t *rout = negz;
-		explicit_bzero(rout, SCALAR_SIZE);
+		explicit_bzero(rout, SCALAR_SIZE - 1);
 		rout[SCALAR_SIZE - 1] = 1 - bit;
 		
 		// Negate rout
@@ -1797,12 +1782,12 @@ void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const u
 		// Update rout
 		cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 		cx_math_addm(rout, rout, sr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-		cx_math_multm(rout, rout, lrGenerator.yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-		cx_math_addm(rout, rout, lrGenerator.z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_multm(rout, rout, yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+		cx_math_addm(rout, rout, z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 		
-		// Update the LR generator
-		cx_math_multm(lrGenerator.yn, lrGenerator.yn, y, SECP256K1_CURVE_ORDER, sizeof(lrGenerator.yn));
-		cx_math_addm(lrGenerator.z22n, lrGenerator.z22n, lrGenerator.z22n, SECP256K1_CURVE_ORDER, sizeof(lrGenerator.z22n));
+		// Update yn and z22n generator
+		cx_math_multm(yn, yn, y, SECP256K1_CURVE_ORDER, sizeof(yn));
+		cx_math_addm(z22n, z22n, z22n, SECP256K1_CURVE_ORDER, sizeof(z22n));
 		
 		// Update result with lout and rout
 		cx_math_multm(lout, lout, rout, SECP256K1_CURVE_ORDER, sizeof(lout));

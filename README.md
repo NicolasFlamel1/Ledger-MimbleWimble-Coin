@@ -388,12 +388,12 @@ The app can return the following response codes when responding to a command:
 ```
 B100: Unknown class
 B101: Unknown instruction
-B102: Device locked
-B103: Malformed request
-B104: User rejected
-B105: Internal error
+B102: Malformed request
+B103: User rejected
+B104: Internal error
 D100: Invalid parameters
 D101: Invalid state
+D102: Device locked
 9000: Success
 ```
 

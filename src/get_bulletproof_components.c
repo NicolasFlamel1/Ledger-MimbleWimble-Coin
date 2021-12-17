@@ -95,11 +95,16 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	}
 	
 	// Initialize proof message
-	uint8_t proofMessage[PROOF_MESSAGE_SIZE] = {};
+	uint8_t proofMessage[PROOF_MESSAGE_SIZE] = {
 	
-	// Set proof message's value
-	proofMessage[PROOF_MESSAGE_SWITCH_TYPE_INDEX] = switchType;
-	proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX] = identifierDepth;
+		// Switch type
+		[PROOF_MESSAGE_SWITCH_TYPE_INDEX] = switchType,
+		
+		// Identifier depth
+		[PROOF_MESSAGE_IDENTIFIER_INDEX] = identifierDepth
+	};
+	
+	// Set proof message's identifier value
 	memcpy(&proofMessage[PROOF_MESSAGE_IDENTIFIER_INDEX + sizeof(identifierDepth)], &data[sizeof(account) + sizeof(identifierDepth)], IDENTIFIER_SIZE - sizeof(identifierDepth));
 	
 	// Initialize blinding factor

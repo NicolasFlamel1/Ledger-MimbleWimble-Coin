@@ -271,20 +271,17 @@ void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305Sta
 	for(size_t i = 0; i <= valueLength / POLY1305_BLOCK_SIZE; ++i) {
 	
 		// Get current block size
-		const size_t currentBlockSize = MIN((uint8_t)MAX((int8_t)(valueLength - POLY1305_BLOCK_SIZE * i), 0), POLY1305_BLOCK_SIZE);
+		const size_t currentBlockSize = MIN(MAX((int8_t)valueLength - POLY1305_BLOCK_SIZE * i, 0), POLY1305_BLOCK_SIZE);
 		
 		// Check if the current block isn't empty
 		if(currentBlockSize) {
 		
-			// Copy current block to block
-			uint8_t block[POLY1305_NUMBER_SIZE];
+			// Copy current block to block and set the highest byte to one
+			uint8_t block[POLY1305_NUMBER_SIZE] = {
+				[POLY1305_NUMBER_SIZE - 1] = 1
+			};
+			
 			memcpy(block, &value[i * POLY1305_BLOCK_SIZE], currentBlockSize);
-			
-			// Pad the block
-			explicit_bzero(&block[currentBlockSize], sizeof(block) - currentBlockSize - 1);
-			
-			// Set highest block byte to one
-			block[sizeof(block) - 1] = 1;
 			
 			// Convert block to big endian
 			swapEndianness(block, sizeof(block));

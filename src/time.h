@@ -16,7 +16,7 @@
 #define MINUTES_IN_AN_HOUR 60
 
 // Maximum epoch
-#define MAXIMUM_EPOCH ((uint64_t)UINT32_MAX * 60 * 60)
+#define MAXIMUM_EPOCH ((uint64_t)UINT32_MAX * MINUTES_IN_AN_HOUR * SECONDS_IN_A_MINUTE)
 
 // Minimum time zone offset
 #define MINIMUM_TIME_ZONE_OFFSET (-13 * MINUTES_IN_AN_HOUR)

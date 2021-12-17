@@ -50,7 +50,7 @@ static const size_t COMPONENT_SIZE = 32;
 static const char FILE_LOCATION[] = "../src/generators.c";
 
 // Hexadecimal character size
-static const size_t HEXADECIMAL_CHARACTER_SIZE = sizeof("FF") - sizeof(static_cast<char>('\0'));
+static const size_t HEXADECIMAL_CHARACTER_SIZE = sizeof("FF") - sizeof('\0');
 
 // Hexadecimal padding character
 static const char HEXADECIMAL_PADDING_CHARACTER = '0';

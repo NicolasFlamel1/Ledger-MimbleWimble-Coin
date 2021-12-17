@@ -34,9 +34,6 @@ enum Error {
 	// Unknown instruction error
 	UNKNOWN_INSTRUCTION_ERROR,
 	
-	// Device locked error
-	DEVICE_LOCKED_ERROR,
-	
 	// Malformed request error
 	MALFORMED_REQUEST_ERROR,
 	
@@ -50,7 +47,10 @@ enum Error {
 	INVALID_PARAMETERS_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01,
 	
 	// Invalid state error
-	INVALID_STATE_ERROR
+	INVALID_STATE_ERROR,
+	
+	// Device locked error
+	DEVICE_LOCKED_ERROR
 };
 
 // Address type
