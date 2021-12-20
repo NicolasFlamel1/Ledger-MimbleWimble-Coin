@@ -51,56 +51,6 @@ bool willResponseOverflow(unsigned short currentLength, size_t lengthChange) {
 	return USHRT_MAX - currentLength < lengthChange || currentLength + lengthChange >= sizeof(G_io_apdu_buffer);
 }
 
-// To uppercase
-char toUppercase(char character) {
-
-	// Check if character is lowercase
-	if(isLowercase(character)) {
-	
-		// Return character as uppercase
-		return character -= 'a' - 'A';
-	}
-	
-	// Otherwise
-	else {
-	
-		// Return character
-		return character;
-	}
-}
-
-// To lowercase
-char toLowercase(char character) {
-
-	// Check if character is uppercase
-	if(character >= 'A' && character <= 'Z') {
-	
-		// Return character as lowercase
-		return character += 'a' - 'A';
-	}
-	
-	// Otherwise
-	else {
-	
-		// Return character
-		return character;
-	}
-}
-
-// Is lowercase
-bool isLowercase(char character) {
-
-	// Return if the character is lowercase
-	return character >= 'a' && character <= 'z';
-}
-
-// Is numeric
-bool isNumeric(char character) {
-
-	// Return if the character is numeric
-	return character >= '0' && character <= '9';
-}
-
 // Swap endianness
 void swapEndianness(uint8_t *value, size_t length) {
 

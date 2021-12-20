@@ -115,13 +115,6 @@ void getTorAddressFromPublicKey(char *torAddress, const uint8_t *publicKey) {
 	
 	// Encode the address data to get the Tor address
 	base32Encode(torAddress, addressData, sizeof(addressData));
-	
-	// Go through all characters in the Tor address
-	for(size_t i = 0; i < TOR_ADDRESS_SIZE; ++i) {
-	
-		// Make character lowercase
-		torAddress[i] = toLowercase(torAddress[i]);
-	}
 }
 
 // Get Tor address

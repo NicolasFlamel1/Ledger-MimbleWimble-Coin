@@ -41,7 +41,7 @@ The app can be installed on a Ledger device with the following command:
 ```
 make load
 ```
-This app also supports Grin as a companion app. To compile and install this app for Grin, run the following commands:
+This app also supports Grin as a dependent app. To compile and install this app for Grin, run the following commands:
 ```
 make CURRENCY=grin
 make load CURRENCY=grin

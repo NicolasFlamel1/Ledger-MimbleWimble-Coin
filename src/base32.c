@@ -16,7 +16,7 @@
 // Constants
 
 // Characters
-static const char CHARACTERS[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
+static const char CHARACTERS[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '2', '3', '4', '5', '6', '7'};
 
 
 // Function prototypes
@@ -177,7 +177,7 @@ size_t getBase32DecodedLength(const char *data, size_t length) {
 	for(size_t i = 0; i < length - numberOfPaddingCharacters; ++i) {
 	
 		// Check if character isn't a valid character
-		if((!isLowercase(data[i]) && !isNumeric(data[i])) || !memchr(CHARACTERS, toUppercase(data[i]), sizeof(CHARACTERS))) {
+		if(!memchr(CHARACTERS, data[i], sizeof(CHARACTERS))) {
 		
 			// Return invalid base32 size
 			return INVALID_BASE32_SIZE;
@@ -201,13 +201,13 @@ void base32Decode(uint8_t *result, const char *data, size_t length) {
 		const size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER;
 		
 		// Get first quantum
-		const char firstQuantum = (char *)memchr(CHARACTERS, toUppercase(data[position]), sizeof(CHARACTERS)) - CHARACTERS;
+		const char firstQuantum = (char *)memchr(CHARACTERS, data[position], sizeof(CHARACTERS)) - CHARACTERS;
 		
 		// Get second quantum
-		const char secondQuantum = (position + 1 < length) ? (char *)memchr(CHARACTERS, toUppercase(data[position + 1]), sizeof(CHARACTERS)) - CHARACTERS : 0;
+		const char secondQuantum = (position + 1 < length) ? (char *)memchr(CHARACTERS, data[position + 1], sizeof(CHARACTERS)) - CHARACTERS : 0;
 		
 		// Get third quantum
-		const char thirdQuantum = (position + 2 < length) ? (char *)memchr(CHARACTERS, toUppercase(data[position + 2]), sizeof(CHARACTERS)) - CHARACTERS : 0;
+		const char thirdQuantum = (position + 2 < length) ? (char *)memchr(CHARACTERS, data[position + 2], sizeof(CHARACTERS)) - CHARACTERS : 0;
 		
 		// Check quantum position in group
 		uint8_t byte;
