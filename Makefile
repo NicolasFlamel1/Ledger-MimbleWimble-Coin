@@ -15,7 +15,7 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 # Application version
 APPVERSION_M = 0
 APPVERSION_N = 0
-APPVERSION_P = 4
+APPVERSION_P = 5
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Emulator flags
@@ -272,11 +272,11 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -std=gnu17 -Oz -Wall -Wextra -Wno-main -Wno-unused-label -mfloat-abi=soft
+CFLAGS += -Oz -Wall -Wextra
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -Oz
-LDLIBS += -lm -lgcc -lc
+LDFLAGS +=
+LDLIBS += -lgcc -lc
 
 # Include BOLOS SDK Makefile glyphs
 include $(BOLOS_SDK)/Makefile.glyphs

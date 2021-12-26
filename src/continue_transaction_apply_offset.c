@@ -54,8 +54,8 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if transaction isn't sending or the offset was already applied
-	if(!transaction.send || transaction.offsetApplied) {
+	// Check if an offset was already applied to the transaction
+	if(transaction.offsetApplied) {
 	
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);

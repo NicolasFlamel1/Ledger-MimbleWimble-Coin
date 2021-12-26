@@ -107,7 +107,7 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 	os_xor((uint64_t *)hash.ctx.h, (void *)INITIALIZATION_VECTOR, &parameter, sizeof(hash.ctx.h));
 	
 	// Initialize key block
-	volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES] = {};
+	volatile uint8_t keyBlock[BLAKE2B_BLOCKBYTES] = {0};
 	
 	// Begin try
 	BEGIN_TRY {

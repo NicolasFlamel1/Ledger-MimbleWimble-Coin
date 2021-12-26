@@ -148,7 +148,7 @@ int main() {
 	}
 	
 	// Write end of generators second half to file
-	file << "};";
+	file << "};" << endl;
 	
 	// Display message
 	cout << "Created " << FILE_LOCATION << endl;

@@ -442,7 +442,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 
 				// Get product of the value and its generator
 				memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
-				uint8_t temp[BLINDING_FACTOR_SIZE] = {};
+				uint8_t temp[BLINDING_FACTOR_SIZE] = {0};
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 				
@@ -838,7 +838,7 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 
 	// Compute the X25519 public key as the sum of one and y divided by the difference of one and y
-	uint8_t one[SCALAR_SIZE] = {};
+	uint8_t one[SCALAR_SIZE] = {0};
 	one[sizeof(one) - 1] = 1;
 	
 	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, ED25519_PUBLIC_KEY_SIZE);
@@ -1295,7 +1295,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	const uint8_t three = 3;
 	cx_math_powm(ySquared, x, &three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	uint8_t seven[SCALAR_SIZE] = {};
+	uint8_t seven[SCALAR_SIZE] = {0};
 	seven[sizeof(seven) - 1] = 7;
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
@@ -1365,11 +1365,11 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t i
 void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
 
 	// Get running commitment from the commitment and generator
-	uint8_t runningCommitment[CX_SHA256_SIZE] = {};
+	uint8_t runningCommitment[CX_SHA256_SIZE] = {0};
 	bulletproofUpdateCommitment(runningCommitment, &commitment[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H);
 
 	// Set value in value bytes
-	uint8_t valueBytes[SCALAR_SIZE] = {};
+	uint8_t valueBytes[SCALAR_SIZE] = {0};
 	U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint32_t), value);
 	U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 
@@ -1499,19 +1499,19 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	memcpy(z, runningCommitment, sizeof(z));
 	
 	// Create t0 with an LR generator
-	const uint8_t zero[SCALAR_SIZE] = {};
-	uint8_t t0[SCALAR_SIZE] = {};
+	const uint8_t zero[SCALAR_SIZE] = {0};
+	uint8_t t0[SCALAR_SIZE] = {0};
 	useLrGenerator(t0, zero, y, z, rewindNonce, value);
 	
 	// Create t1 with an LR generator
-	uint8_t one[SCALAR_SIZE] = {};
+	uint8_t one[SCALAR_SIZE] = {0};
 	one[sizeof(one) - 1] = 1;
-	uint8_t t1[SCALAR_SIZE] = {};
+	uint8_t t1[SCALAR_SIZE] = {0};
 	useLrGenerator(t1, one, y, z, rewindNonce, value);
 	
 	// Create t2 with an LR generator
 	cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
-	uint8_t t2[SCALAR_SIZE] = {};
+	uint8_t t2[SCALAR_SIZE] = {0};
 	useLrGenerator(t2, one, y, z, rewindNonce, value);
 	
 	// Get the difference of t1 and t2
@@ -1520,7 +1520,7 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	cx_math_addm(t1, t1, t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 	
 	// Divide the difference by two
-	uint8_t twoInverse[SCALAR_SIZE] = {};
+	uint8_t twoInverse[SCALAR_SIZE] = {0};
 	twoInverse[sizeof(twoInverse) - 1] = 2;
 	cx_math_invprimem(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, sizeof(twoInverse));
 	
@@ -1732,7 +1732,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
 
 	// Initializer yn to one
-	uint8_t yn[SCALAR_SIZE] = {};
+	uint8_t yn[SCALAR_SIZE] = {0};
 	yn[sizeof(yn) - 1] = 1;
 	
 	// Initialize z22n to z squared
@@ -1747,7 +1747,7 @@ void useLrGenerator(uint8_t *result, const uint8_t *x, const uint8_t *y, const u
 		const bool bit = (value >> i) & 1;
 		
 		// Set bit in lout
-		uint8_t lout[SCALAR_SIZE] = {};
+		uint8_t lout[SCALAR_SIZE] = {0};
 		lout[SCALAR_SIZE - 1] = bit;
 		
 		// Get the negation of z
