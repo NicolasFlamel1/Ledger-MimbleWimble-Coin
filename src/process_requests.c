@@ -7,6 +7,7 @@
 #include "continue_encrypting_slate.h"
 #include "continue_transaction_apply_offset.h"
 #include "continue_transaction_get_public_key.h"
+#include "continue_transaction_get_message_signature.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
 #include "finish_decrypting_slate.h"
@@ -242,6 +243,15 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 					processContinueTransactionGetPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
+					break;
+				
+				// Continue transaction get message signature instruction
+				case CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION:
+				
+					// Process continue transaction get message signature request
+					processContinueTransactionGetMessageSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+				
+					// break
 					break;
 				
 				// Finish transaction instruction

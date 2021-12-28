@@ -87,5 +87,8 @@ size_t getStringLength(uint64_t value);
 // To string
 void toString(char *result, uint64_t value, uint8_t fractionalDigits);
 
+// Is valid UTF-8 string
+bool isValidUtf8String(const char *text, size_t length);
+
 
 #endif

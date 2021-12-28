@@ -243,7 +243,7 @@ Parameter two: 00
 Data: Data (64 bytes with the final request able to be less than 64 bytes)
 Response: Decrypted data (size of the data ceil to the next 16 byte boundary)
 Requires user interaction: No
-Example request: C70C000040976fb93ab07eafa34a7a4385dedaec63df0f5d3415be47b39a2d0ce2781827298b85f4d7532d9ee23bdd7cf9bd8b91d352bd6402ebff6350e05e49960133f46c
+Example request: C70C000040976FB93AB07EAFA34A7A4385DEDAEC63DF0F5D3415BE47B39A2D0CE2781827298B85F4D7532D9EE23BDD7CF9BD8B91D352BD6402EBFF6350E05E49960133F46C
 Example response: E668EBE958E0F7376006AD67E5E7497ED724771510272E55352F8E41ADCA8D004559A19D3FD2930C1152583E9BF53118BAB9DF5D1A0E7AA92341DAFB4F5909CFFC0927D3501721DF06AEA9364D2361F19000
 Test: printf "\xC7\x0C\x00\x00\x40\x97\x6F\xB9\x3A\xB0\x7E\xAF\xA3\x4A\x7A\x43\x85\xDE\xDA\xEC\x63\xDF\x0F\x5D\x34\x15\xBE\x47\xB3\x9A\x2D\x0C\xE2\x78\x18\x27\x29\x8B\x85\xF4\xD7\x53\x2D\x9E\xE2\x3B\xDD\x7C\xF9\xBD\x8B\x91\xD3\x52\xBD\x64\x02\xEB\xFF\x63\x50\xE0\x5E\x49\x96\x01\x33\xF4\x6C" | xxd -ps -c200 | ledgerctl send -
 ```
@@ -338,49 +338,64 @@ Example response: 0324F279934A5AA53AC4930EB87744F80612AA7881855E514E619F426FFB34
 Test: printf "\xC7\x12\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
 ```
 
+* Continue transaction get message signature
+```
+Description: Returns the message signed with the transaction's blinding factor
+Class: C7
+Instruction: 13
+Parameters one: 00
+Parameter two: 00
+Data: Secret nonce (32 bytes) | public nonce (33 bytes) | pubic key (33 bytes) | message (UTF-8 string varying size)
+Response: Single-signer signature (64 bytes)
+Requires user interaction: No
+Example request: C713000066117060E6676E02004AEA8F5834BA51875E867AEAAEB32C9113467604CAE2164E0340CB7F4F4173E8C86127985290C48FBE2398DE2AECEE7085F2DA511A5B2E42D303E51BEC53FF1EFA50516669BC0889FDA35E6FF84F0530A4B4ADBDB0A543E5159354657374
+Example response: D3422E5B1A51DAF28570EEEC2ADE9823BE8FC49052982761C8E873414F7FCB40455F0084C397C2C79E8D6258AF15EC178D79744B452AFA63EB189B08A4DC3A239000"
+Test: printf "\xC7\x13\x00\x00\x66\x11\x70\x60\xE6\x67\x6E\x02\x00\x4A\xEA\x8F\x58\x34\xBA\x51\x87\x5E\x86\x7A\xEA\xAE\xB3\x2C\x91\x13\x46\x76\x04\xCA\xE2\x16\x4E\x03\x40\xCB\x7F\x4F\x41\x73\xE8\xC8\x61\x27\x98\x52\x90\xC4\x8F\xBE\x23\x98\xDE\x2A\xEC\xEE\x70\x85\xF2\xDA\x51\x1A\x5B\x2E\x42\xD3\x03\xE5\x1B\xEC\x53\xFF\x1E\xFA\x50\x51\x66\x69\xBC\x08\x89\xFD\xA3\x5E\x6F\xF8\x4F\x05\x30\xA4\xB4\xAD\xBD\xB0\xA5\x43\xE5\x15\x93\x54\x65\x73\x74" | xxd -ps -c200 | ledgerctl send -
+```
+
 * Finish transaction
 ```
 Description: Returns the kernel information signed with the transaction's blinding factor
 Class: C7
-Instruction: 13
+Instruction: 14
 Parameters one: Address type (MQS 00, Tor 01, Slatepack 02)
 Parameter two: 00
 Data: Secret nonce (32 bytes) | public nonce (33 bytes) | pubic key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [kernel commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address, 64 bytes for Slatepack receiver address)]
 Response: Single-signer signature (64 bytes) | [payment proof (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address, 64 bytes for Slatepack receiver address)]
 Requires user interaction: Yes for transactions that include an input, no otherwise
-Example request: C713000063117060e6676e02004aea8f5834ba51875e867aeaaeb32c9113467604cae2164e0340cb7f4f4173e8c86127985290c48fbe2398de2aecee7085f2da511a5b2e42d303e51bec53ff1efa50516669bc0889fda35e6ff84f0530a4b4adbdb0a543e5159300
+Example request: C714000063117060E6676E02004AEA8F5834BA51875E867AEAAEB32C9113467604CAE2164E0340CB7F4F4173E8C86127985290C48FBE2398DE2AECEE7085F2DA511A5B2E42D303E51BEC53FF1EFA50516669BC0889FDA35E6FF84F0530A4B4ADBDB0A543E5159300
 Example response: D3422E5B1A51DAF28570EEEC2ADE9823BE8FC49052982761C8E873414F7FCB40883D13E79D2E626CBF0E1C92ABEDCC05543235FAC3972040D1AF9598121E92369000
-Test: printf "\xC7\x13\x00\x00\x63\x11\x70\x60\xE6\x67\x6E\x02\x00\x4A\xEA\x8F\x58\x34\xBA\x51\x87\x5E\x86\x7A\xEA\xAE\xB3\x2C\x91\x13\x46\x76\x04\xCA\xE2\x16\x4E\x03\x40\xCB\x7F\x4F\x41\x73\xE8\xC8\x61\x27\x98\x52\x90\xC4\x8F\xBE\x23\x98\xDE\x2A\xEC\xEE\x70\x85\xF2\xDA\x51\x1A\x5B\x2E\x42\xD3\x03\xE5\x1B\xEC\x53\xFF\x1E\xFA\x50\x51\x66\x69\xBC\x08\x89\xFD\xA3\x5E\x6F\xF8\x4F\x05\x30\xA4\xB4\xAD\xBD\xB0\xA5\x43\xE5\x15\x93\x00" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x14\x00\x00\x63\x11\x70\x60\xE6\x67\x6E\x02\x00\x4A\xEA\x8F\x58\x34\xBA\x51\x87\x5E\x86\x7A\xEA\xAE\xB3\x2C\x91\x13\x46\x76\x04\xCA\xE2\x16\x4E\x03\x40\xCB\x7F\x4F\x41\x73\xE8\xC8\x61\x27\x98\x52\x90\xC4\x8F\xBE\x23\x98\xDE\x2A\xEC\xEE\x70\x85\xF2\xDA\x51\x1A\x5B\x2E\x42\xD3\x03\xE5\x1B\xEC\x53\xFF\x1E\xFA\x50\x51\x66\x69\xBC\x08\x89\xFD\xA3\x5E\x6F\xF8\x4F\x05\x30\xA4\xB4\xAD\xBD\xB0\xA5\x43\xE5\x15\x93\x00" | xxd -ps -c200 | ledgerctl send -
 ```
 
 * Get MQS timestamp signature
 ```
 Description: Returns the timestamp signed with the account's MQS private key at the specified index
 Class: C7
-Instruction: 14
+Instruction: 15
 Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | timestamp (unsigned 8 byte little endian) | time zone offset (signed 2 byte little endian)
 Response: DER signature (at most 72 bytes)
 Requires user interaction: Yes
-Example request: C71400001000000000000000006642762100000000
+Example request: C71500001000000000000000006642762100000000
 Example response: 304402206FC03B70F2E15F16F18B697831B20F775FFECEF1A86568272AC90444EFE9BB5B02202656B1692E282BAE22D6D76B7F89015BEE7F71EA9D68071996C7FB46CE0F10229000
-Test: printf "\xC7\x14\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x66\x42\x76\x21\x00\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x15\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x66\x42\x76\x21\x00\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
 ```
 
 * Get Tor certificate signature
 ```
 Description: Returns the certificate signed with the account's Tor private key at the specified index
 Class: C7
-Instruction: 15
+Instruction: 16
 Parameters one: 00
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | index (unsigned 4 bytes little endian integer) | Ed25519 medium term certificate (varying size Ed25519_signing_cert without header and signature) | time zone offset (signed 2 byte little endian)
 Response: Ed25519 signature (64 bytes)
 Requires user interaction: Yes
-Example request: C7150000540000000000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd45824101002004002c425da6a34d075d0b576a6e5d4a66f524a2751eebe74e98b8bb29f025137c2a
+Example request: C7160000540000000000000000010400070003019E5FD5F3A704FB52AA3E54A835E12AE102D0B44B785F239467A1523FFD45824101002004002C425DA6A34D075D0B576A6E5D4A66F524A2751EEBE74E98B8BB29F025137C2A
 Example response: 82FB14C3BC359C246E9870D4321D3A94379ABF4F4EBD66197573A0B32EDF52142FF69A4D1AAAAFB7ACBC2E6B996372AB76D0EE58DC8188BC9E9312E9DBC6410E9000
-Test: printf "\xC7\x15\x00\x00\x54\x00\x00\x00\x00\x00\x00\x00\x00\x01\x04\x00\x07\x00\x03\x01\x9E\x5F\xD5\xF3\xA7\x04\xFB\x52\xAA\x3E\x54\xA8\x35\xE1\x2A\xE1\x02\xD0\xB4\x4B\x78\x5F\x23\x94\x67\xA1\x52\x3F\xFD\x45\x82\x41\x01\x00\x20\x04\x00\x2C\x42\x5D\xA6\xA3\x4D\x07\x5D\x0B\x57\x6A\x6E\x5D\x4A\x66\xF5\x24\xA2\x75\x1E\xEB\xE7\x4E\x98\xB8\xBB\x29\xF0\x25\x13\x7C\x2A" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x16\x00\x00\x54\x00\x00\x00\x00\x00\x00\x00\x00\x01\x04\x00\x07\x00\x03\x01\x9E\x5F\xD5\xF3\xA7\x04\xFB\x52\xAA\x3E\x54\xA8\x35\xE1\x2A\xE1\x02\xD0\xB4\x4B\x78\x5F\x23\x94\x67\xA1\x52\x3F\xFD\x45\x82\x41\x01\x00\x20\x04\x00\x2C\x42\x5D\xA6\xA3\x4D\x07\x5D\x0B\x57\x6A\x6E\x5D\x4A\x66\xF5\x24\xA2\x75\x1E\xEB\xE7\x4E\x98\xB8\xBB\x29\xF0\x25\x13\x7C\x2A" | xxd -ps -c200 | ledgerctl send -
 ```
 
 ### Response Codes

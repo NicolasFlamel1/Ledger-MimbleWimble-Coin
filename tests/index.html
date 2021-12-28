@@ -95,9 +95,12 @@
 
 		// Request continue transaction get public key instruction
 		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION + 1;
+		
+		// Request continue transaction get message signature instruction
+		const REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
 
 		// Request finish transaction instruction
-		const REQUEST_FINISH_TRANSACTION_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
+		const REQUEST_FINISH_TRANSACTION_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION + 1;
 		
 		// Request get MQS timestamp signature instruction
 		const REQUEST_GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION = REQUEST_FINISH_TRANSACTION_INSTRUCTION + 1;
@@ -1396,6 +1399,9 @@
 			// Identifier
 			const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
 			
+			// Message
+			const MESSAGE = "This is a message";
+			
 			// Log output
 			console.log("Using output: " + OUTPUT.toFixed());
 			
@@ -1716,6 +1722,44 @@
 				var publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
 			}
 			
+			// Create message secret nonce
+			let messageSecretNonce = Secp256k1Zkp.createSecretNonce();
+			
+			// Create message public nonce
+			let messagePublicNonce = Secp256k1Zkp.publicKeyFromSecretKey(messageSecretNonce);
+			
+			// Get the message signature from the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			
+				// Message secret nonce
+				Buffer.from(messageSecretNonce),
+				
+				// Message public nonce
+				Buffer.from(messagePublicNonce),
+				
+				// Public key
+				Buffer.from(publicKey),
+				
+				// Message
+				Buffer.from((new TextEncoder()).encode(MESSAGE))
+			]));
+		
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Log message signature
+			console.log("Message signature: " + Common.toHexString(response));
+			
+			// Get expected message signature
+			let expectedMessageSignature = Secp256k1Zkp.createSingleSignerSignature(Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), transactionBlindingFactor, messageSecretNonce, publicKey, messagePublicNonce, messagePublicNonce);
+			
+			// Check if message signature is invalid
+			if(Common.arraysAreEqual(response, expectedMessageSignature) === false) {
+			
+				// Throw error
+				throw "Invalid message signature: " + Common.toHexString(response);
+			}
+			
 			// Check features
 			switch(features) {
 			
@@ -1844,6 +1888,9 @@
 			
 			// Input switch type
 			const INPUT_SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
+			
+			// Message
+			const MESSAGE = "This is a message";
 			
 			// Log output
 			console.log("Using output: " + OUTPUT.toFixed());
@@ -2189,6 +2236,44 @@
 			
 			// Get public key from transaction public key
 			let publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
+			
+			// Create message secret nonce
+			let messageSecretNonce = Secp256k1Zkp.createSecretNonce();
+			
+			// Create message public nonce
+			let messagePublicNonce = Secp256k1Zkp.publicKeyFromSecretKey(messageSecretNonce);
+			
+			// Get the message signature from the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+			
+				// Message secret nonce
+				Buffer.from(messageSecretNonce),
+				
+				// Message public nonce
+				Buffer.from(messagePublicNonce),
+				
+				// Public key
+				Buffer.from(publicKey),
+				
+				// Message
+				Buffer.from((new TextEncoder()).encode(MESSAGE))
+			]));
+		
+			// Remove response code from response
+			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Log message signature
+			console.log("Message signature: " + Common.toHexString(response));
+			
+			// Get expected message signature
+			let expectedMessageSignature = Secp256k1Zkp.createSingleSignerSignature(Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), transactionBlindingFactor, messageSecretNonce, publicKey, messagePublicNonce, messagePublicNonce);
+			
+			// Check if message signature is invalid
+			if(Common.arraysAreEqual(response, expectedMessageSignature) === false) {
+			
+				// Throw error
+				throw "Invalid message signature: " + Common.toHexString(response);
+			}
 			
 			// Check features
 			switch(features) {

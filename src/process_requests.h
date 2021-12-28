@@ -70,6 +70,9 @@ enum Instruction {
 	// Continue transaction get public key instruction
 	CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
 	
+	// Continue transaction get message signature instruction
+	CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION,
+	
 	// Finish transaction instruction
 	FINISH_TRANSACTION_INSTRUCTION,
 	

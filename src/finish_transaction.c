@@ -557,7 +557,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Initialize signature
 	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
 
-	// Create single-signer signature from the message, private key, secret nonce, public nonce if used, and public key
+	// Create single-signer signature from the message, transaction's blinding factor, secret nonce, public nonce, and public key
 	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, secretNonce, publicNonce, publicKey);
 	
 	// Initialize payment proof

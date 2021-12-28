@@ -159,3 +159,77 @@ void toString(char *result, uint64_t value, uint8_t fractionalDigits) {
 	// Copy used buffer to the result
 	memcpy(result, &buffer[length], sizeof(buffer) - length);
 }
+
+// Is valid UTF-8 string
+bool isValidUtf8String(const char *text, size_t length) {
+
+	// Go through all UTF-8 code points in the text
+	for(size_t i = 0; i < length;) {
+	
+		// Check if UTF-8 code point is an ASCII character
+		if(text[i] == '\t' || text[i] == '\n' || text[i] == '\r' || (text[i] >= ' ' && text[i] <= '~')) {
+		
+			// Go to next UTF-8 code point
+			++i;
+		}
+		
+		// Otherwise check if UTF-8 code point is a non-overlong two byte character
+		else if(i < length - 1 && text[i] >= 0xC2 && text[i] <= 0xDF && text[i + 1] <= 0x80 && text[i + 1] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 2;
+		}
+		
+		// Otherwise check if UTF-8 code point is an excluding overlongs character
+		else if(i < length - 2 && text[i] == 0xE0 && text[i + 1] >= 0xA0 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 3;
+		}
+		
+		// Otherwise check if UTF-8 code point is a straight three byte character
+		else if(i < length - 2 && ((text[i] >= 0xE1 && text[i] <= 0xEC) || text[i] == 0xEE || text[i] == 0xEF) && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 3;
+		}
+		
+		// Otherwise check if UTF-8 code point is an excluding surrogates character
+		else if(i < length - 2 && text[i] == 0xED && text[i + 1] >= 0x80 && text[i + 1] <= 0x9F && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 3;
+		}
+		
+		// Otherwise check if UTF-8 code point is a planes one to three character
+		else if(i < length - 3 && text[i] == 0xF0 && text[i + 1] >= 0x90 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF && text[i + 3] >= 0x80 && text[i + 3] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 4;
+		}
+		
+		// Otherwise check if UTF-8 code point is a planes four to fifteen character
+		else if(i < length - 3 && text[i] >= 0xF1 && text[i] <= 0xF3 && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF && text[i + 3] >= 0x80 && text[i + 3] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 4;
+		}
+		
+		// Otherwise check if UTF-8 code point is a plane sixteen character
+		else if(i < length - 3 && text[i] == 0xF4 && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF && text[i + 3] >= 0x80 && text[i + 3] <= 0xBF) {
+		
+			// Go to next UTF-8 code point
+			i += 4;
+		}
+		
+		// Otherwise
+		else {
+		
+			// Return false
+			return false;
+		}
+	}
+	
+	// Return true
+	return true;
+}
