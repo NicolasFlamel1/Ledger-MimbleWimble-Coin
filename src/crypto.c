@@ -688,12 +688,46 @@ void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor
 	}
 }
 
+// Create single-signer nonces
+void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
+
+	// Loop while the secret nonce is zero
+	do {
+	
+		// Create random secret nonce
+		cx_rng(secretNonce, NONCE_SIZE);
+		
+		// Normalize the secret nonce
+		cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
+		
+	} while(cx_math_is_zero(secretNonce, NONCE_SIZE));
+	
+	// Get the product of the secret nonce and its generator
+	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	
+	// Check if the result is infinity or its x component is zero
+	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretNonce, NONCE_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
+
+	// Negate the secret nonce and the result's y component if the result's y component isn't quadratic residue
+	uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	bool negate = !isQuadraticResidue(y);
+	
+	conditionalNegate(secretNonce, negate, SECP256K1_CURVE_ORDER);
+	conditionalNegate(y, negate, SECP256K1_CURVE_PRIME);
+	
+	// Get the public nonce from the result
+	publicNonce[0] = (generator[sizeof(generator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+	memcpy(&publicNonce[PUBLIC_KEY_PREFIX_SIZE], &generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+}
+
 // Create single-signer signature
 void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
-
-	// Normalize the secret nonce
-	cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
-
+	
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));

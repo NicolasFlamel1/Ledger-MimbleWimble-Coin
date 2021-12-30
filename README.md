@@ -275,7 +275,7 @@ Response: N/A
 Requires user interaction: No
 Example request: C70E0000200000000000000000020000000000000003000000000000000300000000000000
 Example response: 9000
-Test: printf "\xC7\x0E\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x0E\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Continue transaction include output
@@ -290,7 +290,7 @@ Response: N/A
 Requires user interaction: No
 Example request: C70F00001A0300000001000000000000000000000000020000000000000001
 Example response: 9000
-Test: printf "\xC7\x0F\x00\x00\x1A\x03\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x0F\x00\x00\x1A\x03\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Continue transaction include input
@@ -305,7 +305,7 @@ Response: N/A
 Requires user interaction: No
 Example request: C71000001A0300000002000000000000000000000000060000000000000001
 Example response: 9000
-Test: printf "\xC7\x10\x00\x00\x1A\x03\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x10\x00\x00\x1A\x03\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Continue transaction apply offset
@@ -320,7 +320,7 @@ Response: N/A
 Requires user interaction: No
 Example request: C71100002008E096C8D9A95570297DFA520BC4F175399CB76672A590A50D5ABA6CD438AD02
 Example response: 9000
-Test: printf "\xC7\x11\x00\x00\x20\x08\xE0\x96\xC8\xD9\xA9\x55\x70\x29\x7D\xFA\x52\x0B\xC4\xF1\x75\x39\x9C\xB7\x66\x72\xA5\x90\xA5\x0D\x5A\xBA\x6C\xD4\x38\xAD\x02" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x11\x00\x00\x20\x08\xE0\x96\xC8\xD9\xA9\x55\x70\x29\x7D\xFA\x52\x0B\xC4\xF1\x75\x39\x9C\xB7\x66\x72\xA5\x90\xA5\x0D\x5A\xBA\x6C\xD4\x38\xAD\x02" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Continue transaction get public key
@@ -335,22 +335,22 @@ Response: Public key (33 bytes)
 Requires user interaction: No
 Example request: C712000000
 Example response: 0324F279934A5AA53AC4930EB87744F80612AA7881855E514E619F426FFB34AB169000
-Test: printf "\xC7\x12\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
+Test: printf "\xC7\x12\x00\x00\x00" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Continue transaction get message signature
 ```
-Description: Returns the message signed with the transaction's blinding factor
+Description: Returns a message signed with the transaction's blinding factor
 Class: C7
 Instruction: 13
 Parameters one: 00
 Parameter two: 00
-Data: Secret nonce (32 bytes) | public nonce (33 bytes) | pubic key (33 bytes) | message (UTF-8 string varying size)
+Data: pubic key (33 bytes) | message (UTF-8 string varying size)
 Response: Single-signer signature (64 bytes)
 Requires user interaction: No
-Example request: C713000066117060E6676E02004AEA8F5834BA51875E867AEAAEB32C9113467604CAE2164E0340CB7F4F4173E8C86127985290C48FBE2398DE2AECEE7085F2DA511A5B2E42D303E51BEC53FF1EFA50516669BC0889FDA35E6FF84F0530A4B4ADBDB0A543E5159354657374
-Example response: D3422E5B1A51DAF28570EEEC2ADE9823BE8FC49052982761C8E873414F7FCB40455F0084C397C2C79E8D6258AF15EC178D79744B452AFA63EB189B08A4DC3A239000"
-Test: printf "\xC7\x13\x00\x00\x66\x11\x70\x60\xE6\x67\x6E\x02\x00\x4A\xEA\x8F\x58\x34\xBA\x51\x87\x5E\x86\x7A\xEA\xAE\xB3\x2C\x91\x13\x46\x76\x04\xCA\xE2\x16\x4E\x03\x40\xCB\x7F\x4F\x41\x73\xE8\xC8\x61\x27\x98\x52\x90\xC4\x8F\xBE\x23\x98\xDE\x2A\xEC\xEE\x70\x85\xF2\xDA\x51\x1A\x5B\x2E\x42\xD3\x03\xE5\x1B\xEC\x53\xFF\x1E\xFA\x50\x51\x66\x69\xBC\x08\x89\xFD\xA3\x5E\x6F\xF8\x4F\x05\x30\xA4\xB4\xAD\xBD\xB0\xA5\x43\xE5\x15\x93\x54\x65\x73\x74" | xxd -ps -c200 | ledgerctl send -
+Example request: C71300002503E51BEC53FF1EFA50516669BC0889FDA35E6FF84F0530A4B4ADBDB0A543E5159354657374
+Example response: A5DA58A68DCBA3A71955F0C7AE9BEB5D2C655E92F797F7FB3961A4EF76769D67F8ED192F062F021D5D968179B88DC1180DDD623F2EF1DC17F7A4664E91AC2DFD9000
+Test: printf "\xC7\x13\x00\x00\x25\x03\xE5\x1B\xEC\x53\xFF\x1E\xFA\x50\x51\x66\x69\xBC\x08\x89\xFD\xA3\x5E\x6F\xF8\x4F\x05\x30\xA4\xB4\xAD\xBD\xB0\xA5\x43\xE5\x15\x93\x54\x65\x73\x74" | xxd -ps -c200 | LEDGER_PROXY_ADDRESS=127.0.0.1 LEDGER_PROXY_PORT=9999 ledgerctl send -
 ```
 
 * Finish transaction

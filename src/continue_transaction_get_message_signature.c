@@ -25,34 +25,14 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
-	// Get secret nonce from data
-	uint8_t *secretNonce = data;
-	
-	// Check if secret nonce is invalid
-	if(cx_math_is_zero(secretNonce, NONCE_SIZE)) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
-	// Get public nonce from data
-	const uint8_t *publicNonce = &data[NONCE_SIZE];
-	
-	// Check if public nonce is invalid
-	if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(firstParameter || secondParameter || dataLength <= COMPRESSED_PUBLIC_KEY_SIZE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get public key from data
-	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const uint8_t *publicKey = data;
 	
 	// Check if public key is invalid
 	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
@@ -62,10 +42,10 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	}
 	
 	// Get message from data
-	char *message = (char *)&data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const char *message = (char *)&data[COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Get message length
-	const size_t messageLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE);
+	const size_t messageLength = dataLength - COMPRESSED_PUBLIC_KEY_SIZE;
 	
 	// Check if message is invalid
 	if(!isValidUtf8String(message, messageLength)) {
@@ -92,14 +72,39 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	uint8_t hash[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(hash, sizeof(hash), (uint8_t *)message, messageLength, NULL, 0);
 	
+	// Initialize secret nonce
+	volatile uint8_t secretNonce[NONCE_SIZE];
+	
 	// Initialize signature
-	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
-
-	// Create single-signer signature from the hash, transaction's blinding factor, secret nonce, public nonce, and public key
-	createSingleSignerSignature(signature, hash, (uint8_t *)transaction.blindingFactor, secretNonce, publicNonce, publicKey);
+	volatile uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Create secret nonce and public nonce
+			uint8_t publicNonce[COMPRESSED_PUBLIC_KEY_SIZE];
+			createSingleSignerNonces((uint8_t *)secretNonce, publicNonce);
+			
+			// Create single-signer signature from the hash, transaction's blinding factor, secret nonce, public nonce, and public key
+			createSingleSignerSignature((uint8_t *)signature, hash, (uint8_t *)transaction.blindingFactor, (uint8_t *)secretNonce, publicNonce, publicKey);
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the secret nonce
+			explicit_bzero((uint8_t *)secretNonce, sizeof(secretNonce));
+		}
+	}
+	
+	// End try
+	END_TRY;
 	
 	// Append signature to response
-	memcpy(&G_io_apdu_buffer[*responseLength], signature, sizeof(signature));
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));
 	
 	*responseLength += sizeof(signature);
 	

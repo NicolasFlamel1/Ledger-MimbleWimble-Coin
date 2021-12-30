@@ -121,6 +121,9 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 // Update blinding factor sum
 void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive);
 
+// Create single-signer nonces
+void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce);
+
 // Create single-signer signature
 void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
 

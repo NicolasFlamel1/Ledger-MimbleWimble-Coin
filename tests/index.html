@@ -6,7 +6,7 @@
 	<script src="BLAKE2b.min.js"></script>
 	<script src="Ed25519.min.js"></script>
 	<script src="X25519.min.js"></script>
-	<script src="LedgerJS-6.11.2.min.js"></script>
+	<script src="LedgerJS-6.20.0.min.js"></script>
 	<script src="secp256k1-zkp.min.js"></script>
 	<script src="bignumber.js-9.0.1.min.js"></script>
 	<script src="js-sha3-0.8.0.min.js"></script>
@@ -1722,21 +1722,9 @@
 				var publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
 			}
 			
-			// Create message secret nonce
-			let messageSecretNonce = Secp256k1Zkp.createSecretNonce();
-			
-			// Create message public nonce
-			let messagePublicNonce = Secp256k1Zkp.publicKeyFromSecretKey(messageSecretNonce);
-			
 			// Get the message signature from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 			
-				// Message secret nonce
-				Buffer.from(messageSecretNonce),
-				
-				// Message public nonce
-				Buffer.from(messagePublicNonce),
-				
 				// Public key
 				Buffer.from(publicKey),
 				
@@ -1750,11 +1738,8 @@
 			// Log message signature
 			console.log("Message signature: " + Common.toHexString(response));
 			
-			// Get expected message signature
-			let expectedMessageSignature = Secp256k1Zkp.createSingleSignerSignature(Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), transactionBlindingFactor, messageSecretNonce, publicKey, messagePublicNonce, messagePublicNonce);
-			
 			// Check if message signature is invalid
-			if(Common.arraysAreEqual(response, expectedMessageSignature) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
 			
 				// Throw error
 				throw "Invalid message signature: " + Common.toHexString(response);
@@ -2237,21 +2222,9 @@
 			// Get public key from transaction public key
 			let publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
 			
-			// Create message secret nonce
-			let messageSecretNonce = Secp256k1Zkp.createSecretNonce();
-			
-			// Create message public nonce
-			let messagePublicNonce = Secp256k1Zkp.publicKeyFromSecretKey(messageSecretNonce);
-			
 			// Get the message signature from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 			
-				// Message secret nonce
-				Buffer.from(messageSecretNonce),
-				
-				// Message public nonce
-				Buffer.from(messagePublicNonce),
-				
 				// Public key
 				Buffer.from(publicKey),
 				
@@ -2265,11 +2238,8 @@
 			// Log message signature
 			console.log("Message signature: " + Common.toHexString(response));
 			
-			// Get expected message signature
-			let expectedMessageSignature = Secp256k1Zkp.createSingleSignerSignature(Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), transactionBlindingFactor, messageSecretNonce, publicKey, messagePublicNonce, messagePublicNonce);
-			
 			// Check if message signature is invalid
-			if(Common.arraysAreEqual(response, expectedMessageSignature) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
 			
 				// Throw error
 				throw "Invalid message signature: " + Common.toHexString(response);
