@@ -14,7 +14,6 @@
 #include "finish_encrypting_slate.h"
 #include "finish_transaction.h"
 #include "get_address.h"
-#include "get_application_information.h"
 #include "get_commitment.h"
 #include "get_bulletproof_components.h"
 #include "get_mqs_timestamp_signature.h"
@@ -74,15 +73,6 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 			// Check request's instruction
 			switch(instruction) {
 			
-				// Get application information instruction
-				case GET_APPLICATION_INFORMATION_INSTRUCTION:
-				
-					// Process get application information request
-					processGetApplicationInformationRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
-					// Break
-					break;
-				
 				// Get root public key instruction
 				case GET_ROOT_PUBLIC_KEY_INSTRUCTION:
 				

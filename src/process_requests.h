@@ -13,9 +13,6 @@
 // Instruction
 enum Instruction {
 
-	// Get application information instruction
-	GET_APPLICATION_INFORMATION_INSTRUCTION,
-	
 	// Get root public key instruction
 	GET_ROOT_PUBLIC_KEY_INSTRUCTION,
 	

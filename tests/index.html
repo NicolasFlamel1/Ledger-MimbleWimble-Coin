@@ -39,11 +39,8 @@
 		// Request class
 		const REQUEST_CLASS = 0xC7;
 		
-		// Request get application information instruction
-		const REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION = 0;
-
 		// Request get root public key instruction
-		const REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION = REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION + 1;
+		const REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION = 0;
 
 		// Request get address instruction
 		const REQUEST_GET_ADDRESS_INSTRUCTION = REQUEST_GET_ROOT_PUBLIC_KEY_INSTRUCTION + 1;
@@ -110,9 +107,6 @@
 		
 		// No parameter
 		const NO_PARAMETER = 0;
-		
-		// Text delimiter
-		const TEXT_DELIMITER = 0;
 		
 		// Mnemonic
 		const MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
@@ -522,27 +516,31 @@
 			console.log("Running get application information test");
 		
 			// Get the application information from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_APPLICATION_INFORMATION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+			let response = await hardwareWallet.send(0xB0, 0x01, NO_PARAMETER, NO_PARAMETER);
 			
 			// Remove response code from response
 			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
 			
+			// Get application name length from response
+			let applicationNameLength = response[1];
+			
 			// Get application name from the response
-			let applicationNameDelimiter = findTextDelimiter(response);
-			let applicationName = (new TextDecoder()).decode(response.subarray(0, applicationNameDelimiter));
+			let applicationName = (new TextDecoder()).decode(response.subarray(2, 2 + applicationNameLength));
 			
 			// Log application name
 			console.log("Application name: " + applicationName);
 			
+			// Get application version length from response
+			let applicationVersionLength = response[2 + applicationNameLength];
+			
 			// Get application version from the response
-			let applicationVersionDelimiter = findTextDelimiter(response.subarray(applicationNameDelimiter + [TEXT_DELIMITER]["length"]));
-			let applicationVersion = (new TextDecoder()).decode(response.subarray(applicationNameDelimiter + [TEXT_DELIMITER]["length"]).subarray(0, applicationVersionDelimiter));
+			let applicationVersion = (new TextDecoder()).decode(response.subarray(2 + applicationNameLength + 1, 2 + applicationNameLength + 1 + applicationVersionLength));
 									
 			// Log application version
 			console.log("Application version: " + applicationVersion);
 			
 			// Log message
-			console.log("Passed getting application information test");		
+			console.log("Passed getting application information test");
 		}
 		
 		// Get root public key test
@@ -574,7 +572,7 @@
 			}
 			
 			// Log message
-			console.log("Passed getting root pubic key test");	
+			console.log("Passed getting root pubic key test");
 		}
 		
 		// Get address test
@@ -665,7 +663,7 @@
 			}
 			
 			// Log message
-			console.log("Passed getting address test");	
+			console.log("Passed getting address test");
 		}
 		
 		// Get seed cookie test
@@ -817,7 +815,7 @@
 			}
 			
 			// Initialize proof builder with the extended private key
-			let proofBuilder = new NewProofBuilder();			
+			let proofBuilder = new NewProofBuilder();
 			await proofBuilder.initialize(extendedPrivateKey);
 			
 			// Get expected bulletproof from the extended private key, amount, identifier, switch type, and proof builder
@@ -2428,7 +2426,7 @@
 			}
 			
 			// Log message
-			console.log("Passed getting MQS timestamp signature test");	
+			console.log("Passed getting MQS timestamp signature test");
 		}
 		
 		// Get Tor certificate signature test
@@ -2551,18 +2549,7 @@
 			console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
 			
 			// Log message
-			console.log("Passed getting Tor certificate signature test");	
-		}
-		
-		// Find text delimiter
-		function findTextDelimiter(text) {
-		
-			// Return finding text delimiter in the text
-			return text.findIndex(function(element, index, array) {
-			
-				// Return if the element is a text delimiter
-				return element === TEXT_DELIMITER;
-			});
+			console.log("Passed getting Tor certificate signature test");
 		}
 	</script>
 </head>
