@@ -114,7 +114,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	const uint8_t *secretNonce = data;
 	
 	// Check if secret nonce is invalid
-	if(!isValidSecp256k1PrivateKey(secretNonce, NONCE_SIZE)) {
+	if(!isValidSecp256k1PrivateKey(secretNonce, NONCE_SIZE) || !publicKeyIsQuadraticResidue(secretNonce)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

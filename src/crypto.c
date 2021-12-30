@@ -739,14 +739,6 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 		THROW(INTERNAL_ERROR_ERROR);
 	}
 	
-	// Check if the result's y component isn't quadratic residue
-	const uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	if(!isQuadraticResidue(y)) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
 	// Set signature's r component
 	uint8_t *r = signature;
 	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], SCALAR_SIZE);
@@ -758,7 +750,7 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
 	
 	// Negate the secret nonce if the uncompressed public nonce's y component isn't quadratic residue
-	y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 	conditionalNegate(secretNonce, !isQuadraticResidue(y), SECP256K1_CURVE_ORDER);
 	
 	// Get signature hash from the public nonce's x component, public key, and message
@@ -1681,6 +1673,26 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	
 	// Add the result to tau x
 	cx_math_addm(tauX, tauX, tmps, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+}
+
+// Public key is quadratic residue
+bool publicKeyIsQuadraticResidue(const uint8_t *secretKey) {
+
+	// Get the product of the secret key and its generator
+	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+	
+	// Check if the result is infinity or its x component is zero
+	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretKey, SECP256k1_PRIVATE_KEY_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Return if the result's y component is quadratic residue
+	const uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	
+	return isQuadraticResidue(y);
 }
 
 // Bulletproof update commitment
