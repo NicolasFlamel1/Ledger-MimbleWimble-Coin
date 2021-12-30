@@ -739,6 +739,14 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 		THROW(INTERNAL_ERROR_ERROR);
 	}
 	
+	// Check if the result's y component isn't quadratic residue
+	const uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	if(!isQuadraticResidue(y)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
 	// Set signature's r component
 	uint8_t *r = signature;
 	memcpy(r, &generator[PUBLIC_KEY_PREFIX_SIZE], SCALAR_SIZE);
@@ -750,7 +758,7 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
 	
 	// Negate the secret nonce if the uncompressed public nonce's y component isn't quadratic residue
-	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+	y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 	conditionalNegate(secretNonce, !isQuadraticResidue(y), SECP256K1_CURVE_ORDER);
 	
 	// Get signature hash from the public nonce's x component, public key, and message
