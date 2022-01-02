@@ -41,6 +41,13 @@ void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLengt
 		THROW(INVALID_STATE_ERROR);
 	}
 	
+	// Check if transaction is sending and transaction offset wasn't applied
+	if(transaction.send && !transaction.offsetApplied) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
 

@@ -68,6 +68,13 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		THROW(INVALID_STATE_ERROR);
 	}
 	
+	// Check if transaction is sending and transaction offset wasn't applied
+	if(transaction.send && !transaction.offsetApplied) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
 	// Get hash from the message
 	uint8_t hash[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(hash, sizeof(hash), (uint8_t *)message, messageLength, NULL, 0);

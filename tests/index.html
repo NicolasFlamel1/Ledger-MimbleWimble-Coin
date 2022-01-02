@@ -2101,18 +2101,6 @@
 					break;
 			}
 			
-			// Get the output's blinding factor
-			let outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
-			
-			// Get the input's blinding factor
-			let inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
-			
-			// Get the sum of all the transaction's blinding factors
-			let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], [inputBlindingFactor]);
-			
-			// Get the expected transaction public key from the transaction's blinding factor
-			let expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
-			
 			// Start transaction on the hardware wallet
 			await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 			
@@ -2161,22 +2149,6 @@
 				Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
 			]));
 			
-			// Get the transaction public key from the hardware wallet
-			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-			
-			// Log transaction public key before offset
-			console.log("Transaction public key before offset: " + Common.toHexString(response));
-			
-			// Check if transaction public key is invalid
-			if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
-			
-				// Throw error
-				throw "Invalid transaction public key: " + Common.toHexString(response);
-			}
-			
 			// While offset isn't a valid secret key
 			let offset = new Uint8Array(Crypto.BLINDING_FACTOR_LENGTH);
 			do {
@@ -2186,17 +2158,26 @@
 				
 			} while(Secp256k1Zkp.isValidSecretKey(offset) === false);
 			
+			// Apply offset to the transaction on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
+			
+			// Get the output's blinding factor
+			let outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
+			
+			// Get the input's blinding factor
+			let inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
+			
+			// Get the sum of all the transaction's blinding factors
+			let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], [inputBlindingFactor]);
+			
 			// Update the transaction blinding factor to include the offset
 			transactionBlindingFactor = Secp256k1Zkp.blindSum([transactionBlindingFactor], [offset]);
 			
 			// Get the expected transaction public key from the transaction's blinding factor
-			expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
-			
-			// Apply offset to the transaction on the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
+			let expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
 			
 			// Get the transaction public key from the hardware wallet
-			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
 			
 			// Remove response code from response
 			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
@@ -2312,7 +2293,7 @@
 				]);
 				
 				// Log message
-				console.log("Verify that the transaction's receive address is: " + receiverAddress);
+				console.log("Verify that the transaction's proof address is: " + receiverAddress);
 			}
 			
 			// Otherwise

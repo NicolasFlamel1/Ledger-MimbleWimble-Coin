@@ -289,41 +289,6 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Copy address into the public key or address line buffer
 			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
-			
-			// Check transaction's address length
-			switch(transaction.addressLength) {
-			
-				// MQS address size
-				case MQS_ADDRESS_SIZE:
-				
-					// Set address type line buffer
-					strcpy(addressTypeLineBuffer, "To MQS Address");
-					
-					// Break
-					break;
-				
-				// Tor address size
-				case TOR_ADDRESS_SIZE:
-				
-					// Set address type line buffer
-					strcpy(addressTypeLineBuffer, "To Tor Address");
-					
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Check if transaction's address length is a Slatepack address length
-					if(transaction.addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
-					
-						// Set address type line buffer
-						strcpy(addressTypeLineBuffer, "To Slatepack Address");
-					}
-				
-					// Break
-					break;
-			}
 		}
 		
 		// Otherwise

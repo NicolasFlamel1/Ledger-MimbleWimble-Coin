@@ -20,7 +20,7 @@
 #define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
 
 // Address type line buffer size
-#define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("To Slatepack address")
+#define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
 
 // Amount line buffer size
 #define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)

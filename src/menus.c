@@ -121,7 +121,7 @@ static UX_STEP_NOCB(aboutMenuCopyrightScreen,
 	.title = "Copyright",
 	
 	// Text
-	.text = "(c) 2021 Nicolas Flamel. All rights reserved."
+	.text = "(c) 2021-2022 Nicolas Flamel. All rights reserved."
 });
 
 // About menu back screen
@@ -643,8 +643,8 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 	.text = feeLineBuffer
 });
 
-// Finalize transaction menu receiver screen
-static UX_STEP_NOCB(finalizeTransactionMenuReceiverScreen,
+// Finalize transaction menu proof address screen
+static UX_STEP_NOCB(finalizeTransactionMenuProofAddressScreen,
 
 	// Check if target is the Nano X
 	#ifdef TARGET_NANOX
@@ -661,7 +661,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuReceiverScreen,
 {
 
 	// Title
-	.title = addressTypeLineBuffer,
+	.title = "Proof Address",
 	
 	// Text
 	.text = publicKeyOrAddressLineBuffer
@@ -712,8 +712,8 @@ static UX_FLOW(finalizeTransactionReceiverMenu,
 	// Finalize transaction menu fee screen
 	&finalizeTransactionMenuFeeScreen,
 	
-	// Finalize transaction menu no receiver screen
-	&finalizeTransactionMenuReceiverScreen,
+	// Finalize transaction menu proof address screen
+	&finalizeTransactionMenuProofAddressScreen,
 	
 	// Finalize transaction menu approve screen
 	&finalizeTransactionMenuApproveScreen,
