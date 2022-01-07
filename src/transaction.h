@@ -13,12 +13,6 @@
 
 // Transaction
 struct Transaction {
-
-	// Started
-	bool started;
-	
-	// Offset applied
-	bool offsetApplied;
 	
 	// Account
 	uint32_t account;
@@ -46,6 +40,15 @@ struct Transaction {
 	
 	// Address length
 	size_t addressLength;
+	
+	// Started
+	bool started;
+	
+	// Offset applied
+	bool offsetApplied;
+	
+	// Message signed
+	bool messageSigned;
 	
 	// Address
 	char address[sizeof("tgrin") - sizeof((char)'\0') + SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE];

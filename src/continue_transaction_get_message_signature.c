@@ -75,6 +75,13 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		THROW(INVALID_STATE_ERROR);
 	}
 	
+	// Check if a message was already signed for the transaction
+	if(transaction.messageSigned) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
 	// Get hash from the message
 	uint8_t hash[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(hash, sizeof(hash), (uint8_t *)message, messageLength, NULL, 0);
@@ -114,6 +121,9 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));
 	
 	*responseLength += sizeof(signature);
+	
+	// Set that transaction's message was signed
+	transaction.messageSigned = true;
 	
 	// Throw success
 	THROW(SWO_SUCCESS);
