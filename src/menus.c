@@ -33,23 +33,8 @@ char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 // About menu version screen
 static UX_STEP_NOCB(aboutMenuVersionScreen, 
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Version",
-			
-			// Second line
-			currencyInformation.version
-		}
-	
-	// Otherwise
-	#else
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
 		nb_paging,
@@ -62,14 +47,9 @@ static UX_STEP_NOCB(aboutMenuVersionScreen,
 			// Text
 			.text = currencyInformation.version
 		}
-	#endif
-);
-
-// About menu currency screen
-static UX_STEP_NOCB(aboutMenuCurrencyScreen, 
-
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	
+	// Otherwise
+	#else
 	
 		// Layout
 		bn,
@@ -77,14 +57,19 @@ static UX_STEP_NOCB(aboutMenuCurrencyScreen,
 		{
 		
 			// Bold first line
-			"Currency",
+			"Version",
 			
 			// Second line
-			currencyInformation.name
+			currencyInformation.version
 		}
-	
-	// Otherwise
-	#else
+	#endif
+);
+
+// About menu currency screen
+static UX_STEP_NOCB(aboutMenuCurrencyScreen, 
+
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
 		nb_paging,
@@ -97,23 +82,38 @@ static UX_STEP_NOCB(aboutMenuCurrencyScreen,
 			// Text
 			.text = currencyInformation.name
 		}
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		bn,
+		
+		{
+		
+			// Bold first line
+			"Currency",
+			
+			// Second line
+			currencyInformation.name
+		}
 	#endif
 );
 
 // About menu copyright screen
 static UX_STEP_NOCB(aboutMenuCopyrightScreen, 
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -267,17 +267,17 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuNotifyScreen, pnn, {
 // Verify root public key menu public key screen
 static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -343,17 +343,17 @@ static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 // Verify address menu address screen
 static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -419,17 +419,17 @@ static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
 // Sign MQS timestamp menu time and date screen
 static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -495,17 +495,17 @@ static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 // Sign Tor certificate menu expiration screen
 static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -519,17 +519,17 @@ static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 // Sign Tor certificate menu address screen
 static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -598,17 +598,17 @@ static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 // Finalize transaction menu amount screen
 static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -622,17 +622,17 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 // Finalize transaction menu fee screen
 static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 
@@ -646,17 +646,17 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 // Finalize transaction menu proof address screen
 static UX_STEP_NOCB(finalizeTransactionMenuProofAddressScreen,
 
-	// Check if target is the Nano X
-	#ifdef TARGET_NANOX
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
 	
 		// Layout
-		bnnn_paging,
+		nb_paging,
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		nb_paging,
+		bnnn_paging,
 	#endif
 {
 

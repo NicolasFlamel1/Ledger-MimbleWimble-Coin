@@ -158,17 +158,17 @@ else
 $(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, or grin_testnet)
 endif
 
-# Check if target is the Nano X
-ifeq ($(TARGET_NAME),TARGET_NANOX)
+# Check if target is the Nano S
+ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME=icons/nanox_app_$(ICON).gif
+	ICONNAME=icons/nanos_app_$(ICON).gif
 
 # Otherwise
 else
 
 	# Icon name
-	ICONNAME=icons/nanos_app_$(ICON).gif
+	ICONNAME=icons/nanox_app_$(ICON).gif
 endif
 
 # Make command
@@ -191,20 +191,26 @@ DEFINES += UNUSED\(x\)=\(void\)x
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Target specific defines
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+endif
+
+# Check if target is the Nano S
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+
+	# Target specific defines
+	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+
+# Otherwise
+else
+
+	# Target specific defines
+	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 	DEFINES += HAVE_GLO096
 	DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
 	DEFINES += HAVE_BAGL_ELLIPSIS
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-
-# Otherwise
-else
-
-	# Target specific defines
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 endif
 
 # Set debug
@@ -216,17 +222,17 @@ ifneq ($(DEBUG),0)
 	# Define printf
 	DEFINES += HAVE_PRINTF
 	
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
+	# Check if target is the Nano S
+	ifeq ($(TARGET_NAME),TARGET_NANOS)
 	
 		# Define target specific printf
-		DEFINES += PRINTF=mcu_usb_printf
+		DEFINES += PRINTF=screen_printf
 	
 	# Otherwise
 	else
 	
 		# Define target specific printf
-		DEFINES += PRINTF=screen_printf
+		DEFINES += PRINTF=mcu_usb_printf
 	endif
 	
 	# Define stack canary
