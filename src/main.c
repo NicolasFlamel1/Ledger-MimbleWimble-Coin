@@ -64,8 +64,8 @@
 					// Initialize HAL
 					io_seproxyhal_init();
 					
-					// Check if target is the Nano X
-					#ifdef TARGET_NANOX
+					// Check if target has Bluetooth
+					#ifdef HAVE_BLE
 					
 						// Set plane mode
 						G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
