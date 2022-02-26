@@ -8,7 +8,7 @@
 	<script src="X25519.min.js"></script>
 	<script src="LedgerJS-6.24.1.min.js"></script>
 	<script src="secp256k1-zkp.min.js"></script>
-	<script src="bignumber.js-9.0.1.min.js"></script>
+	<script src="bignumber.js-9.0.2.min.js"></script>
 	<script src="js-sha3-0.8.0.min.js"></script>
 	<script src="js-sha256-0.9.0.min.js"></script>
 	<script src="hi-base32-0.5.1.min.js"></script>
@@ -915,6 +915,9 @@
 					// Get address from the MQS public key
 					var address = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
 					
+					// Log message
+					console.log("Verify that the MQS address is: " + address);
+					
 					// Break
 					break;
 				
@@ -932,6 +935,9 @@
 					
 					// Get address from the Tor public key
 					var address = Tor.publicKeyToTorAddress(torPublicKey);
+					
+					// Log message
+					console.log("Verify that the Tor address is: " + address);
 					
 					// Break
 					break;
@@ -951,12 +957,12 @@
 					// Get address from the Slatepack public key
 					var address = Slatepack.publicKeyToSlatepackAddress(slatepackPublicKey);
 					
+					// Log message
+					console.log("Verify that the Slatepack address is: " + address);
+					
 					// Break
 					break;
 			}
-			
-			// Log message
-			console.log("Verify that the address is: " + address);
 			
 			// Verify address on the hardware wallet
 			await hardwareWallet.send(REQUEST_CLASS, REQUEST_VERIFY_ADDRESS_INSTRUCTION, addressType, NO_PARAMETER, Buffer.concat([
@@ -1115,7 +1121,7 @@
 					let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
 					
 					// Decrypt the encrypted data
-					var decryptedData = await Mqs.decryptMessage(privateKey, mqsPublicKey, encryptedData, salt, nonce);
+					var decryptedData = await Mqs.decrypt(privateKey, mqsPublicKey, encryptedData, salt, nonce);
 				
 					// Break
 					break;
@@ -1130,7 +1136,7 @@
 					let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
 					
 					// Decrypt the encrypted data
-					var decryptedData = await Slatepack.decryptMessage(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
+					var decryptedData = await Slatepack.decrypt(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
 					
 					// Break
 					break;
@@ -1145,7 +1151,7 @@
 					let slatepackPublicKey = Ed25519.publicKeyFromSecretKey(slatepackPrivateKey);
 					
 					// Decrypt the encrypted data
-					var decryptedData = await Slatepack.decryptMessage(otherSlatepackPrivateKey, slatepackPublicKey, encryptedData, nonce);
+					var decryptedData = await Slatepack.decrypt(otherSlatepackPrivateKey, slatepackPublicKey, encryptedData, nonce);
 					
 					// Break
 					break;
@@ -1215,16 +1221,16 @@
 						let mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
 						
 						// Encrypt the data
-						let encryptedData = await Mqs.encryptMessage(privateKey, mqsPublicKey, DATA);
+						let encryptedData = await Mqs.encrypt(privateKey, mqsPublicKey, DATA);
 						
 						// Get salt from encrypted data
-						var salt = encryptedData[Mqs.ENCRYPTED_MESSAGE_SALT_INDEX];
+						var salt = encryptedData[Mqs.ENCRYPTED_DATA_SALT_INDEX];
 						
 						// Get nonce from encrypted data
-						var nonce = encryptedData[Mqs.ENCRYPTED_MESSAGE_NONCE_INDEX];
+						var nonce = encryptedData[Mqs.ENCRYPTED_DATA_NONCE_INDEX];
 						
 						// Get encrypted message from encrypted data
-						var encryptedMessage = encryptedData[Mqs.ENCRYPTED_MESSAGE_DATA_INDEX];
+						var encryptedMessage = encryptedData[Mqs.ENCRYPTED_DATA_DATA_INDEX];
 					}
 				
 					// Break
@@ -1252,16 +1258,16 @@
 						let torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
 						
 						// Encrypt the data
-						let encryptedData = await Slatepack.encryptMessage(otherTorPrivateKey, torPublicKey, DATA);
+						let encryptedData = await Slatepack.encrypt(otherTorPrivateKey, torPublicKey, DATA);
 						
 						// Set salt to nothing
 						var salt = new Uint8Array([]);
 						
 						// Get nonce from encrypted data
-						var nonce = encryptedData[Slatepack.ENCRYPTED_MESSAGE_NONCE_INDEX];
+						var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
 						
 						// Get encrypted message from encrypted data
-						var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX];
+						var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_DATA_DATA_INDEX];
 					}
 					
 					// Break
@@ -1289,16 +1295,16 @@
 						let slatepackPublicKey = Ed25519.publicKeyFromSecretKey(slatepackPrivateKey);
 						
 						// Encrypt the data
-						let encryptedData = await Slatepack.encryptMessage(otherSlatepackPrivateKey, slatepackPublicKey, DATA);
+						let encryptedData = await Slatepack.encrypt(otherSlatepackPrivateKey, slatepackPublicKey, DATA);
 						
 						// Set salt to nothing
 						var salt = new Uint8Array([]);
 						
 						// Get nonce from encrypted data
-						var nonce = encryptedData[Slatepack.ENCRYPTED_MESSAGE_NONCE_INDEX];
+						var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
 						
 						// Get encrypted message from encrypted data
-						var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_MESSAGE_DATA_INDEX];
+						var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_DATA_DATA_INDEX];
 					}
 					
 					// Break
@@ -2476,6 +2482,9 @@
 					// Get certificate's address
 					var address = Tor.publicKeyToTorAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
 					
+					// Log message
+					console.log("Verify that the certificate's Tor address is: " + address);
+					
 					// Break
 					break;
 				
@@ -2485,12 +2494,12 @@
 					// Get certificate's address
 					var address = Slatepack.publicKeyToSlatepackAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
 					
+					// Log message
+					console.log("Verify that the certificate's Slatepack address is: " + address);
+					
 					// Break
 					break;
 			}
-			
-			// Log message
-			console.log("Verify that the certificate's address is: " + address);
 			
 			// Convert time zone offset to the correct format
 			let timeZoneOffsetBuffer = new ArrayBuffer(Uint16Array["BYTES_PER_ELEMENT"]);
