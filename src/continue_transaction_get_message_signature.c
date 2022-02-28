@@ -98,9 +98,14 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		// Try
 		TRY {
 		
-			// Create secret nonce and public nonce
+			// Loop while secret nonce is the same as the transaction's secret nonce
 			uint8_t publicNonce[COMPRESSED_PUBLIC_KEY_SIZE];
-			createSingleSignerNonces((uint8_t *)secretNonce, publicNonce);
+			do {
+		
+				// Create secret nonce and public nonce
+				createSingleSignerNonces((uint8_t *)secretNonce, publicNonce);
+			
+			} while(!memcmp((uint8_t *)secretNonce, transaction.secretNonce, sizeof(transaction.secretNonce)));
 			
 			// Create single-signer signature from the hash, transaction's blinding factor, secret nonce, public nonce, and public key
 			createSingleSignerSignature((uint8_t *)signature, hash, (uint8_t *)transaction.blindingFactor, (uint8_t *)secretNonce, publicNonce, publicKey);

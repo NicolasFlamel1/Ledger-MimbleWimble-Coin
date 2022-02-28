@@ -169,8 +169,5 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t i
 // Calculate bulletproof components
 void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
-// Public key is quadratic residue
-bool publicKeyIsQuadraticResidue(const uint8_t *secretKey);
-
 
 #endif

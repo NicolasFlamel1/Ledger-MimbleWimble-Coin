@@ -38,6 +38,9 @@ struct Transaction {
 	// Blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
 	
+	// Secret nonce
+	uint8_t secretNonce[NONCE_SIZE];
+	
 	// Address length
 	size_t addressLength;
 	

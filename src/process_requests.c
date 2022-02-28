@@ -7,6 +7,7 @@
 #include "continue_encrypting_slate.h"
 #include "continue_transaction_apply_offset.h"
 #include "continue_transaction_get_public_key.h"
+#include "continue_transaction_get_public_nonce.h"
 #include "continue_transaction_get_message_signature.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
@@ -231,6 +232,15 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 				
 					// Process continue transaction get public key request
 					processContinueTransactionGetPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					
+					// Break
+					break;
+				
+				// Continue transaction get public nonce instruction
+				case CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION:
+				
+					// Process continue transaction get public nonce request
+					processContinueTransactionGetPublicNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;

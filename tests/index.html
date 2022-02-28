@@ -93,8 +93,11 @@
 		// Request continue transaction get public key instruction
 		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION + 1;
 		
+		// Request continue transaction get public nonce instruction
+		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
+		
 		// Request continue transaction get message signature instruction
-		const REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
+		const REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION + 1;
 
 		// Request finish transaction instruction
 		const REQUEST_FINISH_TRANSACTION_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION + 1;
@@ -1692,14 +1695,14 @@
 				throw "Invalid transaction public key: " + Common.toHexString(response);
 			}
 			
-			// Create secret nonce
-			let secretNonce = Secp256k1Zkp.createSecretNonce();
+			// Get the transaction public nonce from the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+		
+			// Get public nonce from response
+			let publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 			
 			// Check if features is coinbase
 			if(features === SlateKernel.COINBASE_FEATURES) {
-				
-				// Get public nonce from secret nonce
-				var publicNonce = Secp256k1Zkp.publicKeyFromSecretKey(secretNonce);
 				
 				// Get excess from commit and over commit
 				let excess = Secp256k1Zkp.pedersenCommitSum([
@@ -1719,11 +1722,8 @@
 			// Otherwise
 			else {
 			
-				// Get public nonce from secret nonce
-				var publicNonce = Secp256k1Zkp.combinePublicKeys([Secp256k1Zkp.publicKeyFromSecretKey(secretNonce)]);
-				
 				// Get public key from transaction public key
-				var publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
+				var publicKey = expectedTransactionPublicKey;
 			}
 			
 			// Get the message signature from the hardware wallet
@@ -1798,9 +1798,6 @@
 			// Get signature for the transaction from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, receiverAddressType, NO_PARAMETER, Buffer.concat([
 			
-				// Secret nonce
-				Buffer.from(secretNonce),
-				
 				// Public nonce
 				Buffer.from(publicNonce),
 				
@@ -1823,17 +1820,11 @@
 			// Log transaction signature
 			console.log("Transaction signature: " + Common.toHexString(signature));
 			
-			// Get message to sign
-			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
-			
-			// Get expected signature
-			let expectedSignature = Secp256k1Zkp.createSingleSignerSignature(messageToSign, transactionBlindingFactor, secretNonce, publicKey, publicNonce, publicNonce);
-			
 			// Check if signature is invalid
-			if(Common.arraysAreEqual(signature, expectedSignature) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) === false) {
 			
 				// Throw error
-				throw "Invalid signature: " + Common.toHexString(signature);
+				throw "Invalid transaction signature: " + Common.toHexString(signature);
 			}
 			
 			// Check if using a payment proof
@@ -2185,27 +2176,24 @@
 			// Get the transaction public key from the hardware wallet
 			let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
 			
-			// Remove response code from response
-			response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			// Get public key from response
+			let publicKey = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 			
 			// Log transaction public key after offset
-			console.log("Transaction public key after offset: " + Common.toHexString(response));
+			console.log("Transaction public key after offset: " + Common.toHexString(publicKey));
 			
 			// Check if transaction public key is invalid
-			if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
+			if(Common.arraysAreEqual(publicKey, expectedTransactionPublicKey) === false) {
 			
 				// Throw error
-				throw "Invalid transaction public key: " + Common.toHexString(response);
+				throw "Invalid transaction public key: " + Common.toHexString(publicKey);
 			}
 			
-			// Create secret nonce
-			let secretNonce = Secp256k1Zkp.createSecretNonce();
-			
-			// Get public nonce from secret nonce
-			let publicNonce = Secp256k1Zkp.combinePublicKeys([Secp256k1Zkp.publicKeyFromSecretKey(secretNonce)]);
-			
-			// Get public key from transaction public key
-			let publicKey = Secp256k1Zkp.combinePublicKeys([expectedTransactionPublicKey]);
+			// Get the transaction public nonce from the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+		
+			// Get public nonce from response
+			let publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 			
 			// Get the message signature from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
@@ -2312,9 +2300,6 @@
 			// Get signature for the transaction from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, senderAddressType, NO_PARAMETER, Buffer.concat([
 			
-				// Secret nonce
-				Buffer.from(secretNonce),
-				
 				// Public nonce
 				Buffer.from(publicNonce),
 				
@@ -2334,17 +2319,11 @@
 			// Log transaction signature
 			console.log("Transaction signature: " + Common.toHexString(response));
 			
-			// Get message to sign
-			let messageToSign = SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight);
-			
-			// Get expected signature
-			let expectedSignature = Secp256k1Zkp.createSingleSignerSignature(messageToSign, transactionBlindingFactor, secretNonce, publicKey, publicNonce, publicNonce);
-			
 			// Check if signature is invalid
-			if(Common.arraysAreEqual(response, expectedSignature) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) === false) {
 			
 				// Throw error
-				throw "Invalid signature: " + Common.toHexString(response);
+				throw "Invalid transaction signature: " + Common.toHexString(response);
 			}
 			
 			// Log message

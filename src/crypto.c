@@ -720,9 +720,13 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	conditionalNegate(secretNonce, negate, SECP256K1_CURVE_ORDER);
 	conditionalNegate(y, negate, SECP256K1_CURVE_PRIME);
 	
-	// Get the public nonce from the result
-	publicNonce[0] = (generator[sizeof(generator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
-	memcpy(&publicNonce[PUBLIC_KEY_PREFIX_SIZE], &generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+	// Check if creating public nonce
+	if(publicNonce) {
+	
+		// Get the public nonce from the result
+		publicNonce[0] = (generator[sizeof(generator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
+		memcpy(&publicNonce[PUBLIC_KEY_PREFIX_SIZE], &generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
+	}
 }
 
 // Create single-signer signature
@@ -1673,26 +1677,6 @@ void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo,
 	
 	// Add the result to tau x
 	cx_math_addm(tauX, tauX, tmps, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-}
-
-// Public key is quadratic residue
-bool publicKeyIsQuadraticResidue(const uint8_t *secretKey) {
-
-	// Get the product of the secret key and its generator
-	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
-	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
-	
-	// Check if the result is infinity or its x component is zero
-	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretKey, SECP256k1_PRIVATE_KEY_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
-	// Return if the result's y component is quadratic residue
-	const uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	
-	return isQuadraticResidue(y);
 }
 
 // Bulletproof update commitment

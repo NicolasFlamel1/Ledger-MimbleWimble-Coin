@@ -52,7 +52,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 	
 	// Check if parameters or data are invalid
-	if(secondParameter || dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
+	if(secondParameter || dataLength < COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -110,18 +110,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Get secret nonce from data
-	const uint8_t *secretNonce = data;
-	
-	// Check if secret nonce is invalid
-	if(!isValidSecp256k1PrivateKey(secretNonce, NONCE_SIZE) || !publicKeyIsQuadraticResidue(secretNonce)) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
 	// Get public nonce from data
-	const uint8_t *publicNonce = &data[NONCE_SIZE];
+	const uint8_t *publicNonce = data;
 	
 	// Check if public nonce is invalid
 	if(!isValidSecp256k1PublicKey(publicNonce, COMPRESSED_PUBLIC_KEY_SIZE)) {
@@ -131,7 +121,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	}
 	
 	// Get public key from data
-	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const uint8_t *publicKey = &data[COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check if public key is invalid
 	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
@@ -141,7 +131,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	}
 	
 	// Get kernel features from data
-	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const enum KernelFeatures kernelFeatures = data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Check kernel features
 	size_t kernelFeaturesLength;
@@ -192,24 +182,24 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	if(transaction.send) {
 	
 		// Check if data is invalid
-		if(dataLength < NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		if(dataLength < COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
 		// Check if a payment proof information is provided
-		if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Check if data is invalid
-			if(dataLength <= NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
+			if(dataLength <= COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get kernel commitment from data
-			uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			uint8_t *kernelCommitment = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if kernel commitment is invalid
 			if(!isValidCommitment(kernelCommitment)) {
@@ -219,10 +209,10 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			}
 			
 			// Get signature from data
-			uint8_t *signature = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			uint8_t *signature = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Get signature length
-			const size_t signatureLength = dataLength - (NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
+			const size_t signatureLength = dataLength - (COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
 			
 			// Check address type
 			size_t addressLength;
@@ -330,7 +320,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	else {
 	
 		// Check if a kernel commitment is provided
-		if(dataLength == NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
+		if(dataLength == COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
 		
 			// Check if a transaction address doesn't exist
 			if(!transaction.addressLength) {
@@ -340,7 +330,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			}
 		
 			// Get kernel commitment from data
-			uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+			uint8_t *kernelCommitment = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 			
 			// Check if kernel commitment is invalid
 			if(!isValidCommitment(kernelCommitment)) {
@@ -351,7 +341,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		}
 	
 		// Otherwise check if data is invalid
-		else if(dataLength != NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+		else if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
@@ -377,17 +367,14 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Get address type from first parameter
 	const enum AddressType addressType = firstParameter;
 	
-	// Get secret nonce from data
-	uint8_t *secretNonce = data;
-	
 	// Get public nonce from data
-	const uint8_t *publicNonce = &data[NONCE_SIZE];
+	const uint8_t *publicNonce = data;
 	
 	// Get public key from data
-	const uint8_t *publicKey = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const uint8_t *publicKey = &data[COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Get kernel features from data
-	const enum KernelFeatures kernelFeatures = data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
+	const enum KernelFeatures kernelFeatures = data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Initialize kernel features length
 	size_t kernelFeaturesLength;
@@ -466,7 +453,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			
 			{
 				// Get lock height from data
-				uint8_t *lockHeight = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint8_t *lockHeight = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert lock height to big endian
 				swapEndianness(lockHeight, sizeof(uint64_t));
@@ -502,7 +489,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 			{
 				
 				// Get relative height from data
-				uint8_t *relativeHeight = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
+				uint8_t *relativeHeight = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert relative height to big endian
 				swapEndianness(relativeHeight, sizeof(uint64_t));
@@ -522,8 +509,8 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	// Initialize signature
 	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
 
-	// Create single-signer signature from the message, transaction's blinding factor, secret nonce, public nonce, and public key
-	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, secretNonce, publicNonce, publicKey);
+	// Create single-signer signature from the message, transaction's blinding factor, transaction's secret nonce, public nonce, and public key
+	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, transaction.secretNonce, publicNonce, publicKey);
 	
 	// Initialize payment proof
 	volatile uint8_t *paymentProof;
@@ -532,10 +519,10 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	volatile size_t paymentProofLength = 0;
 	
 	// Check if transaction is receiving and a kernel commitment is provided
-	if(transaction.receive && dataLength == NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
+	if(transaction.receive && dataLength == COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE) {
 	
 		// Get kernel commitment from data
-		const uint8_t *kernelCommitment = &data[NONCE_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
+		const uint8_t *kernelCommitment = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 		
 		// Get payment proof message
 		uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.receive, transaction.addressLength)];
