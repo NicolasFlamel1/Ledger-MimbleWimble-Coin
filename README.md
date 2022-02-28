@@ -329,7 +329,7 @@ Test: printf "\xC7\x11\x00\x00\x00" | xxd -ps -c200 | ledgerctl send -
 
 * Continue transaction get public nonce
 ```
-Description: Returns the transaction's blinding factor's public nonce
+Description: Returns the transaction's public nonce
 Class: C7
 Instruction: 12
 Parameters one: 00
