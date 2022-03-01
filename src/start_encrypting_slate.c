@@ -212,9 +212,12 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	
 	*responseLength += sizeof(nonce);
 	
-	memcpy(&G_io_apdu_buffer[*responseLength], salt, saltLength);
+	if(saltLength) {
 	
-	*responseLength += saltLength;
+		memcpy(&G_io_apdu_buffer[*responseLength], salt, saltLength);
+		
+		*responseLength += saltLength;
+	}
 	
 	// Set that slate encrypting state is ready
 	slate.encryptingState = READY_SLATE_STATE;

@@ -299,15 +299,15 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
 		toString(amountLineBuffer, transaction.send, currencyInformation.fractionalDigits);
 		
-		strcat(amountLineBuffer, " ");
-		strcat(amountLineBuffer, currencyInformation.abbreviation);
+		strncat(amountLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+		strncat(amountLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
 		
 		// Copy transaction's fee into the fee line buffer
 		explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
 		toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
 		
-		strcat(feeLineBuffer, " ");
-		strcat(feeLineBuffer, currencyInformation.abbreviation);
+		strncat(feeLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+		strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
 
 		// Show finalize transaction menu
 		showMenu(FINALIZE_TRANSACTION_MENU);
@@ -647,9 +647,12 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	
 	*responseLength += sizeof(signature);
 	
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)paymentProof, paymentProofLength);
+	if(paymentProofLength) {
 	
-	*responseLength += paymentProofLength;
+		memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)paymentProof, paymentProofLength);
+		
+		*responseLength += paymentProofLength;
+	}
 	
 	// Reset the transaction
 	resetTransaction();

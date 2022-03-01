@@ -65,7 +65,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 	
 	// Check address length
 	size_t sharedPrivateKeyLength;
-	uint8_t *salt;
+	uint8_t *salt = NULL;
 	switch(addressLength) {
 	
 		// MQS address size

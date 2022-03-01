@@ -206,8 +206,12 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	// Set transaction's address length
 	transaction.addressLength = addressLength;
 	
-	// Set transaction's address
-	memcpy(transaction.address, address, addressLength);
+	// Check if address exists
+	if(addressLength) {
+	
+		// Set transaction's address
+		memcpy(transaction.address, address, addressLength);
+	}
 	
 	// Set that transaction has been started
 	transaction.started = true;
