@@ -49,13 +49,6 @@ void processContinueTransactionGetEncryptedSecretNonceRequest(unsigned short *re
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if a message was signed for the transaction
-	if(transaction.messageSigned) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
 	// Check if the secret nonce was set for the transaction
 	if(transaction.secretNonceSet) {
 	

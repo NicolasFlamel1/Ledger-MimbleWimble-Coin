@@ -50,9 +50,9 @@ make load CURRENCY=grin
 ```
 
 ### Testing
-Tests for this app can be ran by opening the tests/index.html file in a web browser.
+Functional tests for this app can be ran by opening the tests/index.html file in a web browser.
 
-You can also test this app by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tests/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+You can also run functional tests for this app by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tests/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 ### Commands
 The app supports the following commands.
