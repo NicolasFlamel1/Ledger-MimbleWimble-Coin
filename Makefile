@@ -14,7 +14,7 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
 APPVERSION_M = 2
-APPVERSION_N = 0
+APPVERSION_N = 1
 APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
@@ -36,7 +36,19 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	
 	# Application paramaters
 	APP_LOAD_PARAMS += --path "44'/593'"
-	APP_LOAD_PARAMS += --appFlags 0x800
+	
+	# Check if target is the Nano X
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0xA00
+	
+	# Otherwise
+	else
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x800
+	endif
 	
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
@@ -62,8 +74,20 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	
 	# Application parameters
 	APP_LOAD_PARAMS += --path "44'/1'"
-	APP_LOAD_PARAMS += --appFlags 0
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	
+	# Check if target is the Nano X
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x200
+	
+	# Otherwise
+	else
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x000
+	endif
 	
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
@@ -95,8 +119,20 @@ else ifeq ($(CURRENCY),grin)
 	
 	# Application parameters
 	APP_LOAD_PARAMS += --path "44'/592'"
-	APP_LOAD_PARAMS += --appFlags 0
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	
+	# Check if target is the Nano X
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x200
+	
+	# Otherwise
+	else
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x000
+	endif
 	
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
@@ -127,8 +163,20 @@ else ifeq ($(CURRENCY),grin_testnet)
 	
 	# Application parameters
 	APP_LOAD_PARAMS += --path "44'/1'"
-	APP_LOAD_PARAMS += --appFlags 0
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	
+	# Check if target is the Nano X
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x200
+	
+	# Otherwise
+	else
+	
+		# Application paramaters
+		APP_LOAD_PARAMS += --appFlags 0x000
+	endif
 	
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
@@ -278,7 +326,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -Oz -Wall -Wextra
+CFLAGS += -Oz -Wall -Wextra -Werror
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS +=

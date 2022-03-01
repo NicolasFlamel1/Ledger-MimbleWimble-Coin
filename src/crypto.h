@@ -133,6 +133,9 @@ size_t getEncryptedDataLength(size_t dataLength);
 // Encrypt data
 void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength);
 
+// Decrypt data
+size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength);
+
 // Get X25519 private key from Ed25519 private key
 void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x25519PrivateKey, const cx_ecfp_private_key_t *ed25519PrivateKey);
 

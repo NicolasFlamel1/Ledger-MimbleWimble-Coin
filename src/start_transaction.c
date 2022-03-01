@@ -151,7 +151,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	}
 	
 	// Create transaction's secret nonce
-	createSingleSignerNonces(transaction.secretNonce, NULL);
+	createSingleSignerNonces((uint8_t *)transaction.secretNonce, NULL);
 	
 	// Check if an input exists
 	if(input) {

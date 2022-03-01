@@ -510,7 +510,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
 
 	// Create single-signer signature from the message, transaction's blinding factor, transaction's secret nonce, public nonce, and public key
-	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, transaction.secretNonce, publicNonce, publicKey);
+	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, (uint8_t *)transaction.secretNonce, publicNonce, publicKey);
 	
 	// Initialize payment proof
 	volatile uint8_t *paymentProof;

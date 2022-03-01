@@ -93,8 +93,14 @@
 		// Request continue transaction get public key instruction
 		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION + 1;
 		
+		// Request continue transaction get encrypted secret nonce instruction
+		const REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
+		
+		// Request continue transaction set encrypted secret nonce instruction
+		const REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION + 1;
+		
 		// Request continue transaction get public nonce instruction
-		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
+		const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION + 1;
 		
 		// Request continue transaction get message signature instruction
 		const REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION + 1;
@@ -2194,6 +2200,15 @@
 		
 			// Get public nonce from response
 			let publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+			
+			// Get the transaction encrypted secret nonce from the hardware wallet
+			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+		
+			// Get encrypted secret nonce from response
+			let encryptedSecretNonce = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+			
+			// Set the transaction encrypted secret nonce on the hardware wallet
+			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedSecretNonce));
 			
 			// Get the message signature from the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([

@@ -779,7 +779,7 @@ void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, con
 size_t getEncryptedDataLength(size_t dataLength) {
 
 	// Return encrypted data length
-	return dataLength + ((dataLength % CX_AES_BLOCK_SIZE) ? (CX_AES_BLOCK_SIZE - dataLength % CX_AES_BLOCK_SIZE) : CX_AES_BLOCK_SIZE);
+	return dataLength + ((dataLength % CX_AES_BLOCK_SIZE) ? CX_AES_BLOCK_SIZE - dataLength % CX_AES_BLOCK_SIZE : CX_AES_BLOCK_SIZE);
 }
 
 // Encrypt data
@@ -821,6 +821,70 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLengt
 	
 	// End try
 	END_TRY;
+}
+
+// Decrypt data
+size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+
+	// Initialize decryption key
+	volatile cx_aes_key_t decryptionKey;
+	
+	// Initialize decrypted data length
+	volatile size_t decryptedDataLength;
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Initialize the decryption key with the key
+			cx_aes_init_key(key, keyLength, (cx_aes_key_t *)&decryptionKey);
+			
+			// Decrypt the data with the decryption key
+			cx_aes((cx_aes_key_t *)&decryptionKey, CX_DECRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, data, dataLength, (uint8_t *)result, dataLength);
+			
+			// Check if last padding byte is invalid
+			if(!result[dataLength - 1] || result[dataLength - 1] > CX_AES_BLOCK_SIZE || result[dataLength - 1] > dataLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Set decrypted data length
+			decryptedDataLength = dataLength - result[dataLength - 1];
+			
+			// Initialize invalid padding
+			bool invalidPadding = false;
+			
+			// Go through all decrypted bytes
+			for(size_t i = 0; i < dataLength; ++i) {
+			
+				// Update invalid padding in a way that tries to mitigate timing attacks
+				invalidPadding |= result[i] ^ ((i >= decryptedDataLength) ? result[dataLength - 1] : result[i]);
+			}
+			
+			// Check if padding is invalid
+			if(invalidPadding) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the decryption key
+			explicit_bzero((cx_aes_key_t *)&decryptionKey, sizeof(decryptionKey));
+		}
+	}
+	
+	// End try
+	END_TRY;
+	
+	// Return decrypted data length
+	return decryptedDataLength;
 }
 
 // Get X25519 private key from Ed25519 private key

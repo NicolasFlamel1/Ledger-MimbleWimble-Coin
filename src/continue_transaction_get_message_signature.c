@@ -75,7 +75,7 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		THROW(INVALID_STATE_ERROR);
 	}
 	
-	// Check if a message was already signed for the transaction
+	// Check if a message was signed for the transaction
 	if(transaction.messageSigned) {
 	
 		// Throw invalid state error
@@ -105,7 +105,7 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 				// Create secret nonce and public nonce
 				createSingleSignerNonces((uint8_t *)secretNonce, publicNonce);
 			
-			} while(!memcmp((uint8_t *)secretNonce, transaction.secretNonce, sizeof(transaction.secretNonce)));
+			} while(!memcmp((uint8_t *)secretNonce, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce)));
 			
 			// Create single-signer signature from the hash, transaction's blinding factor, secret nonce, public nonce, and public key
 			createSingleSignerSignature((uint8_t *)signature, hash, (uint8_t *)transaction.blindingFactor, (uint8_t *)secretNonce, publicNonce, publicKey);

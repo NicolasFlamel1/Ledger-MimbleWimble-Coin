@@ -39,7 +39,7 @@ struct Transaction {
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
 	
 	// Secret nonce
-	uint8_t secretNonce[NONCE_SIZE];
+	volatile uint8_t secretNonce[NONCE_SIZE];
 	
 	// Address length
 	size_t addressLength;
@@ -52,6 +52,9 @@ struct Transaction {
 	
 	// Message signed
 	bool messageSigned;
+	
+	// Secret nonce set
+	bool secretNonceSet;
 	
 	// Address
 	char address[sizeof("tgrin") - sizeof((char)'\0') + SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE];
