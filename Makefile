@@ -9,7 +9,6 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 # Application parameters
-APP_LOAD_PARAMS = --curve secp256k1
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
@@ -34,19 +33,19 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	# Application name
 	APPNAME = "MimbleWimble Coin"
 	
-	# Application paramaters
-	APP_LOAD_PARAMS += --path "44'/593'"
+	# 44'/593' path on secp256k1 curve
+	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/593'"
 	
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
 	
-		# Application paramaters
+		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0xA00
 	
 	# Otherwise
 	else
 	
-		# Application paramaters
+		# APPLICATION_FLAG_LIBRARY application flags
 		APP_LOAD_PARAMS += --appFlags 0x800
 	endif
 	
@@ -72,20 +71,19 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	# Application name
 	APPNAME = "MimbleWimble Coin Floonet"
 	
-	# Application parameters
-	APP_LOAD_PARAMS += --path "44'/1'"
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	# 44'/1' path on secp256k1 curve
+	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
 	
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
 	
-		# Application paramaters
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
 	
 	# Otherwise
 	else
 	
-		# Application paramaters
+		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
 	
@@ -104,6 +102,7 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Icon
 	ICON = mimblewimble_coin
@@ -117,20 +116,19 @@ else ifeq ($(CURRENCY),grin)
 	# Application name
 	APPNAME = "Grin"
 	
-	# Application parameters
-	APP_LOAD_PARAMS += --path "44'/592'"
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	# 44'/592' path on secp256k1 curve
+	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/592'"
 	
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
 	
-		# Application paramaters
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
 	
 	# Otherwise
 	else
 	
-		# Application paramaters
+		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
 	
@@ -148,6 +146,7 @@ else ifeq ($(CURRENCY),grin)
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Icon
 	ICON = grin
@@ -161,20 +160,19 @@ else ifeq ($(CURRENCY),grin_testnet)
 	# Application name
 	APPNAME = "Grin Testnet"
 	
-	# Application parameters
-	APP_LOAD_PARAMS += --path "44'/1'"
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
+	# 44'/1' path on secp256k1 curve
+	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
 	
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
 	
-		# Application paramaters
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
 	
 	# Otherwise
 	else
 	
-		# Application paramaters
+		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
 	
@@ -192,6 +190,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 	
 	# Icon
 	ICON = grin

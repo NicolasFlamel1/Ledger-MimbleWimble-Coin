@@ -6,3 +6,4 @@ src/glyphs.c
 src/glyphs.h
 tools/a.out
 tools/secp256k1-zkp-master
+output-scan-build

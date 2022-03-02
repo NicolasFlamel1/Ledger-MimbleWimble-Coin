@@ -1,16 +1,16 @@
-# MimbleWimble Coin app for the Ledger Nano S and Nano X
+# MimbleWimble Coin app for Ledger Nano S and Ledger Nano X hardware wallets
 
 ### Description
-MimbleWimble Coin app for the Ledger Nano S and Nano X.
+MimbleWimble Coin app for Ledger Nano S and Ledger Nano X hardware wallets.
 
 ### Building
-Building this app requires setting up a Ledger Nano S or Nano X build environment. The following steps describe how to setup a build environment.
+Building this app requires setting up a Ledger Nano S or Ledger Nano X build environment. The following steps describe how to setup a build environment.
 
 Install dependencies:
 ```
 sudo apt-get install libc6-dev gcc-multilib g++-multilib
 ```
-Download the Ledger Nano S or Nano X SDK:
+Download the Ledger Nano S or Ledger Nano X SDK:
 ```
 git clone https://github.com/LedgerHQ/nanos-secure-sdk.git
 #git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
