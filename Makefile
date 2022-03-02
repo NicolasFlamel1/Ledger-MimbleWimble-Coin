@@ -325,7 +325,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -Oz -Wall -Wextra -Werror
+CFLAGS += -Oz -Wall -Wextra
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS +=
