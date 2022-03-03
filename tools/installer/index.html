@@ -3,11 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 
-	<script src="../tests/LedgerJS-6.24.1.min.js"></script>
-	<script src="../tests/secp256k1-zkp.min.js"></script>
-	<script src="../tests/js-sha256-0.9.0.min.js"></script>
-	<script src="../tests/common.min.js"></script>
-	<script src="../tests/crypto.min.js"></script>
+	<script src="LedgerJS-6.24.1.min.js"></script>
+	<script src="../../tests/functional_tests/secp256k1-zkp.min.js"></script>
+	<script src="../../tests/functional_tests/common.min.js"></script>
 	
 	<script>
 	
@@ -309,6 +307,9 @@
 				
 				// Batch signer serial length
 				const BATCH_SIGNER_SERIAL_LENGTH = 4;
+				
+				// Secp256k1 secret key length
+				const SECP256K1_SECRET_KEY_LENGTH = 32;
 			
 				// Prevent default
 				event.preventDefault();
@@ -338,7 +339,7 @@
 					const deviceNonce = response.subarray(BATCH_SIGNER_SERIAL_LENGTH, BATCH_SIGNER_SERIAL_LENGTH + NONCE_LENGTH);
 					
 					// Create private key
-					const privateKey = crypto.getRandomValues(new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH));
+					const privateKey = crypto.getRandomValues(new Uint8Array(SECP256K1_SECRET_KEY_LENGTH));
 					
 					// Get public key from private key
 					const publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
@@ -354,7 +355,7 @@
 					]);
 					
 					// Get message's hash
-					let messageHash = new Uint8Array(sha256.arrayBuffer(message));
+					let messageHash = new Uint8Array(await crypto["subtle"].digest("SHA-256", message));
 					
 					// Sign message hash with the private key
 					let signature = Secp256k1Zkp.createMessageHashSignature(messageHash, privateKey);
@@ -382,7 +383,7 @@
 					await hardwareWallet.send(0xE0, 0x51, 0x00, 0x00, Buffer.from(certificate));
 					
 					// Create ephemeral private key
-					const ephemeralPrivateKey = crypto.getRandomValues(new Uint8Array(Crypto.SECP256K1_SECRET_KEY_LENGTH));
+					const ephemeralPrivateKey = crypto.getRandomValues(new Uint8Array(SECP256K1_SECRET_KEY_LENGTH));
 					
 					// Get ephemeral public key from the ephemeral private key
 					const ephemeralPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(ephemeralPrivateKey);
@@ -404,7 +405,7 @@
 					]);
 					
 					// Get message's hash
-					messageHash = new Uint8Array(sha256.arrayBuffer(message));
+					messageHash = new Uint8Array(await crypto["subtle"].digest("SHA-256", message));
 					
 					// Sign message hash with the private key
 					signature = Secp256k1Zkp.createMessageHashSignature(messageHash, privateKey);
@@ -522,7 +523,7 @@
 		// Supporting function implementation
 		
 		// Derive AES key
-		function deriveAesKey(sharedPrivateKey, keyIndex) {
+		async function deriveAesKey(sharedPrivateKey, keyIndex) {
 		
 			// AES key size
 			const AES_KEY_SIZE = 16;
@@ -531,7 +532,7 @@
 			for(let retryIndex = 0;; ++retryIndex) {
 			
 				// Derive private key from the key index, retry index, and shared private key
-				let derivedPrivateKey = new Uint8Array(sha256.arrayBuffer(Common.mergeArrays([
+				let derivedPrivateKey = new Uint8Array(await crypto["subtle"].digest("SHA-256", Common.mergeArrays([
 				
 					// Key index as uint32 and retry index
 					new Uint8Array([0x00, 0x00, 0x00, keyIndex, retryIndex]),
@@ -547,7 +548,7 @@
 					const derivedPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(derivedPrivateKey);
 					
 					// Return hash of the derived public key
-					return (new Uint8Array(sha256.arrayBuffer(Secp256k1Zkp.uncompressPublicKey(derivedPublicKey)))).subarray(0, AES_KEY_SIZE);
+					return (new Uint8Array(await crypto["subtle"].digest("SHA-256", Secp256k1Zkp.uncompressPublicKey(derivedPublicKey)))).subarray(0, AES_KEY_SIZE);
 				}
 			}
 		}
@@ -595,7 +596,7 @@
 			}
 			
 			// Get encryption key from shared private key
-			const encryptionKey = deriveAesKey(sharedPrivateKey, ENCRYPTION_KEY_INDEX);
+			const encryptionKey = await deriveAesKey(sharedPrivateKey, ENCRYPTION_KEY_INDEX);
 			
 			// Create AES encryption key from encryption key
 			const aesEncryptionKey = await crypto["subtle"].importKey("raw", encryptionKey, {
@@ -624,7 +625,7 @@
 			const newEncryptionInitializationVector = encryptedData.subarray(encryptedData["length"] - AES_BLOCK_SIZE);
 			
 			// Get MAC key from shared private key
-			const macKey = deriveAesKey(sharedPrivateKey, MAC_KEY_INDEX);
+			const macKey = await deriveAesKey(sharedPrivateKey, MAC_KEY_INDEX);
 			
 			// Create AES MAC key from MAC key
 			const aesMacKey = await crypto["subtle"].importKey("raw", macKey, {

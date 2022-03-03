@@ -1,4 +1,5 @@
 /*
+This file can create the ../../src/generators.c file by running the following commands:
 wget https://github.com/mimblewimble/secp256k1-zkp/archive/refs/heads/master.zip
 unzip master.zip
 rm master.zip
@@ -7,7 +8,7 @@ cd secp256k1-zkp-master
 ./configure --disable-shared --with-bignum=no --with-field=32bit
 make
 cd ..
-g++ -D USE_NUM_NONE -D USE_FIELD_10X26 -D USE_FIELD_INV_BUILTIN generators.cpp -I secp256k1-zkp-master/include/ -I secp256k1-zkp-master/src/ -L secp256k1-zkp-master/.libs/ -l secp256k1
+g++ -D USE_NUM_NONE -D USE_FIELD_10X26 -D USE_FIELD_INV_BUILTIN main.cpp -I secp256k1-zkp-master/include/ -I secp256k1-zkp-master/src/ -L secp256k1-zkp-master/.libs/ -l secp256k1
 ./a.out
 */
 
@@ -47,7 +48,7 @@ static const size_t NUMBER_OF_GENERATORS = 256;
 static const size_t COMPONENT_SIZE = 32;
 
 // File location
-static const char FILE_LOCATION[] = "../src/generators.c";
+static const char FILE_LOCATION[] = "../../src/generators.c";
 
 // Hexadecimal character size
 static const size_t HEXADECIMAL_CHARACTER_SIZE = sizeof("FF") - sizeof('\0');

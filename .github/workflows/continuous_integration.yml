@@ -1,0 +1,454 @@
+name: Compilation & tests
+
+on: [push, pull_request]
+
+jobs:
+  job_build_debug:
+    name: Build debug
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Build Nano S MimbleWimble Coin app
+        run: |
+          make DEBUG=1 CURRENCY=mimblewimble_coin
+
+      - name: Upload Nano S MimbleWimble Coin app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-nanos
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano S MimbleWimble Coin floonet app
+        run: |
+          make DEBUG=1 CURRENCY=mimblewimble_coin_floonet
+
+      - name: Upload Nano S MimbleWimble Coin floonet app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-floonet-nanos
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano S Grin app
+        run: |
+          make DEBUG=1 CURRENCY=grin
+
+      - name: Upload Nano S Grin app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-grin-nanos
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano S Grin testnet app
+        run: |
+          make DEBUG=1 CURRENCY=grin_testnet
+
+      - name: Upload Nano S Grin testnet app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-grin-testnet-nanos
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano X MimbleWimble Coin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin
+
+      - name: Upload Nano X MimbleWimble Coin app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-nanox
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano X MimbleWimble Coin floonet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet
+
+      - name: Upload Nano X MimbleWimble Coin floonet app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-floonet-nanox
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano X Grin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=grin
+
+      - name: Upload Nano X Grin app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-grin-nanox
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git clean -dxf
+
+      - name: Build Nano X Grin testnet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet
+
+      - name: Upload Nano X Grin testnet app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-debug-grin-testnet-nanox
+          path: bin
+ 
+  job_scan_build:
+    name: Clang Static Analyzer
+    needs: job_build_debug
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Nano S MimbleWimble Coin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano S MimbleWimble Coin floonet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin_floonet
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano S Grin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano S Grin testnet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin_testnet
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano X MimbleWimble Coin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano X MimbleWimble Coin floonet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano X Grin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Nano X Grin testnet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+  job_functional_test:
+    name: Functional test
+    needs: job_build_debug
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/ledgerhq/speculos:latest
+      options: --entrypoint /bin/bash
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apt update -q && apt install -qy curl netcat
+          curl -fsSL https://deb.nodesource.com/setup_17.x | bash -
+          apt update -q && apt install -qy nodejs
+          npm i @ledgerhq/hw-transport-node-speculos
+
+      - name: Download Nano S MimbleWimble Coin app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-nanos
+          path: bin-mimblewimble-coin-nanos
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanos/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano S MimbleWimble Coin app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-nanos-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano S MimbleWimble Coin floonet app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-floonet-nanos
+          path: bin-mimblewimble-coin-floonet-nanos
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanos/app.elf bin-mimblewimble-coin-floonet-nanos/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano S MimbleWimble Coin floonet app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-floonet-nanos-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano S Grin app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-grin-nanos
+          path: bin-grin-nanos
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanos/app.elf bin-grin-nanos/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano S Grin app
+        run: |
+          node tests/functional_tests/main.js grin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-grin-nanos-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano S Grin testnet app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-grin-testnet-nanos
+          path: bin-grin-testnet-nanos
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanos/app.elf bin-grin-testnet-nanos/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano S Grin testnet app
+        run: |
+          node tests/functional_tests/main.js grin_testnet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-grin-testnet-nanos-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+      
+      - name: Download Nano X MimbleWimble Coin app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-nanox
+          path: bin-mimblewimble-coin-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X MimbleWimble Coin app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+      
+      - name: Download Nano X MimbleWimble Coin floonet app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-mimblewimble-coin-floonet-nanox
+          path: bin-mimblewimble-coin-floonet-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanox/app.elf bin-mimblewimble-coin-floonet-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X MimbleWimble Coin floonet app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-floonet-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Grin app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-grin-nanox
+          path: bin-grin-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanox/app.elf bin-grin-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Grin app
+        run: |
+          node tests/functional_tests/main.js grin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-grin-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Grin testnet app
+        uses: actions/download-artifact@v2
+        with:
+          name: app-debug-grin-testnet-nanox
+          path: bin-grin-testnet-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanox/app.elf bin-grin-testnet-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Grin testnet app
+        run: |
+          node tests/functional_tests/main.js grin_testnet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: speculos-grin-testnet-nanox-log
+          path: speculos.log

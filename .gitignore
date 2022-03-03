@@ -4,6 +4,6 @@ dep
 obj
 src/glyphs.c
 src/glyphs.h
-tools/a.out
-tools/secp256k1-zkp-master
+tools/generators/a.out
+tools/generators/secp256k1-zkp-master
 output-scan-build

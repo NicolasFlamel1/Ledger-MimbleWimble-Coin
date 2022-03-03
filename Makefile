@@ -351,12 +351,6 @@ load: all
 	# Load application on device 
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
-# Load offline command
-load-offline: all
-	
-	# Load application on on device offline
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
-
 # Delete command
 delete:
 	
@@ -368,6 +362,12 @@ run: all
 	
 	# Run application in emulator
 	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
+
+# Functional tests
+functional_tests: all
+	
+	# Run functional tests
+	node tests/functional_tests/main.js $(CURRENCY)
 
 # Include BOLOS SDK Makefile rules
 include $(BOLOS_SDK)/Makefile.rules

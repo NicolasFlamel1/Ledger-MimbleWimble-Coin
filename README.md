@@ -41,7 +41,7 @@ The app can be installed on a Ledger device with the following command:
 ```
 make load
 ```
-You can also install this app on a Ledger Nano S without installing or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tools/installer.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+You can also install this app on a Ledger Nano S without installing or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 This app also supports Grin as a dependent app. To compile and install this app for Grin, run the following commands:
 ```
@@ -50,9 +50,11 @@ make load CURRENCY=grin
 ```
 
 ### Testing
-Functional tests for this app can be ran by opening the tests/index.html file in a web browser.
-
-You can also run functional tests for this app by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tests/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+Functional tests for this app can be ran with the following commands:
+```
+npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
+make functional_tests
+```
 
 ### Commands
 The app supports the following commands.
