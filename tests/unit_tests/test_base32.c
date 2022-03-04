@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <cmocka.h>
-#include "bech32.h"
+#include "base32.h"
 
 
 // Constants
@@ -11,11 +11,8 @@
 // Input
 static const uint8_t INPUT[] = {0x00, 0x14, 0x75, 0x1e, 0x76, 0xe8, 0x19, 0x91, 0x96, 0xd4, 0x54, 0x94, 0x1c, 0x45, 0xd1, 0xb3, 0xa3, 0x23, 0xf1, 0x43, 0x3b, 0xd6};
 
-// Human-readable part
-static const char *HUMAN_READABLE_PART = "hrp";
-
 // Output
-static const char OUTPUT[] = "hrp1qq2828nkaqver9k52j2pc3w3kw3j8u2r80tqyrjeaq";
+static const char OUTPUT[] = "aakhkhtw5amzdfwukskbyrorworsh4kdhpla====";
 
 
 // Function prototypes
@@ -51,14 +48,14 @@ int main(void) {
 void testEncode(void **state) {
 
 	// Get output length
-	const size_t outputLength = getBech32EncodedLength(sizeof(INPUT), HUMAN_READABLE_PART);
+	const size_t outputLength = getBase32EncodedLength(sizeof(INPUT));
 	
 	// Assert output length is correct
 	assert_int_equal(outputLength, sizeof(OUTPUT) - sizeof((char)'\0'));
 	
 	// Get output by encoding input
 	char output[outputLength + sizeof((char)'\0')];
-	bech32Encode(output, INPUT, sizeof(INPUT), HUMAN_READABLE_PART);
+	base32Encode(output, INPUT, sizeof(INPUT));
 	output[outputLength] = '\0';
 	
 	// Assert output is correct
@@ -69,14 +66,14 @@ void testEncode(void **state) {
 void testDecode(void **state) {
 
 	// Get input length
-	const size_t inputLength = getBech32DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+	const size_t inputLength = getBase32DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
 	
 	// Assert input length is correct
 	assert_int_equal(inputLength, sizeof(INPUT));
 	
 	// Get input by decoding output
 	uint8_t input[inputLength];
-	bech32Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+	base32Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
 	
 	// Assert input is correct
 	assert_memory_equal(input, INPUT, sizeof(INPUT));

@@ -21,6 +21,12 @@ include_directories(../../src $ENV{BOLOS_SDK}/include)
 
 # Tests
 
+# Base32 test
+add_executable(test_base32 test_base32.c)
+add_library(base32 SHARED ../../src/base32.c)
+target_link_libraries(test_base32 PUBLIC cmocka base32)
+add_test(test_base32 test_base32)
+
 # Bech32 test
 add_executable(test_bech32 test_bech32.c)
 add_library(bech32 SHARED ../../src/bech32.c)
