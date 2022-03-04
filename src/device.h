@@ -4,9 +4,22 @@
 
 
 // Header files
-#include <os.h>
-#include <os_apdu.h>
-#include <libcxng.h>
+
+// Check if compiling unit tests
+#ifdef UNIT_TESTS
+
+	// Header files
+	#include <errors.h>
+	#include <os_utils.h>
+
+// Otherwise
+#else
+
+	// Header files
+	#include <os.h>
+	#include <os_apdu.h>
+	#include <libcxng.h>
+#endif
 
 
 #endif

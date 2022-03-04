@@ -7,3 +7,7 @@ src/glyphs.h
 tools/generators/a.out
 tools/generators/secp256k1-zkp-master
 output-scan-build
+node_modules
+package.json
+package-lock.json
+tests/unit_tests/build

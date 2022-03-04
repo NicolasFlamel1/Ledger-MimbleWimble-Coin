@@ -77,7 +77,7 @@ static UX_STEP_NOCB(aboutMenuCurrencyScreen,
 		{
 
 			// Title
-			.title = "Cryptocurrency",
+			.title = "Currency",
 			
 			// Text
 			.text = currencyInformation.name

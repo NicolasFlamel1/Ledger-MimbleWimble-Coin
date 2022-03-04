@@ -221,6 +221,25 @@ jobs:
           name: scan-build
           path: scan-build
 
+  job_unit_test:
+    name: Unit test
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Build unit tests
+        run: |
+          cmake -Btests/unit_tests/build -Htests/unit_tests/ && make -C tests/unit_tests/build/
+
+      - name: Run unit tests
+        run: |
+          make -C tests/unit_tests/build test
+
   job_functional_test:
     name: Functional test
     needs: job_build_debug

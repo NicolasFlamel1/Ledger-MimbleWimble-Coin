@@ -55,6 +55,12 @@ Functional tests for this app can be ran with the following commands:
 npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
 make functional_tests
 ```
+Unit tests can be ran with the following commands:
+```
+cmake -Btests/unit_tests/build -Htests/unit_tests/
+make -C tests/unit_tests/build/
+make -C tests/unit_tests/build test
+```
 
 ### Commands
 The app supports the following commands.

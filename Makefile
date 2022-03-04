@@ -209,13 +209,13 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME=icons/nanos_app_$(ICON).gif
+	ICONNAME=submission_requirements/icons/nanos_app_$(ICON).gif
 
 # Otherwise
 else
 
 	# Icon name
-	ICONNAME=icons/nanox_app_$(ICON).gif
+	ICONNAME=submission_requirements/icons/nanox_app_$(ICON).gif
 endif
 
 # Make command
