@@ -54,7 +54,7 @@ void base58Encode(char *result, const uint8_t *data, size_t length) {
 size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, size_t length) {
 
 	// Return base58 encoded length with checksum
-	return base58EncodeGetLength(NULL, data, length) + BASE58_CHECKSUM_SIZE;
+	return base58EncodeGetLength(NULL, data, length + BASE58_CHECKSUM_SIZE);
 }
 
 // Base58 encode with checksum

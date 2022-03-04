@@ -232,6 +232,10 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: |
+          apt update -q && apt install -qy libssl-dev
+
       - name: Build unit tests
         run: |
           cmake -Btests/unit_tests/build -Htests/unit_tests/ && make -C tests/unit_tests/build/

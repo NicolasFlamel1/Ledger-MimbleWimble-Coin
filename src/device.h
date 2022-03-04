@@ -11,6 +11,7 @@
 	// Header files
 	#include <errors.h>
 	#include <os_utils.h>
+	#include <libcxng.h>
 
 // Otherwise
 #else
