@@ -29,6 +29,9 @@ add_compile_definitions(HAVE_CV_CURVES)
 add_compile_definitions(HAVE_ECC_WEIERSTRASS)
 add_compile_definitions(HAVE_SECP_CURVES)
 add_compile_definitions(HAVE_SHA3)
+add_compile_definitions(HAVE_MATH)
+add_compile_definitions(HAVE_ECDH)
+add_compile_definitions(HAVE_PBKDF2)
 
 # Include directories
 include_directories(./simulate ../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include $ENV{BOLOS_SDK}/lib_ux/include)
@@ -64,9 +67,14 @@ add_test(test_bech32 test_bech32)
 # ChaCha20 Poly1305 test
 add_executable(test_chacha20_poly1305
 	test_chacha20_poly1305.c
+	simulate/simulate.c
+	../../src/common.c
+	../../src/slate.c
+	../../src/state.c
+	../../src/transaction.c
 )
 add_library(chacha20_poly1305 SHARED ../../src/chacha20_poly1305.c)
-target_link_libraries(test_chacha20_poly1305 PUBLIC cmocka chacha20_poly1305)
+target_link_libraries(test_chacha20_poly1305 PUBLIC cmocka crypto chacha20_poly1305)
 add_test(test_chacha20_poly1305 test_chacha20_poly1305)
 
 # Common test
