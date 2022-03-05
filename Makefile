@@ -290,9 +290,6 @@ else
 
 	# Define printf as nothing
 	DEFINES += PRINTF\(...\)=
-	
-	# Compiler flags
-	CFLAGS += -Werror
 endif
 
 # Check if BOLOS environment is defined
