@@ -144,12 +144,21 @@ const TOR_ADDRESS_TYPE = MQS_ADDRESS_TYPE + 1;
 // Slatepack address type
 const SLATEPACK_ADDRESS_TYPE = TOR_ADDRESS_TYPE + 1;
 
+// Speculos APDU port
+const SPECULOS_APDU_PORT = 9999;
+
+// Speculos automation port
+const SPECULOS_AUTOMATION_PORT = 5000;
+
+// Default currency
+const DEFAULT_CURRENCY = "mimblewimble_coin";
+
 
 // Main fucntion
 (async function () {
 
 	// Get currency from the command line arguments if provided
-	const currency = (process["argv"]["length"] >= 3) ? process["argv"][2] : "mimblewimble_coin";
+	const currency = (process["argv"]["length"] >= 3) ? process["argv"][2] : DEFAULT_CURRENCY;
 	
 	// Check currency
 	switch(currency) {
@@ -209,7 +218,7 @@ const SLATEPACK_ADDRESS_TYPE = TOR_ADDRESS_TYPE + 1;
 		// Default
 		default:
 		
-			// Display message
+			// Log message
 			console.log("Invalid currency. Supported currencies are: mimblewimble_coin, mimblewimble_coin_floonet, grin, and grin_testnet");
 			
 			// Return
@@ -219,7 +228,7 @@ const SLATEPACK_ADDRESS_TYPE = TOR_ADDRESS_TYPE + 1;
 	// Get use Speculos from the command line arguments if provided
 	const useSpeculos = process["argv"]["length"] >= 4 && process["argv"][3] === "speculos";
 	
-	// Display message
+	// Log message
 	console.log("Using currency: " + currency);
 
 	// Initialize dependencies
@@ -261,7 +270,7 @@ async function performTests(useSpeculos) {
 			var hardwareWallet = await SpeculosTransport.open({
 			
 				// APDU port
-				"apduPort": 9999
+				"apduPort": SPECULOS_APDU_PORT
 			});
 		}
 		
@@ -277,6 +286,12 @@ async function performTests(useSpeculos) {
 		
 		// Log message
 		console.log("Running functional tests with the mnemonic: " + MNEMONIC);
+		
+		// Log message
+		console.log("Running functional tests with the account: " + ACCOUNT.toFixed());
+		
+		// Log message
+		console.log("Running functional tests with the index: " + INDEX.toFixed());
 		
 		// Initialize seed
 		const seed = new Seed();
@@ -575,7 +590,7 @@ function setAutomation(automation) {
 			"hostname": "localhost",
 			
 			// Port
-			"port": 5000,
+			"port": SPECULOS_AUTOMATION_PORT,
 			
 			// Path
 			"path": "/automation",
@@ -714,8 +729,11 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 	// Check if root public key is invalid
 	if(Common.arraysAreEqual(response, expectedRootPublicKey) === false) {
 	
+		// Log message
+		console.log("Invalid root public key");
+	
 		// Throw error
-		throw "Invalid root public key: " + Common.toHexString(response);
+		throw "Failed running get root pubic key test";
 	}
 	
 	// Log message
@@ -805,8 +823,11 @@ async function getAddressTest(hardwareWallet, extendedPrivateKey, addressType) {
 	// Check if address is invalid
 	if(response !== expectedAddress) {
 	
+		// Log message
+		console.log("Invalid address");
+		
 		// Throw error
-		throw "Invalid address: " + response;
+		throw "Failed running get address test";
 	}
 	
 	// Log message
@@ -837,8 +858,11 @@ async function getSeedCookieTest(hardwareWallet, extendedPrivateKey) {
 	// Check if seed cookie is invalid
 	if(Common.arraysAreEqual(response, expectedSeedCookie) === false) {
 	
+		// Log message
+		console.log("Invalid seed cookie");
+		
 		// Throw error
-		throw "Invalid seed cookie: " + Common.toHexString(response);
+		throw "Failed running get seed cookie test";
 	}
 	
 	// Log message
@@ -913,8 +937,11 @@ async function getCommitmentTest(hardwareWallet, extendedPrivateKey, switchType)
 	// Check if commitment is invalid
 	if(Common.arraysAreEqual(response, expectedCommitment) === false) {
 	
+		// Log message
+		console.log("Invalid commitment");
+		
 		// Throw error
-		throw "Invalid commitment: " + Common.toHexString(response);
+		throw "Failed running get commitment test";
 	}
 	
 	// Log message
@@ -1011,8 +1038,11 @@ async function getBulletproofTest(hardwareWallet, extendedPrivateKey, switchType
 	// Check if commitment is invalid
 	if(Common.arraysAreEqual(bulletproof, expectedBulletproof) === false) {
 	
+		// Log message
+		console.log("Invalid bulletproof");
+		
 		// Throw error
-		throw "Invalid bulletproof: " + Common.toHexString(bulletproof);
+		throw "Failed running get bulletproof test";
 	}
 	
 	// Log message
@@ -1228,6 +1258,9 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 			
 		} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
 		
+		// Log private key
+		console.log("Using private key: " + Common.toHexString(privateKey));
+		
 		// Check address type
 		switch(addressType) {
 		
@@ -1305,8 +1338,14 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Get nonce from response
 		const nonce = response.subarray(0, Slatepack.NONCE_LENGTH);
 		
+		// Log nonce
+		console.log("Using nonce: " + Common.toHexString(nonce));
+		
 		// Get salt from response
 		const salt = response.subarray(Slatepack.NONCE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
+		
+		// Log salt
+		console.log("Using salt: " + Common.toHexString(salt));
 		
 		// Go through all chunks of the data
 		let encryptedData = new Uint8Array([]);
@@ -1389,8 +1428,11 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Check if decrypted data is invalid
 		if(Common.arraysAreEqual(decryptedData, DATA) === false) {
 		
+			// Log message
+			console.log("Invalid decrypted slate");
+			
 			// Throw error
-			throw "Invalid decrypted slate: " + Common.toHexString(decryptedData);
+			throw "Failed running encrypt slate test";
 		}
 		
 		// Log message
@@ -1435,6 +1477,9 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 			
 		} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
 		
+		// Log private key
+		console.log("Using private key: " + Common.toHexString(privateKey));
+		
 		// Check address type
 		switch(addressType) {
 		
@@ -1463,8 +1508,14 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					// Get salt from encrypted data
 					var salt = encryptedData[Mqs.ENCRYPTED_DATA_SALT_INDEX];
 					
+					// Log salt
+					console.log("Using salt: " + Common.toHexString(salt));
+					
 					// Get nonce from encrypted data
 					var nonce = encryptedData[Mqs.ENCRYPTED_DATA_NONCE_INDEX];
+					
+					// Log nonce
+					console.log("Using nonce: " + Common.toHexString(nonce));
 					
 					// Get encrypted message from encrypted data
 					var encryptedMessage = encryptedData[Mqs.ENCRYPTED_DATA_DATA_INDEX];
@@ -1503,6 +1554,9 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					// Get nonce from encrypted data
 					var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
 					
+					// Log nonce
+					console.log("Using nonce: " + Common.toHexString(nonce));
+					
 					// Get encrypted message from encrypted data
 					var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_DATA_DATA_INDEX];
 				}
@@ -1539,6 +1593,9 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					
 					// Get nonce from encrypted data
 					var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
+					
+					// Log nonce
+					console.log("Using nonce: " + Common.toHexString(nonce));
 					
 					// Get encrypted message from encrypted data
 					var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_DATA_DATA_INDEX];
@@ -1594,6 +1651,9 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Remove response code from response
 		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
 		
+		// Log AES key
+		console.log("Using AES key: " + Common.toHexString(response));
+		
 		// Create AES key from response
 		const aesKey = await crypto["subtle"].importKey("raw", response, {"name": "AES-CBC"}, false, ["decrypt"]);
 		
@@ -1614,8 +1674,11 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Check if decrypted data is invalid
 		if(Common.arraysAreEqual(decryptedData, DATA) === false) {
 		
+			// Log message
+			console.log("Invalid decrypted slate");
+			
 			// Throw error
-			throw "Invalid decrypted slate: " + Common.toHexString(decryptedData);
+			throw "Failed running decrypt slate test";
 		}
 		
 		// Log message
@@ -1656,6 +1719,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	
 	// Log identifier
 	console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
+	
+	// Log message
+	console.log("Using message: " + MESSAGE);
 	
 	// Check switch type
 	switch(switchType) {
@@ -1728,7 +1794,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 			console.log("Using fee: " + FEE.toFixed());
 			
 			// Log relative height
-			console.log("Using lock height: " + relativeHeight.toFixed());
+			console.log("Using relative height: " + relativeHeight.toFixed());
 		
 			// Break
 			break;
@@ -1933,8 +1999,11 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	// Check if transaction public key is invalid
 	if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
 	
+		// Log message
+		console.log("Invalid transaction public key");
+		
 		// Throw error
-		throw "Invalid transaction public key: " + Common.toHexString(response);
+		throw "Failed running receive transaction test";
 	}
 	
 	// Get the transaction public nonce from the hardware wallet
@@ -1942,6 +2011,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 
 	// Get public nonce from response
 	const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Log transaction public nonce
+	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
 	
 	// Check if features is coinbase
 	if(features === SlateKernel.COINBASE_FEATURES) {
@@ -1987,8 +2059,11 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	// Check if message signature is invalid
 	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
 	
+		// Log message
+		console.log("Invalid message signature");
+		
 		// Throw error
-		throw "Invalid message signature: " + Common.toHexString(response);
+		throw "Failed running receive transaction test";
 	}
 	
 	// Check features
@@ -2065,8 +2140,11 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	// Check if signature is invalid
 	if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) === false) {
 	
+		// Log message
+		console.log("Invalid transaction signature");
+		
 		// Throw error
-		throw "Invalid transaction signature: " + Common.toHexString(signature);
+		throw "Failed running receive transaction test";
 	}
 	
 	// Check if using a payment proof
@@ -2078,8 +2156,11 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 		// Check if payment proof is invalid
 		if(Common.arraysAreEqual(paymentProof, expectedPaymentProof) === false) {
 		
+			// Log message
+			console.log("Invalid payment proof");
+			
 			// Throw error
-			throw "Invalid payment proof: " + Common.toHexString(paymentProof);
+			throw "Failed running receive transaction test";
 		}
 	}
 	
@@ -2128,6 +2209,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	
 	// Log input identifier
 	console.log("Using input identifier: " + Common.toHexString(INPUT_IDENTIFIER.getValue()));
+	
+	// Log message
+	console.log("Using message: " + MESSAGE);
 	
 	// Check switch type
 	switch(switchType) {
@@ -2191,7 +2275,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 			console.log("Using features: no recent duplicate");
 			
 			// Log relative height
-			console.log("Using lock height: " + relativeHeight.toFixed());
+			console.log("Using relative height: " + relativeHeight.toFixed());
 		
 			// Break
 			break;
@@ -2397,6 +2481,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 		
 	} while(Secp256k1Zkp.isValidSecretKey(offset) === false);
 	
+	// Log offset
+	console.log("Using offset: " + Common.toHexString(offset));
+	
 	// Apply offset to the transaction on the hardware wallet
 	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
 	
@@ -2427,8 +2514,11 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Check if transaction public key is invalid
 	if(Common.arraysAreEqual(publicKey, expectedTransactionPublicKey) === false) {
 	
+		// Log message
+		console.log("Invalid transaction public key");
+		
 		// Throw error
-		throw "Invalid transaction public key: " + Common.toHexString(publicKey);
+		throw "Failed running send transaction test";
 	}
 	
 	// Get the transaction public nonce from the hardware wallet
@@ -2437,11 +2527,17 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Get public nonce from response
 	const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
 	
+	// Log transaction public nonce
+	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
+	
 	// Get the transaction encrypted secret nonce from the hardware wallet
 	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
 
 	// Get encrypted secret nonce from response
 	const encryptedSecretNonce = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log transaction encrypted secret nonce
+	console.log("Transaction encrypted secret nonce: " + Common.toHexString(encryptedSecretNonce));
 	
 	// Set the transaction encrypted secret nonce on the hardware wallet
 	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedSecretNonce));
@@ -2465,8 +2561,11 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Check if message signature is invalid
 	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
 	
+		// Log message
+		console.log("Invalid message signature");
+		
 		// Throw error
-		throw "Invalid message signature: " + Common.toHexString(response);
+		throw "Failed running send transaction test";
 	}
 	
 	// Check features
@@ -2615,8 +2714,11 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Check if signature is invalid
 	if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) === false) {
 	
+		// Log message
+		console.log("Invalid transaction signature");
+		
 		// Throw error
-		throw "Invalid transaction signature: " + Common.toHexString(response);
+		throw "Failed running send transaction test";
 	}
 	
 	// Log message
@@ -2632,6 +2734,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	// Timestamp
 	const TIMESTAMP = new BigNumber(Math.round(Math.random() * Common.UINT32_MAX_VALUE));
 	
+	// Log timestamp
+	console.log("Using timestamp: " + TIMESTAMP.toFixed());
+	
 	// Get MQS private key from the extended private key
 	const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
 	
@@ -2643,6 +2748,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	
 	// Get time zone offset
 	const timeZoneOffset = (new Date()).getTimezoneOffset();
+	
+	// Log time zone offset
+	console.log("Using time zone offset: " + timeZoneOffset.toFixed());
 	
 	// Get timestamp as a date
 	const date = new Date((TIMESTAMP.toNumber() - timeZoneOffset * Common.SECONDS_IN_A_MINUTE) * Common.MILLISECONDS_IN_A_SECOND);
@@ -2714,8 +2822,11 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	// Check if MQS timestamp signature is invalid
 	if(Common.arraysAreEqual(response, expectedMqsTimestampSignature) === false) {
 	
+		// Log message
+		console.log("Invalid MQS timestamp signature");
+		
 		// Throw error
-		throw "Invalid MQS timestamp signature: " + Common.toHexString(response);
+		throw "Failed running get MQS timestamp signature test";
 	}
 	
 	// Log message
@@ -2772,6 +2883,9 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 	
 	// Get time zone offset
 	const timeZoneOffset = (new Date()).getTimezoneOffset();
+	
+	// Log time zone offset
+	console.log("Using time zone offset: " + timeZoneOffset.toFixed());
 	
 	// Get timestamp as a date
 	const date = new Date((expirationTimestamp - timeZoneOffset * Common.SECONDS_IN_A_MINUTE) * Common.MILLISECONDS_IN_A_SECOND);
@@ -2871,8 +2985,11 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 	// Check if Tor certificate signature is invalid
 	if(Common.arraysAreEqual(response, expectedTorCertificateSignature) === false) {
 	
+		// Log message
+		console.log("Invalid Tor certificate signature");
+		
 		// Throw error
-		throw "Invalid Tor certificate signature: " + Common.toHexString(response);
+		throw "Failed running get Tor certificate signature test";
 	}
 	
 	// Log signed Tor certificate

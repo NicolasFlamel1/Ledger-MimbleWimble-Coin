@@ -3,6 +3,10 @@
 #define MQS_H
 
 
+// Header files
+#include "common.h"
+
+
 // Definitions
 
 // MQS address size
