@@ -642,13 +642,15 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		THROW(ERR_APD_LEN);
 	}
 	
-	// Append signature and payment proof to response
+	// Append signature to response
 	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));
 	
 	*responseLength += sizeof(signature);
 	
+	// Check if payment proof exists
 	if(paymentProofLength) {
 	
+		// Append payment proof to response
 		memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)paymentProof, paymentProofLength);
 		
 		*responseLength += paymentProofLength;

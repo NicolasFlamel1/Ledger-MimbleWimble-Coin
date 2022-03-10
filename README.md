@@ -1,19 +1,20 @@
-# MimbleWimble Coin app for Ledger Nano S and Ledger Nano X hardware wallets
+# MimbleWimble Coin app for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets
 
 ### Description
-MimbleWimble Coin app for Ledger Nano S and Ledger Nano X hardware wallets.
+MimbleWimble Coin app for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets.
 
 ### Building
-Building this app requires setting up a Ledger Nano S or Ledger Nano X build environment. The following steps describe how to setup a build environment.
+Building this app requires setting up a Ledger Nano S, Ledger Nano X, or Ledger Nano S Plus build environment. The following steps describe how to setup a build environment.
 
 Install dependencies:
 ```
 sudo apt-get install libc6-dev gcc-multilib g++-multilib
 ```
-Download the Ledger Nano S or Ledger Nano X SDK:
+Download the Ledger Nano S SDK, Ledger Nano X SDK, or Ledger Nano S Plus SDK:
 ```
 git clone https://github.com/LedgerHQ/nanos-secure-sdk.git
-#git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
+git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
+git clone https://github.com/LedgerHQ/nanosplus-secure-sdk.git
 ```
 Download the ARM and Clang development tools:
 ```
@@ -30,7 +31,8 @@ mv bolos-environment/gcc-arm-none-eabi-10.3-2021.10 bolos-environment/gcc-arm-no
 Add environmental variables:
 ```
 echo "export BOLOS_SDK=$PWD/nanos-secure-sdk" >> ~/.bashrc
-#echo "export BOLOS_SDK=$PWD/nanox-secure-sdk" >> ~/.bashrc
+echo "#export BOLOS_SDK=$PWD/nanox-secure-sdk" >> ~/.bashrc
+echo "#export BOLOS_SDK=$PWD/nanosplus-secure-sdk" >> ~/.bashrc
 echo "export BOLOS_ENV=$PWD/bolos-environment" >> ~/.bashrc
 ```
 The app can then be built with the following command:
@@ -41,7 +43,7 @@ The app can be installed on a Ledger device with the following command:
 ```
 make load
 ```
-You can also install this app on a Ledger Nano S without installing or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+You can also install this app on a Ledger Nano S or Ledger Nano S Plus without downloading or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 This app also supports Grin as a dependent app. To compile and install this app for Grin, run the following commands:
 ```
@@ -456,5 +458,5 @@ D102: Device locked
 
 ### Notes
 * The app will reset its internal slate and/or transaction state when unrelated commands are requested. For example, performing a `Start transaction` command followed by a `Get commitment` command will reset the app's internal transaction state thus requiring another `Start transaction` command to be performed before a `Continue transaction include output` command can be performed.
-* The `Get bulletproof components` command takes about 90 seconds to complete.
+* The `Get bulletproof components` command takes about 90 seconds to complete on a Ledger Nano S hardware wallet.
 * If a transaction needs to be finalized at a later time, then that transaction's state can be restored on the hardware wallet by starting a transaction, including the same inputs and outpus, applying the same offset, and setting the encrypted secret nonce that was obtained previously.

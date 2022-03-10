@@ -207,13 +207,15 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		THROW(ERR_APD_LEN);
 	}
 	
-	// Append nonce and salt to response	
+	// Append nonce to response	
 	memcpy(&G_io_apdu_buffer[*responseLength], nonce, sizeof(nonce));
 	
 	*responseLength += sizeof(nonce);
 	
+	// Check if salt exists
 	if(saltLength) {
 	
+		// Append salt to response	
 		memcpy(&G_io_apdu_buffer[*responseLength], salt, saltLength);
 		
 		*responseLength += saltLength;
