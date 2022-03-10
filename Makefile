@@ -211,11 +211,17 @@ ifeq ($(TARGET_NAME),TARGET_NANOS)
 	# Icon name
 	ICONNAME=submission_requirements/icons/nanos_app_$(ICON).gif
 
-# Otherwise
-else
+# Otherwise check if target is the Nano X
+else ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
 	ICONNAME=submission_requirements/icons/nanox_app_$(ICON).gif
+
+# Otherwise check if target is the Nano S Plus
+else ifeq ($(TARGET_NAME),TARGET_NANOS2)
+
+	# Icon name
+	ICONNAME=submission_requirements/icons/nanosplus_app_$(ICON).gif
 endif
 
 # Make command
