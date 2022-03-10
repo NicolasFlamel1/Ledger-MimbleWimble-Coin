@@ -125,7 +125,7 @@ void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor
 void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce);
 
 // Create single-signer signature
-void createSingleSignerSignature(uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
 
 // Get encrypted data length
 size_t getEncryptedDataLength(size_t dataLength);
@@ -170,7 +170,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey);
 void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t index);
 
 // Calculate bulletproof components
-void calculateBulletproofComponents(uint8_t *tauX, uint8_t *tOne, uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
+void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tOne, volatile uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
 
 #endif

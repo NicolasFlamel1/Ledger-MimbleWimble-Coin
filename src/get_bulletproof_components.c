@@ -143,7 +143,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 			getPrivateNonce(privateNonce, account, commitment);
 			
 			// Calculate bulletproof components
-			calculateBulletproofComponents((uint8_t *)bulletproofTauX, (uint8_t *)bulletproofTOne, (uint8_t *)bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, (uint8_t *)rewindNonce, (uint8_t *)privateNonce, proofMessage);
+			calculateBulletproofComponents(bulletproofTauX, bulletproofTOne, bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, (uint8_t *)rewindNonce, (uint8_t *)privateNonce, proofMessage);
 		}
 		
 		// Finally
