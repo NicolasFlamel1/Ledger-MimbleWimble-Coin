@@ -592,7 +592,7 @@ jobs:
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model nanos2 --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanosplus/app.elf 2>speculos.log &
+          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanosplus/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
@@ -619,7 +619,7 @@ jobs:
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model nanos2 --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-mimblewimble-coin-floonet-nanosplus/app.elf 2>speculos.log &
+          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-mimblewimble-coin-floonet-nanosplus/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
@@ -646,7 +646,7 @@ jobs:
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model nanos2 --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-nanosplus/app.elf 2>speculos.log &
+          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-nanosplus/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
@@ -673,7 +673,7 @@ jobs:
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model nanos2 --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-testnet-nanosplus/app.elf 2>speculos.log &
+          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-testnet-nanosplus/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
