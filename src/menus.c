@@ -245,10 +245,7 @@ static UX_FLOW(exportRootPublicKeyMenu,
 	&exportRootPublicKeyMenuApproveScreen,
 	
 	// Export root public key menu deny screen
-	&exportRootPublicKeyMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&exportRootPublicKeyMenuDenyScreen
 );
 
 // Verify root public key menu notify screen
@@ -321,10 +318,7 @@ static UX_FLOW(verifyRootPublicKeyMenu,
 	&verifyRootPublicKeyMenuValidScreen,
 	
 	// Verify root public key menu deny screen
-	&verifyRootPublicKeyMenuInvalidScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&verifyRootPublicKeyMenuInvalidScreen
 );
 
 // Verify address menu notify screen
@@ -397,10 +391,7 @@ static UX_FLOW(verifyAddressMenu,
 	&verifyAddressMenuValidScreen,
 	
 	// Verify address menu deny screen
-	&verifyAddressMenuInvalidScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&verifyAddressMenuInvalidScreen
 );
 
 // Sign MQS timestamp menu notify screen
@@ -473,10 +464,7 @@ static UX_FLOW(signMqsTimestampMenu,
 	&signMqsTimestampMenuApproveScreen,
 	
 	// Sign MQS timestamp menu deny screen
-	&signMqsTimestampMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&signMqsTimestampMenuDenyScreen
 );
 
 // Sign Tor certificate menu notify screen
@@ -576,10 +564,7 @@ static UX_FLOW(signTorCertificateMenu,
 	&signTorCertificateMenuApproveScreen,
 	
 	// Sign Tor certificate menu deny screen
-	&signTorCertificateMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&signTorCertificateMenuDenyScreen
 );
 
 // Finalize transaction menu notify screen
@@ -719,10 +704,7 @@ static UX_FLOW(finalizeTransactionReceiverMenu,
 	&finalizeTransactionMenuApproveScreen,
 	
 	// Finalize transaction menu deny screen
-	&finalizeTransactionMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&finalizeTransactionMenuDenyScreen
 );
 
 // Finalize transaction no payment proof menu
@@ -744,10 +726,7 @@ static UX_FLOW(finalizeTransactionNoPaymentProofMenu,
 	&finalizeTransactionMenuApproveScreen,
 	
 	// Finalize transaction menu deny screen
-	&finalizeTransactionMenuDenyScreen,
-	
-	// Loop
-	FLOW_LOOP
+	&finalizeTransactionMenuDenyScreen
 );
 
 // Processing menu screen
@@ -764,10 +743,7 @@ static UX_STEP_NOCB(processingMenuScreen, pb, {
 static UX_FLOW(processingMenu,
 
 	// Processing menu screen
-	&processingMenuScreen,
-	
-	// End
-	FLOW_END_STEP
+	&processingMenuScreen
 );
 
 

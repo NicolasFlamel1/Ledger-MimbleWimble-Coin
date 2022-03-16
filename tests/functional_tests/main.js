@@ -698,14 +698,15 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					"text": "Export root",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Approve",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
@@ -1076,14 +1077,24 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					"text": "Verify root",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Root Public Key.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Valid",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
@@ -1198,14 +1209,24 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 					"text": "address",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^.+ Address.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Valid",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
@@ -2670,14 +2691,51 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 					"text": "Finalize",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Amount.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Fee.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "No payment",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Proof Address.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Approve",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
@@ -2778,14 +2836,24 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 					"text": "timestamp?",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Time And Date.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Approve",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
@@ -2941,14 +3009,33 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 					"text": "certificate?",
 					"actions": [
 					
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
-						// Push left
-						["button", 1, true],
-						["button", 1, false],
-						
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Expires.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^.+ Address.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Approve",
+					"actions": [
+					
 						// Push both
 						["button", 1, true],
 						["button", 2, true],
