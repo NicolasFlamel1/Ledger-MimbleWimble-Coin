@@ -15,6 +15,12 @@
 #include "tor.h"
 
 
+// Definitions
+
+// Maximum relative height
+#define MAXIMUM_RELATIVE_HEIGHT (7 * 24 * 60)
+
+
 // Constants
 
 // Kernel features
@@ -137,9 +143,24 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 	size_t kernelFeaturesLength;
 	switch(kernelFeatures) {
 	
-		// Plain and coinbase features
+		// Plain features
 		case PLAIN_FEATURES:
+		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t);
+			
+			// Break
+			break;
+		
+		// Coinbase features
 		case COINBASE_FEATURES:
+		
+			// Check if transaction is sending
+			if(transaction.send) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t);
@@ -147,12 +168,20 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Break
 			break;
 		
-		// Height locked and no recent duplicate features
+		// Height locked features
 		case HEIGHT_LOCKED_FEATURES:
-		case NO_RECENT_DUPLICATE_FEATURES:
 		
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint64_t);
+		
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Set kernel features length
+			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint16_t);
 			
 			// Break
 			break;
@@ -286,6 +315,70 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			
 			// Clear the public key or address line buffer
 			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+		}
+		
+		// Check kernel features
+		switch(kernelFeatures) {
+		
+			// Plain features
+			case PLAIN_FEATURES:
+			
+				// Set kernel features line buffer
+				strcpy(kernelFeaturesLineBuffer, "Plain");
+				
+				// Clear the kernel features details title line buffer
+				explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+			
+				// Break
+				break;
+			
+			// Height locked features
+			case HEIGHT_LOCKED_FEATURES:
+			
+				// Set kernel features line buffer
+				strcpy(kernelFeaturesLineBuffer, "Height Locked");
+				
+				// Set kernel features details title line buffer
+				strcpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height");
+				
+				// Get lock height from data
+				uint64_t lockHeight;
+				memcpy(&lockHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(lockHeight));
+				
+				// Copy lock height into the kernel features details text line buffer
+				explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
+				toString(kernelFeaturesDetailsTextLineBuffer, lockHeight, 0);
+			
+				// Break
+				break;
+			
+			// No recent duplicate features or default
+			case NO_RECENT_DUPLICATE_FEATURES:
+			default:
+			
+				// Set kernel features line buffer
+				strcpy(kernelFeaturesLineBuffer, "No Recent Duplicate");
+				
+				// Set kernel features details title line buffer
+				strcpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height");
+				
+				// Get relative height from data
+				uint16_t relativeHeight;
+				memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
+				
+				// Check if relative height is invalid
+				if(!relativeHeight || relativeHeight > MAXIMUM_RELATIVE_HEIGHT) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Copy relative height into the kernel features details text line buffer
+				explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
+				toString(kernelFeaturesDetailsTextLineBuffer, relativeHeight, 0);
+				
+				// Break
+				break;
 		}
 		
 		// Check if transaction offset wasn't applied
@@ -469,10 +562,10 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		case NO_RECENT_DUPLICATE_FEATURES:
 		
 			// Set kernel features length
-			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint64_t);
+			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint16_t);
 		
 			// Set kernel data length
-			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
+			kernelDataLength = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint16_t);
 			
 			// Allocate memory for kernel data
 			kernelData = alloca(kernelDataLength);
@@ -492,10 +585,10 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 				uint8_t *relativeHeight = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)];
 				
 				// Convert relative height to big endian
-				swapEndianness(relativeHeight, sizeof(uint64_t));
+				swapEndianness(relativeHeight, sizeof(uint16_t));
 				
 				// Append relative height to the kernel data
-				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], relativeHeight, sizeof(uint64_t));
+				memcpy(&kernelData[sizeof(kernelData[0]) + sizeof(transaction.fee)], relativeHeight, sizeof(uint16_t));
 			}
 			
 			// Break

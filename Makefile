@@ -12,9 +12,9 @@ include $(BOLOS_SDK)/Makefile.defines
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
-APPVERSION_M = 2
-APPVERSION_N = 1
-APPVERSION_P = 1
+APPVERSION_M = 3
+APPVERSION_N = 0
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Emulator flags
@@ -367,7 +367,7 @@ delete:
 run: all
 	
 	# Run application in emulator
-	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 p | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
+	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
 
 # Functional tests
 functional_tests: all

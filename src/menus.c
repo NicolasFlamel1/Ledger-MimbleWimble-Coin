@@ -27,6 +27,15 @@ char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
+// Kernel features line buffer
+char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
+
+// Kernel features details title line buffer
+char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
+
+// Kernel features details text line buffer
+char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
+
 
 // Constants
 
@@ -100,30 +109,6 @@ static UX_STEP_NOCB(aboutMenuCurrencyScreen,
 	#endif
 );
 
-// About menu copyright screen
-static UX_STEP_NOCB(aboutMenuCopyrightScreen, 
-
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
-	
-		// Layout
-		nb_paging,
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		bnnn_paging,
-	#endif
-{
-
-	// Title
-	.title = "Copyright",
-	
-	// Text
-	.text = "(c) 2021-2022 Nicolas Flamel. All rights reserved."
-});
-
 // About menu back screen
 static UX_STEP_CB(aboutMenuBackScreen, pb, showMainMenu(ABOUT_SCREEN), {
 
@@ -142,9 +127,6 @@ static UX_FLOW(aboutMenu,
 	
 	// About menu currency screen
 	&aboutMenuCurrencyScreen,
-	
-	// About menu copyright screen
-	&aboutMenuCopyrightScreen,
 	
 	// About menu back screen
 	&aboutMenuBackScreen,
@@ -628,6 +610,54 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
 	.text = feeLineBuffer
 });
 
+// Finalize transaction menu kernel features screen
+static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesScreen,
+
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
+	
+		// Layout
+		nb_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		bnnn_paging,
+	#endif
+{
+
+	// Title
+	.title = "Kernel Features",
+
+	// Text
+	.text = kernelFeaturesLineBuffer
+});
+
+// Finalize transaction menu kernel features details screen
+static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsScreen,
+
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
+	
+		// Layout
+		nb_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		bnnn_paging,
+	#endif
+{
+
+	// Title
+	.title = kernelFeaturesDetailsTitleLineBuffer,
+	
+	// Text
+	.text = kernelFeaturesDetailsTextLineBuffer
+});
+
 // Finalize transaction menu proof address screen
 static UX_STEP_NOCB(finalizeTransactionMenuProofAddressScreen,
 
@@ -685,49 +715,8 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(
 	"Deny"
 });
 
-// Finalize transaction receiver menu
-static UX_FLOW(finalizeTransactionReceiverMenu,
-
-	// Finalize transaction menu notify screen
-	&finalizeTransactionMenuNotifyScreen,
-	
-	// Finalize transaction menu amount screen
-	&finalizeTransactionMenuAmountScreen,
-	
-	// Finalize transaction menu fee screen
-	&finalizeTransactionMenuFeeScreen,
-	
-	// Finalize transaction menu proof address screen
-	&finalizeTransactionMenuProofAddressScreen,
-	
-	// Finalize transaction menu approve screen
-	&finalizeTransactionMenuApproveScreen,
-	
-	// Finalize transaction menu deny screen
-	&finalizeTransactionMenuDenyScreen
-);
-
-// Finalize transaction no payment proof menu
-static UX_FLOW(finalizeTransactionNoPaymentProofMenu,
-
-	// Finalize transaction menu notify screen
-	&finalizeTransactionMenuNotifyScreen,
-	
-	// Finalize transaction menu amount screen
-	&finalizeTransactionMenuAmountScreen,
-	
-	// Finalize transaction menu fee screen
-	&finalizeTransactionMenuFeeScreen,
-	
-	// Finalize transaction menu no payment proof screen
-	&finalizeTransactionMenuNoPaymentProofScreen,
-	
-	// Finalize transaction menu approve screen
-	&finalizeTransactionMenuApproveScreen,
-	
-	// Finalize transaction menu deny screen
-	&finalizeTransactionMenuDenyScreen
-);
+// Finalize transaction menu
+static const ux_flow_step_t *finalizeTransactionMenu[8];
 
 // Processing menu screen
 static UX_STEP_NOCB(processingMenuScreen, pb, {
@@ -769,6 +758,15 @@ void clearMenuBuffers(void) {
 	
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
+	
+	// Clear the kernel features line buffer
+	explicit_bzero(kernelFeaturesLineBuffer, sizeof(kernelFeaturesLineBuffer));
+	
+	// Clear the kernel features details title line buffer
+	explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+	
+	// Clear the kernel features details text line buffer
+	explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
 }
 
 // Show main menu
@@ -867,18 +865,55 @@ void showMenu(enum Menu menu) {
 		// Finalize transaction menu
 		case FINALIZE_TRANSACTION_MENU:
 		
-			// Check if public key or address line buffer isn't empty
-			if(strlen(publicKeyOrAddressLineBuffer)) {
+			{
 			
-				// Set menu steps to finalize transaction receiver menu
-				menuSteps = finalizeTransactionReceiverMenu;
-			}
+				// Initialize index
+				size_t index = 0;
 			
-			// Otherwise
-			else {
-			
-				// Set menu steps to finalize transaction no payment proof menu
-				menuSteps = finalizeTransactionNoPaymentProofMenu;
+				// Set finalize transaction menu to use notify screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuNotifyScreen;
+				
+				// Set finalize transaction menu to use amount screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountScreen;
+				
+				// Set finalize transaction menu to use fee screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeScreen;
+				
+				// Set finalize transaction menu to use kernel features screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesScreen;
+				
+				// Check if kernel features details title line buffer isn't empty
+				if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
+				
+					// Set finalize transaction menu to use kernel features details screen
+					finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsScreen;
+				}
+				
+				// Check if public key or address line buffer isn't empty
+				if(strlen(publicKeyOrAddressLineBuffer)) {
+				
+					// Set finalize transaction menu to use proof address screen
+					finalizeTransactionMenu[index++] = &finalizeTransactionMenuProofAddressScreen;
+				}
+				
+				// Otherwise
+				else {
+				
+					// Set finalize transaction menu to use no payment proof screen
+					finalizeTransactionMenu[index++] = &finalizeTransactionMenuNoPaymentProofScreen;
+				}
+				
+				// Set finalize transaction menu to use approve screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuApproveScreen;
+				
+				// Set finalize transaction menu to use deny screen
+				finalizeTransactionMenu[index++] = &finalizeTransactionMenuDenyScreen;
+				
+				// End finalize transaction menu
+				finalizeTransactionMenu[index++] = FLOW_END_STEP;
+				
+				// Set menu steps to finalize transaction menu
+				menuSteps = finalizeTransactionMenu;
 			}
 			
 			// Break

@@ -420,18 +420,18 @@ async function performTests(useSpeculos) {
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
 		}
 		
 		// Otherwise check if using Grin
@@ -450,28 +450,16 @@ async function performTests(useSpeculos) {
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
 			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
-			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
+			await receiveTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
 		}
 		
 		// Check if using MimbleWimble Coin
 		if(Consensus.getWalletType() === Consensus.MWC_WALLET_TYPE) {
 		
 			// Run send transaction test
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
@@ -496,28 +484,24 @@ async function performTests(useSpeculos) {
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), MQS_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, MQS_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), TOR_ADDRESS_TYPE, TOR_PAYMENT_PROOF_TYPE);
 		}
 		
 		// Otherwise check if using Grin
 		else if(Consensus.getWalletType() === Consensus.GRIN_WALLET_TYPE) {
 		
 			// Run send transaction test
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.COINBASE_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.PLAIN_FEATURES, Slate.NO_LOCK_HEIGHT, SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
@@ -526,10 +510,10 @@ async function performTests(useSpeculos) {
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
 			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.HEIGHT_LOCKED_FEATURES, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SlateKernel.NO_RELATIVE_HEIGHT, SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
-			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, NO_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
+			await sendTransactionTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SlateKernel.NO_RECENT_DUPLICATE_FEATURES, Slate.NO_LOCK_HEIGHT, new BigNumber(Math.floor(Math.random() * (SlateKernel.MAXIMUM_RECENT_HEIGHT - SlateKernel.MINIMUM_RECENT_HEIGHT + 1)) + SlateKernel.MINIMUM_RECENT_HEIGHT), SLATEPACK_ADDRESS_TYPE, SLATEPACK_PAYMENT_PROOF_TYPE);
 		}
 		
 		// Check if using MimbleWimble Coin
@@ -2126,7 +2110,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 				new Uint8Array([features]),
 				
 				// Relative height
-				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
+				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
 			]);
 		
 			// Break
@@ -2259,15 +2243,6 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Check features
 	switch(features) {
 	
-		// Coinbase features
-		case SlateKernel.COINBASE_FEATURES:
-		
-			// Log features
-			console.log("Using features: coinbase");
-		
-			// Break
-			break;
-		
 		// Plain features
 		case SlateKernel.PLAIN_FEATURES:
 		
@@ -2592,13 +2567,19 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Check features
 	switch(features) {
 	
-		// Coinbase or plain features
-		case SlateKernel.COINBASE_FEATURES:
+		// Plain features
 		case SlateKernel.PLAIN_FEATURES:
 		
 			// Set kernel information to features
 			var kernelInformation = new Uint8Array([features]);
-		
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Plain");
+			}
+			
 			// Break
 			break;
 		
@@ -2614,7 +2595,17 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 				// Lock height
 				new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
 			]);
-		
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Height Locked");
+				
+				// Log message
+				console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
+			}
+			
 			// Break
 			break;
 		
@@ -2628,9 +2619,21 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 				new Uint8Array([features]),
 				
 				// Relative height
-				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
+				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
 			]);
-		
+			
+			console.log(Common.toHexString(kernelInformation));
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
+				
+				// Log message
+				console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
+			}
+			
 			// Break
 			break;
 	}
@@ -2707,6 +2710,33 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 				},
 				{
 					"regexp": "^Fee.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Kernel Features.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Lock Height.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Relative Height.*$",
 					"actions": [
 					
 						// Push right

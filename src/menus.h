@@ -28,6 +28,15 @@
 // Fee line buffer size
 #define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
 
+// Kernel features line buffer size
+#define KERNEL_FEATURES_LINE_BUFFER_SIZE sizeof("No Recent Duplicate")
+
+// Kernel features details title line buffer size
+#define KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE sizeof("Relative Height")
+
+// Kernel features details text line buffer size
+#define KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
+
 
 // Constants
 
@@ -95,6 +104,15 @@ extern char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 
 // Fee line buffer
 extern char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
+
+// Kernel features line buffer
+extern char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
+
+// Kernel features details title line buffer
+extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
+
+// Kernel features details text line buffer
+extern char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
 
 
 // Function prototypes

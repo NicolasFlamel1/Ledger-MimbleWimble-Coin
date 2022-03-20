@@ -405,7 +405,7 @@ Class: C7
 Instruction: 16
 Parameters one: Address type (MQS 00, Tor 01, Slatepack 02)
 Parameter two: 00
-Data: Public nonce (33 bytes) | public key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 8 bytes little endian integer)) | [kernel commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address, 64 bytes for Slatepack receiver address)]
+Data: Public nonce (33 bytes) | public key (33 bytes) | kernel information (plain 00, coinbase 01, height locked 02 | lock height (unsigned 8 bytes little endian integer), no recent duplicate 03 | relative height (unsigned 2 bytes little endian integer)) | [kernel commitment (33 bytes) | receiver signature (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address, 64 bytes for Slatepack receiver address)]
 Response: Single-signer signature (64 bytes) | [payment proof (at most 72 bytes for MQS receiver address, 64 bytes for Tor receiver address, 64 bytes for Slatepack receiver address)]
 Requires user interaction: Yes for transactions that include an input, no otherwise
 Example request: C7160000430340CB7F4F4173E8C86127985290C48FBE2398DE2AECEE7085F2DA511A5B2E42D303E51BEC53FF1EFA50516669BC0889FDA35E6FF84F0530A4B4ADBDB0A543E5159300
