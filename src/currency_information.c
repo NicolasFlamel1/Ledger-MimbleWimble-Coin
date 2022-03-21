@@ -14,6 +14,9 @@ struct CurrencyInformation currencyInformation;
 // Get currency information
 void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformation) {
 
+	// Clear current currency information
+	explicit_bzero(currentCurrencyInformation, sizeof(*currentCurrencyInformation));
+
 	// Set current currency information's BIP44 coin type
 	currentCurrencyInformation->bip44CoinType = CURRENCY_BIP44_COIN_TYPE;
 	

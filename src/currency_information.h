@@ -20,7 +20,7 @@
 #define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("Testnet GRIN")
 
 // Currency information version size
-#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("1.0.0")
+#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("3.0.1")
 
 // Currency information icon colors size
 #define CURRENCY_INFORMATION_ICON_COLORS_SIZE 2

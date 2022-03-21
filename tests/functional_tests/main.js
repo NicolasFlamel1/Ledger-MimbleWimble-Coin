@@ -155,7 +155,7 @@ const DEFAULT_CURRENCY = "mimblewimble_coin";
 
 
 // Main fucntion
-(async function () {
+(async function() {
 
 	// Get currency from the command line arguments if provided
 	const currency = (process["argv"]["length"] >= 3) ? process["argv"][2] : DEFAULT_CURRENCY;
