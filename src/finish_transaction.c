@@ -183,6 +183,24 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint16_t);
 			
+			// Check if data is invalid
+			if(dataLength < COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get relative height from data
+			uint16_t relativeHeight;
+			memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
+			
+			// Check if relative height is invalid
+			if(!relativeHeight || relativeHeight > MAXIMUM_RELATIVE_HEIGHT) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
 			// Break
 			break;
 		
@@ -317,6 +335,13 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
+		// Check if transaction offset wasn't applied
+		if(!transaction.offsetApplied) {
+		
+			// Throw invalid state error
+			THROW(INVALID_STATE_ERROR);
+		}
+		
 		// Check kernel features
 		switch(kernelFeatures) {
 		
@@ -366,26 +391,12 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 				uint16_t relativeHeight;
 				memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
 				
-				// Check if relative height is invalid
-				if(!relativeHeight || relativeHeight > MAXIMUM_RELATIVE_HEIGHT) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
 				// Copy relative height into the kernel features details text line buffer
 				explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
 				toString(kernelFeaturesDetailsTextLineBuffer, relativeHeight, 0);
 				
 				// Break
 				break;
-		}
-		
-		// Check if transaction offset wasn't applied
-		if(!transaction.offsetApplied) {
-		
-			// Throw invalid state error
-			THROW(INVALID_STATE_ERROR);
 		}
 	
 		// Copy transaction's input into the amount line buffer
@@ -399,8 +410,8 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
 		toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
 		
-		strncat(feeLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
-		strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+		strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
+		strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
 
 		// Show finalize transaction menu
 		showMenu(FINALIZE_TRANSACTION_MENU);
