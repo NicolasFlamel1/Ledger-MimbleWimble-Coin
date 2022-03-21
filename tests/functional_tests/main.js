@@ -1711,7 +1711,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	const INPUT = new BigNumber(0);
 	
 	// Fee
-	const FEE = new BigNumber((features === SlateKernel.COINBASE_FEATURES) ? 0 : Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+	const FEE = new BigNumber((features === SlateKernel.COINBASE_FEATURES) ? 0 : (Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE));
 	
 	// Identifier
 	const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
@@ -2183,7 +2183,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	const OUTPUT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
 	
 	// Fee
-	const FEE = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+	const FEE = new BigNumber(Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE);
 	
 	// Input
 	const INPUT = (new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER))).plus(OUTPUT);

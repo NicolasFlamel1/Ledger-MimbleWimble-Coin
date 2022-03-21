@@ -59,6 +59,19 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->enableSlatepackAddress = false;
 	#endif
 	
+	// Check if maximum fee exists
+	#ifdef CURRENCY_MAXIMUM_FEE
+	
+		// Set current currency information's maximum fee
+		currentCurrencyInformation->maximumFee = CURRENCY_MAXIMUM_FEE;
+	
+	// Otherwise
+	#else
+	
+		// Set current currency information's maximum fee
+		currentCurrencyInformation->maximumFee = UINT64_MAX;
+	#endif
+	
 	// Check if MQS version exists
 	#ifdef CURRENCY_MQS_VERSION
 	
