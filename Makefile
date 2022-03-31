@@ -137,7 +137,7 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
 	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"grin\"
-	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
+	DEFINES += CURRENCY_FEE_MASK=0xFFFFFFFFFF
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
@@ -182,7 +182,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
 	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"tgrin\"
-	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
+	DEFINES += CURRENCY_FEE_MASK=0xFFFFFFFFFF
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
@@ -211,19 +211,19 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME=submission_requirements/icons/nanos_app_$(ICON).gif
+	ICONNAME=icons/nanos_app_$(ICON).gif
 
 # Otherwise check if target is the Nano X
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
-	ICONNAME=submission_requirements/icons/nanox_app_$(ICON).gif
+	ICONNAME=icons/nanox_app_$(ICON).gif
 
 # Otherwise check if target is the Nano S Plus
 else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Icon name
-	ICONNAME=submission_requirements/icons/nanosplus_app_$(ICON).gif
+	ICONNAME=icons/nanosplus_app_$(ICON).gif
 endif
 
 # Make command

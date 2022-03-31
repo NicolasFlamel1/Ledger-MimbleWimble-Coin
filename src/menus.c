@@ -198,7 +198,7 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 });
 
 // Export root public key menu approve screen
-static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true), {
+static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -208,7 +208,7 @@ static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteracti
 });
 
 // Export root public key menu deny screen
-static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false), {
+static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -268,7 +268,7 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 });
 
 // Verify root public key menu valid screen
-static UX_STEP_CB(verifyRootPublicKeyMenuValidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, true), {
+static UX_STEP_CB(verifyRootPublicKeyMenuValidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, true, false), {
 
 	// Picture
 	&C_icon_approve,
@@ -278,7 +278,7 @@ static UX_STEP_CB(verifyRootPublicKeyMenuValidScreen, pb, processUserInteraction
 });
 
 // Verify root public key menu invalid screen
-static UX_STEP_CB(verifyRootPublicKeyMenuInvalidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, false), {
+static UX_STEP_CB(verifyRootPublicKeyMenuInvalidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -341,7 +341,7 @@ static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 });
 
 // Verify address menu valid screen
-static UX_STEP_CB(verifyAddressMenuValidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true), {
+static UX_STEP_CB(verifyAddressMenuValidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false), {
 
 	// Picture
 	&C_icon_approve,
@@ -351,7 +351,7 @@ static UX_STEP_CB(verifyAddressMenuValidScreen, pb, processUserInteraction(VERIF
 });
 
 // Verify address menu invalid screen
-static UX_STEP_CB(verifyAddressMenuInvalidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false), {
+static UX_STEP_CB(verifyAddressMenuInvalidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -414,7 +414,7 @@ static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 });
 
 // Sign MQS timestamp menu approve screen
-static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true), {
+static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -424,7 +424,7 @@ static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pb, processUserInteraction(
 });
 
 // Sign MQS timestamp menu deny screen
-static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false), {
+static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -511,7 +511,7 @@ static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 });
 
 // Sign Tor certificate menu approve screen
-static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true), {
+static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -521,7 +521,7 @@ static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteractio
 });
 
 // Sign Tor certificate menu deny screen
-static UX_STEP_CB(signTorCertificateMenuDenyScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false), {
+static UX_STEP_CB(signTorCertificateMenuDenyScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -696,7 +696,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, pnn, {
 });
 
 // Finalize transaction menu approve screen
-static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true), {
+static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -706,7 +706,7 @@ static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteracti
 });
 
 // Finalize transaction menu deny screen
-static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false), {
+static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,

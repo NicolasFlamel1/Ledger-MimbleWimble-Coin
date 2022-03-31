@@ -28,12 +28,6 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 		// Set current currency information's enable MQS address
 		currentCurrencyInformation->enableMqsAddress = true;
-	
-	// Otherwise
-	#else
-	
-		// Set current currency information's enable MQS address
-		currentCurrencyInformation->enableMqsAddress = false;
 	#endif
 	
 	// Check if enable TOR address
@@ -41,12 +35,6 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 		// Set current currency information's enable Tor address
 		currentCurrencyInformation->enableTorAddress = true;
-	
-	// Otherwise
-	#else
-	
-		// Set current currency information's enable Tor address
-		currentCurrencyInformation->enableTorAddress = false;
 	#endif
 	
 	// Check if enable Slatepack address
@@ -54,25 +42,19 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 		// Set current currency information's enable Slatepack address
 		currentCurrencyInformation->enableSlatepackAddress = true;
-	
-	// Otherwise
-	#else
-	
-		// Set current currency information's enable Slatepack address
-		currentCurrencyInformation->enableSlatepackAddress = false;
 	#endif
 	
-	// Check if maximum fee exists
-	#ifdef CURRENCY_MAXIMUM_FEE
+	// Check if fee mask exists
+	#ifdef CURRENCY_FEE_MASK
 	
-		// Set current currency information's maximum fee
-		currentCurrencyInformation->maximumFee = CURRENCY_MAXIMUM_FEE;
+		// Set current currency information's fee mask
+		currentCurrencyInformation->feeMask = CURRENCY_FEE_MASK;
 	
 	// Otherwise
 	#else
 	
-		// Set current currency information's maximum fee
-		currentCurrencyInformation->maximumFee = UINT64_MAX;
+		// Set current currency information's fee mask
+		currentCurrencyInformation->feeMask = UINT64_MAX;
 	#endif
 	
 	// Check if MQS version exists

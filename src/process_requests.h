@@ -96,7 +96,7 @@ enum Instruction {
 void processRequest(unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags);
 
 // Process user interaction
-void processUserInteraction(size_t instruction, bool isApprovedResult);
+void processUserInteraction(size_t instruction, bool isApprovedResult, bool showProcessing);
 
 
 #endif

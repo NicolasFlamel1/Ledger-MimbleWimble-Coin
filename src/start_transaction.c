@@ -63,13 +63,6 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	uint64_t fee;
 	memcpy(&fee, &data[sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input)], sizeof(fee));
 	
-	// Check if fee is invalid
-	if(fee > currencyInformation.maximumFee) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
 	// Check if an address is provided
 	size_t addressLength = 0;
 	const char *address;

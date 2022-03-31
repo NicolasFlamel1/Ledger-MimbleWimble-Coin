@@ -358,7 +358,7 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 }
 
 // Process user interaction
-void processUserInteraction(size_t instruction, bool isApprovedResult) {
+void processUserInteraction(size_t instruction, bool isApprovedResult, bool showProcessing) {
 	
 	// Clear menu buffers
 	clearMenuBuffers();
@@ -375,11 +375,15 @@ void processUserInteraction(size_t instruction, bool isApprovedResult) {
 			// Check if user approved the interaction
 			if(isApprovedResult) {
 			
-				// Show processing menu
-				showMenu(PROCESSING_MENU);
-				
-				// Wait for display to update
-				UX_WAIT_DISPLAYED();
+				// Check if showing processing
+				if(showProcessing) {
+			
+					// Show processing menu
+					showMenu(PROCESSING_MENU);
+					
+					// Wait for display to update
+					UX_WAIT_DISPLAYED();
+				}
 			
 				// Check instruction
 				switch(instruction) {

@@ -52,8 +52,8 @@ struct CurrencyInformation {
 	// Enable Slatepack address
 	bool enableSlatepackAddress;
 	
-	// Maximum fee
-	uint64_t maximumFee;
+	// Fee mask
+	uint64_t feeMask;
 	
 	// MQS version
 	uint8_t mqsVersion[CURRENCY_MQS_VERSION_SIZE];
