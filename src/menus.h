@@ -10,8 +10,8 @@
 
 // Definitions
 
-// Time line buffer size
-#define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
+// Time or processing message line buffer size
+#define TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
 // Public key or address line buffer size
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
@@ -87,8 +87,8 @@ enum MainMenuScreen {
 
 // Global variables
 
-// Time line buffer
-extern char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
+// Time or processing message line buffer
+extern char timeOrProcessingMessageLineBuffer[TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];

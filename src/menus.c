@@ -9,8 +9,8 @@
 
 // Global variables
 
-// Time line buffer
-char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
+// Time or processing message line buffer
+char timeOrProcessingMessageLineBuffer[TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
@@ -410,7 +410,7 @@ static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 	.title = "Time And Date",
 	
 	// Text
-	.text = timeLineBuffer
+	.text = timeOrProcessingMessageLineBuffer
 });
 
 // Sign MQS timestamp menu approve screen
@@ -483,7 +483,7 @@ static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 	.title = "Expires",
 	
 	// Text
-	.text = timeLineBuffer
+	.text = timeOrProcessingMessageLineBuffer
 });
 
 // Sign Tor certificate menu address screen
@@ -556,7 +556,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 	&C_icon_view,
 
 	// First line
-	"Finalize",
+	"Finalize sending",
 	
 	// Second line
 	"transaction?"
@@ -718,21 +718,21 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(
 // Finalize transaction menu
 static const ux_flow_step_t *finalizeTransactionMenu[8];
 
-// Processing menu screen
-static UX_STEP_NOCB(processingMenuScreen, pb, {
+// Processing menu message screen
+static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
 
 	// Picture
 	&C_icon_processing,
 	
 	// Bold line
-	"Processing"
+	timeOrProcessingMessageLineBuffer
 });
 
 // Processing menu
 static UX_FLOW(processingMenu,
 
-	// Processing menu screen
-	&processingMenuScreen
+	// Processing menu message screen
+	&processingMenuMessageScreen
 );
 
 
@@ -741,8 +741,8 @@ static UX_FLOW(processingMenu,
 // Clear menu buffers
 void clearMenuBuffers(void) {
 	
-	// Clear the time line buffer
-	explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
+	// Clear the time or processing message line buffer
+	explicit_bzero(timeOrProcessingMessageLineBuffer, sizeof(timeOrProcessingMessageLineBuffer));
 	
 	// Clear the public key or address line buffer
 	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));

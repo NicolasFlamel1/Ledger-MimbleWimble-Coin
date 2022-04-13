@@ -1,8 +1,10 @@
 // Header files
 #include <string.h>
+#include <os_io_seproxyhal.h>
 #include "common.h"
 #include "crypto.h"
 #include "get_bulletproof_components.h"
+#include "menus.h"
 
 
 // Definitions
@@ -15,6 +17,22 @@
 
 // Tau x size
 #define TAU_X_SIZE 32
+
+
+// Constants
+
+// Message type
+enum MessageType {
+
+	// Sending transaction message type
+	SENDING_TRANSACTION_MESSAGE_TYPE,
+	
+	// Receiving transaction message type
+	RECEIVING_TRANSACTION_MESSAGE_TYPE,
+	
+	// Creating coinbase message type
+	CREATING_COINBASE_MESSAGE_TYPE
+};
 
 
 // Supporting function implementation
@@ -35,10 +53,50 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	if(secondParameter || dataLength != sizeof(uint32_t) + IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get message type from first parameter
+	const enum MessageType messageType = firstParameter;
+	
+	// Check message type
+	switch(messageType) {
+	
+		// Sending transaction message type
+		case SENDING_TRANSACTION_MESSAGE_TYPE:
+		
+			// Set time or processing menu line buffer
+			strcpy(timeOrProcessingMessageLineBuffer, "Sending Transaction");
+			
+			// Break
+			break;
+		
+		// Receiving transaction message type
+		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
+		
+			// Set time or processing menu line buffer
+			strcpy(timeOrProcessingMessageLineBuffer, "Receiving Transaction");
+			
+			// Break
+			break;
+		
+		// Creating coinbase message type
+		case CREATING_COINBASE_MESSAGE_TYPE:
+		
+			// Set time or processing menu line buffer
+			strcpy(timeOrProcessingMessageLineBuffer, "Creating Coinbase");
+			
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get account from data
@@ -128,6 +186,12 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	
 		// Try
 		TRY {
+		
+			// Show processing menu
+			showMenu(PROCESSING_MENU);
+			
+			// Wait for display to update
+			UX_WAIT_DISPLAYED();
 	
 			// Derive blinding factor
 			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
@@ -148,6 +212,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		
 		// Finally
 		FINALLY {
+		
+			// Show main menu's ready screen
+			showMainMenu(READY_SCREEN);
 		
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));

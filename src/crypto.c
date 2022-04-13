@@ -26,11 +26,11 @@
 // Chain code size
 #define CHAIN_CODE_SIZE 32
 
-// BIP32 path coin type index
-#define BIP32_PATH_COIN_TYPE_INDEX 1
+// BIP44 path coin type index
+#define BIP44_PATH_COIN_TYPE_INDEX 1
 
-// BIP32 path account index
-#define BIP32_PATH_ACCOUNT_INDEX 2
+// BIP44 path account index
+#define BIP44_PATH_ACCOUNT_INDEX 2
 
 // Address private key blinding factor value
 #define ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE 713
@@ -82,8 +82,8 @@ static const uint8_t GENERATOR_J_PUBLIC[] = {
 	0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
 };
 
-// BIP32 path without coin type and account
-static const uint32_t BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
+// BIP44 path without coin type and account
+static const uint32_t BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT[] = {
 
 	// Purpose
 	44 | HARDENED_PATH_MASK,
@@ -131,15 +131,15 @@ static bool isQuadraticResidue(const uint8_t *component);
 // Get private key and chain code
 void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account) {
 
-	// Copy BIP32 path without coin type and account
-	uint32_t bip32Path[ARRAYLEN(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT)];
-	memcpy(bip32Path, BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP32_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
+	// Copy BIP44 path without coin type and account
+	uint32_t bip44Path[ARRAYLEN(BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT)];
+	memcpy(bip44Path, BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
 	
-	// Set BIP32 path's coin type
-	bip32Path[BIP32_PATH_COIN_TYPE_INDEX] |= currencyInformation.bip44CoinType;
+	// Set BIP44 path's coin type
+	bip44Path[BIP44_PATH_COIN_TYPE_INDEX] |= currencyInformation.bip44CoinType;
 	
-	// Set BIP32 path's account
-	bip32Path[BIP32_PATH_ACCOUNT_INDEX] |= account;
+	// Set BIP44 path's account
+	bip44Path[BIP44_PATH_ACCOUNT_INDEX] |= account;
 
 	// Initialize node
 	volatile uint8_t node[NODE_SIZE];
@@ -151,7 +151,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 		TRY {
 
 			// Derive node and chain code from path and seed key
-			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip32Path, ARRAYLEN(bip32Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY));
+			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip44Path, ARRAYLEN(bip44Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY));
 			
 			// Get private key from node
 			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);

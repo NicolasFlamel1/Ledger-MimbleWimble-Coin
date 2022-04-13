@@ -133,7 +133,7 @@ Test: printf "\xC7\x03\x00\x00\x1E\x00\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x
 Description: Returns the account's tau x, t one, and t two for the identifier, value, and switch type
 Class: C7
 Instruction: 04
-Parameters one: 00
+Parameters one: Message type (Sending transaction 00, Receiving transaction 01, Creating coinbase 02)
 Parameter two: 00
 Data: Account (unsigned 4 bytes little endian integer) | identifier (17 bytes) | value (unsigned 8 bytes little endian integer) | switch type (00 none, 01 regular)
 Response: Tau x (32 bytes) | t one (33 bytes) | t two (33 bytes)

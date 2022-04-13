@@ -377,6 +377,9 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 			
 				// Check if showing processing
 				if(showProcessing) {
+				
+					// Set time or processing menu line buffer
+					strcpy(timeOrProcessingMessageLineBuffer, "Processing");
 			
 					// Show processing menu
 					showMenu(PROCESSING_MENU);
@@ -517,12 +520,11 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 		// Finally
 		FINALLY {
 		
+			// Show main menu's ready screen
+			showMainMenu(READY_SCREEN);
 		}
 	}
 	
 	// End try
 	END_TRY;
-	
-	// Show main menu's ready screen
-	showMainMenu(READY_SCREEN);
 }

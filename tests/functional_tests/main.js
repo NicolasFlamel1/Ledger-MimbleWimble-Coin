@@ -144,6 +144,15 @@ const TOR_ADDRESS_TYPE = MQS_ADDRESS_TYPE + 1;
 // Slatepack address type
 const SLATEPACK_ADDRESS_TYPE = TOR_ADDRESS_TYPE + 1;
 
+// Sending transaction message type
+const SENDING_TRANSACTION_MESSAGE_TYPE = 0;
+
+// Receiving transaction message type
+const RECEIVING_TRANSACTION_MESSAGE_TYPE = SENDING_TRANSACTION_MESSAGE_TYPE + 1;
+
+// Creating coinbase message type
+const CREATING_COINBASE_MESSAGE_TYPE = RECEIVING_TRANSACTION_MESSAGE_TYPE + 1;
+
 // Speculos APDU port
 const SPECULOS_APDU_PORT = 9999;
 
@@ -329,8 +338,12 @@ async function performTests(useSpeculos) {
 		await getCommitmentTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
 		
 		// Run get bulletproof test
-		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE);
-		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, SENDING_TRANSACTION_MESSAGE_TYPE);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, RECEIVING_TRANSACTION_MESSAGE_TYPE);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_NONE, CREATING_COINBASE_MESSAGE_TYPE);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, SENDING_TRANSACTION_MESSAGE_TYPE);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, RECEIVING_TRANSACTION_MESSAGE_TYPE);
+		await getBulletproofTest(hardwareWallet, extendedPrivateKey, Crypto.SWITCH_TYPE_REGULAR, CREATING_COINBASE_MESSAGE_TYPE);
 		
 		// Run verify root public key test
 		await verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey);
@@ -934,7 +947,7 @@ async function getCommitmentTest(hardwareWallet, extendedPrivateKey, switchType)
 }
 
 // Get bulletproof test
-async function getBulletproofTest(hardwareWallet, extendedPrivateKey, switchType) {
+async function getBulletproofTest(hardwareWallet, extendedPrivateKey, switchType, messageType) {
 
 	// Log message
 	console.log("Running get bulletproof test");
@@ -981,7 +994,7 @@ async function getBulletproofTest(hardwareWallet, extendedPrivateKey, switchType
 	const expectedBulletproof = await Crypto.proof(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType, proofBuilder);
 	
 	// Get bulletproof components from the hardware wallet
-	const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+	const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION, messageType, NO_PARAMETER, Buffer.concat([
 				
 		// Account
 		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
