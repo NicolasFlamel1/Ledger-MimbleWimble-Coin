@@ -1199,7 +1199,7 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 					]
 				},
 				{
-					"regexp": "^.+ Address.*$",
+					"regexp": "^.+ress.*$",
 					"actions": [
 					
 						// Push right
@@ -3054,7 +3054,7 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 					]
 				},
 				{
-					"regexp": "^.+ Address.*$",
+					"regexp": "^.+ress.*$",
 					"actions": [
 					
 						// Push right
