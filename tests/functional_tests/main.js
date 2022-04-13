@@ -2704,7 +2704,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 			"version": 1,
 			"rules": [
 				{
-					"text": "Finalize",
+					"text": "Finalize sending",
 					"actions": [
 					
 						// Push right
