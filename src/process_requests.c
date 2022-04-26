@@ -520,8 +520,8 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 		// Finally
 		FINALLY {
 		
-			// Show main menu's ready screen
-			showMainMenu(READY_SCREEN);
+			// Show main menu
+			showMainMenu();
 		}
 	}
 	

@@ -39,8 +39,21 @@ char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFE
 
 // Constants
 
-// About menu version screen
-static UX_STEP_NOCB(aboutMenuVersionScreen, 
+// Main menu ready screen
+static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
+
+	// Picture
+	&currencyInformation.iconDetails,
+	
+	// First line
+	"Application",
+	
+	// Second line
+	"is ready"
+});
+
+// Main menu version screen
+static UX_STEP_NOCB(mainMenuVersionScreen, 
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
@@ -74,8 +87,8 @@ static UX_STEP_NOCB(aboutMenuVersionScreen,
 	#endif
 );
 
-// About menu currency screen
-static UX_STEP_NOCB(aboutMenuCurrencyScreen, 
+// Main menu currency screen
+static UX_STEP_NOCB(mainMenuCurrencyScreen, 
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
@@ -109,55 +122,6 @@ static UX_STEP_NOCB(aboutMenuCurrencyScreen,
 	#endif
 );
 
-// About menu back screen
-static UX_STEP_CB(aboutMenuBackScreen, pb, showMainMenu(ABOUT_SCREEN), {
-
-	// Picture
-	&C_icon_back,
-	
-	// Bold line
-	"Back"
-});
-
-// About menu
-static UX_FLOW(aboutMenu,
-
-	// About menu version screen
-	&aboutMenuVersionScreen,
-	
-	// About menu currency screen
-	&aboutMenuCurrencyScreen,
-	
-	// About menu back screen
-	&aboutMenuBackScreen,
-	
-	// Loop
-	FLOW_LOOP
-);
-
-// Main menu ready screen
-static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
-
-	// Picture
-	&currencyInformation.iconDetails,
-	
-	// First line
-	"Application",
-	
-	// Second line
-	"is ready"
-});
-
-// Main menu about screen
-static UX_STEP_CB(mainMenuAboutScreen, pb, ux_flow_init(0, aboutMenu, NULL), {
-
-	// Picture
-	&C_icon_about,
-	
-	// Bold line
-	"About"
-});
-
 // Main menu exit screen
 static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
 
@@ -174,8 +138,11 @@ static UX_FLOW(mainMenu,
 	// Main menu ready screen
 	&mainMenuReadyScreen,
 	
-	// Main menu about screen
-	&mainMenuAboutScreen,
+	// Main menu version screen
+	&mainMenuVersionScreen,
+	
+	// Main menu currency screen
+	&mainMenuCurrencyScreen,
 	
 	// Main menu exit screen
 	&mainMenuExitScreen,
@@ -770,7 +737,7 @@ void clearMenuBuffers(void) {
 }
 
 // Show main menu
-void showMainMenu(enum MainMenuScreen mainMenuScreen) {
+void showMainMenu() {
 
 	// Check if UX stack doesn't exist
 	if(!G_ux.stack_count) {
@@ -781,13 +748,6 @@ void showMainMenu(enum MainMenuScreen mainMenuScreen) {
 	
 	// Show main menu
 	ux_flow_init(0, mainMenu, NULL);
-	
-	// Go though all main menu screens until specified screen
-	for(enum MainMenuScreen i = READY_SCREEN; i < mainMenuScreen; ++i) {
-	
-		// Go to next screen
-		ux_flow_next();
-	}
 }
 
 // Show menu
@@ -804,15 +764,6 @@ void showMenu(enum Menu menu) {
 		
 			// Set menu steps to main menu
 			menuSteps = mainMenu;
-			
-			// Break
-			break;
-		
-		// About menu
-		case ABOUT_MENU:
-		
-			// Set menu steps to about menu
-			menuSteps = aboutMenu;
 			
 			// Break
 			break;

@@ -75,8 +75,8 @@
 					USB_power(0);
 					USB_power(1);
 					
-					// Show main menu's ready screen
-					showMainMenu(READY_SCREEN);
+					// Show main menu
+					showMainMenu();
 					
 					// Check if target has Bluetooth
 					#ifdef HAVE_BLE

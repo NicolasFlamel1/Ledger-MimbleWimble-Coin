@@ -46,9 +46,6 @@ enum Menu {
 	// Main menu
 	MAIN_MENU,
 	
-	// About menu
-	ABOUT_MENU,
-	
 	// Export root public key menu
 	EXPORT_ROOT_PUBLIC_KEY_MENU,
 	
@@ -69,19 +66,6 @@ enum Menu {
 	
 	// Processing menu
 	PROCESSING_MENU
-};
-
-// Main menu screen
-enum MainMenuScreen {
-
-	// Ready
-	READY_SCREEN,
-	
-	// About screen
-	ABOUT_SCREEN,
-	
-	// Exit screen
-	EXIT_SCREEN
 };
 
 
@@ -121,7 +105,7 @@ extern char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LIN
 void clearMenuBuffers(void);
 
 // Show main menu
-void showMainMenu(enum MainMenuScreen mainMenuScreen);
+void showMainMenu();
 
 // Show menu
 void showMenu(enum Menu menu);

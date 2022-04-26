@@ -459,5 +459,5 @@ D102: Device locked
 
 ### Notes
 * The app will reset its internal slate and/or transaction state when unrelated commands are requested. For example, performing a `Start transaction` command followed by a `Get commitment` command will reset the app's internal transaction state thus requiring another `Start transaction` command to be performed before a `Continue transaction include output` command can be performed.
-* The `Get bulletproof components` command takes about 90 seconds to complete on a Ledger Nano S hardware wallet.
+* The `Get bulletproof components` command takes about 90 seconds to complete on a Ledger Nano S hardware wallet and about 24 seconds to complete on a Ledger Nano S Plus hardware wallet.
 * If a transaction needs to be finalized at a later time, then that transaction's state can be restored on the hardware wallet by starting a transaction, including the same inputs and outpus, applying the same offset, and setting the encrypted secret nonce that was obtained previously.

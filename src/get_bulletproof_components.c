@@ -213,8 +213,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Finally
 		FINALLY {
 		
-			// Show main menu's ready screen
-			showMainMenu(READY_SCREEN);
+			// Show main menu
+			showMainMenu();
 		
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
