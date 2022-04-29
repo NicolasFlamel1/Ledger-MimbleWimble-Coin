@@ -17,6 +17,10 @@ APPVERSION_N = 0
 APPVERSION_P = 3
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
+# Add security review banner. To be removed once Ledger security review is done.
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
+
 # Emulator flags
 EMULATOR_FLAGS = --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
