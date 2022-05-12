@@ -1,5 +1,6 @@
 // Header files
 #include <os.h>
+#include <os_io_seproxyhal.h>
 #include <string.h>
 #include "blake2b.h"
 #include "chacha20_poly1305.h"
@@ -1616,6 +1617,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
+				
+				// Prevent I/O timeout
+				io_seproxyhal_io_heartbeat();
 			}
 			
 			// Update running commitment with the alpha generator and rho generator
@@ -2009,6 +2013,9 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 				// Update result with lout and rout
 				cx_math_multm((uint8_t *)lout, (uint8_t *)lout, rout, SECP256K1_CURVE_ORDER, sizeof(lout));
 				cx_math_addm((uint8_t *)result, (uint8_t *)result, (uint8_t *)lout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+				
+				// Prevent I/O timeout
+				io_seproxyhal_io_heartbeat();
 			}
 		}
 		
