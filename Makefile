@@ -36,23 +36,23 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 
 	# Application name
 	APPNAME = "MimbleWimble Coin"
-	
+
 	# 44'/593' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/593'"
-	
+
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
-	
+
 		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0xA00
-	
+
 	# Otherwise
 	else
-	
+
 		# APPLICATION_FLAG_LIBRARY application flags
 		APP_LOAD_PARAMS += --appFlags 0x800
 	endif
-	
+
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
@@ -65,7 +65,7 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
-	
+
 	# Icon
 	ICON = mimblewimble_coin
 
@@ -74,23 +74,23 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 
 	# Application name
 	APPNAME = "MimbleWimble Coin Floonet"
-	
+
 	# 44'/1' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
-	
+
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
-	
+
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
-	
+
 	# Otherwise
 	else
-	
+
 		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
-	
+
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
@@ -103,14 +103,14 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
-	
+
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
-	
+
 	# Icon
 	ICON = mimblewimble_coin
-	
+
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
@@ -119,23 +119,23 @@ else ifeq ($(CURRENCY),grin)
 
 	# Application name
 	APPNAME = "Grin"
-	
+
 	# 44'/592' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/592'"
-	
+
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
-	
+
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
-	
+
 	# Otherwise
 	else
-	
+
 		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
-	
+
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
@@ -148,14 +148,14 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
-	
+
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
-	
+
 	# Icon
 	ICON = grin
-	
+
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
@@ -164,23 +164,23 @@ else ifeq ($(CURRENCY),grin_testnet)
 
 	# Application name
 	APPNAME = "Grin Testnet"
-	
+
 	# 44'/1' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
-	
+
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
-	
+
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
-	
+
 	# Otherwise
 	else
-	
+
 		# No application flags
 		APP_LOAD_PARAMS += --appFlags 0x000
 	endif
-	
+
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
@@ -193,14 +193,14 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
 	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
-	
+
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
-	
+
 	# Icon
 	ICON = grin
-	
+
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
@@ -280,16 +280,16 @@ ifneq ($(DEBUG),0)
 
 	# Define printf
 	DEFINES += HAVE_PRINTF
-	
+
 	# Check if target is the Nano S
 	ifeq ($(TARGET_NAME),TARGET_NANOS)
-	
+
 		# Define target specific printf
 		DEFINES += PRINTF=screen_printf
-	
+
 	# Otherwise
 	else
-	
+
 		# Define target specific printf
 		DEFINES += PRINTF=mcu_usb_printf
 	endif
@@ -359,25 +359,25 @@ endif
 
 # Load command
 load: all
-	
-	# Load application on device 
+
+	# Load application on device
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
 # Delete command
 delete:
-	
+
 	# Delete application from device
 	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
 # Run command
 run: all
-	
+
 	# Run application in emulator
 	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
 
 # Functional tests
 functional_tests: all
-	
+
 	# Run functional tests
 	node tests/functional_tests/main.js $(CURRENCY)
 
