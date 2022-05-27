@@ -69,13 +69,13 @@ Returns an account's root public key after displaying a message on the device's 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
 | 4      | `account` | Account number (little endian, max 7FFFFFFF) |
 
-**Output data**
+**Output Data**
 
 | Length | Name              | Description |
 |--------|-------------------|-------------|
@@ -102,14 +102,14 @@ Returns an account's MQS, Tor, or Slatepack address at a provided index. This ad
 | P1        | `address_type` | 00 for MQS, 01 for Tor, or 02 for Slatepack address |
 | P2        | N/A            | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
 | 4      | `account` | Account number (little endian, max 7FFFFFFF)) |
 | 4      | `index`   | Index number (little endian) |
 
-**Output data**
+**Output Data**
 
 | Length                                                  | Name      | Description |
 |---------------------------------------------------------|-----------|-------------|
@@ -136,13 +136,13 @@ Returns the SHA512 hash of the account's root public key. This hash can be used 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name         | Description |
 |---------|--------------|-------------|
 | 4       | `account`    | Account number (little endian, max 7FFFFFFF)) |
 
-**Output data**
+**Output Data**
 
 | Length | Name          | Description |
 |--------|---------------|-------------|
@@ -169,7 +169,7 @@ Returns the account's commitment for the provided identifier, value, and switch 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name          | Description |
 |---------|---------------|-------------|
@@ -178,7 +178,7 @@ Returns the account's commitment for the provided identifier, value, and switch 
 | 8       | `value`       | Value to commit (little endian) |
 | 1       | `switch_type` | 00 for none or 01 for regular |
 
-**Output data**
+**Output Data**
 
 | Length | Name          | Description |
 |--------|---------------|-------------|
@@ -207,7 +207,7 @@ This command takes about 90 seconds to complete on a Ledger Nano S hardware wall
 | P1        | `message_type` | 00 for sending transaction, 01 for receiving transaction, or 02 for creating coinbase |
 | P2        | N/A            | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name          | Description |
 |---------|---------------|-------------|
@@ -216,7 +216,7 @@ This command takes about 90 seconds to complete on a Ledger Nano S hardware wall
 | 8       | `value`       | Value to commit (little endian) |
 | 1       | `switch_type` | 00 for none or 01 for regular |
 
-**Output data**
+**Output Data**
 
 | Length | Name     | Description |
 |--------|----------|-------------|
@@ -245,13 +245,13 @@ Displays the account's root public key on the device and returns if the user ver
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name         | Description |
 |---------|--------------|-------------|
 | 4       | `account`    | Account number (little endian, max 7FFFFFFF)) |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -278,14 +278,14 @@ Displays the account's MQS, Tor, or Slatepack address at a provided index on the
 | P1        | `address_type` | 00 for MQS, 01 for Tor, or 02 for Slatepack address |
 | P2        | N/A            | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
 | 4      | `account` | Account number (little endian, max 7FFFFFFF)) |
 | 4      | `index`   | Index number (little endian) |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -312,7 +312,7 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length                                                  | Name                | Description |
 |---------------------------------------------------------|---------------------|-------------|
@@ -320,7 +320,7 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 | 4                                                       | `index`             | Index number (little endian) |
 | 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `recipient_address` | Address that will be able to decrypt the data |
 
-**Output data**
+**Output Data**
 
 | Length | Name    | Description |
 |--------|---------|-------------|
@@ -348,13 +348,13 @@ Encrypts the provided data using the app's internal slate state and returns it. 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name   | Description |
 |--------|--------|-------------|
 | <= 64  | `data` | Data chunk to encrypt |
 
-**Output data**
+**Output Data**
 
 | Length | Name             | Description |
 |--------|------------------|-------------|
@@ -381,13 +381,13 @@ Returns the tag for all the data that was encrypted.
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
 | 0      | N/A  | Unused |
 
-**Output data**
+**Output Data**
 
 | Length | Name  | Description |
 |--------|-------|-------------|
@@ -414,7 +414,7 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length                                                  | Name             | Description |
 |---------------------------------------------------------|------------------|-------------|
@@ -424,7 +424,7 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 | 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `sender_address` | Address that will be able to decrypt the data |
 | 0 or 8                                                  | `salt`           | Optional salt that was used to encrypt the data if the `sender_address` is an MQS address |
 
-**Output data**
+**Output Data**
 
 | Length | Name    | Description |
 |--------|---------|-------------|
@@ -451,13 +451,13 @@ Decrypts the provided data using the app's internal slate state and returns it e
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name             | Description |
 |--------|------------------|-------------|
 | <= 64  | `encrypted_data` | Data chunk to decrypt |
 
-**Output data**
+**Output Data**
 
 | Length                | Name   | Description |
 |-----------------------|--------|-------------|
@@ -484,13 +484,13 @@ Returns the AES key used to encrypt the decrypted data chunks if a valid tag is 
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name  | Description |
 |--------|-------|-------------|
 | 16     | `tag` | Tag for the encrypted data |
 
-**Output data**
+**Output Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
@@ -517,7 +517,7 @@ Prepares the app's internal transaction state to be able to process a transactio
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length                                                  | Name      | Description |
 |---------------------------------------------------------|-----------|-------------|
@@ -528,7 +528,7 @@ Prepares the app's internal transaction state to be able to process a transactio
 | 8                                                       | `fee`     | Fee amount (little endian) |
 | 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `address` | Sender or recipient address of the transaction |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -555,7 +555,7 @@ Includes the output for a provided identifier, value, and switch type in the tra
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name          | Description |
 |---------|---------------|-------------|
@@ -563,7 +563,7 @@ Includes the output for a provided identifier, value, and switch type in the tra
 | 8       | `value`       | Value to commit (little endian) |
 | 1       | `switch_type` | 00 for none or 01 for regular |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -590,7 +590,7 @@ Includes the input for a provided identifier, value, and switch type in the tran
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name          | Description |
 |---------|---------------|-------------|
@@ -598,7 +598,7 @@ Includes the input for a provided identifier, value, and switch type in the tran
 | 8       | `value`       | Value to commit (little endian) |
 | 1       | `switch_type` | 00 for none or 01 for regular |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -625,13 +625,13 @@ Applies an offset to the transaction's blinding factor in the app's internal tra
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name     | Description |
 |---------|----------|-------------|
 | 32      | `offset` | Offset |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -658,13 +658,13 @@ Returns the app's internal transaction state's blinding factor's public key.
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
 | 0      | N/A  | Unused |
 
-**Output data**
+**Output Data**
 
 | Length | Name         | Description |
 |--------|--------------|-------------|
@@ -691,13 +691,13 @@ Returns the app's internal transaction state's secret nonce encrypted.
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
 | 0      | N/A  | Unused |
 
-**Output data**
+**Output Data**
 
 | Length  | Name                     | Description |
 |---------|--------------------------|-------------|
@@ -724,13 +724,13 @@ Set the app's internal transaction state's secret nonce.
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name                     | Description |
 |---------|--------------------------|-------------|
 | Varying | `encrypted_secret_nonce` | Encrypted secret nonce |
 
-**Output data**
+**Output Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
@@ -757,13 +757,13 @@ Returns the app's internal transaction state's public nonce.
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name | Description |
 |--------|------|-------------|
 | 0      | N/A  | Unused |
 
-**Output data**
+**Output Data**
 
 | Length | Name           | Description |
 |--------|----------------|-------------|
@@ -790,14 +790,14 @@ Returns the signature for a provided UTF-8 message and public key signed with th
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name         | Description |
 |---------|--------------|-------------|
 | 33      | `public_key` | Public key |
 | Varying | `message`    | UTF-8 message |
 
-**Output data**
+**Output Data**
 
 | Length | Name        | Description |
 |--------|-------------|-------------|
@@ -830,7 +830,7 @@ If a transaction needs to be finalized at a later time, then the app's internal 
 | P1        | `address_type` | Optional 00 for MQS, 01 for Tor, or 02 for Slatepack address that will be used if creating a payment proof |
 | P2        | N/A            | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length                                                  | Name                 | Description |
 |---------------------------------------------------------|----------------------|-------------|
@@ -840,7 +840,7 @@ If a transaction needs to be finalized at a later time, then the app's internal 
 | 0 or 33                                                 | `kernel_commitment`  | Optional kernel commitment that will be used for creating or displaying a payment proof |
 | 0, <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`      | Optional receiver's payment proof signature that will be used when displaying a payment proof
 
-**Output data**
+**Output Data**
 
 | Length                                                 | Name            | Description |
 |--------------------------------------------------------|-----------------|-------------|
@@ -868,7 +868,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length | Name               | Description |
 |--------|--------------------|-------------|
@@ -877,7 +877,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 | 4      | `timestamp`        | Timestamp epoch to sign (little endian, max 23FFFFFFDC00) |
 | 2      | `time zone offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
 
-**Output data**
+**Output Data**
 
 | Length        | Name        | Description |
 |---------------|-------------|-------------|
@@ -904,7 +904,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 | P1        | N/A  | Unused (must be zero) |
 | P2        | N/A  | Unused (must be zero) |
 
-**Input data**
+**Input Data**
 
 | Length  | Name               | Description |
 |---------|--------------------|-------------|
@@ -913,7 +913,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 | Varying | `tor_certificate`  | Ed25519_signing_cert without header and signature to sign |
 | 2       | `time zone offset` | Time zone offset in minutes used when displaying the Tor certificate's expiration timestamp (little endian, signed, min -780, max 900) |
 
-**Output data**
+**Output Data**
 
 | Length | Name        | Description |
 |--------|-------------|-------------|
