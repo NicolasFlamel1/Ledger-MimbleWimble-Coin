@@ -10,4 +10,4 @@ output-scan-build
 node_modules
 package.json
 package-lock.json
-tests/unit_tests/build
+test/unit_tests/build

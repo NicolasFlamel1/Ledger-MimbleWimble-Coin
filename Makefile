@@ -67,7 +67,7 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
 
 	# Icon
-	ICON = mimblewimble_coin
+	ICON = MimbleWimble Coin
 
 # Otherwise check if currency is MimbleWimble Coin floonet
 else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
@@ -109,7 +109,7 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
-	ICON = mimblewimble_coin
+	ICON = MimbleWimble Coin
 
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
@@ -154,7 +154,7 @@ else ifeq ($(CURRENCY),grin)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
-	ICON = grin
+	ICON = Grin
 
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
@@ -199,7 +199,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
-	ICON = grin
+	ICON = Grin
 
 	# Emulator flags
 	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
@@ -215,19 +215,19 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME=icons/nanos_app_$(ICON).gif
+	ICONNAME="icons/$(ICON)/nanos_app.gif"
 
 # Otherwise check if target is the Nano X
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
-	ICONNAME=icons/nanox_app_$(ICON).gif
+	ICONNAME="icons/$(ICON)/nanox_app.gif"
 
 # Otherwise check if target is the Nano S Plus
 else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Icon name
-	ICONNAME=icons/nanosplus_app_$(ICON).gif
+	ICONNAME="icons/$(ICON)/nanosplus_app.gif"
 endif
 
 # Make command
@@ -379,7 +379,7 @@ run: all
 functional_tests: all
 
 	# Run functional tests
-	node tests/functional_tests/main.js $(CURRENCY)
+	node test/functional_tests/main.js $(CURRENCY)
 
 # Include BOLOS SDK Makefile rules
 include $(BOLOS_SDK)/Makefile.rules
