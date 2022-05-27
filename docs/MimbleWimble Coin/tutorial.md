@@ -7,7 +7,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 * [Requirements](#user-content-requirements)
 * [Installation Instructions](#user-content-installation-instructions)
 * [Setup Instructions](#user-content-setup-instructions)
-* [How To View Your MimbleWimble Coin balance](#user-content-how-to-view-your-mimblewimble-coin-balance)
+* [How To View Your MimbleWimble Coin Balance](#user-content-how-to-view-your-mimblewimble-coin-balance)
 * [How To Receive MimbleWimble Coin](#user-content-how-to-receive-mimblewimble-coin)
 * [How To Send MimbleWimble Coin](#user-content-how-to-send-mimblewimble-coin)
 * [Support](#user-content-support)
@@ -20,12 +20,12 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Installation Instructions
 
-1. Open Ledger Live and click on the Settings button.  
+1. Open Ledger Live and click the Settings button.  
 <p align="center">
 	<img alt="Ledger Live Settings Button" src="images/installation_instructions_1.png">
 </p>  
 
-2. Click on the Experimental features tab.  
+2. Click the Experimental features tab.  
 <p align="center">
 	<img alt="Ledger Live Experimental Features Tab" src="images/installation_instructions_2.png">
 </p>  
@@ -35,7 +35,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="Ledger Live Developer Mode Setting" src="images/installation_instructions_3.png">
 </p>  
 
-4. Click on the Manager section.  
+4. Click the Manager section.  
 <p align="center">
 	<img alt="Ledger Live Manager Section" src="images/installation_instructions_4.png">
 </p>  
@@ -62,7 +62,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Log Into Account" src="images/setup_instructions_2.png">
 </p>  
 
-3. Click on the Hardware button in the wallets list.  
+3. Click the Hardware button in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Button" src="images/setup_instructions_3.png">
 </p>  
@@ -87,9 +87,9 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet" src="images/setup_instructions_7.png">
 </p>  
 
-## How To View Your MimbleWimble Coin balance
+## How To View Your MimbleWimble Coin Balance
 
-1. Click on the hardware wallet in the wallets list.  
+1. Click the hardware wallet in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_view_your_mimblewimble_coin_balance_1.png">
 </p>  
@@ -106,7 +106,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Listener" src="images/how_to_receive_mimblewimble_coin_1.png">
 </p>  
 
-2. Click on the hardware wallet in the wallets list.  
+2. Click the hardware wallet in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_receive_mimblewimble_coin_2.png">
 </p>  
@@ -116,7 +116,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Address Section" src="images/how_to_receive_mimblewimble_coin_3.png">
 </p>  
 
-4. Click on the Get Payment Proof Address button in the Utilities section.  
+4. Click the Get Payment Proof Address button in the Utilities section.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Get Payment Proof Address Button" src="images/how_to_receive_mimblewimble_coin_4.png">
 </p>  
@@ -143,12 +143,12 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Node" src="images/how_to_send_mimblewimble_coin_1.png">
 </p>  
 
-2. Click on the hardware wallet in the wallets list.  
+2. Click the hardware wallet in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_send_mimblewimble_coin_2.png">
 </p>  
 
-3. Click on the Send Payment button in the balance section.  
+3. Click the Send Payment button in the balance section.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Send Payment Button" src="images/how_to_send_mimblewimble_coin_3.png">
 </p>  
@@ -176,5 +176,5 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 ## Support
 
 * Discord: [https://discord.gg/n5dZaty](https://discord.gg/n5dZaty)
-* Reddit: [https://www.reddit.com/r/MimbleWimbleCoin](https://www.reddit.com/r/MimbleWimbleCoin/)
+* MimbleWimble Coin Forum: [https://forum.mwc.mw](https://forum.mwc.mw)
 * Github: [https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues](https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues)

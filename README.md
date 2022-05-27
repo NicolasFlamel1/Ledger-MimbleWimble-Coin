@@ -1,4 +1,4 @@
-# MimbleWimble Coin app for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets
+# MimbleWimble Coin Ledger app
 
 ### Description
 MimbleWimble Coin app for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets.
@@ -39,7 +39,7 @@ The app can then be built with the following command:
 ```
 make
 ```
-The app can be installed on a Ledger device with the following command:
+The app can be installed on a Ledger hardware wallet with the following command:
 ```
 make load
 ```
