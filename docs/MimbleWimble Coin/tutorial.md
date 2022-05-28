@@ -138,7 +138,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## How To Send MimbleWimble Coin
 
-1. Verify that the MimbleWimble Coin web wallet is connected to a node. You can only send payments while you are connected to a node.  
+1. Verify that the MimbleWimble Coin web wallet is connected to a node. You can only send payments when you are connected to a node.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Node" src="images/how_to_send_mimblewimble_coin_1.png">
 </p>  

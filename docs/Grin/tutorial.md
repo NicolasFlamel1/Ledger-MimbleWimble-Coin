@@ -121,9 +121,9 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Get Payment Proof Address Button" src="images/how_to_receive_grin_4.png">
 </p>  
 
-5. Verify that the Tor address displayed on the hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
+5. Verify that the Slatepack address displayed on the hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
 <p align="center">
-	<img alt="Grin App Verify Tor Address" src="images/how_to_receive_grin_5.png">
+	<img alt="Grin App Verify Slatepack Address" src="images/how_to_receive_grin_5.png">
 </p>  
 
 6. Provide the payment sender with the payment proof address so that they can confirm that they are truly sending to you.  
@@ -138,7 +138,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## How To Send Grin
 
-1. Verify that the MimbleWimble Coin web wallet is connected to a node. You can only send payments while you are connected to a node.  
+1. Verify that the MimbleWimble Coin web wallet is connected to a node. You can only send payments when you are connected to a node.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Node" src="images/how_to_send_grin_1.png">
 </p>  
