@@ -6,23 +6,23 @@
 const SpeculosTransport = require("@ledgerhq/hw-transport-node-speculos")["default"];
 const http = require("http");
 const crypto = require("crypto");
-const Blake2b = require("./BLAKE2b.min.js");
-const Ed25519 = require("./Ed25519.min.js");
-const X25519 = require("./X25519.min.js");
-const Secp256k1Zkp = require("./secp256k1-zkp.min.js");
-const BigNumber = require("./bignumber.js-9.0.2.min.js");
-const sha256 = require("./js-sha256-0.9.0.min.js");
-const Common = require("./common.min.js");
-const Identifier = require("./identifier.min.js");
-const Crypto = require("./crypto.min.js");
-const Seed = require("./seed.min.js");
-const Tor = require("./tor.min.js");
-const Mqs = require("./mqs.min.js");
-const Slatepack = require("./slatepack.min.js");
-const Consensus = require("./consensus.min.js");
-const NewProofBuilder = require("./new_proof_builder.min.js");
-const Slate = require("./slate.min.js");
-const SlateKernel = require("./slate_kernel.min.js");
+const Blake2b = require("./BLAKE2b-0.0.1.js");
+const Ed25519 = require("./Ed25519-0.0.1.js");
+const X25519 = require("./X25519-0.0.1.js");
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.1.js");
+const BigNumber = require("./bignumber.js-9.0.2.js");
+const sha256 = require("./js-sha256-0.9.0.js");
+const Common = require("./common.js");
+const Identifier = require("./identifier.js");
+const Crypto = require("./crypto.js");
+const Seed = require("./seed.js");
+const Tor = require("./tor.js");
+const Mqs = require("./mqs.js");
+const Slatepack = require("./slatepack.js");
+const Consensus = require("./consensus.js");
+const NewProofBuilder = require("./new_proof_builder.js");
+const Slate = require("./slate.js");
+const SlateKernel = require("./slate_kernel.js");
 
 
 // Constants
@@ -1362,8 +1362,18 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Get salt from response
 		const salt = response.subarray(Slatepack.NONCE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
 		
-		// Log salt
-		console.log("Using salt: " + Common.toHexString(salt));
+		// Check address type
+		switch(addressType) {
+		
+			// MQS address type
+			case MQS_ADDRESS_TYPE:
+		
+				// Log salt
+				console.log("Using salt: " + Common.toHexString(salt));
+				
+				// Break
+				break;
+		}
 		
 		// Go through all chunks of the data
 		let encryptedData = new Uint8Array([]);
@@ -3128,3 +3138,4 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 	// Log message
 	console.log("Passed getting Tor certificate signature test");
 }
+
