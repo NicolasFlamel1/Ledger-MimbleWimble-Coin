@@ -50,7 +50,7 @@ make CURRENCY=grin
 make load CURRENCY=grin
 ```
 
-You can also install the MimbleWimble Coin app and the Grin app on a Ledger Nano S or Ledger Nano S Plus without downloading or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+You can also install the MimbleWimble Coin app and the Grin app on a Ledger Nano S or Ledger Nano S Plus without downloading or compiling anything by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 ### Testing
 Functional tests for this app can be ran with the following commands:

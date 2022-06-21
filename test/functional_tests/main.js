@@ -3138,4 +3138,3 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 	// Log message
 	console.log("Passed getting Tor certificate signature test");
 }
-
