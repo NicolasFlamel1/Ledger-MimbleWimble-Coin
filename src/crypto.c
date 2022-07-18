@@ -732,7 +732,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 
 // Create single-signer signature
 void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
-	
+
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
