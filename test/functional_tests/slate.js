@@ -5512,7 +5512,7 @@ class Slate {
 				var compareResult = currentHash.compare(lastHash);
 				
 				// Check if current hash is less than or equal to the last hash
-				if(compareResult === Hash.LESS_THAN || compareResult === Hash.EQUAL_TO)
+				if(compareResult === Common.SORT_LESS_THAN || compareResult === Common.SORT_EQUAL)
 				
 					// Return false
 					return false;

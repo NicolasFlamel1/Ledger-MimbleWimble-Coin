@@ -60,26 +60,15 @@ class Identifier {
 					if(serializedValue["length"] === Identifier.LENGTH) {
 					
 						// Set depth
-						this.depth = serializedValue[Identifier.DEPTH_INDEX];
+						this.depth = Math.min(serializedValue[Identifier.DEPTH_INDEX], Identifier.MAX_DEPTH);
 						
-						// Check if depth is valid
-						if(this.depth <= Identifier.MAX_DEPTH) {
+						// Go through all paths
+						var serializedValueDataView = new DataView(serializedValue["buffer"]);
 						
-							// Go through all paths
-							var serializedValueDataView = new DataView(serializedValue["buffer"]);
-							
-							for(var i = 0; i < this.getPaths()["length"]; ++i)
-							
-								// Set path
-								this.paths[i] = serializedValueDataView.getUint32(Identifier.PATHS_INDEX + i * Uint32Array["BYTES_PER_ELEMENT"], false);
-						}
+						for(var i = 0; i < this.getPaths()["length"]; ++i)
 						
-						// Otherwise
-						else {
-						
-							// Throw error
-							throw "Invalid identifier.";
-						}
+							// Set path
+							this.paths[i] = serializedValueDataView.getUint32(Identifier.PATHS_INDEX + i * Uint32Array["BYTES_PER_ELEMENT"], false);
 					}
 					
 					// Otherwise
