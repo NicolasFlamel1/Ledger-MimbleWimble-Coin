@@ -34,8 +34,8 @@
 // Kernel features details title line buffer size
 #define KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE sizeof("Relative Height")
 
-// Kernel features details text line buffer size
-#define KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
+// Kernel features details text or account index line buffer size
+#define KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
 
 
 // Constants
@@ -95,8 +95,8 @@ extern char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
 // Kernel features details title line buffer
 extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
 
-// Kernel features details text line buffer
-extern char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
+// Kernel features details text or account index line buffer
+extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
 
 // Function prototypes

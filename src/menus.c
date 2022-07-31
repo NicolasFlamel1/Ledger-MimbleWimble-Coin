@@ -33,8 +33,8 @@ char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
 // Kernel features details title line buffer
 char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
 
-// Kernel features details text line buffer
-char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
+// Kernel features details text or account index line buffer
+char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
 
 // Constants
@@ -164,6 +164,30 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 	"public key?"
 });
 
+// Export root public key menu account index screen
+static UX_STEP_NOCB(exportRootPublicKeyMenuAccountIndexScreen,
+
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
+	
+		// Layout
+		nb_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		bnnn_paging,
+	#endif
+{
+
+	// Title
+	.title = "Account Index",
+	
+	// Text
+	.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+});
+
 // Export root public key menu approve screen
 static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true), {
 
@@ -189,6 +213,9 @@ static UX_FLOW(exportRootPublicKeyMenu,
 
 	// Export root public key menu notify screen
 	&exportRootPublicKeyMenuNotifyScreen,
+	
+	// Export root public key menu account index screen
+	&exportRootPublicKeyMenuAccountIndexScreen,
 
 	// Export root public key menu approve screen
 	&exportRootPublicKeyMenuApproveScreen,
@@ -622,7 +649,7 @@ static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsScreen,
 	.title = kernelFeaturesDetailsTitleLineBuffer,
 	
 	// Text
-	.text = kernelFeaturesDetailsTextLineBuffer
+	.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
 });
 
 // Finalize transaction menu proof address screen
@@ -732,8 +759,8 @@ void clearMenuBuffers(void) {
 	// Clear the kernel features details title line buffer
 	explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
 	
-	// Clear the kernel features details text line buffer
-	explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
+	// Clear the kernel features details text or account index line buffer
+	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
 }
 
 // Show main menu

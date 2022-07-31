@@ -41,6 +41,10 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
+	// Copy account into the kernel features details text or account index line buffer
+	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
+	
 	// Show export root public key menu
 	showMenu(EXPORT_ROOT_PUBLIC_KEY_MENU);
 	

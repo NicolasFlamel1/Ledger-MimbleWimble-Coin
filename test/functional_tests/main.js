@@ -701,6 +701,15 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					]
 				},
 				{
+					"regexp": "^Account Index.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
 					"text": "Approve",
 					"actions": [
 					

@@ -370,9 +370,9 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 				uint64_t lockHeight;
 				memcpy(&lockHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(lockHeight));
 				
-				// Copy lock height into the kernel features details text line buffer
-				explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
-				toString(kernelFeaturesDetailsTextLineBuffer, lockHeight, 0);
+				// Copy lock height into the kernel features details text or account index line buffer
+				explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+				toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, lockHeight, 0);
 			
 				// Break
 				break;
@@ -391,9 +391,9 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 				uint16_t relativeHeight;
 				memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
 				
-				// Copy relative height into the kernel features details text line buffer
-				explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
-				toString(kernelFeaturesDetailsTextLineBuffer, relativeHeight, 0);
+				// Copy relative height into the kernel features details text or account index line buffer
+				explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+				toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, relativeHeight, 0);
 				
 				// Break
 				break;
