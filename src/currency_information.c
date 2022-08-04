@@ -44,17 +44,17 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->enableSlatepackAddress = true;
 	#endif
 	
-	// Check if fee mask exists
-	#ifdef CURRENCY_FEE_MASK
+	// Check if maximum fee exists
+	#ifdef CURRENCY_MAXIMUM_FEE
 	
-		// Set current currency information's fee mask
-		currentCurrencyInformation->feeMask = CURRENCY_FEE_MASK;
+		// Set current currency information's maximum fee
+		currentCurrencyInformation->maximumFee = CURRENCY_MAXIMUM_FEE;
 	
 	// Otherwise
 	#else
 	
-		// Set current currency information's fee mask
-		currentCurrencyInformation->feeMask = UINT64_MAX;
+		// Set current currency information's maximum fee
+		currentCurrencyInformation->maximumFee = UINT64_MAX;
 	#endif
 	
 	// Check if MQS version exists

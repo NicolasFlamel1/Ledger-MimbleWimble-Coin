@@ -408,7 +408,7 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 		
 		// Copy transaction's fee into the fee line buffer
 		explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
-		toString(feeLineBuffer, transaction.fee & currencyInformation.feeMask, currencyInformation.fractionalDigits);
+		toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
 		
 		strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
 		strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));

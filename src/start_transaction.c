@@ -164,7 +164,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		}
 	
 		// Check if fee is invalid or will overflow
-		if(!fee || UINT64_MAX - input < fee) {
+		if(!fee || fee > currencyInformation.maximumFee || UINT64_MAX - input < fee) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
