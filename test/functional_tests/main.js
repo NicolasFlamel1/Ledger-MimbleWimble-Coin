@@ -701,7 +701,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					]
 				},
 				{
-					"regexp": "^Account Index.*$",
+					"regexp": "^Account.*$",
 					"actions": [
 					
 						// Push right
