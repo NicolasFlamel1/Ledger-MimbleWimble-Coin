@@ -39,6 +39,23 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 
 // Constants
 
+// Check if target is not the Nano S
+#ifndef TARGET_NANOS
+
+	// Main menu currency name ready screen
+	static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
+			
+		// Picture
+		&currencyInformation.iconDetails,
+		
+		// First line
+		currencyInformation.name,
+		
+		// Second line
+		"is ready"
+	});
+#endif
+
 // Main menu ready screen
 static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 
@@ -52,75 +69,67 @@ static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 	"is ready"
 });
 
-// Main menu version screen
-static UX_STEP_NOCB(mainMenuVersionScreen, 
-
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
-	
-		// Layout
-		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Version",
-			
-			// Text
-			.text = currencyInformation.version
-		}
-	
-	// Otherwise
-	#else
-	
-		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Version",
-			
-			// Second line
-			currencyInformation.version
-		}
-	#endif
-);
-
 // Main menu currency screen
-static UX_STEP_NOCB(mainMenuCurrencyScreen, 
+static UX_STEP_NOCB(mainMenuCurrencyScreen,
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
 	
 		// Layout
 		nb_paging,
-		
-		{
-
-			// Title
-			.title = "Currency",
-			
-			// Text
-			.text = currencyInformation.name
-		}
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		bn,
-		
-		{
-		
-			// Bold first line
-			"Currency",
-			
-			// Second line
-			currencyInformation.name
-		}
+		bnnn_paging,
 	#endif
-);
+{
+
+	// Title
+	.title = "Currency",
+	
+	// Text
+	.text = currencyInformation.name
+});
+
+// Check if target is not the Nano S
+#ifndef TARGET_NANOS
+
+	// Main menu version single line screen
+	static UX_STEP_NOCB(mainMenuVersionSingleLineScreen, bn, {
+			
+		// Bold first line
+		"Version",
+		
+		// Second line
+		currencyInformation.version
+	});
+#endif
+
+// Main menu version multiline screen
+static UX_STEP_NOCB(mainMenuVersionMultilineScreen,
+
+	// Check if target is the Nano S
+	#ifdef TARGET_NANOS
+	
+		// Layout
+		nb_paging,
+	
+	// Otherwise
+	#else
+	
+		// Layout
+		bnnn_paging,
+	#endif
+{
+
+	// Title
+	.title = "Version",
+	
+	// Text
+	.text = currencyInformation.version
+});
 
 // Main menu exit screen
 static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
@@ -132,24 +141,34 @@ static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
 	"Back to dashboard"
 });
 
-// Main menu
-static UX_FLOW(mainMenu,
+// Check if target is the Nano S
+#ifdef TARGET_NANOS
 
-	// Main menu ready screen
-	&mainMenuReadyScreen,
-	
-	// Main menu version screen
-	&mainMenuVersionScreen,
-	
-	// Main menu currency screen
-	&mainMenuCurrencyScreen,
-	
-	// Main menu exit screen
-	&mainMenuExitScreen,
-	
-	// Loop
-	FLOW_LOOP
-);
+	// Main menu
+	static UX_FLOW(mainMenu,
+
+		// Main menu ready screen
+		&mainMenuReadyScreen,
+		
+		// Main menu currency screen
+		&mainMenuCurrencyScreen,
+		
+		// Main menu version multiline screen
+		&mainMenuVersionMultilineScreen,
+		
+		// Main menu exit screen
+		&mainMenuExitScreen,
+		
+		// Loop
+		FLOW_LOOP
+	);
+
+// Otherwise
+#else
+
+	// Main menu
+	static const ux_flow_step_t *mainMenu[6];
+#endif
 
 // Export root public key menu notify screen
 static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
@@ -172,21 +191,32 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuAccountIndexScreen,
 	
 		// Layout
 		nb_paging,
+		
+		{
+
+			// Title
+			.title = "Account Index",
+			
+			// Text
+			.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+		}
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		bnnn_paging,
+		bn,
+		
+		{
+		
+			// Bold first line
+			"Account Index",
+			
+			// Second line
+			kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+		}
 	#endif
-{
-
-	// Title
-	.title = "Account Index",
-	
-	// Text
-	.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
-});
+);
 
 // Export root public key menu approve screen
 static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true), {
@@ -556,8 +586,22 @@ static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 	"transaction?"
 });
 
-// Finalize transaction menu amount screen
-static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
+// Check if target is not the Nano S
+#ifndef TARGET_NANOS
+
+	// Finalize transaction menu amount single line screen
+	static UX_STEP_NOCB(finalizeTransactionMenuAmountSingleLineScreen, bn, {
+			
+		// Bold first line
+		"Amount",
+		
+		// Second line
+		amountLineBuffer
+	});
+#endif
+
+// Finalize transaction menu amount multiline screen
+static UX_STEP_NOCB(finalizeTransactionMenuAmountMultilineScreen,
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
@@ -580,8 +624,22 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountScreen,
 	.text = amountLineBuffer
 });
 
-// Finalize transaction menu fee screen
-static UX_STEP_NOCB(finalizeTransactionMenuFeeScreen,
+// Check if target is not the Nano S
+#ifndef TARGET_NANOS
+
+	// Finalize transaction menu fee single line screen
+	static UX_STEP_NOCB(finalizeTransactionMenuFeeSingleLineScreen, bn, {
+			
+		// Bold first line
+		"Fee",
+		
+		// Second line
+		feeLineBuffer
+	});
+#endif
+
+// Finalize transaction menu fee multiline screen
+static UX_STEP_NOCB(finalizeTransactionMenuFeeMultilineScreen,
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
@@ -612,24 +670,49 @@ static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesScreen,
 	
 		// Layout
 		nb_paging,
+		
+		{
+
+			// Title
+			.title = "Kernel Features",
+			
+			// Text
+			.text = kernelFeaturesLineBuffer
+		}
 	
 	// Otherwise
 	#else
 	
 		// Layout
-		bnnn_paging,
+		bn,
+		
+		{
+		
+			// Bold first line
+			"Kernel Features",
+			
+			// Second line
+			kernelFeaturesLineBuffer
+		}
 	#endif
-{
+);
 
-	// Title
-	.title = "Kernel Features",
+// Check if target is not the Nano S
+#ifndef TARGET_NANOS
 
-	// Text
-	.text = kernelFeaturesLineBuffer
-});
+	// Finalize transaction menu kernel features details single line screen
+	static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsSingleLineScreen, bn, {
+			
+		// Bold first line
+		kernelFeaturesDetailsTitleLineBuffer,
+		
+		// Second line
+		kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+	});
+#endif
 
-// Finalize transaction menu kernel features details screen
-static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsScreen,
+// Finalize transaction menu kernel features details multiline screen
+static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsMultilineScreen,
 
 	// Check if target is the Nano S
 	#ifdef TARGET_NANOS
@@ -710,7 +793,7 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(
 });
 
 // Finalize transaction menu
-static const ux_flow_step_t *finalizeTransactionMenu[8];
+static const ux_flow_step_t *finalizeTransactionMenu[9];
 
 // Processing menu message screen
 static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
@@ -774,7 +857,7 @@ void showMainMenu() {
 	}
 	
 	// Show main menu
-	ux_flow_init(0, mainMenu, NULL);
+	showMenu(MAIN_MENU);
 }
 
 // Show menu
@@ -789,6 +872,62 @@ void showMenu(enum Menu menu) {
 		// Main menu
 		case MAIN_MENU:
 		
+			// Check if target is not the Nano S
+			#ifndef TARGET_NANOS
+		
+				{
+			
+					// Initialize index
+					size_t index = 0;
+					
+					// Check if target is not the Nano S
+					#ifndef TARGET_NANOS
+					
+						// Check if currency information name can fit on one line
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation.name, strlen(currencyInformation.name), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						
+							// Set main menu to use currency name ready screen
+							mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
+						}
+						else
+					#endif
+					{
+				
+						// Set main menu to use ready screen
+						mainMenu[index++] = &mainMenuReadyScreen;
+						
+						// Set main menu to use currency screen
+						mainMenu[index++] = &mainMenuCurrencyScreen;
+					}
+					
+					// Check if target is not the Nano S
+					#ifndef TARGET_NANOS
+					
+						// Check if currency information version can fit on one line
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation.version, strlen(currencyInformation.version), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						
+							// Set main menu to use version single line screen
+							mainMenu[index++] = &mainMenuVersionSingleLineScreen;
+						}
+						else
+					#endif
+					{
+					
+						// Set main menu to use version multiline screen
+						mainMenu[index++] = &mainMenuVersionMultilineScreen;
+					}
+					
+					// Set main menu to use exit screen
+					mainMenu[index++] = &mainMenuExitScreen;
+					
+					// End finalize transaction menu
+					mainMenu[index++] = FLOW_LOOP;
+					
+					// End finalize transaction menu
+					mainMenu[index++] = FLOW_END_STEP;
+				}
+			#endif
+			
 			// Set menu steps to main menu
 			menuSteps = mainMenu;
 			
@@ -851,11 +990,39 @@ void showMenu(enum Menu menu) {
 				// Set finalize transaction menu to use notify screen
 				finalizeTransactionMenu[index++] = &finalizeTransactionMenuNotifyScreen;
 				
-				// Set finalize transaction menu to use amount screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountScreen;
+				// Check if target is not the Nano S
+				#ifndef TARGET_NANOS
 				
-				// Set finalize transaction menu to use fee screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeScreen;
+					// Check if amount can fit on one line
+					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountLineBuffer, strlen(amountLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+					
+						// Set finalize transaction menu to use amount single line screen
+						finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountSingleLineScreen;
+					}
+					else
+				#endif
+				{
+					
+					// Set finalize transaction menu to use amount multiline screen
+					finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountMultilineScreen;
+				}
+				
+				// Check if target is not the Nano S
+				#ifndef TARGET_NANOS
+				
+					// Check if fee can fit on one line
+					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, feeLineBuffer, strlen(feeLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+					
+						// Set finalize transaction menu to use fee single line screen
+						finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeSingleLineScreen;
+					}
+					else
+				#endif
+				{
+					
+					// Set finalize transaction menu to use fee multiline screen
+					finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeMultilineScreen;
+				}
 				
 				// Set finalize transaction menu to use kernel features screen
 				finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesScreen;
@@ -863,8 +1030,22 @@ void showMenu(enum Menu menu) {
 				// Check if kernel features details title line buffer isn't empty
 				if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
 				
-					// Set finalize transaction menu to use kernel features details screen
-					finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsScreen;
+					// Check if target is not the Nano S
+					#ifndef TARGET_NANOS
+					
+						// Check if kernel features details text can fit on one line
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, kernelFeaturesDetailsTextOrAccountIndexLineBuffer, strlen(kernelFeaturesDetailsTextOrAccountIndexLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						
+							// Set finalize transaction menu to use kernel features details single line screen
+							finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsSingleLineScreen;
+						}
+						else
+					#endif
+					{
+				
+						// Set finalize transaction menu to use kernel features details multiline screen
+						finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsMultilineScreen;
+					}
 				}
 				
 				// Check if public key or address line buffer isn't empty
