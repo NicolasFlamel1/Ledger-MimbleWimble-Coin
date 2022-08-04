@@ -292,7 +292,7 @@ jobs:
         with:
           name: scan-build
           path: scan-build
-      
+
       - name: Build Nano S Plus MimbleWimble Coin app with Clang Static Analyzer
         run: |
           make clean
@@ -487,7 +487,7 @@ jobs:
       - name: Kill Speculos
         run: |
           kill -9 $(cat /tmp/speculos.pid)
-      
+
       - name: Download Nano X MimbleWimble Coin app
         uses: actions/download-artifact@v2
         with:
@@ -514,7 +514,7 @@ jobs:
       - name: Kill Speculos
         run: |
           kill -9 $(cat /tmp/speculos.pid)
-      
+
       - name: Download Nano X MimbleWimble Coin floonet app
         uses: actions/download-artifact@v2
         with:
@@ -596,110 +596,111 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Nano S Plus MimbleWimble Coin app
-        uses: actions/download-artifact@v2
-        with:
-          name: app-debug-mimblewimble-coin-nanosplus
-          path: bin-mimblewimble-coin-nanosplus
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanosplus/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S Plus MimbleWimble Coin app
-        run: |
-          node test/functional_tests/main.js mimblewimble_coin speculos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-nanosplus-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-      
-      - name: Download Nano S Plus MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v2
-        with:
-          name: app-debug-mimblewimble-coin-floonet-nanosplus
-          path: bin-mimblewimble-coin-floonet-nanosplus
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-mimblewimble-coin-floonet-nanosplus/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S Plus MimbleWimble Coin floonet app
-        run: |
-          node test/functional_tests/main.js mimblewimble_coin_floonet speculos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-floonet-nanosplus-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Nano S Plus Grin app
-        uses: actions/download-artifact@v2
-        with:
-          name: app-debug-grin-nanosplus
-          path: bin-grin-nanosplus
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-nanosplus/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S Plus Grin app
-        run: |
-          node test/functional_tests/main.js grin speculos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: speculos-grin-nanosplus-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Nano S Plus Grin testnet app
-        uses: actions/download-artifact@v2
-        with:
-          name: app-debug-grin-testnet-nanosplus
-          path: bin-grin-testnet-nanosplus
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-testnet-nanosplus/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S Plus Grin testnet app
-        run: |
-          node test/functional_tests/main.js grin_testnet speculos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: speculos-grin-testnet-nanosplus-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
+      # Nano S Plus tests removed due to issue with Speculos running apps created with the newest Nano S Plus SDK
+      #- name: Download Nano S Plus MimbleWimble Coin app
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: app-debug-mimblewimble-coin-nanosplus
+      #    path: bin-mimblewimble-coin-nanosplus
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanosplus/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Nano S Plus MimbleWimble Coin app
+      #  run: |
+      #    node test/functional_tests/main.js mimblewimble_coin speculos
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v2
+      #  if: failure()
+      #  with:
+      #    name: speculos-mimblewimble-coin-nanosplus-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Nano S Plus MimbleWimble Coin floonet app
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: app-debug-mimblewimble-coin-floonet-nanosplus
+      #    path: bin-mimblewimble-coin-floonet-nanosplus
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-mimblewimble-coin-floonet-nanosplus/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Nano S Plus MimbleWimble Coin floonet app
+      #  run: |
+      #    node test/functional_tests/main.js mimblewimble_coin_floonet speculos
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v2
+      #  if: failure()
+      #  with:
+      #    name: speculos-mimblewimble-coin-floonet-nanosplus-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Nano S Plus Grin app
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: app-debug-grin-nanosplus
+      #    path: bin-grin-nanosplus
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-nanosplus/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Nano S Plus Grin app
+      #  run: |
+      #    node test/functional_tests/main.js grin speculos
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v2
+      #  if: failure()
+      #  with:
+      #    name: speculos-grin-nanosplus-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Nano S Plus Grin testnet app
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: app-debug-grin-testnet-nanosplus
+      #    path: bin-grin-testnet-nanosplus
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model nanosp --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-nanosplus/app.elf bin-grin-testnet-nanosplus/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Nano S Plus Grin testnet app
+      #  run: |
+      #    node test/functional_tests/main.js grin_testnet speculos
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v2
+      #  if: failure()
+      #  with:
+      #    name: speculos-grin-testnet-nanosplus-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
