@@ -135,7 +135,7 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 // Decrypt ChaCha20 Poly1305 data
 void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
 
-	// Check if data length will overflow
+	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
 	
 		// Throw invalid parameters error
