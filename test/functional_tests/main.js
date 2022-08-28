@@ -7,9 +7,9 @@ const SpeculosTransport = require("@ledgerhq/hw-transport-node-speculos")["defau
 const http = require("http");
 const crypto = require("crypto");
 const Blake2b = require("./BLAKE2b-0.0.1.js");
-const Ed25519 = require("./Ed25519-0.0.1.js");
-const X25519 = require("./X25519-0.0.1.js");
-const Secp256k1Zkp = require("./secp256k1-zkp-0.0.3.js");
+const Ed25519 = require("./Ed25519-0.0.2.js");
+const X25519 = require("./X25519-0.0.2.js");
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.4.js");
 const BigNumber = require("./bignumber.js-9.0.2.js");
 const sha256 = require("./js-sha256-0.9.0.js");
 const Common = require("./common.js");
@@ -23,6 +23,7 @@ const Consensus = require("./consensus.js");
 const NewProofBuilder = require("./new_proof_builder.js");
 const Slate = require("./slate.js");
 const SlateKernel = require("./slate_kernel.js");
+const Age = require("./age.js");
 
 
 // Constants
@@ -371,13 +372,6 @@ async function performTests(useSpeculos) {
 			await encryptSlateTest(hardwareWallet, extendedPrivateKey, TOR_ADDRESS_TYPE);
 		}
 		
-		// Otherwise check if using Grin
-		else if(Consensus.getWalletType() === Consensus.GRIN_WALLET_TYPE) {
-		
-			// Run encrypt slate test
-			await encryptSlateTest(hardwareWallet, extendedPrivateKey, SLATEPACK_ADDRESS_TYPE);
-		}
-		
 		// Check if using MimbleWimble Coin
 		if(Consensus.getWalletType() === Consensus.MWC_WALLET_TYPE) {
 		
@@ -681,7 +675,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 	if(hardwareWallet instanceof SpeculosTransport === false) {
 	
 		// Log message
-		console.log("Confirm exporting the root public key on the device");
+		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
 	}
 	
 	// Otherwise
@@ -1268,7 +1262,7 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		console.log("Running encrypt slate test");
 		
 		// Data
-		const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
+		const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE + 1)));
 		
 		// Maximum chunk size
 		const MAXIMUM_CHUNK_SIZE = 64;
@@ -1386,7 +1380,7 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		
 		// Go through all chunks of the data
 		let encryptedData = new Uint8Array([]);
-		for(let i = 0; i <= DATA["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
+		for(let i = 0; i < Math.ceil(DATA["length"] / MAXIMUM_CHUNK_SIZE); ++i) {
 		
 			// Continue encrypting slate on the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_ENCRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(DATA.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));
@@ -1494,7 +1488,7 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		console.log("Running decrypt slate test");
 		
 		// Data
-		const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE)));
+		const DATA = crypto.getRandomValues(new Uint8Array(Math.round(Math.random() * Common.BYTE_MAX_VALUE + 1)));
 		
 		// Maximum chunk size
 		const MAXIMUM_CHUNK_SIZE = 64;
@@ -1548,6 +1542,15 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					// Log salt
 					console.log("Using salt: " + Common.toHexString(salt));
 					
+					// Set ephemeral X25519 public key to nothing
+					var ephemeralX25519PublicKey = new Uint8Array([]);
+					
+					// Set encrypted file key to nothing
+					var encryptedFileKey = new Uint8Array([]);
+					
+					// Set payload nonce to nothing
+					var payloadNonce = new Uint8Array([]);
+					
 					// Get nonce from encrypted data
 					var nonce = encryptedData[Mqs.ENCRYPTED_DATA_NONCE_INDEX];
 					
@@ -1588,6 +1591,15 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					// Set salt to nothing
 					var salt = new Uint8Array([]);
 					
+					// Set ephemeral X25519 public key to nothing
+					var ephemeralX25519PublicKey = new Uint8Array([]);
+					
+					// Set encrypted file key to nothing
+					var encryptedFileKey = new Uint8Array([]);
+					
+					// Set payload nonce to nothing
+					var payloadNonce = new Uint8Array([]);
+					
 					// Get nonce from encrypted data
 					var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
 					
@@ -1608,14 +1620,6 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 				console.log("Using decryption type: Slatepack");
 			
 				{
-					// Get Slatepack private key from the random private key
-					const otherSlatepackPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), INDEX.toNumber());
-					
-					const publicKey = Ed25519.publicKeyFromSecretKey(otherSlatepackPrivateKey);
-					
-					// Get address from the public key
-					var address = Slatepack.publicKeyToSlatepackAddress(publicKey);
-					
 					// Get Slatepack private key from the extended private key
 					const slatepackPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
 					
@@ -1623,19 +1627,40 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 					const slatepackPublicKey = Ed25519.publicKeyFromSecretKey(slatepackPrivateKey);
 					
 					// Encrypt the data
-					const encryptedData = await Slatepack.encrypt(otherSlatepackPrivateKey, slatepackPublicKey, DATA);
+					const encryptedData = await Age.encrypt(slatepackPublicKey, DATA);
+					
+					// Set address to nothing
+					var address = new Uint8Array([]);
 					
 					// Set salt to nothing
 					var salt = new Uint8Array([]);
 					
+					// Get ephemeral X25519 public key from encrypted data
+					var ephemeralX25519PublicKey = encryptedData[Age.ENCRYPTED_DATA_EPHEMERAL_X25519_PUBLIC_KEY_INDEX];
+					
+					// Log ephemeral X25519 public key
+					console.log("Using ephemeral X25519 public key: " + Common.toHexString(ephemeralX25519PublicKey));
+					
+					// Get encrypted file key from encrypted data
+					var encryptedFileKey = encryptedData[Age.ENCRYPTED_DATA_ENCRYPTED_FILE_KEY_INDEX];
+					
+					// Log encrypted file key
+					console.log("Using encrypted file key: " + Common.toHexString(encryptedFileKey));
+					
+					// Get payload nonce from encrypted data
+					var payloadNonce = encryptedData[Age.ENCRYPTED_DATA_PAYLOAD_NONCE_INDEX];
+					
+					// Log payload nonce
+					console.log("Using payload nonce: " + Common.toHexString(payloadNonce));
+					
 					// Get nonce from encrypted data
-					var nonce = encryptedData[Slatepack.ENCRYPTED_DATA_NONCE_INDEX];
+					var nonce = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]);
 					
 					// Log nonce
 					console.log("Using nonce: " + Common.toHexString(nonce));
 					
 					// Get encrypted message from encrypted data
-					var encryptedMessage = encryptedData[Slatepack.ENCRYPTED_DATA_DATA_INDEX];
+					var encryptedMessage = encryptedData[Age.ENCRYPTED_DATA_DATA_INDEX];
 				}
 				
 				// Break
@@ -1665,12 +1690,21 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 			Buffer.from(address),
 			
 			// Salt
-			Buffer.from(salt)
+			Buffer.from(salt),
+			
+			// Ephemeral X25519 public key
+			Buffer.from(ephemeralX25519PublicKey),
+			
+			// Encrypted file key
+			Buffer.from(encryptedFileKey),
+			
+			// Payload nonce
+			Buffer.from(payloadNonce)
 		]));
 		
 		// Go through all chunks of the encrypted message
 		const decryptedDataChunks = [];
-		for(let i = 0; i <= encryptedMessage["length"] / MAXIMUM_CHUNK_SIZE; ++i) {
+		for(let i = 0; i < Math.ceil(encryptedMessage["length"] / MAXIMUM_CHUNK_SIZE); ++i) {
 		
 			// Continue decrypting slate on the hardware wallet
 			response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_DECRYPTING_SLATE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedMessage.subarray(i * MAXIMUM_CHUNK_SIZE, i * MAXIMUM_CHUNK_SIZE + MAXIMUM_CHUNK_SIZE)));

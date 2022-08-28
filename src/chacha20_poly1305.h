@@ -61,7 +61,7 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength);
 
 // Get ChaCha20 Poly1305 tag
-void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *tag);
+void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *tag);
 
 // Initialize ChaCha20 current state
 void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);

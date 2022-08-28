@@ -4,7 +4,7 @@
 
 // Requires
 const crypto = require("crypto");
-const X25519 = require("./X25519-0.0.1.js");
+const X25519 = require("./X25519-0.0.2.js");
 const bech32 = require("./bech32-2.0.0.js");
 const chacha = require("./ChaCha-2.1.0.js");
 const Common = require("./common.js");

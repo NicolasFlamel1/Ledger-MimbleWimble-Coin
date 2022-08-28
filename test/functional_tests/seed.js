@@ -4,7 +4,7 @@
 
 // Requires
 const crypto = require("crypto");
-const Secp256k1Zkp = require("./secp256k1-zkp-0.0.3.js");
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.4.js");
 const Common = require("./common.js");
 const Identifier = require("./identifier.js");
 const Crypto = require("./crypto.js");

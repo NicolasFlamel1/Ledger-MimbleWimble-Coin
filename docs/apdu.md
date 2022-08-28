@@ -314,11 +314,11 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 
 **Input Data**
 
-| Length                                                  | Name                | Description |
-|---------------------------------------------------------|---------------------|-------------|
-| 4                                                       | `account`           | Account number (little endian, max 7FFFFFFF)) |
-| 4                                                       | `index`             | Index number (little endian) |
-| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `recipient_address` | Address that will be able to decrypt the data |
+| Length                   | Name                | Description |
+|--------------------------|---------------------|-------------|
+| 4                        | `account`           | Account number (little endian, max 7FFFFFFF)) |
+| 4                        | `index`             | Index number (little endian) |
+| 52 for MQS or 56 for Tor | `recipient_address` | Address that will be able to decrypt the data |
 
 **Output Data**
 
@@ -397,7 +397,7 @@ Returns the tag for all the data that was encrypted.
 
 #### Description
 
-Prepares the app's internal slate state to be able to decrypt data that will be provided later as an account at a provided index using a provided nonce and optional salt that was encrypted by a provided address.
+Prepares the app's internal slate state to be able to decrypt data that will be provided later as an account at a provided index using a provided nonce and optional salt, ephemeral X25519 public key, encrypted file key, and payload nonce that was encrypted by a provided address or payload key.
 
 #### Encoding
 
@@ -416,13 +416,14 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 **Input Data**
 
-| Length                                                  | Name             | Description |
-|---------------------------------------------------------|------------------|-------------|
-| 4                                                       | `account`        | Account number (little endian, max 7FFFFFFF)) |
-| 4                                                       | `index`          | Index number (little endian) |
-| 12                                                      | `nonce`          | Nonce that was used to encrypt the data |
-| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `sender_address` | Address that will be able to decrypt the data |
-| 0 or 8                                                  | `salt`           | Optional salt that was used to encrypt the data if the `sender_address` is an MQS address |
+| Length                                       | Name                                            | Description |
+|----------------------------------------------|-------------------------------------------------|-------------|
+| 4                                            | `account`                                       | Account number (little endian, max 7FFFFFFF)) |
+| 4                                            | `index`                                         | Index number (little endian) |
+| 12                                           | `nonce`                                         | Nonce that was used to encrypt the data |
+| 52 for MQS, 56 for Tor, and 32 for Slatepack | `sender_address_or_ephemeral_x25519_public_key` | Address or ephemeral X25519 public key that will be able to decrypt the data |
+| 8 for MQS, 0 for Tor, and 32 for Slatepack   | `salt_or_encrypted_file_key`                    | Optional salt that was used to encrypt the data if the `sender_address` is an MQS address or encrypted file key that was used to encrypt the data if the `sender_address` is an ephemeral X25519 public key |
+| 0 for MQS, 0 for Tor, and 16 for Slatepack   | `payload_nonce`                                 | Optional payload nonce that was used to encrypt the data if the `sender_address` is an ephemeral X25519 public key |
 
 **Output Data**
 

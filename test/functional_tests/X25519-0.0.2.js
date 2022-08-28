@@ -98,6 +98,12 @@ class X25519 {
 		// Secret key from Ed25519 secret key
 		static secretKeyFromEd25519SecretKey(ed25519SecretKey) {
 		
+			// Check if instance doesn't exist
+			if(typeof X25519.instance === "undefined")
+			
+				// Set instance
+				X25519.instance = x25519();
+		
 			// Check if instance is invalid
 			if(X25519.instance === X25519.INVALID)
 			
@@ -146,6 +152,12 @@ class X25519 {
 		// Public key from Ed25519 public key
 		static publicKeyFromEd25519PublicKey(ed25519PublicKey) {
 		
+			// Check if instance doesn't exist
+			if(typeof X25519.instance === "undefined")
+			
+				// Set instance
+				X25519.instance = x25519();
+		
 			// Check if instance is invalid
 			if(X25519.instance === X25519.INVALID)
 			
@@ -193,6 +205,12 @@ class X25519 {
 		
 		// Shared secret key from secret key and public key
 		static sharedSecretKeyFromSecretKeyAndPublicKey(secretKey, publicKey) {
+		
+			// Check if instance doesn't exist
+			if(typeof X25519.instance === "undefined")
+			
+				// Set instance
+				X25519.instance = x25519();
 		
 			// Check if instance is invalid
 			if(X25519.instance === X25519.INVALID)

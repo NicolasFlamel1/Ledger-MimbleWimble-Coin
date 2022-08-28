@@ -217,7 +217,7 @@ class Identifier {
 					case Consensus.MWC_WALLET_TYPE:
 				
 						// Set next's height path as the height limited by its maximum value
-						next.paths[Identifier.HEIGHT_PATH_INDEX] = height.modulo(Identifier.MAXIMUM_HEIGHT + 1).toNumber();
+						next.paths[Identifier.HEIGHT_PATH_INDEX] = Math.max(height.modulo(Identifier.MAXIMUM_HEIGHT + 1).toNumber(), 1);
 						
 						// Break
 						break;
@@ -271,7 +271,7 @@ class Identifier {
 					case Consensus.MWC_WALLET_TYPE:
 			
 						// Set child's height path as the height limited by its maximum value
-						child.paths[Identifier.HEIGHT_PATH_INDEX] = height.modulo(Identifier.MAXIMUM_HEIGHT + 1).toNumber();
+						child.paths[Identifier.HEIGHT_PATH_INDEX] = Math.max(height.modulo(Identifier.MAXIMUM_HEIGHT + 1).toNumber(), 1);
 						
 						// Break
 						break;

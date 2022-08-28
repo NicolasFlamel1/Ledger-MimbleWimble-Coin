@@ -1863,7 +1863,7 @@ class Slate {
 				return false;
 			
 			// Check if heights aren't equal
-			if((this.getHeight() === Slate.UNKNOWN_HEIGHT && slate.getHeight() !== Slate.UNKNOWN_HEIGHT) || (this.getHeight() !== Slate.UNKNOWN_HEIGHT && slate.getHeight() === Slate.UNKNOWN_HEIGHT) || (this.getHeight() !== Slate.NO_HEIGHT && this.getHeight().isEqualTo(slate.getHeight()) === false))
+			if((this.getHeight() === Slate.UNKNOWN_HEIGHT && slate.getHeight() !== Slate.UNKNOWN_HEIGHT) || (this.getHeight() !== Slate.UNKNOWN_HEIGHT && slate.getHeight() === Slate.UNKNOWN_HEIGHT) || (this.getHeight() !== Slate.UNKNOWN_HEIGHT && this.getHeight().isEqualTo(slate.getHeight()) === false))
 			
 				// Return false
 				return false;
@@ -4478,7 +4478,7 @@ class Slate {
 					if(kernel.isNoRecentDuplicate() === true) {
 					
 						// Check if kernel's excess already exists in the list
-						if(noRecentDuplicateKernelsExcesses.indexOf(Common.toHexString(kernel.getExcess)) !== Common.INDEX_NOT_FOUND) {
+						if(noRecentDuplicateKernelsExcesses.indexOf(Common.toHexString(kernel.getExcess())) !== Common.INDEX_NOT_FOUND) {
 						
 							// Return false
 							return false;

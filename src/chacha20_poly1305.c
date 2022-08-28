@@ -164,7 +164,7 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 }
 
 // Get ChaCha20 Poly1305 tag
-void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *tag) {
+void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *tag) {
 
 	// Initialize copy
 	volatile ChaCha20Poly1305State copy;
@@ -193,7 +193,7 @@ void getChaCha20Poly1305Tag(struct ChaCha20Poly1305State *chaCha20Poly1305State,
 			swapEndianness((uint8_t *)copy.poly1305Accumulator, sizeof(copy.poly1305Accumulator));
 			
 			// Set tag to the Poly1305 accumulator
-			memcpy(tag, (uint8_t *)copy.poly1305Accumulator, POLY1305_TAG_SIZE);
+			memcpy((uint8_t *)tag, (uint8_t *)copy.poly1305Accumulator, POLY1305_TAG_SIZE);
 		}
 		
 		// Finally

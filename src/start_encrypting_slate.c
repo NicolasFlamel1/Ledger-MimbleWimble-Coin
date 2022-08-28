@@ -110,29 +110,8 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		// Default
 		default:
 		
-			// Check if address length is a Slatepack address length
-			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
-			
-				// Check currency doesn't allow Slatepack addresses
-				if(!currencyInformation.enableSlatepackAddress) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
-				// Set shared private key length
-				sharedPrivateKeyLength = SLATEPACK_SHARED_PRIVATE_KEY_SIZE;
-			}
-			
-			// Otherwise
-			else {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-		
-			// Break
-			break;
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Initialize nonce
@@ -167,19 +146,6 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 				
 					// Create Slatepack shared private key
 					createSlatepackSharedPrivateKey(sharedPrivateKey, account, index, address, addressLength);
-				
-					// Break
-					break;
-				
-				// Default
-				default:
-				
-					// Check if address length is a Slatepack address length
-					if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
-					
-						// Create Slatepack shared private key
-						createSlatepackSharedPrivateKey(sharedPrivateKey, account, index, address, addressLength);
-					}
 				
 					// Break
 					break;

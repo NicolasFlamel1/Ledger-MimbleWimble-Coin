@@ -98,6 +98,12 @@ class Ed25519 {
 		// Public key from secret key
 		static publicKeyFromSecretKey(secretKey) {
 		
+			// Check if instance doesn't exist
+			if(typeof Ed25519.instance === "undefined")
+			
+				// Set instance
+				Ed25519.instance = ed25519();
+		
 			// Check if instance is invalid
 			if(Ed25519.instance === Ed25519.INVALID)
 			
@@ -145,6 +151,12 @@ class Ed25519 {
 		
 		// Sign
 		static sign(message, secretKey) {
+		
+			// Check if instance doesn't exist
+			if(typeof Ed25519.instance === "undefined")
+			
+				// Set instance
+				Ed25519.instance = ed25519();
 		
 			// Check if instance is invalid
 			if(Ed25519.instance === Ed25519.INVALID)
@@ -200,6 +212,12 @@ class Ed25519 {
 		
 		// Verify
 		static verify(message, signature, publicKey) {
+		
+			// Check if instance doesn't exist
+			if(typeof Ed25519.instance === "undefined")
+			
+				// Set instance
+				Ed25519.instance = ed25519();
 		
 			// Check if instance is invalid
 			if(Ed25519.instance === Ed25519.INVALID)

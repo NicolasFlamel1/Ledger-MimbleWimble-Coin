@@ -825,7 +825,7 @@ class SlateKernel {
 						case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
 						
 							// Check if no recent duplicate kernels isn't enabled
-							if(Consensus.isNoRecentDuplicateKernelsEnabled(isMainnet) === true) {
+							if(Consensus.isNoRecentDuplicateKernelsEnabled(isMainnet) === false) {
 							
 								// Throw error
 								throw "Unsupported kernel.";

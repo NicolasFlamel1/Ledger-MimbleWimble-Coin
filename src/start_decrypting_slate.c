@@ -1,6 +1,6 @@
 // Header files
 #include <string.h>
-#include "chacha20_poly1305.h"
+#include "age.h"
 #include "common.h"
 #include "crypto.h"
 #include "currency_information.h"
@@ -66,6 +66,9 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 	// Check address length
 	size_t sharedPrivateKeyLength;
 	uint8_t *salt = NULL;
+	uint8_t *ephemeralX25519PublicKey = NULL;
+	uint8_t *encryptedFileKey = NULL;
+	uint8_t *payloadNonce = NULL;
 	switch(addressLength) {
 	
 		// MQS address size
@@ -78,14 +81,11 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Correct address length
-			addressLength = MQS_ADDRESS_SIZE;
-			
 			// Set shared private key length
 			sharedPrivateKeyLength = MQS_SHARED_PRIVATE_KEY_SIZE;
 			
 			// Get salt from data
-			salt = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + addressLength];
+			salt = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + MQS_ADDRESS_SIZE];
 		
 			// Break
 			break;
@@ -106,32 +106,43 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 			// Break
 			break;
 		
-		// Default
-		default:
+		// Slatepack address size
+		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 		
-			// Check if address length is a Slatepack address length
-			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
-			
-				// Check currency doesn't allow Slatepack addresses
-				if(!currencyInformation.enableSlatepackAddress) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
-				// Set shared private key length
-				sharedPrivateKeyLength = SLATEPACK_SHARED_PRIVATE_KEY_SIZE;
-			}
-			
-			// Otherwise
-			else {
+			// Check currency doesn't allow Slatepack addresses
+			if(!currencyInformation.enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Set shared private key length
+			sharedPrivateKeyLength = AGE_PAYLOAD_KEY_SIZE;
+			
+			// Get ephemeral X25519 public key from data
+			ephemeralX25519PublicKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce)];
+			
+			// Check if ephemeral X25519 public key is invalid
+			if(cx_math_is_zero(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Get encrypted file key from data
+			encryptedFileKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + X25519_PUBLIC_KEY_SIZE];
+			
+			// Get payload nonce from data
+			payloadNonce = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE];
 		
 			// Break
 			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Initialize shared private key
@@ -147,7 +158,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 			switch(addressLength) {
 			
 				// MQS address size
-				case MQS_ADDRESS_SIZE:
+				case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
 					
 					// Create MQS shared private key
 					createMqsSharedPrivateKey(sharedPrivateKey, account, index, address, salt);
@@ -164,15 +175,11 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 					// Break
 					break;
 				
-				// Default
-				default:
+				// Slatepack address size
+				case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 				
-					// Check if address length is a Slatepack address length
-					if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
-					
-						// Create Slatepack shared private key
-						createSlatepackSharedPrivateKey(sharedPrivateKey, account, index, address, addressLength);
-					}
+					// Get shared private key as the age payload key
+					getAgePayloadKey(sharedPrivateKey, account, index, ephemeralX25519PublicKey, encryptedFileKey, payloadNonce);
 				
 					// Break
 					break;

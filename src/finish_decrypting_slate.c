@@ -50,7 +50,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 		TRY {
 	
 			// Get ChaCha20 Poly1305 expected tag
-			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)expectedTag);
+			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, expectedTag);
 			
 			// Check if tag isn't equal to the expected tag
 			if(os_secure_memcmp(tag, (uint8_t *)expectedTag, sizeof(expectedTag))) {
