@@ -2017,6 +2017,32 @@ class Slate {
 			return this.getVersion() === Slate.VERSION_SLATEPACK || (this.getVersion() instanceof BigNumber === true && this.getVersion().isGreaterThanOrEqualTo(Slate.VERSION_FOUR) === true);
 		}
 		
+		// Get display kernel features
+		getDisplayKernelFeatures() {
+		
+			// Check kernel features
+			switch(this.getKernelFeatures()) {
+			
+				// Plain features
+				case SlateKernel.PLAIN_FEATURES:
+				
+					// Return display kernel features
+					return "plain";
+				
+				// Height locked features
+				case SlateKernel.HEIGHT_LOCKED_FEATURES:
+				
+					// Return display kernel features
+					return "height locked";
+				
+				// No recent duplicate features
+				case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
+				
+					// Return display kernel features
+					return "no recent duplicate";
+			}
+		}
+		
 		// Get payment proof message
 		static getPaymentProofMessage(amount, commit, senderAddress) {
 		
