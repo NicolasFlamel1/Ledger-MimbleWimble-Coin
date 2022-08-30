@@ -2320,6 +2320,13 @@ class Slate {
 		// Parse slate asynchronous
 		static parseSlateAsynchronous(serializedSlate, isMainnet, purpose, initialSendSlate) {
 		
+			// Check if serialized slate is compact
+			if(serializedSlate instanceof Uint8Array === true) {
+		
+				// Get serialized slate data
+				var serializedSlateData = serializedSlate.slice()["buffer"];
+			}
+		
 			// Return promise
 			return new Promise(function(resolve, reject) {
 		
@@ -2330,7 +2337,7 @@ class Slate {
 					Slate.PARSE_SLATE_REQUEST_TYPE,
 					
 					// Serialized slate
-					(serializedSlate instanceof Uint8Array === true) ? serializedSlate["buffer"] : Common.serializeObject(serializedSlate),
+					(serializedSlate instanceof Uint8Array === true) ? serializedSlateData : Common.serializeObject(serializedSlate),
 					
 					// Is mainnet
 					isMainnet,
@@ -2343,8 +2350,8 @@ class Slate {
 				
 				], (serializedSlate instanceof Uint8Array === true) ? [
 				
-					// Serialized slate
-					serializedSlate["buffer"]
+					// Serialized slate data
+					serializedSlateData
 				
 				] : []).then(function(response) {
 				
