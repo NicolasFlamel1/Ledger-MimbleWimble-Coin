@@ -1897,10 +1897,15 @@ class Slate {
 				return false;
 			
 			// Check if original versions aren't equal
-			if((this.getOriginalVersion() instanceof BigNumber === true && (slate.getOriginalVersion() instanceof BigNumber === false || this.getOriginalVersion().isEqualTo(slate.getOriginalVersion()) === false)) || (typeof this.getOriginalVersion() === "string" && (typeof slate.getOriginalVersion() !== "string" || this.getOriginalVersion() !== slate.getOriginalVersion())))
+			if((this.getOriginalVersion() instanceof BigNumber === true && (slate.getOriginalVersion() instanceof BigNumber === false || this.getOriginalVersion().isEqualTo(slate.getOriginalVersion()) === false)) || (typeof this.getOriginalVersion() === "string" && (typeof slate.getOriginalVersion() !== "string" || this.getOriginalVersion() !== slate.getOriginalVersion()))) {
 			
-				// Return false
-				return false;
+				// Check if orignal version difference isn't allowed
+				if(this.getOriginalVersion() instanceof BigNumber === false || slate.getOriginalVersion() instanceof BigNumber === false || this.getOriginalVersion().isEqualTo(Slate.VERSION_TWO) === false || slate.getOriginalVersion().isEqualTo(Slate.VERSION_THREE) === false) {
+				
+					// Return false
+					return false;
+				}
+			}
 			
 			// Check if versions aren't compatible
 			if((this.getVersion() instanceof BigNumber === true && (slate.getVersion() instanceof BigNumber === false || this.getVersion().isLessThan(slate.getVersion()) === true)) || (typeof this.getVersion() === "string" && (typeof slate.getVersion() !== "string" || this.getVersion() !== slate.getVersion())))
