@@ -2140,12 +2140,34 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	// Check features
 	switch(features) {
 	
-		// Coinbase or plain features
-		case SlateKernel.COINBASE_FEATURES:
+		// Plain features
 		case SlateKernel.PLAIN_FEATURES:
 		
 			// Set kernel information to features
 			var kernelInformation = new Uint8Array([features]);
+		
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Plain");
+			}
+			
+			// Break
+			break;
+	
+		// Coinbase features
+		case SlateKernel.COINBASE_FEATURES:
+		
+			// Set kernel information to features
+			var kernelInformation = new Uint8Array([features]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Coinbase");
+			}
 		
 			// Break
 			break;
@@ -2162,6 +2184,16 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 				// Lock height
 				new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
 			]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Height Locked");
+				
+				// Log message
+				console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
+			}
 		
 			// Break
 			break;
@@ -2178,9 +2210,145 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 				// Relative height
 				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
 			]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
+				
+				// Log message
+				console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
+			}
 		
 			// Break
 			break;
+	}
+	
+	// Check if not using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+		// Log message
+		console.log("Verify that the transaction's amount on the device is: " + OUTPUT.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
+		
+		// Log message
+		console.log("Verify that the transaction's fee on the device is: " + FEE.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
+	}
+	
+	// Check if using a payment proof
+	if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+	
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+		
+			// Log message
+			console.log("Verify that the transaction's proof address on the device is: " + senderAddress);
+		}
+	}
+	
+	// Otherwise
+	else {
+	
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+			// Log message
+			console.log("Verify that the transaction contains no payment proof on the device");
+		}
+	}
+	
+	// Check if using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === true) {
+	
+		// Set automation
+		await setAutomation({
+			"version": 1,
+			"rules": [
+				{
+					"text": "Receive",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Amount.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Fee.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Kernel Features.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Lock Height.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Relative Height.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "No payment",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"regexp": "^Proof Address.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "Approve",
+					"actions": [
+					
+						// Push both
+						["button", 1, true],
+						["button", 2, true],
+						["button", 1, false],
+						["button", 2, false]
+					]
+				}
+			]
+		});
 	}
 	
 	// Get signature for the transaction from the hardware wallet
@@ -2687,8 +2855,6 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 				// Relative height
 				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
 			]);
-			
-			console.log(Common.toHexString(kernelInformation));
 			
 			// Check if not using Speculos
 			if(hardwareWallet instanceof SpeculosTransport === false) {

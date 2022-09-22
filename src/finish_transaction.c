@@ -43,7 +43,7 @@ enum KernelFeatures {
 // Supporting function implementation
 
 // Process finish transaction request
-void processFinishTransactionRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processFinishTransactionRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -342,82 +342,12 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 			THROW(INVALID_STATE_ERROR);
 		}
 		
-		// Check kernel features
-		switch(kernelFeatures) {
-		
-			// Plain features
-			case PLAIN_FEATURES:
-			
-				// Set kernel features line buffer
-				strcpy(kernelFeaturesLineBuffer, "Plain");
-				
-				// Clear the kernel features details title line buffer
-				explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
-			
-				// Break
-				break;
-			
-			// Height locked features
-			case HEIGHT_LOCKED_FEATURES:
-			
-				// Set kernel features line buffer
-				strcpy(kernelFeaturesLineBuffer, "Height Locked");
-				
-				// Set kernel features details title line buffer
-				strcpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height");
-				
-				// Get lock height from data
-				uint64_t lockHeight;
-				memcpy(&lockHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(lockHeight));
-				
-				// Copy lock height into the kernel features details text or account index line buffer
-				explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
-				toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, lockHeight, 0);
-			
-				// Break
-				break;
-			
-			// No recent duplicate features or default
-			case NO_RECENT_DUPLICATE_FEATURES:
-			default:
-			
-				// Set kernel features line buffer
-				strcpy(kernelFeaturesLineBuffer, "No Recent Duplicate");
-				
-				// Set kernel features details title line buffer
-				strcpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height");
-				
-				// Get relative height from data
-				uint16_t relativeHeight;
-				memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
-				
-				// Copy relative height into the kernel features details text or account index line buffer
-				explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
-				toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, relativeHeight, 0);
-				
-				// Break
-				break;
-		}
+		// Set verify address or approve transaction line buffer
+		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Finalize sending");
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
 		toString(amountLineBuffer, transaction.send, currencyInformation.fractionalDigits);
-		
-		strncat(amountLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
-		strncat(amountLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
-		
-		// Copy transaction's fee into the fee line buffer
-		explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
-		toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
-		
-		strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
-		strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
-
-		// Show finalize transaction menu
-		showMenu(FINALIZE_TRANSACTION_MENU);
-		
-		// Set response flags to send response later
-		*responseFlags |= IO_ASYNCH_REPLY;
 	}
 	
 	// Otherwise
@@ -442,18 +372,119 @@ void processFinishTransactionRequest(unsigned short *responseLength, __attribute
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Copy address into the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
-	
-		// Otherwise check if data is invalid
-		else if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
 		
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
+		// Otherwise
+		else {
+			
+			// Check if data is invalid
+			if(dataLength != COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Clear the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
-	
-		// Process finish transaction user interaction
-		processFinishTransactionUserInteraction(responseLength);
+		
+		// Set verify address or approve transaction line buffer
+		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Receive");
+		
+		// Copy transaction's output into the amount line buffer
+		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
+		toString(amountLineBuffer, transaction.receive, currencyInformation.fractionalDigits);
 	}
+	
+	// Append currency abbreviation to amount line buffer
+	strncat(amountLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+	strncat(amountLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+	
+	// Copy transaction's fee into the fee line buffer
+	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
+	toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
+	
+	strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
+	strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
+	
+	// Check kernel features
+	switch(kernelFeatures) {
+	
+		// Plain features
+		case PLAIN_FEATURES:
+		
+			// Set kernel features line buffer
+			strcpy(kernelFeaturesLineBuffer, "Plain");
+			
+			// Clear the kernel features details title line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+		
+			// Break
+			break;
+		
+		// Coinbase features
+		case COINBASE_FEATURES:
+		
+			// Set kernel features line buffer
+			strcpy(kernelFeaturesLineBuffer, "Coinbase");
+			
+			// Clear the kernel features details title line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+		
+			// Break
+			break;
+		
+		// Height locked features
+		case HEIGHT_LOCKED_FEATURES:
+		
+			// Set kernel features line buffer
+			strcpy(kernelFeaturesLineBuffer, "Height Locked");
+			
+			// Set kernel features details title line buffer
+			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height");
+			
+			// Get lock height from data
+			uint64_t lockHeight;
+			memcpy(&lockHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(lockHeight));
+			
+			// Copy lock height into the kernel features details text or account index line buffer
+			explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+			toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, lockHeight, 0);
+		
+			// Break
+			break;
+		
+		// No recent duplicate features or default
+		case NO_RECENT_DUPLICATE_FEATURES:
+		default:
+		
+			// Set kernel features line buffer
+			strcpy(kernelFeaturesLineBuffer, "No Recent Duplicate");
+			
+			// Set kernel features details title line buffer
+			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height");
+			
+			// Get relative height from data
+			uint16_t relativeHeight;
+			memcpy(&relativeHeight, &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint8_t)], sizeof(relativeHeight));
+			
+			// Copy relative height into the kernel features details text or account index line buffer
+			explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+			toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, relativeHeight, 0);
+			
+			// Break
+			break;
+	}
+	
+	// Show approve transaction menu
+	showMenu(APPROVE_TRANSACTION_MENU);
+	
+	// Set response flags to send response later
+	*responseFlags |= IO_ASYNCH_REPLY;
 }
 
 // Process finish transaction user interaction

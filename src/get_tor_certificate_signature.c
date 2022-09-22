@@ -193,17 +193,17 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	struct Time time;
 	epochToTime(&time, (uint64_t)certificateExpiration * CERTIFICATE_TIME_TO_EPOCH_TIME_SCALAR - timeZoneOffset * SECONDS_IN_A_MINUTE);
 	
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
-		// Copy time into the time or processing message line buffer
-		SPRINTF(timeOrProcessingMessageLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, or progress bar message line buffer
+		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	
 	// Otherwise
 	#else
 	
-		// Copy time into the time or processing message line buffer
-		SPRINTF(timeOrProcessingMessageLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, or progress bar message line buffer
+		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
 	// Check currency allows Tor addresses

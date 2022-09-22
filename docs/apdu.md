@@ -808,11 +808,11 @@ Returns the signature for a provided UTF-8 message and public key signed with th
 
 #### Description
 
-Returns the signature for the provided kernel information signed with the apps' internal transaction state's blinding factor. This command requires user approval if transaction is sending.
+Returns the signature for the provided kernel information signed with the apps' internal transaction state's blinding factor after obtaining user's approval.
 
 A payment proof will be returned as well if the payment is receiving, a `kernel_commitment` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the sender's address and the `address_type` will be treated as the desired receiver's address type.
 
-A payment proof will be displayed if a payment is sending, a `kernel_commitment` is provided, a `payment_proof` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address and the `address_type` will be treated as the desired sender's address type.
+A payment proof will be displayed if a `kernel_commitment` is provided, a `payment_proof` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending and the sender's address if receiving. The `address_type` will be treated as the desired sender's address type if sending.
 
 If a transaction needs to be finalized at a later time, then the app's internal slate state can be restored by starting a transaction, including the same inputs and outputs, applying the same offset, and setting the encrypted secret nonce that was previously obtained with a `CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE` command.
 

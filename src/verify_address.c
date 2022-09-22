@@ -64,8 +64,8 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address line buffer
-			strcpy(verifyAddressLineBuffer, "Verify MQS");
+			// Set verify address or approve transaction line buffer
+			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify MQS");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "MQS Address");
@@ -91,8 +91,8 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		
-			// Set verify address line buffer
-			strcpy(verifyAddressLineBuffer, "Verify Tor");
+			// Set verify address or approve transaction line buffer
+			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Tor");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "Tor Address");
@@ -118,8 +118,8 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address line buffer
-			strcpy(verifyAddressLineBuffer, "Verify Slatepack");
+			// Set verify address or approve transaction line buffer
+			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Slatepack");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "Slatepack Address");

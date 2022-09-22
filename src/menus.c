@@ -13,24 +13,30 @@
 // Progress bar padding
 #define PROGRESS_BAR_PADDING 6
 
-// Progress bar height
-#if BAGL_HEIGHT == 32
+// Check if device has low height
+#if BAGL_HEIGHT < 64
+
+	// Progress bar height
 	#define PROGRESS_BAR_HEIGHT 10
+
+// Otherwise
 #else
+
+	// Progress bar height
 	#define PROGRESS_BAR_HEIGHT 12
 #endif
 
 
 // Global variables
 
-// Time or processing message line buffer
-char timeOrProcessingMessageLineBuffer[TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE];
+// Time, processing message, or progress bar message line buffer
+char timeProcessingMessageOrProgressBarMessageLineBuffer[TIME_PROCESSING_MESSAGE_OR_PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Verify address line buffer
-char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
+// Verify address or approve transaction line buffer
+char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
@@ -53,8 +59,8 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 
 // Constants
 
-// Check if target is not the Nano S
-#ifndef TARGET_NANOS
+// Check if device doesn't have low height
+#if BAGL_HEIGHT >= 64
 
 	// Main menu currency name ready screen
 	static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
@@ -86,8 +92,8 @@ static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 // Main menu currency screen
 static UX_STEP_NOCB(mainMenuCurrencyScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -107,8 +113,8 @@ static UX_STEP_NOCB(mainMenuCurrencyScreen,
 	.text = currencyInformation.name
 });
 
-// Check if target is not the Nano S
-#ifndef TARGET_NANOS
+// Check if device doesn't have low height
+#if BAGL_HEIGHT >= 64
 
 	// Main menu version single line screen
 	static UX_STEP_NOCB(mainMenuVersionSingleLineScreen, bn, {
@@ -124,8 +130,8 @@ static UX_STEP_NOCB(mainMenuCurrencyScreen,
 // Main menu version multiline screen
 static UX_STEP_NOCB(mainMenuVersionMultilineScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -155,8 +161,8 @@ static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
 	"Back to dashboard"
 });
 
-// Check if target is the Nano S
-#ifdef TARGET_NANOS
+// Check if device has low height
+#if BAGL_HEIGHT < 64
 
 	// Main menu
 	static UX_FLOW(mainMenu,
@@ -200,8 +206,8 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 // Export root public key menu account index screen
 static UX_STEP_NOCB(exportRootPublicKeyMenuAccountIndexScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -284,8 +290,8 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuNotifyScreen, pnn, {
 // Verify root public key menu public key screen
 static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -348,7 +354,7 @@ static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 	&C_icon_view,
 
 	// First line
-	verifyAddressLineBuffer,
+	verifyAddressOrApproveTransactionLineBuffer,
 	
 	// Second line
 	"address"
@@ -357,8 +363,8 @@ static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 // Verify address menu address screen
 static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -430,8 +436,8 @@ static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
 // Sign MQS timestamp menu time and date screen
 static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -448,7 +454,7 @@ static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 	.title = "Time And Date",
 	
 	// Text
-	.text = timeOrProcessingMessageLineBuffer
+	.text = timeProcessingMessageOrProgressBarMessageLineBuffer
 });
 
 // Sign MQS timestamp menu approve screen
@@ -503,8 +509,8 @@ static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 // Sign Tor certificate menu expiration screen
 static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -521,14 +527,14 @@ static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 	.title = "Expires",
 	
 	// Text
-	.text = timeOrProcessingMessageLineBuffer
+	.text = timeProcessingMessageOrProgressBarMessageLineBuffer
 });
 
 // Sign Tor certificate menu address screen
 static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -587,24 +593,24 @@ static UX_FLOW(signTorCertificateMenu,
 	&signTorCertificateMenuDenyScreen
 );
 
-// Finalize transaction menu notify screen
-static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
+// Approve transaction menu notify screen
+static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {
 
 	// Picture
 	&C_icon_view,
 
 	// First line
-	"Finalize sending",
+	verifyAddressOrApproveTransactionLineBuffer,
 	
 	// Second line
 	"transaction?"
 });
 
-// Check if target is not the Nano S
-#ifndef TARGET_NANOS
+// Check if device doesn't have low height
+#if BAGL_HEIGHT >= 64
 
-	// Finalize transaction menu amount single line screen
-	static UX_STEP_NOCB(finalizeTransactionMenuAmountSingleLineScreen, bn, {
+	// Approve transaction menu amount single line screen
+	static UX_STEP_NOCB(approveTransactionMenuAmountSingleLineScreen, bn, {
 			
 		// Bold first line
 		"Amount",
@@ -614,11 +620,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuNotifyScreen, pnn, {
 	});
 #endif
 
-// Finalize transaction menu amount multiline screen
-static UX_STEP_NOCB(finalizeTransactionMenuAmountMultilineScreen,
+// Approve transaction menu amount multiline screen
+static UX_STEP_NOCB(approveTransactionMenuAmountMultilineScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -638,11 +644,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountMultilineScreen,
 	.text = amountLineBuffer
 });
 
-// Check if target is not the Nano S
-#ifndef TARGET_NANOS
+// Check if device doesn't have low height
+#if BAGL_HEIGHT >= 64
 
-	// Finalize transaction menu fee single line screen
-	static UX_STEP_NOCB(finalizeTransactionMenuFeeSingleLineScreen, bn, {
+	// Approve transaction menu fee single line screen
+	static UX_STEP_NOCB(approveTransactionMenuFeeSingleLineScreen, bn, {
 			
 		// Bold first line
 		"Fee",
@@ -652,11 +658,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuAmountMultilineScreen,
 	});
 #endif
 
-// Finalize transaction menu fee multiline screen
-static UX_STEP_NOCB(finalizeTransactionMenuFeeMultilineScreen,
+// Approve transaction menu fee multiline screen
+static UX_STEP_NOCB(approveTransactionMenuFeeMultilineScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -676,11 +682,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuFeeMultilineScreen,
 	.text = feeLineBuffer
 });
 
-// Finalize transaction menu kernel features screen
-static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesScreen,
+// Approve transaction menu kernel features screen
+static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -711,11 +717,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesScreen,
 	#endif
 );
 
-// Check if target is not the Nano S
-#ifndef TARGET_NANOS
+// Check if device doesn't have low height
+#if BAGL_HEIGHT >= 64
 
-	// Finalize transaction menu kernel features details single line screen
-	static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsSingleLineScreen, bn, {
+	// Approve transaction menu kernel features details single line screen
+	static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesDetailsSingleLineScreen, bn, {
 			
 		// Bold first line
 		kernelFeaturesDetailsTitleLineBuffer,
@@ -725,11 +731,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesScreen,
 	});
 #endif
 
-// Finalize transaction menu kernel features details multiline screen
-static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsMultilineScreen,
+// Approve transaction menu kernel features details multiline screen
+static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesDetailsMultilineScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -749,11 +755,11 @@ static UX_STEP_NOCB(finalizeTransactionMenuKernelFeaturesDetailsMultilineScreen,
 	.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
 });
 
-// Finalize transaction menu proof address screen
-static UX_STEP_NOCB(finalizeTransactionMenuProofAddressScreen,
+// Approve transaction menu proof address screen
+static UX_STEP_NOCB(approveTransactionMenuProofAddressScreen,
 
-	// Check if target is the Nano S
-	#ifdef TARGET_NANOS
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
 	
 		// Layout
 		nb_paging,
@@ -773,8 +779,8 @@ static UX_STEP_NOCB(finalizeTransactionMenuProofAddressScreen,
 	.text = publicKeyOrAddressLineBuffer
 });
 
-// Finalize transaction menu no payment proof screen
-static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, pnn, {
+// Approve transaction menu no payment proof screen
+static UX_STEP_NOCB(approveTransactionMenuNoPaymentProofScreen, pnn, {
 
 	// Picture
 	&C_icon_warning,
@@ -786,8 +792,8 @@ static UX_STEP_NOCB(finalizeTransactionMenuNoPaymentProofScreen, pnn, {
 	"proof"
 });
 
-// Finalize transaction menu approve screen
-static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true), {
+// Approve transaction menu approve screen
+static UX_STEP_CB(approveTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true), {
 
 	// Picture
 	&C_icon_approve,
@@ -796,8 +802,8 @@ static UX_STEP_CB(finalizeTransactionMenuApproveScreen, pb, processUserInteracti
 	"Approve"
 });
 
-// Finalize transaction menu deny screen
-static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false), {
+// Approve transaction menu deny screen
+static UX_STEP_CB(approveTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false), {
 
 	// Picture
 	&C_icon_reject,
@@ -806,8 +812,8 @@ static UX_STEP_CB(finalizeTransactionMenuDenyScreen, pb, processUserInteraction(
 	"Deny"
 });
 
-// Finalize transaction menu
-static const ux_flow_step_t *finalizeTransactionMenu[9];
+// Approve transaction menu
+static const ux_flow_step_t *approveTransactionMenu[9];
 
 // Processing menu message screen
 static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
@@ -816,7 +822,7 @@ static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
 	&C_icon_processing,
 	
 	// Bold line
-	timeOrProcessingMessageLineBuffer
+	timeProcessingMessageOrProgressBarMessageLineBuffer
 });
 
 // Processing menu
@@ -833,7 +839,7 @@ static const bagl_element_t PROGRESS_BAR[] = {
 	{{BAGL_RECTANGLE, 0x00, 0, 0, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 	
 	// Text
-	{{BAGL_LABELINE, 0x0, 0,  (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, timeOrProcessingMessageLineBuffer},
+	{{BAGL_LABELINE, 0x0, 0,  (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, timeProcessingMessageOrProgressBarMessageLineBuffer},
 	
 	// Outline
 	{{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING, (BAGL_HEIGHT / 2) + 5, BAGL_WIDTH - (PROGRESS_BAR_PADDING * 2), PROGRESS_BAR_HEIGHT, 1, 3, BAGL_OUTLINE, 0xFFFFFF, 0x000000, 0, 0}, NULL}
@@ -851,14 +857,14 @@ static unsigned int progressBar_button(unsigned int buttonMask, unsigned int but
 // Clear menu buffers
 void clearMenuBuffers(void) {
 	
-	// Clear the time or processing message line buffer
-	explicit_bzero(timeOrProcessingMessageLineBuffer, sizeof(timeOrProcessingMessageLineBuffer));
+	// Clear the time, processing message, or progress bar message line buffer
+	explicit_bzero(timeProcessingMessageOrProgressBarMessageLineBuffer, sizeof(timeProcessingMessageOrProgressBarMessageLineBuffer));
 	
 	// Clear the public key or address line buffer
 	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
-	// Clear the verify address line buffer
-	explicit_bzero(verifyAddressLineBuffer, sizeof(verifyAddressLineBuffer));
+	// Clear the verify address or approve transaction line buffer
+	explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
 	
 	// Clear the address type line buffer
 	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -905,16 +911,16 @@ void showMenu(enum Menu menu) {
 		// Main menu
 		case MAIN_MENU:
 		
-			// Check if target is not the Nano S
-			#ifndef TARGET_NANOS
+			// Check if device doesn't have low height
+			#if BAGL_HEIGHT >= 64
 		
 				{
 			
 					// Initialize index
 					size_t index = 0;
 					
-					// Check if target is not the Nano S
-					#ifndef TARGET_NANOS
+					// Check if device doesn't have low height
+					#if BAGL_HEIGHT >= 64
 					
 						// Check if currency information name can fit on one line
 						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation.name, strlen(currencyInformation.name), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
@@ -933,8 +939,8 @@ void showMenu(enum Menu menu) {
 						mainMenu[index++] = &mainMenuCurrencyScreen;
 					}
 					
-					// Check if target is not the Nano S
-					#ifndef TARGET_NANOS
+					// Check if device doesn't have low height
+					#if BAGL_HEIGHT >= 64
 					
 						// Check if currency information version can fit on one line
 						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation.version, strlen(currencyInformation.version), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
@@ -953,10 +959,10 @@ void showMenu(enum Menu menu) {
 					// Set main menu to use exit screen
 					mainMenu[index++] = &mainMenuExitScreen;
 					
-					// End finalize transaction menu
+					// End main menu
 					mainMenu[index++] = FLOW_LOOP;
 					
-					// End finalize transaction menu
+					// End main menu
 					mainMenu[index++] = FLOW_END_STEP;
 				}
 			#endif
@@ -1012,100 +1018,100 @@ void showMenu(enum Menu menu) {
 			// Break
 			break;
 		
-		// Finalize transaction menu
-		case FINALIZE_TRANSACTION_MENU:
+		// Approve transaction menu
+		case APPROVE_TRANSACTION_MENU:
 		
 			{
 			
 				// Initialize index
 				size_t index = 0;
 			
-				// Set finalize transaction menu to use notify screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuNotifyScreen;
+				// Set approve transaction menu to use notify screen
+				approveTransactionMenu[index++] = &approveTransactionMenuNotifyScreen;
 				
-				// Check if target is not the Nano S
-				#ifndef TARGET_NANOS
+				// Check if device doesn't have low height
+				#if BAGL_HEIGHT >= 64
 				
 					// Check if amount can fit on one line
 					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountLineBuffer, strlen(amountLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 					
-						// Set finalize transaction menu to use amount single line screen
-						finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountSingleLineScreen;
+						// Set approve transaction menu to use amount single line screen
+						approveTransactionMenu[index++] = &approveTransactionMenuAmountSingleLineScreen;
 					}
 					else
 				#endif
 				{
 					
-					// Set finalize transaction menu to use amount multiline screen
-					finalizeTransactionMenu[index++] = &finalizeTransactionMenuAmountMultilineScreen;
+					// Set approve transaction menu to use amount multiline screen
+					approveTransactionMenu[index++] = &approveTransactionMenuAmountMultilineScreen;
 				}
 				
-				// Check if target is not the Nano S
-				#ifndef TARGET_NANOS
+				// Check if device doesn't have low height
+				#if BAGL_HEIGHT >= 64
 				
 					// Check if fee can fit on one line
 					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, feeLineBuffer, strlen(feeLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 					
-						// Set finalize transaction menu to use fee single line screen
-						finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeSingleLineScreen;
+						// Set approve transaction menu to use fee single line screen
+						approveTransactionMenu[index++] = &approveTransactionMenuFeeSingleLineScreen;
 					}
 					else
 				#endif
 				{
 					
-					// Set finalize transaction menu to use fee multiline screen
-					finalizeTransactionMenu[index++] = &finalizeTransactionMenuFeeMultilineScreen;
+					// Set approve transaction menu to use fee multiline screen
+					approveTransactionMenu[index++] = &approveTransactionMenuFeeMultilineScreen;
 				}
 				
-				// Set finalize transaction menu to use kernel features screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesScreen;
+				// Set approve transaction menu to use kernel features screen
+				approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesScreen;
 				
 				// Check if kernel features details title line buffer isn't empty
 				if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
 				
-					// Check if target is not the Nano S
-					#ifndef TARGET_NANOS
+					// Check if device doesn't have low height
+					#if BAGL_HEIGHT >= 64
 					
 						// Check if kernel features details text can fit on one line
 						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, kernelFeaturesDetailsTextOrAccountIndexLineBuffer, strlen(kernelFeaturesDetailsTextOrAccountIndexLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 						
-							// Set finalize transaction menu to use kernel features details single line screen
-							finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsSingleLineScreen;
+							// Set approve transaction menu to use kernel features details single line screen
+							approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesDetailsSingleLineScreen;
 						}
 						else
 					#endif
 					{
 				
-						// Set finalize transaction menu to use kernel features details multiline screen
-						finalizeTransactionMenu[index++] = &finalizeTransactionMenuKernelFeaturesDetailsMultilineScreen;
+						// Set approve transaction menu to use kernel features details multiline screen
+						approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesDetailsMultilineScreen;
 					}
 				}
 				
 				// Check if public key or address line buffer isn't empty
 				if(strlen(publicKeyOrAddressLineBuffer)) {
 				
-					// Set finalize transaction menu to use proof address screen
-					finalizeTransactionMenu[index++] = &finalizeTransactionMenuProofAddressScreen;
+					// Set approve transaction menu to use proof address screen
+					approveTransactionMenu[index++] = &approveTransactionMenuProofAddressScreen;
 				}
 				
 				// Otherwise
 				else {
 				
-					// Set finalize transaction menu to use no payment proof screen
-					finalizeTransactionMenu[index++] = &finalizeTransactionMenuNoPaymentProofScreen;
+					// Set approve transaction menu to use no payment proof screen
+					approveTransactionMenu[index++] = &approveTransactionMenuNoPaymentProofScreen;
 				}
 				
-				// Set finalize transaction menu to use approve screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuApproveScreen;
+				// Set approve transaction menu to use approve screen
+				approveTransactionMenu[index++] = &approveTransactionMenuApproveScreen;
 				
-				// Set finalize transaction menu to use deny screen
-				finalizeTransactionMenu[index++] = &finalizeTransactionMenuDenyScreen;
+				// Set approve transaction menu to use deny screen
+				approveTransactionMenu[index++] = &approveTransactionMenuDenyScreen;
 				
-				// End finalize transaction menu
-				finalizeTransactionMenu[index++] = FLOW_END_STEP;
+				// End approve transaction menu
+				approveTransactionMenu[index++] = FLOW_END_STEP;
 				
-				// Set menu steps to finalize transaction menu
-				menuSteps = finalizeTransactionMenu;
+				// Set menu steps to approve transaction menu
+				menuSteps = approveTransactionMenu;
 			}
 			
 			// Break

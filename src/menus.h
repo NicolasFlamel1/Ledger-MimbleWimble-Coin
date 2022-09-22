@@ -10,14 +10,14 @@
 
 // Definitions
 
-// Time or processing message line buffer size
-#define TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
+// Time, processing message, or progress bar message line buffer size
+#define TIME_PROCESSING_MESSAGE_OR_PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
 // Public key or address line buffer size
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
-// Verify address line buffer size
-#define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+// Verify address or approve transaction line buffer size
+#define VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Approve receiving")
 
 // Address type line buffer size
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
@@ -64,8 +64,8 @@ enum Menu {
 	// Sign Tor certificate menu
 	SIGN_TOR_CERTIFICATE_MENU,
 	
-	// Finalize transaction menu
-	FINALIZE_TRANSACTION_MENU,
+	// Approve transaction menu
+	APPROVE_TRANSACTION_MENU,
 	
 	// Processing menu
 	PROCESSING_MENU
@@ -74,14 +74,14 @@ enum Menu {
 
 // Global variables
 
-// Time or processing message line buffer
-extern char timeOrProcessingMessageLineBuffer[TIME_OR_PROCESSING_MESSAGE_LINE_BUFFER_SIZE];
+// Time, processing message, or progress bar message line buffer
+extern char timeProcessingMessageOrProgressBarMessageLineBuffer[TIME_PROCESSING_MESSAGE_OR_PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
 extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Verify address line buffer
-extern char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
+// Verify address or approve transaction line buffer
+extern char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 extern char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
