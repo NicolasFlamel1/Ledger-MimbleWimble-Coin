@@ -1619,11 +1619,15 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
-				// Prevent I/O timeout
-				io_seproxyhal_io_heartbeat();
+				// Check if time to update progress
+				if(!(i % 4)) {
 				
-				// Show progress bar
-				showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT / 2));
+					// Prevent I/O timeout
+					io_seproxyhal_io_heartbeat();
+					
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT / 2));
+				}
 			}
 			
 			// Update running commitment with the alpha generator and rho generator
@@ -2021,11 +2025,15 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 				cx_math_multm((uint8_t *)lout, (uint8_t *)lout, rout, SECP256K1_CURVE_ORDER, sizeof(lout));
 				cx_math_addm((uint8_t *)result, (uint8_t *)result, (uint8_t *)lout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 				
-				// Prevent I/O timeout
-				io_seproxyhal_io_heartbeat();
+				// Check if time to update progress
+				if(!(i % 16)) {
 				
-				// Show progress bar
-				showProgressBar(map(i, 0, BITS_TO_PROVE - 1, progressBarStartValue, progressBarStartValue + MAXIMUM_PROGRESS_BAR_PERCENT / 6));
+					// Prevent I/O timeout
+					io_seproxyhal_io_heartbeat();
+					
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, progressBarStartValue, progressBarStartValue + MAXIMUM_PROGRESS_BAR_PERCENT / 6));
+				}
 			}
 		}
 		
