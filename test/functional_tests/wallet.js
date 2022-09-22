@@ -1859,7 +1859,7 @@ class Wallet {
 								}
 							
 								// Check if sum isn't a valid secret key
-								if(Secp256k1Zkp.isValidSecretKey(sum) === false) {
+								if(Secp256k1Zkp.isValidSecretKey(sum) !== true) {
 								
 									// Securely clear sum
 									sum.fill(0);

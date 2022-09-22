@@ -1,10 +1,24 @@
 // Header files
+#include <os_io_seproxyhal.h>
 #include <string.h>
 #include <ux.h>
 #include "common.h"
 #include "currency_information.h"
 #include "menus.h"
 #include "process_requests.h"
+
+
+// Definitions
+
+// Progress bar padding
+#define PROGRESS_BAR_PADDING 6
+
+// Progress bar height
+#if BAGL_HEIGHT == 32
+	#define PROGRESS_BAR_HEIGHT 10
+#else
+	#define PROGRESS_BAR_HEIGHT 12
+#endif
 
 
 // Global variables
@@ -812,6 +826,25 @@ static UX_FLOW(processingMenu,
 	&processingMenuMessageScreen
 );
 
+// Progress bar
+static const bagl_element_t PROGRESS_BAR[] = {
+
+	// Clear
+	{{BAGL_RECTANGLE, 0x00, 0, 0, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
+	
+	// Text
+	{{BAGL_LABELINE, 0x0, 0,  (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, timeOrProcessingMessageLineBuffer},
+	
+	// Outline
+	{{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING, (BAGL_HEIGHT / 2) + 5, BAGL_WIDTH - (PROGRESS_BAR_PADDING * 2), PROGRESS_BAR_HEIGHT, 1, 3, BAGL_OUTLINE, 0xFFFFFF, 0x000000, 0, 0}, NULL}
+};
+
+
+// Function prototypes
+
+// Progress bar button
+static unsigned int progressBar_button(unsigned int buttonMask, unsigned int buttonMaskCounter);
+
 
 // Supporting function implementation
 
@@ -1090,4 +1123,45 @@ void showMenu(enum Menu menu) {
 	
 	// Show menu steps
 	ux_flow_init(0, menuSteps, NULL);
+}
+
+// Show progress bar
+void showProgressBar(uint8_t percent) {
+	
+	// Get percent width
+	const short percentWidth = (BAGL_WIDTH - ((PROGRESS_BAR_PADDING + 1) * 2)) * percent / MAXIMUM_PROGRESS_BAR_PERCENT;
+	
+	// Check if percent width exists
+	if(percentWidth) {
+	
+		// Create progress bar with percent
+		bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR) + 1];
+		memcpy(progressBar, PROGRESS_BAR, sizeof(PROGRESS_BAR));
+		bagl_element_t progressBarPercent = {{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING + 1, (BAGL_HEIGHT / 2) + 5 + ((percentWidth == 1) ? 1 : 0), percentWidth, PROGRESS_BAR_HEIGHT - ((percentWidth == 1) ? 2 : 0), 0, 1, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0}, NULL};
+		memcpy(&progressBar[ARRAYLEN(PROGRESS_BAR)], &progressBarPercent, sizeof(progressBarPercent));
+		
+		// Display progress bar
+		UX_DISPLAY(progressBar, NULL);
+	}
+	
+	// Otherwise
+	else {
+	
+		// Display progress bar
+		bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR)];
+		memcpy(progressBar, PROGRESS_BAR, sizeof(PROGRESS_BAR));
+		
+		// Display progress bar
+		UX_DISPLAY(progressBar, NULL);
+	}
+	
+	// Wait for progress bar to finish being displayed
+	UX_WAIT_DISPLAYED();
+}
+
+// Progress bar button
+unsigned int progressBar_button(__attribute__((unused)) unsigned int buttonMask, __attribute__((unused)) unsigned int buttonMaskCounter) {
+
+	// Return zero
+	return 0;
 }

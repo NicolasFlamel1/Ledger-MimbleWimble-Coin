@@ -8,6 +8,7 @@
 #include "crypto.h"
 #include "currency_information.h"
 #include "generators.h"
+#include "menus.h"
 #include "mqs.h"
 #include "slatepack.h"
 #include "tor.h"
@@ -118,7 +119,7 @@ static void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint
 static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index);
 
 // Use LR generator
-static void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
+static void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value, uint8_t progressBarStartValue);
 
 // Conditional negate
 static void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8_t *modulo);
@@ -1620,6 +1621,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				
 				// Prevent I/O timeout
 				io_seproxyhal_io_heartbeat();
+				
+				// Show progress bar
+				showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT / 2));
 			}
 			
 			// Update running commitment with the alpha generator and rho generator
@@ -1650,16 +1654,19 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			
 			// Create t0 with an LR generator
 			const uint8_t zero[SCALAR_SIZE] = {0};
-			useLrGenerator(t0, zero, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
+			useLrGenerator(t0, zero, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 6);
 			
 			// Create t1 with an LR generator
 			uint8_t one[SCALAR_SIZE] = {0};
 			one[sizeof(one) - 1] = 1;
-			useLrGenerator(t1, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
+			useLrGenerator(t1, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 4 / 6);
 			
 			// Create t2 with an LR generator
 			cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
-			useLrGenerator(t2, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
+			useLrGenerator(t2, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 5 / 6);
+			
+			// Show progress bar
+			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
 			
 			// Get the difference of t1 and t2
 			conditionalNegate(t2, true, SECP256K1_CURVE_ORDER);
@@ -1934,7 +1941,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 }
 
 // Use LR generator
-void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
+void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value, uint8_t progressBarStartValue) {
 
 	// Initialize yn
 	volatile uint8_t yn[SCALAR_SIZE] = {0};
@@ -2016,6 +2023,9 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 				
 				// Prevent I/O timeout
 				io_seproxyhal_io_heartbeat();
+				
+				// Show progress bar
+				showProgressBar(map(i, 0, BITS_TO_PROVE - 1, progressBarStartValue, progressBarStartValue + MAXIMUM_PROGRESS_BAR_PERCENT / 6));
 			}
 		}
 		

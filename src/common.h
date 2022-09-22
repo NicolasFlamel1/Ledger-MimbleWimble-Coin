@@ -90,5 +90,8 @@ void toString(char *result, uint64_t value, uint8_t fractionalDigits);
 // Is valid UTF-8 string
 bool isValidUtf8String(const char *text, size_t length);
 
+// Map
+uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t newTo);
+
 
 #endif

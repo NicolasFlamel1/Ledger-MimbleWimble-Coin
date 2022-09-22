@@ -233,3 +233,10 @@ bool isValidUtf8String(const char *text, size_t length) {
 	// Return true
 	return true;
 }
+
+// Map
+uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t newTo) {
+
+	// Return value mapped to new range
+	return (newTo - newFrom) * (value - from) / (to - from) + newFrom;
+}

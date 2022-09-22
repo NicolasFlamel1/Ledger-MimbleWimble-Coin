@@ -1277,7 +1277,7 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 			// Fill offset with random values
 			crypto.getRandomValues(privateKey);
 			
-		} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
+		} while(Secp256k1Zkp.isValidSecretKey(privateKey) !== true);
 		
 		// Log private key
 		console.log("Using private key: " + Common.toHexString(privateKey));
@@ -1506,7 +1506,7 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 			// Fill offset with random values
 			crypto.getRandomValues(privateKey);
 			
-		} while(Secp256k1Zkp.isValidSecretKey(privateKey) === false);
+		} while(Secp256k1Zkp.isValidSecretKey(privateKey) !== true);
 		
 		// Log private key
 		console.log("Using private key: " + Common.toHexString(privateKey));
@@ -2128,7 +2128,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	console.log("Message signature: " + Common.toHexString(response));
 	
 	// Check if message signature is invalid
-	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
 	
 		// Log message
 		console.log("Invalid message signature");
@@ -2209,7 +2209,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	console.log("Transaction signature: " + Common.toHexString(signature));
 	
 	// Check if signature is invalid
-	if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) === false) {
+	if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) !== true) {
 	
 		// Log message
 		console.log("Invalid transaction signature");
@@ -2541,7 +2541,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 		// Fill offset with random values
 		crypto.getRandomValues(offset);
 		
-	} while(Secp256k1Zkp.isValidSecretKey(offset) === false);
+	} while(Secp256k1Zkp.isValidSecretKey(offset) !== true);
 	
 	// Log offset
 	console.log("Using offset: " + Common.toHexString(offset));
@@ -2621,7 +2621,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	console.log("Message signature: " + Common.toHexString(response));
 	
 	// Check if message signature is invalid
-	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
 	
 		// Log message
 		console.log("Invalid message signature");
@@ -2866,7 +2866,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	console.log("Transaction signature: " + Common.toHexString(response));
 	
 	// Check if signature is invalid
-	if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) === false) {
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) !== true) {
 	
 		// Log message
 		console.log("Invalid transaction signature");

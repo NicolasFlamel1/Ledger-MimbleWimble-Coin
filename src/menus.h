@@ -37,6 +37,9 @@
 // Kernel features details text or account index line buffer size
 #define KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
 
+// Maximum progress bar percent
+#define MAXIMUM_PROGRESS_BAR_PERCENT UINT8_MAX
+
 
 // Constants
 
@@ -109,6 +112,9 @@ void showMainMenu();
 
 // Show menu
 void showMenu(enum Menu menu);
+
+// Show progress bar
+void showProgressBar(uint8_t percent);
 
 
 #endif

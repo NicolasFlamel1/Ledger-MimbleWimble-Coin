@@ -187,12 +187,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Try
 		TRY {
 		
-			// Show processing menu
-			showMenu(PROCESSING_MENU);
+			// Show progress bar
+			showProgressBar(0);
 			
-			// Wait for display to update
-			UX_WAIT_DISPLAYED();
-	
 			// Derive blinding factor
 			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			

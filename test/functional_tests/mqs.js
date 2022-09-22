@@ -73,7 +73,7 @@ class Mqs {
 			}
 			
 			// Check if decoded address isn't a valid public key
-			if(Secp256k1Zkp.isValidPublicKey(decodedAddress.subarray(version["length"])) === false) {
+			if(Secp256k1Zkp.isValidPublicKey(decodedAddress.subarray(version["length"])) !== true) {
 			
 				// Throw error
 				throw "Invalid MQS address.";

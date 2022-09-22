@@ -975,7 +975,7 @@ class SlateKernel {
 			}
 			
 			// Check if partial signature doesn't verify the excess
-			if(Secp256k1Zkp.verifySingleSignerSignature(this.getExcessSignature(), messageToSign, Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) === false) {
+			if(Secp256k1Zkp.verifySingleSignerSignature(this.getExcessSignature(), messageToSign, Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
 			
 				// Return false
 				return false;
