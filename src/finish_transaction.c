@@ -343,7 +343,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		}
 		
 		// Set verify address or approve transaction line buffer
-		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Finalize sending");
+		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Send");
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));

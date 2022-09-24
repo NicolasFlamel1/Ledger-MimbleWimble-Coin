@@ -17,7 +17,7 @@
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 // Verify address or approve transaction line buffer size
-#define VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Approve receiving")
+#define VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
 
 // Address type line buffer size
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
