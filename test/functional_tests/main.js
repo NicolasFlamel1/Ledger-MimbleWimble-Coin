@@ -2923,7 +2923,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 			"version": 1,
 			"rules": [
 				{
-					"text": "Finalize sending",
+					"text": "Send",
 					"actions": [
 					
 						// Push right
