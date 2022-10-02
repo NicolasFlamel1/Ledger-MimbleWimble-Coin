@@ -1161,7 +1161,7 @@ void showProgressBar(uint8_t percent) {
 		UX_DISPLAY(progressBar, NULL);
 	}
 	
-	// Wait for progress bar to finish being displayed
+	// Wait for display to update
 	UX_WAIT_DISPLAYED();
 }
 

@@ -212,6 +212,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		
 			// Show main menu
 			showMainMenu();
+			
+			// Wait for display to update
+			UX_WAIT_DISPLAYED();
 		
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));

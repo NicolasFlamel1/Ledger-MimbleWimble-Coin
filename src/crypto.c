@@ -119,7 +119,7 @@ static void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint
 static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index);
 
 // Use LR generator
-static void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value, uint8_t progressBarStartValue);
+static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
 
 // Conditional negate
 static void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8_t *modulo);
@@ -1622,11 +1622,8 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if time to update progress
 				if(!(i % 4)) {
 				
-					// Prevent I/O timeout
-					io_seproxyhal_io_heartbeat();
-					
 					// Show progress bar
-					showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT / 2));
+					showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4));
 				}
 			}
 			
@@ -1657,17 +1654,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)z, (uint8_t *)runningCommitment, sizeof(z));
 			
 			// Create t0 with an LR generator
-			const uint8_t zero[SCALAR_SIZE] = {0};
-			useLrGenerator(t0, zero, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 6);
-			
-			// Create t1 with an LR generator
-			uint8_t one[SCALAR_SIZE] = {0};
-			one[sizeof(one) - 1] = 1;
-			useLrGenerator(t1, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 4 / 6);
-			
-			// Create t2 with an LR generator
-			cx_math_subm(one, SECP256K1_CURVE_ORDER, one, SECP256K1_CURVE_ORDER, sizeof(one));
-			useLrGenerator(t2, one, (uint8_t *)y, (uint8_t *)z, rewindNonce, value, MAXIMUM_PROGRESS_BAR_PERCENT * 5 / 6);
+			useLrGenerator(t0, t1, t2, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
 			
 			// Show progress bar
 			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
@@ -1945,7 +1932,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 }
 
 // Use LR generator
-void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value, uint8_t progressBarStartValue) {
+void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
 
 	// Initialize yn
 	volatile uint8_t yn[SCALAR_SIZE] = {0};
@@ -1956,24 +1943,48 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 	// Initialize lout
 	volatile uint8_t lout[SCALAR_SIZE];
 	
+	// Initialize rout
+	volatile uint8_t rout[SCALAR_SIZE];
+	
 	// Initialize neg z
 	volatile uint8_t negz[SCALAR_SIZE];
 	
 	// Initialize sr
 	volatile uint8_t sr[SCALAR_SIZE];
 	
+	// Initialize sl
+	volatile uint8_t sl[SCALAR_SIZE];
+	
+	// Temp rout, lout, sl, and sr
+	volatile uint8_t tempLout[SCALAR_SIZE];
+	volatile uint8_t tempRout[SCALAR_SIZE];
+	volatile uint8_t tempSl[SCALAR_SIZE];
+	volatile uint8_t tempSr[SCALAR_SIZE];
+	
 	// Begin try
 	BEGIN_TRY {
 	
 		// Try
 		TRY {
-
+		
 			// Set yn to one
 			yn[sizeof(yn) - 1] = 1;
 			
 			// Set z22n to z squared
 			const uint8_t two[] = {2};
 			cx_math_powm((uint8_t *)z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n));
+			
+			// Get the negation of z
+			memcpy((uint8_t *)negz, z, sizeof(negz));
+			conditionalNegate(negz, true, SECP256K1_CURVE_ORDER);
+			
+			// Create inputs
+			uint8_t inputs[3][SCALAR_SIZE] = {0};
+			inputs[1][sizeof(inputs[1]) - 1] = 1;
+			cx_math_subm(inputs[2], SECP256K1_CURVE_ORDER, inputs[1], SECP256K1_CURVE_ORDER, sizeof(inputs[1]));
+			
+			// Create outputs
+			volatile uint8_t *outputs[3] = {t0, t1, t2};
 
 			// Go through all bits to prove
 			for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
@@ -1985,54 +1996,51 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 				explicit_bzero((uint8_t *)lout, SCALAR_SIZE - 1);
 				lout[SCALAR_SIZE - 1] = bit;
 				
-				// Get the negation of z
-				memcpy((uint8_t *)negz, z, sizeof(negz));
-				conditionalNegate(negz, true, SECP256K1_CURVE_ORDER);
-				
 				// Update lout
 				cx_math_addm((uint8_t *)lout, (uint8_t *)lout, (uint8_t *)negz, SECP256K1_CURVE_ORDER, sizeof(negz));
 				
-				// Create sl and sr
-				uint8_t *sl = (uint8_t *)negz;
-				createScalarsFromChaCha20(sl, sr, nonce, i + 2);
-				
-				// Multiply sl and sr by x
-				cx_math_multm(sl, sl, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				cx_math_multm((uint8_t *)sr, (uint8_t *)sr, x, SECP256K1_CURVE_ORDER, sizeof(sr));
-				
-				// Update lout
-				cx_math_addm((uint8_t *)lout, (uint8_t *)lout, sl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				
 				// Set bit in rout
-				uint8_t *rout = (uint8_t *)negz;
-				explicit_bzero(rout, SCALAR_SIZE - 1);
+				explicit_bzero((uint8_t *)rout, SCALAR_SIZE - 1);
 				rout[SCALAR_SIZE - 1] = 1 - bit;
 				
 				// Negate rout
 				conditionalNegate(rout, true, SECP256K1_CURVE_ORDER);
 				
 				// Update rout
-				cx_math_addm(rout, rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				cx_math_addm(rout, rout, (uint8_t *)sr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				cx_math_multm(rout, rout, (uint8_t *)yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				cx_math_addm(rout, rout, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+				cx_math_addm((uint8_t *)rout, (uint8_t *)rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+				
+				// Create sl and sr
+				createScalarsFromChaCha20(sl, sr, nonce, i + 2);
+				
+				// Go through all outputs
+				for(size_t j = 0; j < ARRAYLEN(outputs); ++j) {
+				
+					// Multiply sl and sr by input
+					cx_math_multm((uint8_t *)tempSl, (uint8_t *)sl, inputs[j], SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					cx_math_multm((uint8_t *)tempSr, (uint8_t *)sr, inputs[j], SECP256K1_CURVE_ORDER, sizeof(sr));
+					
+					// Update lout
+					cx_math_addm((uint8_t *)tempLout, (uint8_t *)lout, (uint8_t *)tempSl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					
+					// Update rout
+					cx_math_addm((uint8_t *)tempRout, (uint8_t *)rout, (uint8_t *)tempSr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					cx_math_multm((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					cx_math_addm((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					
+					// Update output with lout and rout
+					cx_math_multm((uint8_t *)tempLout, (uint8_t *)tempLout, (uint8_t *)tempRout, SECP256K1_CURVE_ORDER, sizeof(tempLout));
+					cx_math_addm((uint8_t *)outputs[j], (uint8_t *)outputs[j], (uint8_t *)tempLout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+				}
 				
 				// Update yn and z22n generator
 				cx_math_multm((uint8_t *)yn, (uint8_t *)yn, y, SECP256K1_CURVE_ORDER, sizeof(yn));
 				cx_math_addm((uint8_t *)z22n, (uint8_t *)z22n, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, sizeof(z22n));
 				
-				// Update result with lout and rout
-				cx_math_multm((uint8_t *)lout, (uint8_t *)lout, rout, SECP256K1_CURVE_ORDER, sizeof(lout));
-				cx_math_addm((uint8_t *)result, (uint8_t *)result, (uint8_t *)lout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-				
 				// Check if time to update progress
 				if(!(i % 16)) {
 				
-					// Prevent I/O timeout
-					io_seproxyhal_io_heartbeat();
-					
 					// Show progress bar
-					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, progressBarStartValue, progressBarStartValue + MAXIMUM_PROGRESS_BAR_PERCENT / 6));
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4, MAXIMUM_PROGRESS_BAR_PERCENT));
 				}
 			}
 		}
@@ -2040,11 +2048,23 @@ void useLrGenerator(volatile uint8_t *result, const uint8_t *x, const uint8_t *y
 		// Finally
 		FINALLY {
 		
+			// Clear temp rout, lout, sl, and sr
+			explicit_bzero((uint8_t *)tempSr, sizeof(tempSr));
+			explicit_bzero((uint8_t *)tempSl, sizeof(tempSl));
+			explicit_bzero((uint8_t *)tempRout, sizeof(tempRout));
+			explicit_bzero((uint8_t *)tempLout, sizeof(tempLout));
+		
+			// Clear sl
+			explicit_bzero((uint8_t *)sl, sizeof(sl));
+			
 			// Clear sr
 			explicit_bzero((uint8_t *)sr, sizeof(sr));
 			
 			// Clear neg z
 			explicit_bzero((uint8_t *)negz, sizeof(negz));
+			
+			// Clear rout
+			explicit_bzero((uint8_t *)rout, sizeof(lout));
 			
 			// Clear lout
 			explicit_bzero((uint8_t *)lout, sizeof(lout));
