@@ -74,9 +74,9 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			char mqsAddress[MQS_ADDRESS_SIZE];
 			getMqsAddress(mqsAddress, account, index);
 			
-			// Copy MQS address into the public key, address, or currency icon line buffer
-			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, mqsAddress, sizeof(mqsAddress));
-			publicKeyAddressOrCurrencyIconLineBuffer[sizeof(mqsAddress)] = '\0';
+			// Copy MQS address into the public key or address line buffer
+			memcpy(publicKeyOrAddressLineBuffer, mqsAddress, sizeof(mqsAddress));
+			publicKeyOrAddressLineBuffer[sizeof(mqsAddress)] = '\0';
 		
 			// Break
 			break;
@@ -101,9 +101,9 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			char torAddress[TOR_ADDRESS_SIZE];
 			getTorAddress(torAddress, account, index);
 			
-			// Copy Tor address into the public key, address, or currency icon line buffer
-			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, torAddress, sizeof(torAddress));
-			publicKeyAddressOrCurrencyIconLineBuffer[sizeof(torAddress)] = '\0';
+			// Copy Tor address into the public key or address line buffer
+			memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
+			publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
 			
 			// Break
 			break;
@@ -129,9 +129,9 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 				char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
 				getSlatepackAddress(slatepackAddress, account, index);
 				
-				// Copy Slatepack address into the public key, address, or currency icon line buffer
-				memcpy(publicKeyAddressOrCurrencyIconLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-				publicKeyAddressOrCurrencyIconLineBuffer[sizeof(slatepackAddress)] = '\0';
+				// Copy Slatepack address into the public key or address line buffer
+				memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+				publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
 			}
 			
 			// Break

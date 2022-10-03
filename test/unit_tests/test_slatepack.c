@@ -43,9 +43,9 @@ int main(void) {
 void testGetSlatepackAddressFromPublicKey(void **state) {
 
 	// Get address from the public key
-	char address[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart) + sizeof((char)'\0')];
+	char address[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart) + sizeof((char)'\0')];
 	getSlatepackAddressFromPublicKey(address, PUBLIC_KEY);
-	address[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)] = '\0';
+	address[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)] = '\0';
 	
 	// Assert address is correct
 	assert_string_equal(address, ADDRESS);

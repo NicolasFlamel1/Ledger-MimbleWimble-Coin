@@ -213,9 +213,9 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		char torAddress[TOR_ADDRESS_SIZE];
 		getTorAddressFromPublicKey(torAddress, signedPublicKey);
 		
-		// Copy Tor address into the public key, address, or currency icon line buffer
-		memcpy(publicKeyAddressOrCurrencyIconLineBuffer, torAddress, sizeof(torAddress));
-		publicKeyAddressOrCurrencyIconLineBuffer[sizeof(torAddress)] = '\0';
+		// Copy Tor address into the public key or address line buffer
+		memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
+		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Tor Address");
@@ -228,9 +228,9 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
 		getSlatepackAddressFromPublicKey(slatepackAddress, signedPublicKey);
 		
-		// Copy Slatepack address into the public key, address, or currency icon line buffer
-		memcpy(publicKeyAddressOrCurrencyIconLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-		publicKeyAddressOrCurrencyIconLineBuffer[sizeof(slatepackAddress)] = '\0';
+		// Copy Slatepack address into the public key or address line buffer
+		memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Slatepack Address");

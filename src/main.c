@@ -47,9 +47,6 @@
 			// Reset state
 			resetState();
 			
-			// Clear menu buffers
-			clearMenuBuffers();
-		
 			// Initialize UX
 			UX_INIT();
 			

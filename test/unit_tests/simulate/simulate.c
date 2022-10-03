@@ -8,7 +8,7 @@
 // Global variables
 
 // Currency information
-struct CurrencyInformation currencyInformation = {
+struct CurrencyInformation CURRENCY_INFORMATION = {
 
 	// MQS version
 	.mqsVersion = {1, 69},
@@ -16,6 +16,8 @@ struct CurrencyInformation currencyInformation = {
 	// Slatepack human-readable part
 	.slatepackAddressHumanReadablePart = "grin"
 };
+
+struct CurrencyInformation *currencyInformation = &CURRENCY_INFORMATION;
 
 
 // Supporting function implementation

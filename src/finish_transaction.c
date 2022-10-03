@@ -330,9 +330,9 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_STATE_ERROR);
 			}
 			
-			// Copy address into the public key, address, or currency icon line buffer
-			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
-			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, transaction.address, transaction.addressLength);
+			// Copy address into the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
@@ -346,7 +346,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Clear the public key or address line buffer
-			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer
@@ -380,9 +380,9 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Copy address into the public key, address, or currency icon line buffer
-			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
-			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, transaction.address, transaction.addressLength);
+			// Copy address into the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
@@ -395,8 +395,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Clear the public key, address, or currency icon line buffer
-			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
+			// Clear the public key or address line buffer
+			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer

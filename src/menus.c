@@ -32,8 +32,8 @@
 // Time, processing message, progress bar message, or currency name line buffer
 char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
 
-// Public key, address, or currency icon line buffer
-char publicKeyAddressOrCurrencyIconLineBuffer[PUBLIC_KEY_ADDRESS_OR_CURRENCY_ICON_LINE_BUFFER_SIZE];
+// Public key or address line buffer
+char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
 // Verify address, approve transaction, or currency version line buffer
 char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
@@ -56,6 +56,9 @@ char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUF
 // Kernel features details text or account index line buffer
 char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
+// Currency icon buffer
+bagl_icon_details_t currencyIconBuffer;
+
 
 // Constants
 
@@ -66,7 +69,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
 			
 		// Picture
-		(bagl_icon_details_t *)publicKeyAddressOrCurrencyIconLineBuffer,
+		&currencyIconBuffer,
 		
 		// First line
 		timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
@@ -80,7 +83,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 
 	// Picture
-	(bagl_icon_details_t *)publicKeyAddressOrCurrencyIconLineBuffer,
+	&currencyIconBuffer,
 	
 	// First line
 	"Application",
@@ -308,7 +311,7 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 	.title = "Root Public Key",
 	
 	// Text
-	.text = publicKeyAddressOrCurrencyIconLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Verify root public key menu valid screen
@@ -381,7 +384,7 @@ static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 	.title = addressTypeLineBuffer,
 	
 	// Text
-	.text = publicKeyAddressOrCurrencyIconLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Verify address menu valid screen
@@ -551,7 +554,7 @@ static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 	.title = addressTypeLineBuffer,
 	
 	// Text
-	.text = publicKeyAddressOrCurrencyIconLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Sign Tor certificate menu approve screen
@@ -776,7 +779,7 @@ static UX_STEP_NOCB(approveTransactionMenuProofAddressScreen,
 	.title = "Proof Address",
 	
 	// Text
-	.text = publicKeyAddressOrCurrencyIconLineBuffer
+	.text = publicKeyOrAddressLineBuffer
 });
 
 // Approve transaction menu no payment proof screen
@@ -860,8 +863,8 @@ void clearMenuBuffers(void) {
 	// Clear the time, processing message, progress bar message, or currency name line buffer
 	explicit_bzero(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
 	
-	// Clear the public key, address, or currency icon line buffer
-	explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
+	// Clear the public key or address line buffer
+	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
 	// Clear the verify address, approve transaction, or currency version line buffer
 	explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
@@ -883,10 +886,15 @@ void clearMenuBuffers(void) {
 	
 	// Clear the kernel features details text or account index line buffer
 	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	
+	// Copy currency information to buffers
+	memcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
+	memcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, currencyInformation->version, sizeof(currencyInformation->version));
+	memcpy(&currencyIconBuffer, &currencyInformation->iconDetails, sizeof(currencyInformation->iconDetails));
 }
 
 // Show main menu
-void showMainMenu() {
+void showMainMenu(void) {
 
 	// Check if UX stack doesn't exist
 	if(!G_ux.stack_count) {
@@ -895,10 +903,8 @@ void showMainMenu() {
 		ux_stack_push();
 	}
 	
-	// Copy currency information to buffers
-	memcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
-	memcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, currencyInformation->version, sizeof(currencyInformation->version));
-	memcpy(publicKeyAddressOrCurrencyIconLineBuffer, &currencyInformation->iconDetails, sizeof(currencyInformation->iconDetails));
+	// Clear menu buffers
+	clearMenuBuffers();
 	
 	// Show main menu
 	showMenu(MAIN_MENU);
@@ -1092,8 +1098,8 @@ void showMenu(enum Menu menu) {
 					}
 				}
 				
-				// Check if public key, address, or currency icon line buffer isn't empty
-				if(strlen(publicKeyAddressOrCurrencyIconLineBuffer)) {
+				// Check if public key or address line buffer isn't empty
+				if(strlen(publicKeyOrAddressLineBuffer)) {
 				
 					// Set approve transaction menu to use proof address screen
 					approveTransactionMenu[index++] = &approveTransactionMenuProofAddressScreen;

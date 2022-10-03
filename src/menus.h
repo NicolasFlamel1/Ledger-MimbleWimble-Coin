@@ -13,8 +13,8 @@
 // Time, processing message, progress bar message, or currency name line buffer size
 #define TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
-// Public key, address, or currency icon line buffer size
-#define PUBLIC_KEY_ADDRESS_OR_CURRENCY_ICON_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Public key or address line buffer size
+#define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 // Verify address, approve transaction, or currency version line buffer size
 #define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
@@ -77,8 +77,8 @@ enum Menu {
 // Time, processing message, progress bar message, or currency name line buffer
 extern char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
 
-// Public key, address, or currency icon line buffer
-extern char publicKeyAddressOrCurrencyIconLineBuffer[PUBLIC_KEY_ADDRESS_OR_CURRENCY_ICON_LINE_BUFFER_SIZE];
+// Public key or address line buffer
+extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
 // Verify address, approve transaction, or currency version line buffer
 extern char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
@@ -101,6 +101,9 @@ extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_L
 // Kernel features details text or account index line buffer
 extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
+// Currency icon buffer
+extern bagl_icon_details_t currencyIconBuffer;
+
 
 // Function prototypes
 
@@ -108,7 +111,7 @@ extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DE
 void clearMenuBuffers(void);
 
 // Show main menu
-void showMainMenu();
+void showMainMenu(void);
 
 // Show menu
 void showMenu(enum Menu menu);

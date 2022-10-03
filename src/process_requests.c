@@ -360,9 +360,6 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 // Process user interaction
 void processUserInteraction(size_t instruction, bool isApprovedResult, bool showProcessing) {
 	
-	// Clear menu buffers
-	clearMenuBuffers();
-
 	// Initialize response length
 	volatile unsigned short responseLength = 0;
 	
