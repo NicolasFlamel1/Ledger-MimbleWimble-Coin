@@ -74,7 +74,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case MQS_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -87,7 +87,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case TOR_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -100,7 +100,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case SLATEPACK_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Slatepack addresses
-			if(!currencyInformation.enableSlatepackAddress) {
+			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -300,7 +300,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				case SLATEPACK_ADDRESS_TYPE:
 				
 					// Set address length
-					addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart);
+					addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart);
 					
 					// Allocate memory for the address
 					address = alloca(addressLength);
@@ -323,31 +323,38 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Copy address into the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
-			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
+			// Check if transaction offset wasn't applied
+			if(!transaction.offsetApplied) {
+			
+				// Throw invalid state error
+				THROW(INVALID_STATE_ERROR);
+			}
+			
+			// Copy address into the public key, address, or currency icon line buffer
+			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
+			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
 		else {
+		
+			// Check if transaction offset wasn't applied
+			if(!transaction.offsetApplied) {
+			
+				// Throw invalid state error
+				THROW(INVALID_STATE_ERROR);
+			}
 			
 			// Clear the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
 		}
 		
-		// Check if transaction offset wasn't applied
-		if(!transaction.offsetApplied) {
-		
-			// Throw invalid state error
-			THROW(INVALID_STATE_ERROR);
-		}
-		
-		// Set verify address or approve transaction line buffer
-		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Send");
+		// Set verify address, approve transaction, or currency version line buffer
+		strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send");
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.send, currencyInformation.fractionalDigits);
+		toString(amountLineBuffer, transaction.send, currencyInformation->fractionalDigits);
 	}
 	
 	// Otherwise
@@ -373,9 +380,9 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Copy address into the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
-			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
+			// Copy address into the public key, address, or currency icon line buffer
+			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
+			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
@@ -388,28 +395,28 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Clear the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			// Clear the public key, address, or currency icon line buffer
+			explicit_bzero(publicKeyAddressOrCurrencyIconLineBuffer, sizeof(publicKeyAddressOrCurrencyIconLineBuffer));
 		}
 		
-		// Set verify address or approve transaction line buffer
-		strcpy(verifyAddressOrApproveTransactionLineBuffer, "Receive");
+		// Set verify address, approve transaction, or currency version line buffer
+		strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive");
 		
 		// Copy transaction's output into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.receive, currencyInformation.fractionalDigits);
+		toString(amountLineBuffer, transaction.receive, currencyInformation->fractionalDigits);
 	}
 	
 	// Append currency abbreviation to amount line buffer
 	strncat(amountLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
-	strncat(amountLineBuffer, currencyInformation.abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+	strncat(amountLineBuffer, currencyInformation->abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
 	
 	// Copy transaction's fee into the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
-	toString(feeLineBuffer, transaction.fee, currencyInformation.fractionalDigits);
+	toString(feeLineBuffer, transaction.fee, currencyInformation->fractionalDigits);
 	
 	strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
-	strncat(feeLineBuffer, currencyInformation.abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
+	strncat(feeLineBuffer, currencyInformation->abbreviation, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
 	
 	// Check kernel features
 	switch(kernelFeatures) {

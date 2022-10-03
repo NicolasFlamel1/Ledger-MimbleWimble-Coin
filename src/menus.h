@@ -10,14 +10,14 @@
 
 // Definitions
 
-// Time, processing message, or progress bar message line buffer size
-#define TIME_PROCESSING_MESSAGE_OR_PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
+// Time, processing message, progress bar message, or currency name line buffer size
+#define TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
-// Public key or address line buffer size
-#define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Public key, address, or currency icon line buffer size
+#define PUBLIC_KEY_ADDRESS_OR_CURRENCY_ICON_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
-// Verify address or approve transaction line buffer size
-#define VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+// Verify address, approve transaction, or currency version line buffer size
+#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
 
 // Address type line buffer size
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
@@ -74,14 +74,14 @@ enum Menu {
 
 // Global variables
 
-// Time, processing message, or progress bar message line buffer
-extern char timeProcessingMessageOrProgressBarMessageLineBuffer[TIME_PROCESSING_MESSAGE_OR_PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE];
+// Time, processing message, progress bar message, or currency name line buffer
+extern char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
 
-// Public key or address line buffer
-extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+// Public key, address, or currency icon line buffer
+extern char publicKeyAddressOrCurrencyIconLineBuffer[PUBLIC_KEY_ADDRESS_OR_CURRENCY_ICON_LINE_BUFFER_SIZE];
 
-// Verify address or approve transaction line buffer
-extern char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
+// Verify address, approve transaction, or currency version line buffer
+extern char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 extern char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];

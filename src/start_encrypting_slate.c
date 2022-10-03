@@ -70,7 +70,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -95,7 +95,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

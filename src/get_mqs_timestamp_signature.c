@@ -16,7 +16,7 @@
 void processGetMqsTimestampSignatureRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Check currency doesn't allow MQS addresses
-	if(!currencyInformation.enableMqsAddress) {
+	if(!currencyInformation->enableMqsAddress) {
 	
 		// Throw unknown instruction error
 		THROW(UNKNOWN_INSTRUCTION_ERROR);
@@ -88,14 +88,14 @@ void processGetMqsTimestampSignatureRequest(__attribute__((unused)) unsigned sho
 	// Check if device has low height
 	#if BAGL_HEIGHT < 64
 	
-		// Copy time into the time, processing message, or progress bar message line buffer
-		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, progress bar message, or currency name line buffer
+		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	
 	// Otherwise
 	#else
 	
-		// Copy time into the time, processing message, or progress bar message line buffer
-		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, progress bar message, or currency name line buffer
+		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
 	// Show sign MQS timestamp menu

@@ -2242,7 +2242,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 		if(hardwareWallet instanceof SpeculosTransport === false) {
 		
 			// Log message
-			console.log("Verify that the transaction's proof address on the device is: " + senderAddress);
+			console.log("Verify that the transaction's sender payment proof address on the device is: " + senderAddress);
 		}
 	}
 	
@@ -2900,7 +2900,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 		if(hardwareWallet instanceof SpeculosTransport === false) {
 		
 			// Log message
-			console.log("Verify that the transaction's proof address on the device is: " + receiverAddress);
+			console.log("Verify that the transaction's recipient payment proof address on the device is: " + receiverAddress);
 		}
 	}
 	

@@ -75,7 +75,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 		case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -94,7 +94,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -110,7 +110,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 		
 			// Check currency doesn't allow Slatepack addresses
-			if(!currencyInformation.enableSlatepackAddress) {
+			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

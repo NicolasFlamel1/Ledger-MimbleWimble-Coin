@@ -84,7 +84,7 @@ struct CurrencyInformation {
 // Global variables
 
 // Currency information
-extern struct CurrencyInformation currencyInformation;
+extern struct CurrencyInformation *currencyInformation;
 
 
 // Function prototypes

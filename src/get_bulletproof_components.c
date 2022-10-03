@@ -68,8 +68,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Sending transaction message type
 		case SENDING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, or progress bar message line buffer
-			strcpy(timeProcessingMessageOrProgressBarMessageLineBuffer, "Sending Transaction");
+			// Set time, processing menu, progress bar message, or currency name line buffer
+			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction");
 			
 			// Break
 			break;
@@ -77,8 +77,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Receiving transaction message type
 		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, or progress bar message line buffer
-			strcpy(timeProcessingMessageOrProgressBarMessageLineBuffer, "Receiving Transaction");
+			// Set time, processing menu, progress bar message, or currency name line buffer
+			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction");
 			
 			// Break
 			break;
@@ -86,8 +86,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Creating coinbase message type
 		case CREATING_COINBASE_MESSAGE_TYPE:
 		
-			// Set time, processing menu, or progress bar message line buffer
-			strcpy(timeProcessingMessageOrProgressBarMessageLineBuffer, "Creating Coinbase");
+			// Set time, processing menu, progress bar message, or currency name line buffer
+			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase");
 			
 			// Break
 			break;

@@ -81,7 +81,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			case MQS_ADDRESS_SIZE:
 			
 				// Check currency doesn't allow MQS addresses
-				if(!currencyInformation.enableMqsAddress) {
+				if(!currencyInformation->enableMqsAddress) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -101,7 +101,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			case TOR_ADDRESS_SIZE:
 			
 				// Check currency doesn't allow Tor addresses
-				if(!currencyInformation.enableTorAddress) {
+				if(!currencyInformation->enableTorAddress) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -121,10 +121,10 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			default:
 			
 				// Check if address length is a Slatepack address's length
-				if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+				if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 			
 					// Check currency doesn't allow Slatepack addresses
-					if(!currencyInformation.enableSlatepackAddress) {
+					if(!currencyInformation->enableSlatepackAddress) {
 					
 						// Throw invalid parameters error
 						THROW(INVALID_PARAMETERS_ERROR);
@@ -164,7 +164,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		}
 	
 		// Check if fee is invalid or will overflow
-		if(!fee || fee > currencyInformation.maximumFee || UINT64_MAX - input < fee) {
+		if(!fee || fee > currencyInformation->maximumFee || UINT64_MAX - input < fee) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);

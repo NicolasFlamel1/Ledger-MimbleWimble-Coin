@@ -61,7 +61,7 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case MQS_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -83,7 +83,7 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case TOR_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -105,14 +105,14 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case SLATEPACK_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Slatepack addresses
-			if(!currencyInformation.enableSlatepackAddress) {
+			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Set address length
-			addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart);
+			addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart);
 			
 			// Allocate memory for address
 			address = alloca(addressLength);

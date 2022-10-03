@@ -30,14 +30,15 @@
 		if(parameters) {
 		
 			// Get currency information from parameters
-			memcpy(&currencyInformation, *(unsigned int **)parameters, sizeof(currencyInformation));
+			currencyInformation = (struct CurrencyInformation *)*(unsigned int **)parameters;
 		}
 		
 		// Otherwise
 		else {
 		
 			// Get currency information
-			getCurrencyInformation(&currencyInformation);
+			currencyInformation = alloca(sizeof(struct CurrencyInformation));
+			getCurrencyInformation(currencyInformation);
 		}
 		
 		// Loop forever

@@ -34,7 +34,7 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 		default:
 		
 			// Check if address length is a Slatepack address length
-			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 			
 				// Check if getting public key from address failed
 				if(!getPublicKeyFromSlatepackAddress(&publicKey, address, addressLength)) {
@@ -120,14 +120,14 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const char *slatepackAddress, size_t length) {
 
 	// Check if length is invalid
-	if(length != SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+	if(length != SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 	
 		// Return false
 		return false;
 	}
 	
 	// Check if Slatepack adderss's human-readable part is invalid
-	if(memcmp(slatepackAddress, currencyInformation.slatepackAddressHumanReadablePart, strlen(currencyInformation.slatepackAddressHumanReadablePart))) {
+	if(memcmp(slatepackAddress, currencyInformation->slatepackAddressHumanReadablePart, strlen(currencyInformation->slatepackAddressHumanReadablePart))) {
 	
 		// Return false
 		return false;
@@ -176,7 +176,7 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 void getSlatepackAddressFromPublicKey(char *slatepackAddress, const uint8_t *publicKey) {
 
 	// Encode the public key to get the Slatepack address
-	bech32Encode(slatepackAddress, publicKey, ED25519_PUBLIC_KEY_SIZE, currencyInformation.slatepackAddressHumanReadablePart);
+	bech32Encode(slatepackAddress, publicKey, ED25519_PUBLIC_KEY_SIZE, currencyInformation->slatepackAddressHumanReadablePart);
 }
 
 // Get Slatepack address

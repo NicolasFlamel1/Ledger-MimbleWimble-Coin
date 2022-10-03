@@ -138,7 +138,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 	memcpy(bip44Path, BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
 	
 	// Set BIP44 path's coin type
-	bip44Path[BIP44_PATH_COIN_TYPE_INDEX] |= currencyInformation.bip44CoinType;
+	bip44Path[BIP44_PATH_COIN_TYPE_INDEX] |= currencyInformation->bip44CoinType;
 	
 	// Set BIP44 path's account
 	bip44Path[BIP44_PATH_ACCOUNT_INDEX] |= account;
@@ -988,7 +988,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1001,7 +1001,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1014,10 +1014,10 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		default:
 		
 			// Check if sender address length is a Slatepack address's length
-			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 		
 				// Check currency doesn't allow Slatepack addresses
-				if(!currencyInformation.enableSlatepackAddress) {
+				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -1049,7 +1049,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1078,7 +1078,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1107,10 +1107,10 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 		default:
 		
 			// Check if sender address length is a Slatepack address's length
-			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 			
 				// Check currency doesn't allow Slatepack addresses
-				if(!currencyInformation.enableSlatepackAddress) {
+				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -1162,7 +1162,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		case MQS_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1203,7 +1203,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		case TOR_ADDRESS_SIZE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1240,10 +1240,10 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		default:
 		
 			// Check if receiver address length is a Slatepack address's length
-			if(receiverAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)) {
+			if(receiverAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 		
 				// Check currency doesn't allow Slatepack addresses
-				if(!currencyInformation.enableSlatepackAddress) {
+				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);

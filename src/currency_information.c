@@ -6,7 +6,7 @@
 // Global variables
 
 // Currency information
-struct CurrencyInformation currencyInformation;
+struct CurrencyInformation *currencyInformation;
 
 
 // Supporting function implementation

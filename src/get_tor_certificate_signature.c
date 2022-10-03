@@ -29,7 +29,7 @@
 void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Check currency doesn't allow Tor and Slatepack addresses
-	if(!currencyInformation.enableTorAddress && !currencyInformation.enableSlatepackAddress) {
+	if(!currencyInformation->enableTorAddress && !currencyInformation->enableSlatepackAddress) {
 	
 		// Throw unknown instruction error
 		THROW(UNKNOWN_INSTRUCTION_ERROR);
@@ -196,41 +196,41 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	// Check if device has low height
 	#if BAGL_HEIGHT < 64
 	
-		// Copy time into the time, processing message, or progress bar message line buffer
-		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, progress bar message, or currency name line buffer
+		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	
 	// Otherwise
 	#else
 	
-		// Copy time into the time, processing message, or progress bar message line buffer
-		SPRINTF(timeProcessingMessageOrProgressBarMessageLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		// Copy time into the time, processing message, progress bar message, or currency name line buffer
+		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
 	// Check currency allows Tor addresses
-	if(currencyInformation.enableTorAddress) {
+	if(currencyInformation->enableTorAddress) {
 	
 		// Get Tor address from the signed public key
 		char torAddress[TOR_ADDRESS_SIZE];
 		getTorAddressFromPublicKey(torAddress, signedPublicKey);
 		
-		// Copy Tor address into the public key or address line buffer
-		memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
-		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
+		// Copy Tor address into the public key, address, or currency icon line buffer
+		memcpy(publicKeyAddressOrCurrencyIconLineBuffer, torAddress, sizeof(torAddress));
+		publicKeyAddressOrCurrencyIconLineBuffer[sizeof(torAddress)] = '\0';
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Tor Address");
 	}
 	
 	// Check currency allows Slatepack addresses
-	else if(currencyInformation.enableSlatepackAddress) {
+	else if(currencyInformation->enableSlatepackAddress) {
 	
 		// Get Slatepack address from the signed public key
-		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
+		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
 		getSlatepackAddressFromPublicKey(slatepackAddress, signedPublicKey);
 		
-		// Copy Slatepack address into the public key or address line buffer
-		memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+		// Copy Slatepack address into the public key, address, or currency icon line buffer
+		memcpy(publicKeyAddressOrCurrencyIconLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+		publicKeyAddressOrCurrencyIconLineBuffer[sizeof(slatepackAddress)] = '\0';
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Slatepack Address");

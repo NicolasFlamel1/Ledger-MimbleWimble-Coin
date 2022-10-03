@@ -58,14 +58,14 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 		case MQS_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow MQS addresses
-			if(!currencyInformation.enableMqsAddress) {
+			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address or approve transaction line buffer
-			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify MQS");
+			// Set verify address, approve transaction, or currency version line buffer
+			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "MQS Address");
@@ -74,9 +74,9 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			char mqsAddress[MQS_ADDRESS_SIZE];
 			getMqsAddress(mqsAddress, account, index);
 			
-			// Copy MQS address into the public key or address line buffer
-			memcpy(publicKeyOrAddressLineBuffer, mqsAddress, sizeof(mqsAddress));
-			publicKeyOrAddressLineBuffer[sizeof(mqsAddress)] = '\0';
+			// Copy MQS address into the public key, address, or currency icon line buffer
+			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, mqsAddress, sizeof(mqsAddress));
+			publicKeyAddressOrCurrencyIconLineBuffer[sizeof(mqsAddress)] = '\0';
 		
 			// Break
 			break;
@@ -85,14 +85,14 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 		case TOR_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Tor addresses
-			if(!currencyInformation.enableTorAddress) {
+			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		
-			// Set verify address or approve transaction line buffer
-			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Tor");
+			// Set verify address, approve transaction, or currency version line buffer
+			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "Tor Address");
@@ -101,9 +101,9 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			char torAddress[TOR_ADDRESS_SIZE];
 			getTorAddress(torAddress, account, index);
 			
-			// Copy Tor address into the public key or address line buffer
-			memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
-			publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
+			// Copy Tor address into the public key, address, or currency icon line buffer
+			memcpy(publicKeyAddressOrCurrencyIconLineBuffer, torAddress, sizeof(torAddress));
+			publicKeyAddressOrCurrencyIconLineBuffer[sizeof(torAddress)] = '\0';
 			
 			// Break
 			break;
@@ -112,26 +112,26 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 		case SLATEPACK_ADDRESS_TYPE:
 		
 			// Check currency doesn't allow Slatepack addresses
-			if(!currencyInformation.enableSlatepackAddress) {
+			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address or approve transaction line buffer
-			strcpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Slatepack");
+			// Set verify address, approve transaction, or currency version line buffer
+			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack");
 			
 			// Set address type line buffer
 			strcpy(addressTypeLineBuffer, "Slatepack Address");
 			
 			{
 				// Get Slatepack address
-				char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation.slatepackAddressHumanReadablePart)];
+				char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
 				getSlatepackAddress(slatepackAddress, account, index);
 				
-				// Copy Slatepack address into the public key or address line buffer
-				memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-				publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+				// Copy Slatepack address into the public key, address, or currency icon line buffer
+				memcpy(publicKeyAddressOrCurrencyIconLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+				publicKeyAddressOrCurrencyIconLineBuffer[sizeof(slatepackAddress)] = '\0';
 			}
 			
 			// Break
