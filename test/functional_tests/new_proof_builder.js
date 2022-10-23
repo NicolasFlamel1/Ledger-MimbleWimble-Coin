@@ -3,8 +3,8 @@
 
 
 // Requires
-const Blake2b = require("./BLAKE2b-0.0.1.js");
-const Secp256k1Zkp = require("./secp256k1-zkp-0.0.4.js");
+const Blake2b = require("./BLAKE2b-0.0.2.js");
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.25.js");
 const BigNumber = require("./bignumber.js-9.0.2.js");
 const Common = require("./common.js");
 const Identifier = require("./identifier.js");

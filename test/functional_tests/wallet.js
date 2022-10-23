@@ -1195,10 +1195,18 @@ class Wallet {
 			return new Promise(function(resolve, reject) {
 		
 				// Check if wallet isn't open
-				if(self.isOpen() === false)
+				if(self.isOpen() === false) {
 				
 					// Reject error
 					reject("Wallet closed.");
+				}
+				
+				// Otherwise check if wallet is a hardware wallet
+				else if(self.getHardwareType() !== Wallet.NO_HARDWARE_TYPE) {
+				
+					// Reject error
+					reject("Building coinbase isn't supported for a hardware wallet.");
+				}
 				
 				// Otherwise
 				else {
@@ -3987,6 +3995,3 @@ class Wallet {
 
 // Set global object's wallet
 globalThis["Wallet"] = Wallet;
-
-// Export wallet
-module["exports"] = Wallet;
