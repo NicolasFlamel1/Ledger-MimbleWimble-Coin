@@ -3995,3 +3995,6 @@ class Wallet {
 
 // Set global object's wallet
 globalThis["Wallet"] = Wallet;
+
+// Export wallet
+module["exports"] = Wallet;
