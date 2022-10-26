@@ -8,18 +8,18 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build Nano S MimbleWimble Coin app
         run: |
           make DEBUG=1 CURRENCY=mimblewimble_coin
 
       - name: Upload Nano S MimbleWimble Coin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-nanos
           path: bin
@@ -34,7 +34,7 @@ jobs:
           make DEBUG=1 CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano S MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-floonet-nanos
           path: bin
@@ -49,7 +49,7 @@ jobs:
           make DEBUG=1 CURRENCY=grin
 
       - name: Upload Nano S Grin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-nanos
           path: bin
@@ -64,7 +64,7 @@ jobs:
           make DEBUG=1 CURRENCY=grin_testnet
 
       - name: Upload Nano S Grin testnet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-testnet-nanos
           path: bin
@@ -79,7 +79,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Nano X MimbleWimble Coin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-nanox
           path: bin
@@ -94,7 +94,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano X MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-floonet-nanox
           path: bin
@@ -109,7 +109,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=grin
 
       - name: Upload Nano X Grin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-nanox
           path: bin
@@ -124,7 +124,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet
 
       - name: Upload Nano X Grin testnet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-testnet-nanox
           path: bin
@@ -139,7 +139,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Nano S Plus MimbleWimble Coin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-nanosplus
           path: bin
@@ -154,7 +154,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano S Plus MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-floonet-nanosplus
           path: bin
@@ -169,7 +169,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=grin
 
       - name: Upload Nano S Plus Grin app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-nanosplus
           path: bin
@@ -184,7 +184,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=grin_testnet
 
       - name: Upload Nano S Plus Grin testnet app
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-debug-grin-testnet-nanosplus
           path: bin
@@ -200,17 +200,17 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build Nano S MimbleWimble Coin app with Clang Static Analyzer
         run: |
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -221,7 +221,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -232,7 +232,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -243,7 +243,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin_testnet
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -254,7 +254,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -265,7 +265,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -276,7 +276,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -287,7 +287,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -298,7 +298,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -309,7 +309,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -320,7 +320,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -331,7 +331,7 @@ jobs:
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -342,11 +342,11 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
@@ -371,7 +371,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
@@ -381,7 +381,7 @@ jobs:
           npm i @ledgerhq/hw-transport-node-speculos
 
       - name: Download Nano S MimbleWimble Coin app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-nanos
           path: bin-mimblewimble-coin-nanos
@@ -397,7 +397,7 @@ jobs:
           node test/functional_tests/main.js mimblewimble_coin speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-mimblewimble-coin-nanos-log
@@ -408,7 +408,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-floonet-nanos
           path: bin-mimblewimble-coin-floonet-nanos
@@ -424,7 +424,7 @@ jobs:
           node test/functional_tests/main.js mimblewimble_coin_floonet speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-nanos-log
@@ -435,7 +435,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S Grin app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-grin-nanos
           path: bin-grin-nanos
@@ -451,7 +451,7 @@ jobs:
           node test/functional_tests/main.js grin speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-grin-nanos-log
@@ -462,7 +462,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S Grin testnet app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-grin-testnet-nanos
           path: bin-grin-testnet-nanos
@@ -478,7 +478,7 @@ jobs:
           node test/functional_tests/main.js grin_testnet speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-grin-testnet-nanos-log
@@ -489,7 +489,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X MimbleWimble Coin app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-nanox
           path: bin-mimblewimble-coin-nanox
@@ -505,7 +505,7 @@ jobs:
           node test/functional_tests/main.js mimblewimble_coin speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-mimblewimble-coin-nanox-log
@@ -516,7 +516,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-mimblewimble-coin-floonet-nanox
           path: bin-mimblewimble-coin-floonet-nanox
@@ -532,7 +532,7 @@ jobs:
           node test/functional_tests/main.js mimblewimble_coin_floonet speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-nanox-log
@@ -543,7 +543,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X Grin app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-grin-nanox
           path: bin-grin-nanox
@@ -559,7 +559,7 @@ jobs:
           node test/functional_tests/main.js grin speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-grin-nanox-log
@@ -570,7 +570,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X Grin testnet app
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: app-debug-grin-testnet-nanox
           path: bin-grin-testnet-nanox
@@ -586,7 +586,7 @@ jobs:
           node test/functional_tests/main.js grin_testnet speculos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: speculos-grin-testnet-nanox-log
@@ -598,7 +598,7 @@ jobs:
 
       # Nano S Plus tests removed due to issue with Speculos running apps created with the newest Nano S Plus SDK
       #- name: Download Nano S Plus MimbleWimble Coin app
-      #  uses: actions/download-artifact@v2
+      #  uses: actions/download-artifact@v3
       #  with:
       #    name: app-debug-mimblewimble-coin-nanosplus
       #    path: bin-mimblewimble-coin-nanosplus
@@ -614,7 +614,7 @@ jobs:
       #    node test/functional_tests/main.js mimblewimble_coin speculos
       #
       #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v2
+      #  uses: actions/upload-artifact@v3
       #  if: failure()
       #  with:
       #    name: speculos-mimblewimble-coin-nanosplus-log
@@ -625,7 +625,7 @@ jobs:
       #    kill -9 $(cat /tmp/speculos.pid)
       #
       #- name: Download Nano S Plus MimbleWimble Coin floonet app
-      #  uses: actions/download-artifact@v2
+      #  uses: actions/download-artifact@v3
       #  with:
       #    name: app-debug-mimblewimble-coin-floonet-nanosplus
       #    path: bin-mimblewimble-coin-floonet-nanosplus
@@ -641,7 +641,7 @@ jobs:
       #    node test/functional_tests/main.js mimblewimble_coin_floonet speculos
       #
       #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v2
+      #  uses: actions/upload-artifact@v3
       #  if: failure()
       #  with:
       #    name: speculos-mimblewimble-coin-floonet-nanosplus-log
@@ -652,7 +652,7 @@ jobs:
       #    kill -9 $(cat /tmp/speculos.pid)
       #
       #- name: Download Nano S Plus Grin app
-      #  uses: actions/download-artifact@v2
+      #  uses: actions/download-artifact@v3
       #  with:
       #    name: app-debug-grin-nanosplus
       #    path: bin-grin-nanosplus
@@ -668,7 +668,7 @@ jobs:
       #    node test/functional_tests/main.js grin speculos
       #
       #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v2
+      #  uses: actions/upload-artifact@v3
       #  if: failure()
       #  with:
       #    name: speculos-grin-nanosplus-log
@@ -679,7 +679,7 @@ jobs:
       #    kill -9 $(cat /tmp/speculos.pid)
       #
       #- name: Download Nano S Plus Grin testnet app
-      #  uses: actions/download-artifact@v2
+      #  uses: actions/download-artifact@v3
       #  with:
       #    name: app-debug-grin-testnet-nanosplus
       #    path: bin-grin-testnet-nanosplus
@@ -695,7 +695,7 @@ jobs:
       #    node test/functional_tests/main.js grin_testnet speculos
       #
       #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v2
+      #  uses: actions/upload-artifact@v3
       #  if: failure()
       #  with:
       #    name: speculos-grin-testnet-nanosplus-log
