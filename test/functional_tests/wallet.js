@@ -1185,8 +1185,8 @@ class Wallet {
 			});
 		}
 		
-		// Build coinbase
-		buildCoinbase(fees, height, identifier, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
+		// Get coinbase proof
+		getCoinbaseProof(fees, height, identifier, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
 		
 			// Set self
 			var self = this;
@@ -1195,18 +1195,144 @@ class Wallet {
 			return new Promise(function(resolve, reject) {
 		
 				// Check if wallet isn't open
-				if(self.isOpen() === false) {
+				if(self.isOpen() === false)
 				
 					// Reject error
 					reject("Wallet closed.");
-				}
 				
-				// Otherwise check if wallet is a hardware wallet
-				else if(self.getHardwareType() !== Wallet.NO_HARDWARE_TYPE) {
+				// Otherwise
+				else {
+				
+					// Check if no last identifier exists
+					if(self.getLastIdentifier() === Wallet.NO_LAST_IDENTIFIER) {
+					
+						// Get default identifer
+						var defaultIdentifier = new Identifier();
+						
+						// Set the current identifier to the default identifier's child identifier
+						var currentIdentifier = defaultIdentifier.getChild(height);
+					}
+					
+					// Otherwise check if an identifier is provided and it was previously used
+					else if(identifier !== Identifier.NO_IDENTIFIER && self.getLastIdentifier().includesValue(identifier) === true)
+					
+						// Set current identifier to the identifier
+						var currentIdentifier = identifier;
+					
+					// Otherwise
+					else {
+					
+						// Set the current identifier to the last identifier's next identifier
+						var currentIdentifier = self.getLastIdentifier().getNext(height);
+					}
+					
+					// Get reward from fees and height
+					var reward = Consensus.getReward(self.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE, fees, height);
+					
+					// Set switch type
+					var switchType = Crypto.SWITCH_TYPE_REGULAR;
+					
+					// Check if wallet isn't a hardware wallet
+					if(self.getHardwareType() === Wallet.NO_HARDWARE_TYPE) {
+					
+						// Return initializing new proof builder
+						var proofBuilder = new NewProofBuilder();
+						
+						return proofBuilder.initialize(self.extendedPrivateKey).then(function() {
+						
+							// Return creating proof from extended private key, reward, current identifier, switch type, and proof builder
+							return Crypto.proof(self.extendedPrivateKey, reward, currentIdentifier, switchType, proofBuilder).then(function(proof) {
+							
+								// Uninitialize proof builder
+								proofBuilder.uninitialize();
+						
+								// Resolve proof
+								resolve(proof);
+							
+							// Catch errors
+							}).catch(function(error) {
+							
+								// Uninitialize proof builder
+								proofBuilder.uninitialize();
+							
+								// Reject error
+								reject(error);
+							});
+						
+						// Catch errors
+						}).catch(function(error) {
+						
+							// Reject error
+							reject(error);
+						});
+					}
+					
+					// Otherwise
+					else {
+					
+						// Return initializing view proof builder
+						var proofBuilder = new ViewProofBuilder();
+						
+						return proofBuilder.initialize(self.rootPublicKey).then(function() {
+						
+							// Check if hardware wallet is connected
+							if(self.isHardwareConnected() === true) {
+						
+								// Return getting proof from reward, current identifier, switch type, and proof builder with the hardware wallet
+								return self.getHardwareWallet().getProof(reward, currentIdentifier, switchType, HardwareWallet.CREATING_COINBASE_MESSAGE, proofBuilder, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(proof) {
+							
+									// Uninitialize proof builder
+									proofBuilder.uninitialize();
+									
+									// Resolve proof
+									resolve(proof);
+								
+								// Catch errors
+								}).catch(function(error) {
+								
+									// Uninitialize proof builder
+									proofBuilder.uninitialize();
+								
+									// Reject error
+									reject(error);
+								});
+							}
+					
+							// Otherwise
+							else {
+							
+								// Uninitialize proof builder
+								proofBuilder.uninitialize();
+							
+								// Reject hardware disconnected error
+								reject(HardwareWallet.DISCONNECTED_ERROR);
+							}
+						
+						// Catch errors
+						}).catch(function(error) {
+						
+							// Reject error
+							reject(error);
+						});
+					}
+				}
+			});
+		}
+		
+		// Build coinbase
+		buildCoinbase(fees, height, identifier, proof = Wallet.NO_PROOF, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
+		
+			// Set self
+			var self = this;
+		
+			// Return promise
+			return new Promise(function(resolve, reject) {
+		
+				// Check if wallet isn't open
+				if(self.isOpen() === false)
 				
 					// Reject error
-					reject("Building coinbase isn't supported for a hardware wallet.");
-				}
+					reject("Wallet closed.");
 				
 				// Otherwise
 				else {
@@ -1307,9 +1433,16 @@ class Wallet {
 						
 							// Return promise
 							return new Promise(function(resolve, reject) {
+							
+								// Check if a proof is provided
+								if(proof !== Wallet.NO_PROOF) {
+								
+									// Resolve proof
+									resolve(proof);
+								}
 						
-								// Check if wallet isn't a hardware wallet
-								if(self.getHardwareType() === Wallet.NO_HARDWARE_TYPE) {
+								// Otherwise check if wallet isn't a hardware wallet
+								else if(self.getHardwareType() === Wallet.NO_HARDWARE_TYPE) {
 								
 									// Return initializing new proof builder
 									var proofBuilder = new NewProofBuilder();
@@ -3362,6 +3495,13 @@ class Wallet {
 		
 			// Return decrypt seed and BIP39 salt decrypted BIP39 salt index
 			return Wallet.DECRYPT_SEED_AND_BIP39_SALT_DECRYPTED_SEED_INDEX + 1;
+		}
+		
+		// No proof
+		static get NO_PROOF() {
+		
+			// Return no proof
+			return null;
 		}
 	
 	// Private
