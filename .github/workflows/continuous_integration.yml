@@ -350,7 +350,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt update -q && apt install -qy libssl-dev
+          apk add --update-cache openssl-dev
 
       - name: Build unit tests
         run: |
