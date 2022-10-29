@@ -4,6 +4,19 @@
 
 // Constants
 
+// Firmware versions
+const FIRMWARE_VERSIONS = {
+
+	// Ledger Nano S
+	"Nano S": "2.1.0",
+	
+	// Ledger Nano X
+	"Nano X": "2.0.2",
+	
+	// Ledger Nano S Plus
+	"Nano S Plus": "1.0.4"
+};
+
 // Applications
 const APPLICATIONS = {
 

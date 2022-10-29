@@ -122,6 +122,13 @@
 					// Get wallet's name
 					walletName = hardwareWallet["device"]["manufacturerName"] + " " + hardwareWallet["device"]["productName"];
 					
+					// Check if wallet is a Ledger Nano X
+					if(walletType === "Nano X") {
+					
+						// Throw error
+						throw "Side loading apps isn't possible on " + walletName + " hardware wallets.";
+					}
+					
 					// Verify that device has the correct target ID
 					await hardwareWallet.send(0xE0, 0x04, 0x00, 0x00, Buffer.from(APPLICATIONS[application]["Target ID"][walletType]));
 					
@@ -252,7 +259,7 @@
 					let macInitializationVector = new Uint8Array(AES_IV_SIZE);
 					
 					// Add alert
-					addAlert("Installing the " + application + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + Common.toHexString(APPLICATIONS[application]["Hash"][walletType]).toUpperCase() + ". Do not proceed if the identifier is different.");
+					addAlert("Installing the " + application + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + Common.toHexString(APPLICATIONS[application]["Hash"][walletType]).toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " +  walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
 					
 					// Go through all APDU commands
 					for(let i = 0; i < APPLICATIONS[application]["APDU Commands"][walletType]["length"]; ++i) {
@@ -303,6 +310,13 @@
 					
 						// Add alert
 						addAlert("One or more of the app's dependencies are not currently installed on the " + walletName + ". The MimbleWimble Coin app v" + APPLICATIONS[application]["Version"] + " must be installed on the hardware wallet in order for this app to be installed.");
+					}
+					
+					// Otherwise check if error is a storage requirement error
+					else if(typeof error === "object" && error !== null && "statusCode" in error === true && error["statusCode"] === 0x5103) {
+					
+						// Add alert
+						addAlert("There's not enough space available on the " + walletName + ". Uninstall one or more apps from the hardware wallet to install this app.");
 					}
 					
 					// Add alert
