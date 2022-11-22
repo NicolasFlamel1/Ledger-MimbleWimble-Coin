@@ -16,38 +16,23 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 1. [You've initialized your Ledger hardware wallet.](https://support.ledger.com/hc/en-us/articles/360000613793-Set-up-your-Ledger-Nano-S?docs=true)
 2. [The latest firmware is installed on your Ledger hardware wallet.](https://support.ledger.com/hc/en-us/articles/360002731113-Update-Ledger-Nano-S-firmware?docs=true)
-3. [You have Ledger Live installed.](https://support.ledger.com/hc/en-us/articles/4404389606417-Download-and-install-Ledger-Live?docs=true)
+3. [You have Ledger Live Desktop installed.](https://support.ledger.com/hc/en-us/articles/4404389606417-Download-and-install-Ledger-Live?docs=true)
 
 ## Installation Instructions
 
-1. Open Ledger Live and click the Settings button.  
+1. Open Ledger Live Desktop and click the My Ledger section.  
 <p align="center">
-	<img alt="Ledger Live Settings Button" src="images/installation_instructions_1.png">
+	<img alt="Ledger Live Desktop My Ledger Section" src="images/installation_instructions_1.png">
 </p>  
 
-2. Click the Experimental features tab.  
+2. Connect your Ledger hardware wallet to your computer, find the MimbleWimble Coin app in the App catalog, and click its Install button.  
 <p align="center">
-	<img alt="Ledger Live Experimental Features Tab" src="images/installation_instructions_2.png">
+	<img alt="Ledger Live Desktop MimbleWimble Coin App Install Button" src="images/installation_instructions_2.png">
 </p>  
 
-3. Enable the Developer mode setting.  
+3. The MimbleWimble Coin app will be available on your Ledger hardware wallet once the installation completes.  
 <p align="center">
-	<img alt="Ledger Live Developer Mode Setting" src="images/installation_instructions_3.png">
-</p>  
-
-4. Click the Manager section.  
-<p align="center">
-	<img alt="Ledger Live Manager Section" src="images/installation_instructions_4.png">
-</p>  
-
-5. Connect your Ledger hardware wallet to your computer, find MimbleWimble Coin in the App catalog, and click its Install button.  
-<p align="center">
-	<img alt="Ledger Live MimbleWimble Coin App Install Button" src="images/installation_instructions_5.png">
-</p>  
-
-6. The MimbleWimble Coin app should be available on your Ledger hardware wallet once the installation completes.  
-<p align="center">
-	<img alt="Ledger Hardware Wallet MimbleWimble Coin App" src="images/installation_instructions_6.png">
+	<img alt="Ledger Hardware Wallet MimbleWimble Coin App" src="images/installation_instructions_3.png">
 </p>  
 
 ## Setup Instructions
@@ -72,19 +57,14 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Connect To Hardware Wallet" src="images/setup_instructions_4.png">
 </p>  
 
-5. Approve exporting your root public key on the Ledger hardware wallet.  
+5. Approve exporting the root public key on you Ledger hardware wallet.  
 <p align="center">
 	<img alt="MimbleWimble Coin App Export Root Public Key" src="images/setup_instructions_5.png">
 </p>  
 
-6. Verify that the root public key displayed on your Ledger hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
+6. The hardware wallet will now be listed in your wallets list.  
 <p align="center">
-	<img alt="MimbleWimble Coin App Verify Root Public Key" src="images/setup_instructions_6.png">
-</p>  
-
-7. The hardware wallet will now be listed in your wallets list.  
-<p align="center">
-	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet" src="images/setup_instructions_7.png">
+	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet" src="images/setup_instructions_6.png">
 </p>  
 
 ## How To View Your MimbleWimble Coin Balance
@@ -121,7 +101,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Get Payment Proof Address Button" src="images/how_to_receive_mimblewimble_coin_4.png">
 </p>  
 
-5. Verify that the Tor address displayed on the hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
+5. Verify that the Tor address displayed on your hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
 <p align="center">
 	<img alt="MimbleWimble Coin App Verify Tor Address" src="images/how_to_receive_mimblewimble_coin_5.png">
 </p>  
@@ -131,9 +111,14 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Payment Proof Address" src="images/how_to_receive_mimblewimble_coin_6.png">
 </p>  
 
-7. A message will be displayed in the MimbleWimble Coin web wallet when you receive a payment.  
+7. After the sender sends you the transaction, confirm the amount, fee, kernel features, and sender payment proof address displayed on you Ledger hardware wallet before approving receiving the transaction on your hardware wallet.  
 <p align="center">
-	<img alt="MimbleWimble Coin Web Wallet Payment Received Message" src="images/how_to_receive_mimblewimble_coin_7.png">
+	<img alt="MimbleWimble Coin App Approve Receiving Transaction" src="images/how_to_receive_mimblewimble_coin_7.png">
+</p>  
+
+8. The MimbleWimble Coin web wallet will show a message with a check mark if the transaction response is successfully sent to the sender.  
+<p align="center">
+	<img alt="MimbleWimble Coin Web Wallet Payment Received Message" src="images/how_to_receive_mimblewimble_coin_8.png">
 </p>  
 
 ## How To Send MimbleWimble Coin
@@ -163,9 +148,9 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Confirm Payment Details" src="images/how_to_send_mimblewimble_coin_5.png">
 </p>  
 
-6. After the recipient signs the transaction, confirm the amount, fee, and proof address displayed on the Ledger hardware wallet before finalizing sending the transaction.  
+6. After the recipient signs the transaction, confirm the amount, fee, kernel features, and recipient payment proof address displayed on your Ledger hardware wallet before approving sending the transaction on your hardware wallet.  
 <p align="center">
-	<img alt="MimbleWimble Coin App Finalize Sending Transaction" src="images/how_to_send_mimblewimble_coin_6.png">
+	<img alt="MimbleWimble Coin App Approve Sending Transaction" src="images/how_to_send_mimblewimble_coin_6.png">
 </p>  
 
 7. The message displayed in the MimbleWimble Coin web wallet will show a check mark if the transaction is successfully broadcast.  
@@ -177,4 +162,4 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 * Discord: [https://discord.gg/n5dZaty](https://discord.gg/n5dZaty)
 * MimbleWimble Coin Forum: [https://forum.mwc.mw](https://forum.mwc.mw)
-* Github: [https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues](https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues)
+* Github: [https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues](https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues)
