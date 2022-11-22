@@ -37,7 +37,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Setup Instructions
 
-1. Go to the Grin version of the MimbleWimble Coin web wallet, [mwcwallet.com?Override+Wallet+Type=Grin](https://mwcwallet.com?Override+Wallet+Type=Grin), with a web browser that supports [WebUSB](https://caniuse.com/webusb), like Google Chrome.  
+1. Go to the Grin version of the MimbleWimble Coin web wallet, [https://mwcwallet.com?Override+Wallet+Type=Grin](https://mwcwallet.com?Override+Wallet+Type=Grin), with a web browser that supports [WebUSB](https://caniuse.com/webusb), like Google Chrome.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet" src="images/setup_instructions_1.png">
 </p>  
