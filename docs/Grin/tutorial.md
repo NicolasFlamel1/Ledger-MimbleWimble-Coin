@@ -57,7 +57,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Connect To Hardware Wallet" src="images/setup_instructions_4.png">
 </p>  
 
-5. Approve exporting the root public key on you Ledger hardware wallet.  
+5. Approve exporting the root public key on your Ledger hardware wallet.  
 <p align="center">
 	<img alt="Grin App Export Root Public Key" src="images/setup_instructions_5.png">
 </p>  
@@ -74,7 +74,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_view_your_grin_balance_1.png">
 </p>  
 
-2. Once the hardware wallet has finished syncing, its Grin balance will be displayed in the balance section.  
+2. Once the hardware wallet has finished syncing, its Grin balance will be displayed in the Balance section.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Balance Section" src="images/how_to_view_your_grin_balance_2.png">
 </p>  
@@ -86,12 +86,12 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Listener" src="images/how_to_receive_grin_1.png">
 </p>  
 
-2. Click the hardware wallet in the wallets list.  
+2. Connect your Ledger hardware wallet to your computer, and click the hardware wallet in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_receive_grin_2.png">
 </p>  
 
-3. Provide the payment sender with the QR code or address listed in the address section.  
+3. Provide the payment sender with the QR code or address listed in the Address section.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Address Section" src="images/how_to_receive_grin_3.png">
 </p>  
@@ -101,17 +101,17 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Get Payment Proof Address Button" src="images/how_to_receive_grin_4.png">
 </p>  
 
-5. Verify that the Tor address displayed on your hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
+5. Verify that the Slatepack address displayed on your hardware wallet matches the one displayed in the MimbleWimble Coin web wallet.  
 <p align="center">
-	<img alt="Grin App Verify Tor Address" src="images/how_to_receive_grin_5.png">
+	<img alt="Grin App Verify Slatepack Address" src="images/how_to_receive_grin_5.png">
 </p>  
 
-6. Provide the payment sender with the payment proof address so that they can confirm that they are truly sending to you.  
+6. Provide the payment sender with the payment proof address so that they can confirm that they are truly sending Grin to you.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Payment Proof Address" src="images/how_to_receive_grin_6.png">
 </p>  
 
-7. After the sender sends you the transaction, confirm the amount, fee, kernel features, and sender payment proof address displayed on you Ledger hardware wallet before approving receiving the transaction on your hardware wallet.  
+7. After the sender sends you the transaction, confirm the amount, fee, kernel features, and sender payment proof address displayed on your Ledger hardware wallet before approving receiving the transaction.  
 <p align="center">
 	<img alt="Grin App Approve Receiving Transaction" src="images/how_to_receive_grin_7.png">
 </p>  
@@ -128,12 +128,12 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Node" src="images/how_to_send_grin_1.png">
 </p>  
 
-2. Click the hardware wallet in the wallets list.  
+2. Connect your Ledger hardware wallet to your computer, and click the hardware wallet in the wallets list.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Hardware Wallet In List" src="images/how_to_send_grin_2.png">
 </p>  
 
-3. Click the Send Payment button in the balance section.  
+3. Click the Send Payment button in the Balance section.  
 <p align="center">
 	<img alt="MimbleWimble Coin Web Wallet Send Payment Button" src="images/how_to_send_grin_3.png">
 </p>  
@@ -148,7 +148,7 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 	<img alt="MimbleWimble Coin Web Wallet Confirm Payment Details" src="images/how_to_send_grin_5.png">
 </p>  
 
-6. After the recipient signs the transaction, confirm the amount, fee, kernel features, and recipient payment proof address displayed on your Ledger hardware wallet before approving sending the transaction on your hardware wallet.  
+6. After the recipient signs the transaction, confirm the amount, fee, kernel features, and recipient payment proof address displayed on your Ledger hardware wallet before approving sending the transaction.  
 <p align="center">
 	<img alt="Grin App Approve Sending Transaction" src="images/how_to_send_grin_6.png">
 </p>  
