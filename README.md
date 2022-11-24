@@ -1,7 +1,11 @@
 # MimbleWimble Coin (MWC) and Grin (GRIN) Ledger hardware wallet apps
 
 ### Description
-MimbleWimble Coin (MWC) and Grin (GRIN) apps for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets. These apps can be installed onto Ledger Nano S and Ledger Nano S Plus hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+MimbleWimble Coin (MWC) and Grin (GRIN) apps for Ledger Nano S, Ledger Nano X, and Ledger Nano S Plus hardware wallets.
+
+These apps can be installed onto Ledger Nano S and Ledger Nano S Plus hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+
+The version of Ledger Live Desktop and Ledger Live Mobile that supports MimbleWimble Coin (MWC) and Grin (GRIN) can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
 ### Building
 Building these apps requires setting up a Ledger Nano S, Ledger Nano X, or Ledger Nano S Plus build environment. The following steps describe how to do this on Linux.
