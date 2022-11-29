@@ -7,6 +7,8 @@ These apps can be installed onto Ledger Nano S and Ledger Nano S Plus hardware w
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) and Grin (GRIN) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
+[These video tutorials](https://youtube.com/playlist?list=PLb1nuT3sFYbD_sydCVCngbvATsm9RwWyF) go over how to start using Grin with Ledger Live Desktop/Mobile and how to send Grin to and receive Grin from popular wallets and exchanges with it.
+
 ### Building
 Building these apps requires setting up a Ledger Nano S, Ledger Nano X, or Ledger Nano S Plus build environment. The following steps describe how to do this on Linux.
 
