@@ -176,7 +176,7 @@ Returns the account's commitment for the provided identifier, value, and switch 
 | 4       | `account`     | Account number (little endian, max 7FFFFFFF)) |
 | 17      | `identifier`  | Identifier |
 | 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 00 for none or 01 for regular |
+| 1       | `switch_type` | 01 for regular |
 
 **Output Data**
 
@@ -214,7 +214,7 @@ This command takes about 90 seconds to complete on a Ledger Nano S hardware wall
 | 4       | `account`     | Account number (little endian, max 7FFFFFFF)) |
 | 17      | `identifier`  | Identifier |
 | 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 00 for none or 01 for regular |
+| 1       | `switch_type` | 01 for regular |
 
 **Output Data**
 
@@ -562,7 +562,7 @@ Includes the output for a provided identifier, value, and switch type in the tra
 |---------|---------------|-------------|
 | 17      | `identifier`  | Identifier |
 | 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 00 for none or 01 for regular |
+| 1       | `switch_type` | 01 for regular |
 
 **Output Data**
 
@@ -597,7 +597,7 @@ Includes the input for a provided identifier, value, and switch type in the tran
 |---------|---------------|-------------|
 | 17      | `identifier`  | Identifier |
 | 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 00 for none or 01 for regular |
+| 1       | `switch_type` | 01 for regular |
 
 **Output Data**
 

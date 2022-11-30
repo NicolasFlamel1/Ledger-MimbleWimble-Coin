@@ -66,7 +66,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	const enum SwitchType switchType = data[IDENTIFIER_SIZE + sizeof(uint64_t)];
 	
 	// Check if switch type is invalid
-	if(switchType > REGULAR_SWITCH_TYPE) {
+	if(switchType != REGULAR_SWITCH_TYPE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
