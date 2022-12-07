@@ -105,7 +105,7 @@ void processContinueTransactionSetEncryptedSecretNonceRequest(__attribute__((unu
 			cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &publicKey, (cx_ecfp_private_key_t *)&privateKey, KEEP_PRIVATE_KEY);
 			
 			// Check if the public key and signature don't verify the secret nonce
-			if(!cx_ecdsa_verify(&publicKey, CX_LAST, CX_SHA256, secretNonce, sizeof(transaction.secretNonce), signature, secretNonceAndSignatureLength - sizeof(transaction.secretNonce))) {
+			if(!cx_ecdsa_verify(&publicKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, secretNonce, sizeof(transaction.secretNonce), signature, secretNonceAndSignatureLength - sizeof(transaction.secretNonce))) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

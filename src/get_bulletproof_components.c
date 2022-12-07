@@ -253,4 +253,3 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	// Throw success
 	THROW(SWO_SUCCESS);
 }
-

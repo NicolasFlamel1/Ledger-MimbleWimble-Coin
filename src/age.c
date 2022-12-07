@@ -105,7 +105,7 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t i
 			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint8_t *)wrapKey, FILE_KEY_NONCE, NULL, 0, 0);
 			decryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint8_t *)fileKey, encryptedFileKey, AGE_FILE_KEY_SIZE);
 			
-			// Check if file key's tag is correct
+			// Check if file key's tag isn't correct
 			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&chaCha20Poly1305State, tag);
 			if(os_secure_memcmp((uint8_t *)&encryptedFileKey[AGE_FILE_KEY_SIZE], (uint8_t *)tag, sizeof(tag))) {
 			
