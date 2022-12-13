@@ -241,6 +241,32 @@ static UX_STEP_NOCB(exportRootPublicKeyMenuAccountIndexScreen,
 	#endif
 );
 
+// Export root public key menu warning screen one
+static UX_STEP_NOCB(exportRootPublicKeyMenuWarningScreenOne, pnn, {
+
+	// Picture
+	&C_icon_warning,
+	
+	// First line
+	"The host will",
+	
+	// Second line
+	"be able to view"
+});
+
+// Export root public key menu warning screen two
+static UX_STEP_NOCB(exportRootPublicKeyMenuWarningScreenTwo, pnn, {
+
+	// Picture
+	&C_icon_warning,
+	
+	// First line
+	"the account's",
+	
+	// Second line
+	"transactions"
+});
+
 // Export root public key menu approve screen
 static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true), {
 
@@ -269,6 +295,12 @@ static UX_FLOW(exportRootPublicKeyMenu,
 	
 	// Export root public key menu account index screen
 	&exportRootPublicKeyMenuAccountIndexScreen,
+	
+	// Export root public key menu warning screen one
+	&exportRootPublicKeyMenuWarningScreenOne,
+	
+	// Export root public key menu warning screen two
+	&exportRootPublicKeyMenuWarningScreenTwo,
 
 	// Export root public key menu approve screen
 	&exportRootPublicKeyMenuApproveScreen,
