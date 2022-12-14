@@ -98,6 +98,13 @@ void processGetMqsTimestampSignatureRequest(__attribute__((unused)) unsigned sho
 		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
+	// Copy account into the kernel features details text or account index line buffer
+	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
+	
+	// Set kernel features or transaction type line buffer
+	strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "MQS");
+	
 	// Show sign MQS timestamp menu
 	showMenu(SIGN_MQS_TIMESTAMP_MENU);
 	

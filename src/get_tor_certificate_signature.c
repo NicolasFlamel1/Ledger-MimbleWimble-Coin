@@ -219,6 +219,9 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Tor Address");
+		
+		// Set kernel features or transaction type line buffer
+		strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Tor");
 	}
 	
 	// Check currency allows Slatepack addresses
@@ -234,7 +237,14 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		
 		// Set address type line buffer
 		strcpy(addressTypeLineBuffer, "Slatepack Address");
+		
+		// Set kernel features or transaction type line buffer
+		strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Slatepack");
 	}
+	
+	// Copy account into the kernel features details text or account index line buffer
+	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
 	
 	// Show sign Tor certificate menu
 	showMenu(SIGN_TOR_CERTIFICATE_MENU);

@@ -635,6 +635,15 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					]
 				},
 				{
+					"regexp": "^Account.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
 					"text": "The host will",
 					"actions": [
 					
@@ -645,15 +654,6 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 				},
 				{
 					"text": "the account's",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"regexp": "^Account.*$",
 					"actions": [
 					
 						// Push right
@@ -3037,6 +3037,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	if(hardwareWallet instanceof SpeculosTransport === false) {
 	
 		// Log message
+		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+		
+		// Log message
 		console.log("Verify that the timestamp's time and date on the device is: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC" + ((timeZoneOffset > 0) ? "-" : "+") + (timeZoneOffset / Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0") + ":" + (timeZoneOffset % Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0"));
 	}
 	
@@ -3062,7 +3065,43 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 					]
 				},
 				{
+					"regexp": "^Account.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
 					"regexp": "^Time And Date.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "The host will",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "listen for the",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "transactions",
 					"actions": [
 					
 						// Push right
@@ -3182,6 +3221,9 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 	if(hardwareWallet instanceof SpeculosTransport === false) {
 	
 		// Log message
+		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+		
+		// Log message
 		console.log("Verify that the certificate expires on the device on: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC" + ((timeZoneOffset > 0) ? "-" : "+") + (timeZoneOffset / Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0") + ":" + (timeZoneOffset % Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0"));
 		
 		// Check address type
@@ -3235,6 +3277,15 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 					]
 				},
 				{
+					"regexp": "^Account.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
 					"regexp": "^Expires.*$",
 					"actions": [
 					
@@ -3245,6 +3296,33 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 				},
 				{
 					"regexp": "^.+ress.*$",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "The host will",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "listen for the",
+					"actions": [
+					
+						// Push right
+						["button", 2, true],
+						["button", 2, false]
+					]
+				},
+				{
+					"text": "transactions",
 					"actions": [
 					
 						// Push right

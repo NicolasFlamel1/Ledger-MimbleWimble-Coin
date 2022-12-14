@@ -47,8 +47,8 @@ char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
-// Kernel features line buffer
-char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
+// Kernel features or transaction type line buffer
+char kernelFeaturesOrTransactionTypeLineBuffer[KERNEL_FEATURES_OR_TRANSACTION_TYPE_LINE_BUFFER_SIZE];
 
 // Kernel features details title line buffer
 char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
@@ -468,6 +468,9 @@ static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
 	"timestamp?"
 });
 
+// Sign MQS timestamp menu account index screen
+#define signMqsTimestampMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
+
 // Sign MQS timestamp menu time and date screen
 static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 
@@ -490,6 +493,45 @@ static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 	
 	// Text
 	.text = timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+});
+
+// Sign MQS timestamp menu warning screen one
+static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenOne, pnn, {
+
+	// Picture
+	&C_icon_warning,
+	
+	// First line
+	"The host will",
+	
+	// Second line
+	"be able to"
+});
+
+// Sign MQS timestamp menu warning screen two
+static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenTwo, pnn, {
+
+	// Picture
+	&C_icon_warning,
+	
+	// First line
+	"listen for the",
+	
+	// Second line
+	"account's"
+});
+
+// Sign MQS timestamp menu warning screen three
+static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenThree, pnn, {
+
+	// Picture
+	&C_icon_warning,
+	
+	// First line
+	kernelFeaturesOrTransactionTypeLineBuffer,
+	
+	// Second line
+	"transactions"
 });
 
 // Sign MQS timestamp menu approve screen
@@ -518,8 +560,20 @@ static UX_FLOW(signMqsTimestampMenu,
 	// Sign MQS timestamp menu notify screen
 	&signMqsTimestampMenuNotifyScreen,
 	
+	// Sign MQS timestamp menu account index screen
+	&signMqsTimestampMenuAccountIndexScreen,
+	
 	// Sign MQS timestamp menu time and date screen
 	&signMqsTimestampMenuTimeAndDateScreen,
+	
+	// Sign MQS timestamp menu warning screen one
+	&signMqsTimestampMenuWarningScreenOne,
+	
+	// Sign MQS timestamp menu warning screen two
+	&signMqsTimestampMenuWarningScreenTwo,
+	
+	// Sign MQS timestamp menu warning screen three
+	&signMqsTimestampMenuWarningScreenThree,
 	
 	// Sign MQS timestamp menu approve screen
 	&signMqsTimestampMenuApproveScreen,
@@ -540,6 +594,9 @@ static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
 	// Second line
 	"certificate?"
 });
+
+// Sign Tor certificate menu account index screen
+#define signTorCertificateMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
 
 // Sign Tor certificate menu expiration screen
 static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
@@ -589,6 +646,15 @@ static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 	.text = publicKeyOrAddressLineBuffer
 });
 
+// Sign Tor certificate menu warning screen one
+#define signTorCertificateMenuWarningScreenOne signMqsTimestampMenuWarningScreenOne
+
+// Sign Tor certificate menu warning screen two
+#define signTorCertificateMenuWarningScreenTwo signMqsTimestampMenuWarningScreenTwo
+
+// Sign Tor certificate menu warning screen three
+#define signTorCertificateMenuWarningScreenThree signMqsTimestampMenuWarningScreenThree
+
 // Sign Tor certificate menu approve screen
 static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true, true), {
 
@@ -615,11 +681,23 @@ static UX_FLOW(signTorCertificateMenu,
 	// Sign Tor certificate menu notify screen
 	&signTorCertificateMenuNotifyScreen,
 	
+	// Sign Tor certificate menu account index screen
+	&signTorCertificateMenuAccountIndexScreen,
+	
 	// Sign Tor certificate menu expiration screen
 	&signTorCertificateMenuExpirationScreen,
 	
 	// Sign Tor certificate menu address screen
 	&signTorCertificateMenuAddressScreen,
+	
+	// Sign Tor certificate menu warning screen one
+	&signTorCertificateMenuWarningScreenOne,
+	
+	// Sign Tor certificate menu warning screen two
+	&signTorCertificateMenuWarningScreenTwo,
+	
+	// Sign Tor certificate menu warning screen three
+	&signTorCertificateMenuWarningScreenThree,
 
 	// Sign Tor certificate menu approve screen
 	&signTorCertificateMenuApproveScreen,
@@ -732,7 +810,7 @@ static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesScreen,
 			.title = "Kernel Features",
 			
 			// Text
-			.text = kernelFeaturesLineBuffer
+			.text = kernelFeaturesOrTransactionTypeLineBuffer
 		}
 	
 	// Otherwise
@@ -747,7 +825,7 @@ static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesScreen,
 			"Kernel Features",
 			
 			// Second line
-			kernelFeaturesLineBuffer
+			kernelFeaturesOrTransactionTypeLineBuffer
 		}
 	#endif
 );
@@ -910,8 +988,8 @@ void clearMenuBuffers(void) {
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
 	
-	// Clear the kernel features line buffer
-	explicit_bzero(kernelFeaturesLineBuffer, sizeof(kernelFeaturesLineBuffer));
+	// Clear the kernel features or transaction type line buffer
+	explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 	
 	// Clear the kernel features details title line buffer
 	explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));

@@ -424,8 +424,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		// Plain features
 		case PLAIN_FEATURES:
 		
-			// Set kernel features line buffer
-			strcpy(kernelFeaturesLineBuffer, "Plain");
+			// Set kernel features or transaction type line buffer
+			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Plain");
 			
 			// Clear the kernel features details title line buffer
 			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
@@ -436,8 +436,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		// Coinbase features
 		case COINBASE_FEATURES:
 		
-			// Set kernel features line buffer
-			strcpy(kernelFeaturesLineBuffer, "Coinbase");
+			// Set kernel features or transaction type line buffer
+			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Coinbase");
 			
 			// Clear the kernel features details title line buffer
 			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
@@ -448,8 +448,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		// Height locked features
 		case HEIGHT_LOCKED_FEATURES:
 		
-			// Set kernel features line buffer
-			strcpy(kernelFeaturesLineBuffer, "Height Locked");
+			// Set kernel features or transaction type line buffer
+			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Height Locked");
 			
 			// Set kernel features details title line buffer
 			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height");
@@ -469,8 +469,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case NO_RECENT_DUPLICATE_FEATURES:
 		default:
 		
-			// Set kernel features line buffer
-			strcpy(kernelFeaturesLineBuffer, "No Recent Duplicate");
+			// Set kernel features or transaction type line buffer
+			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "No Recent Duplicate");
 			
 			// Set kernel features details title line buffer
 			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height");
