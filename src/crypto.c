@@ -370,8 +370,10 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 						volatile uint8_t *y = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 						swapEndianness((uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
 						
-						// Check if the result is infinity or its x component is zero
-						if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, sizeof(publicKeyGenerator), (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE) || cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
+						CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE));
+						
+						// Check if the result has an x component of zero
+						if(cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
 						
 							// Throw internal error error
 							THROW(INTERNAL_ERROR_ERROR);
@@ -439,7 +441,6 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 		TRY {
 		
 			// Check if value isn't zero
-			bool isInfinity = true;
 			if(value) {
 
 				// Get product of the value and its generator
@@ -448,35 +449,38 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 				
-				isInfinity = !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, sizeof(valueGenerator), temp, sizeof(temp));
+				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp)));
 			}
 			
-			// Get product of the blind and its generator
-			memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
+			// Check if the blinding factor isn't zero
+			if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE)) {
 			
-			// Check if the result isn't infinity
-			if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE) && cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, sizeof(blindGenerator), blindingFactor, BLINDING_FACTOR_SIZE)) {
-			
-				// Check if product of value and its generator isn't infinity or its x component is zero
-				if(!isInfinity && !cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-			
-					// Get sum of products
-					isInfinity = !cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
-				}
+				// Get product of the blind and its generator
+				memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 				
-				// Otherwise
-				else {
+				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, blindingFactor, BLINDING_FACTOR_SIZE));
 				
-					// Get sum of products
-					memcpy((uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
+				// Check if the result doesn't have an x component of zero
+				if(!cx_math_is_zero((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				
+					// Check if product of value and its generator doesn't have an x component of zero
+					if(!cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				
+						// Get sum of products
+						CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
+					}
 					
-					// Set that result isn't infinity
-					isInfinity = false;
+					// Otherwise
+					else {
+					
+						// Get sum of products
+						memcpy((uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
+					}
 				}
 			}
 			
-			// Check if result is infinity or its x component is zero
-			if(isInfinity || cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			// Check if result has an x component of zero
+			if(cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -708,8 +712,10 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 	
-	// Check if the result is infinity or its x component is zero
-	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretNonce, NONCE_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
+	
+	// Check if the result has an x component of zero
+	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -738,8 +744,10 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	memcpy(&generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 	
-	// Check if the result is infinity or its x component is zero
-	if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, generator, sizeof(generator), secretNonce, NONCE_SIZE) || cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
+	
+	// Check if the result has an x component of zero
+	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -1539,12 +1547,21 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 
 			// Add value bytes to alpha
 			cx_math_addm((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
+			
+			// Check if alpha or rho is zero
+			if(cx_math_is_zero((uint8_t *)alpha, sizeof(alpha)) || cx_math_is_zero((uint8_t *)rho, sizeof(rho))) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 
-			// Get the product of the alpha and its generator (Check for infinity and zero)
+			// Get the product of the alpha and its generator
 			memcpy((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero((uint8_t *)alpha, sizeof(alpha)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, sizeof(alphaGenerator), (uint8_t *)alpha, sizeof(alpha)) || cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alpha, sizeof(alpha)));
+			
+			// Check if the result has an x component of zero
+			if(cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1553,8 +1570,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			// Get the product of the rho and its generator
 			memcpy((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero((uint8_t *)rho, sizeof(rho)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, sizeof(rhoGenerator), (uint8_t *)rho, sizeof(rho)) || cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rho, sizeof(rho)));
+			
+			// Check if the result has an x component of zero
+			if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1572,8 +1591,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Negate the aterm's y component if the bit isn't set
 				conditionalNegate(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], !bit, SECP256K1_CURVE_PRIME);
 				
-				// Check if adding aterm to the alpha generator is infinity or its x component is zero
-				if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm, sizeof(alphaGenerator)) || cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				// Check if the sum of aterm to the alpha generator has an x component of zero
+				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
+				
+				if(cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1584,19 +1605,30 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				uint8_t *sr  = (uint8_t *)rho;
 				createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
 				
-				// Get the product of the generator and sl
-				uint8_t *sterm = (uint8_t *)aterm;
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
-				
-				// Check if the result is infinity or its x component is zero
-				if(cx_math_is_zero(sl, SCALAR_SIZE) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, UNCOMPRESSED_PUBLIC_KEY_SIZE, sl, SCALAR_SIZE) || cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				// Check if sl or sr is zero
+				if(cx_math_is_zero(sl, SCALAR_SIZE) || cx_math_is_zero(sr, SCALAR_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
-				// Check if adding sterm to the rho generator is infinity or its x component is zero
-				if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm, sizeof(rhoGenerator)) || cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				// Get the product of the generator and sl
+				uint8_t *sterm = (uint8_t *)aterm;
+				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+				
+				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE));
+				
+				// Check if the result has an x component of zero
+				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+				}
+				
+				// Check if the sum of sterm to the rho generator has an x component of zero
+				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
+				
+				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1605,15 +1637,19 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Get the product of the generator and sr
 				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
-				// Check if the result is infinity or its x component is zero
-				if(cx_math_is_zero(sr, SCALAR_SIZE) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, sterm, UNCOMPRESSED_PUBLIC_KEY_SIZE, sr, SCALAR_SIZE) || cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE));
+				
+				// Check if the result has an x component of zero
+				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
-				// Check if adding sterm to the rho generator is infinity or its x component is zero
-				if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm, sizeof(rhoGenerator)) || cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				// Check if the sum of sterm to the rho generator has an x component of zero
+				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
+				
+				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1680,12 +1716,21 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			// Add t1 to t2
 			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2));
 			
+			// Check if t1 or t2 is zero
+			if(cx_math_is_zero((uint8_t *)t1, sizeof(t1)) || cx_math_is_zero((uint8_t *)t2, sizeof(t2))) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
 			// Get the product of t1 and its generator
 			uint8_t *t1Generator = (uint8_t *)alphaGenerator;
 			memcpy(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero((uint8_t *)t1, sizeof(t1)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, t1Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)t1, sizeof(t1)) || cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, t1Generator, (uint8_t *)t1, sizeof(t1)));
+			
+			// Check if the result has an x component of zero
+			if(cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1696,12 +1741,21 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			uint8_t *tau2 = (uint8_t *)rho;
 			createScalarsFromChaCha20(tau1, tau2, privateNonce, 1);
 			
+			// Check if tau1 or tau2 is zero
+			if(cx_math_is_zero(tau1, SCALAR_SIZE) || cx_math_is_zero(tau2, SCALAR_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
 			// Get the product of tau1 and its generator
 			uint8_t *tau1Generator = (uint8_t *)rhoGenerator;
 			memcpy(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero(tau1, SCALAR_SIZE) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, tau1Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, tau1, SCALAR_SIZE) || cx_math_is_zero(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, tau1Generator, tau1, SCALAR_SIZE));
+			
+			// Check if the result has an x component of zero
+			if(cx_math_is_zero(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1711,8 +1765,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)&tOne[PUBLIC_KEY_PREFIX_SIZE], &tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
 			tOne[0] = (tau1Generator[UNCOMPRESSED_PUBLIC_KEY_SIZE - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 			
-			// Check if adding tau1 generator to the t1 generator is infinity or its x component is zero
-			if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, t1Generator, tau1Generator, t1Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE) || cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			// Check if the sum of tau1 generator to the t1 generator has an x component of zero
+			CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, t1Generator, tau1Generator, t1Generator));
+			
+			if(cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1722,8 +1778,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			uint8_t *t2Generator = (uint8_t *)rhoGenerator;
 			memcpy(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero((uint8_t *)t2, sizeof(t2)) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, t2Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)t2, sizeof(t2)) || cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, t2Generator, (uint8_t *)t2, sizeof(t2)));
+			
+			// Check if the result is has an x component of zero
+			if(cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1733,8 +1791,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			uint8_t *tau2Generator = (uint8_t *)aterm;
 			memcpy(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 			
-			// Check if the result is infinity or its x component is zero
-			if(cx_math_is_zero(tau2, SCALAR_SIZE) || !cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, tau2Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE, tau2, SCALAR_SIZE) || cx_math_is_zero(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, tau2Generator, tau2, SCALAR_SIZE));
+			
+			// Check if the result has an x component of zero
+			if(cx_math_is_zero(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1744,8 +1804,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)&tTwo[PUBLIC_KEY_PREFIX_SIZE], &tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
 			tTwo[0] = (tau2Generator[UNCOMPRESSED_PUBLIC_KEY_SIZE - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 			
-			// Check if adding tau2 generator to the t2 generator is infinity or its x component is zero
-			if(!cx_ecfp_add_point(CX_CURVE_SECP256K1, t2Generator, tau2Generator, t2Generator, UNCOMPRESSED_PUBLIC_KEY_SIZE) || cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			// Check if the sum of tau2 generator to the t2 generator has an x component of zero
+			CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, t2Generator, tau2Generator, t2Generator));
+			
+			if(cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);

@@ -32,8 +32,10 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			// Get private key
 			getAddressPrivateKey(&privateKey, account, index, CX_CURVE_SECP256K1);
 			
-			// Check if the product of the public key by the private key is infinity or its x component is zero
-			if(!cx_ecfp_scalar_mult(CX_CURVE_SECP256K1, publicKey.W, publicKey.W_len, (uint8_t *)privateKey.d, privateKey.d_len) || cx_math_is_zero(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			// Check if the product of the public key by the private key has an x component of zero
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, publicKey.W, (uint8_t *)privateKey.d, privateKey.d_len));
+			
+			if(cx_math_is_zero(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
