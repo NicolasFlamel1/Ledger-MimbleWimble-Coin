@@ -219,7 +219,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
 			
-			// Clear the private nonce
+			// Clear the rewind nonce
 			explicit_bzero((uint8_t *)rewindNonce, sizeof(rewindNonce));
 			
 			// Clear the private nonce

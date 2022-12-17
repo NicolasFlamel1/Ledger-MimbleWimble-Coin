@@ -127,6 +127,9 @@ static void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
 
+// Unsafe point scalar multiply
+static void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *scalar, size_t scalarLength);
+
 
 // Supporting function implementation
 
@@ -449,7 +452,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 				
-				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp)));
+				unsafePointScalarMultiply(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp));
 			}
 			
 			// Check if the blinding factor isn't zero
@@ -1616,7 +1619,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				uint8_t *sterm = (uint8_t *)aterm;
 				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
-				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE));
+				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
 				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1637,7 +1640,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Get the product of the generator and sr
 				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
-				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE));
+				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
 				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -2209,4 +2212,57 @@ bool isQuadraticResidue(const uint8_t *component) {
 	
 	// Return result
 	return result;
+}
+
+// Unsafe point scalar multiply
+void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *scalar, size_t scalarLength) {
+
+	// Lock big number processor and throw error if it fails
+	CX_THROW(cx_bn_lock(CX_BN_WORD_ALIGNEMENT, 0));
+	
+	// Initialize error
+	cx_err_t error;
+	
+	// Check if allocating memory for internal point was successful
+	cx_ecpoint_t internalPoint;
+	const cx_err_t allocError = cx_ecpoint_alloc(&internalPoint, curve);
+	
+	if(!allocError) {
+	
+		// Set internal point to the point and check if it fails
+		CX_CHECK(cx_ecpoint_init(&internalPoint, &point[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &point[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+		
+		// Perform point scalar multiplication and check if it fails
+		CX_CHECK(cx_ecpoint_scalarmul(&internalPoint, scalar, scalarLength));
+		
+		// Set point to the result and check if it fails
+		CX_CHECK(cx_ecpoint_export(&internalPoint, &point[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &point[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+	}
+	
+	// Otherwise
+	else {
+	
+		// Set error
+		error = allocError;
+	}
+	
+// End
+end:
+
+	// Check if memory was allocated for internal point
+	if(!allocError) {
+	
+		// Free memory and set error to if it failed
+		error = MAX(cx_ecpoint_destroy(&internalPoint), error);
+	}
+	
+	// Unlock big number processor and throw error if it fails
+	CX_THROW(cx_bn_unlock());
+	
+	// Check if error occurred
+	if(error) {
+	
+		// Throw error
+		THROW(error);
+	}
 }
