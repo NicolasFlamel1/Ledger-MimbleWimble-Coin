@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
 #include "chacha20_poly1305.h"
@@ -31,6 +32,9 @@ static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
 // Rotate left
 static void rotateLeft(uint32_t *value, size_t bits);
 
+// Initialize ChaCha20 current state
+static void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
+
 // Update Poly1305 accumulator
 static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength);
 
@@ -38,7 +42,7 @@ static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter) {
+void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter, uint32_t *chaCha20ResultingState) {
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -65,7 +69,7 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 	chaCha20Poly1305State->chaCha20OriginalState[15] = *(uint32_t *)&nonce[sizeof(uint32_t) * 2];
 	
 	// Initialize ChaCha20 current state
-	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	uint32_t *chaCha20CurrentState = chaCha20ResultingState ? chaCha20ResultingState : alloca(sizeof(chaCha20Poly1305State->chaCha20OriginalState));
 	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
 	
 	// Get the Poly1305 key from the ChaCha20 current state

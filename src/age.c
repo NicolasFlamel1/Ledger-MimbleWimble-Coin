@@ -102,7 +102,7 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t i
 			
 			// Decrypt file key with the wrap key
 			const uint8_t FILE_KEY_NONCE[CHACHA20_NONCE_SIZE] = {0};
-			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint8_t *)wrapKey, FILE_KEY_NONCE, NULL, 0, 0);
+			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint8_t *)wrapKey, FILE_KEY_NONCE, NULL, 0, 0, NULL);
 			decryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint8_t *)fileKey, encryptedFileKey, AGE_FILE_KEY_SIZE);
 			
 			// Check if file key's tag isn't correct

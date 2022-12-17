@@ -61,7 +61,7 @@ void testEncrypt(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
 	ChaCha20Poly1305State chacha20Poly1305State;
-	initializeChaCha20Poly1305(&chacha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER);
+	initializeChaCha20Poly1305(&chacha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, NULL);
 	
 	// Encrypt the data
 	uint8_t encryptedData[sizeof(DATA)];
@@ -76,7 +76,7 @@ void testDecrypt(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
 	ChaCha20Poly1305State chacha20Poly1305State;
-	initializeChaCha20Poly1305(&chacha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER);
+	initializeChaCha20Poly1305(&chacha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, NULL);
 	
 	// Decrypt the encrypted data
 	uint8_t data[sizeof(ENCRYPTED_DATA)];

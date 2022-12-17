@@ -1963,10 +1963,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 					counter
 				};
 				
-				initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index);
-
-				// Get ChaCha20 current state
-				initializeChaCha20CurrentState((ChaCha20Poly1305State *)&chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+				initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index, (uint32_t *)chaCha20CurrentState);
 				
 				// Set scalars to the ChaCha20 current state
 				memcpy((uint8_t *)firstScalar,  (uint32_t *)chaCha20CurrentState, SCALAR_SIZE);

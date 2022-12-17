@@ -152,7 +152,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 			}
 			
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
-			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0);
+			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0, NULL);
 		}
 		
 		// Finally
