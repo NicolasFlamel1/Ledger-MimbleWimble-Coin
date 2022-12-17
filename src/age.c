@@ -85,7 +85,7 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t i
 			swapEndianness((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
 			
 			// Check if shared private key is zero
-			if(cx_math_is_zero((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey))) {
+			if(isZeroArraySecure((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);

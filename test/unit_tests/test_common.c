@@ -33,6 +33,18 @@ static const char VALID_UTF8_STRING[] = "test";
 // Invalid UTF-8 string
 static const char INVALID_UTF8_STRING[] = "tes\x02t";
 
+// Unmapped value
+static const uint8_t UNMAPPED_VALUE = 50;
+
+// Mapped value
+static const uint8_t MAPPED_VALUE = 127;
+
+// Zero array
+static const uint8_t ZERO_ARRAY[] = {0, 0, 0, 0, 0};
+
+// Not zero array
+static const uint8_t NOT_ZERO_ARRAY[] = {0, 0, 0, 1, 0};
+
 
 // Function prototypes
 
@@ -42,11 +54,20 @@ static void testSwapEndianness(void **state);
 // Test to hex string
 static void testToHexString(void **state);
 
+// Test get string length
+static void testGetStringLength(void **state);
+
 // Test to string
 static void testToString(void **state);
 
 // Test is valid UTF-8 string
 static void testIsValidUtf8String(void **state);
+
+// Test map
+static void testMap(void **state);
+
+// test is zero array secure
+static void testIsZeroArraySecure(void **state);
 
 
 // Main function
@@ -61,11 +82,20 @@ int main(void) {
 		// Test to hex string
 		cmocka_unit_test(testToHexString),
 		
+		// Test get string length
+		cmocka_unit_test(testGetStringLength),
+		
 		// Test to string
 		cmocka_unit_test(testToString),
 		
 		// Test is valid UTF-8 string
-		cmocka_unit_test(testIsValidUtf8String)
+		cmocka_unit_test(testIsValidUtf8String),
+		
+		// Test map
+		cmocka_unit_test(testMap),
+		
+		// Test is zero array secure
+		cmocka_unit_test(testIsZeroArraySecure)
 	};
 	
 	// Return performing tests
@@ -97,6 +127,16 @@ void testToHexString(void **state) {
 	
 	// Assert hex string value is correct
 	assert_string_equal(hexStringValue, HEX_STRING_VALUE);
+}
+
+// Test get string length
+void testGetStringLength(void **state) {
+
+	// Get string length
+	const size_t stringLength = getStringLength(NUMBER_VALUE);
+	
+	// Assert string length is correct
+	assert_int_equal(stringLength, sizeof(STRING_VALUE) - sizeof((char)'\0'));
 }
 
 // Test to string
@@ -131,4 +171,30 @@ void testIsValidUtf8String(void **state) {
 	
 	// Assert invalid is correct
 	assert_false(invalid);
+}
+
+// Test map
+void testMap(void **state) {
+
+	// Get mapped value
+	const uint8_t mappedValue = map(UNMAPPED_VALUE, 0, UNMAPPED_VALUE * 2, 0, UINT8_MAX);
+	
+	// Assert mapped value is correct
+	assert_int_equal(mappedValue, MAPPED_VALUE);
+}
+
+// Test is zero array secure
+void testIsZeroArraySecure(void **state) {
+
+	// Get is zero by checking if zero array is zero
+	const bool isZero = isZeroArraySecure(ZERO_ARRAY, sizeof(ZERO_ARRAY));
+	
+	// Assert is zero is correct
+	assert_true(isZero);
+	
+	// Get is not zero by checking if not zero array is zero
+	const bool isNotZero = isZeroArraySecure(NOT_ZERO_ARRAY, sizeof(NOT_ZERO_ARRAY));
+	
+	// Assert is not zero is correct
+	assert_false(isNotZero);
 }

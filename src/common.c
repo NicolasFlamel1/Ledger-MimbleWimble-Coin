@@ -240,3 +240,20 @@ uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t ne
 	// Return value mapped to new range
 	return (newTo - newFrom) * (value - from) / (to - from) + newFrom;
 }
+
+// Is zero array secure
+bool isZeroArraySecure(const uint8_t *value, size_t length) {
+
+	// Initialize result
+	uint8_t result = 0;
+	
+	// Go through all bytes in the value
+	for(size_t i = 0; i < length; ++i) {
+	
+		// Or byte with the result
+		result |= value[i];
+	}
+	
+	// Return if result is zero
+	return !result;
+}

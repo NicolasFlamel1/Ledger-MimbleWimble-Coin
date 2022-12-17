@@ -93,5 +93,8 @@ bool isValidUtf8String(const char *text, size_t length);
 // Map
 uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t newTo);
 
+// Is zero array secure
+bool isZeroArraySecure(const uint8_t *value, size_t length);
+
 
 #endif

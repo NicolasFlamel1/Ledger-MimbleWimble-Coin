@@ -93,8 +93,12 @@ add_test(test_common test_common)
 add_executable(test_mqs
 	test_mqs.c
 	simulate/simulate.c
+	../../src/common.c
 	../../src/mqs.c
 	../../src/base58.c
+	../../src/slate.c
+	../../src/state.c
+	../../src/transaction.c
 )
 add_library(mqs SHARED ../../src/mqs.c)
 target_link_libraries(test_mqs PUBLIC cmocka crypto mqs)

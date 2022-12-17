@@ -373,7 +373,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 						CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE));
 						
 						// Check if the result has an x component of zero
-						if(cx_math_is_zero((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
+						if(isZeroArraySecure((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
 						
 							// Throw internal error error
 							THROW(INTERNAL_ERROR_ERROR);
@@ -453,7 +453,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 			}
 			
 			// Check if the blinding factor isn't zero
-			if(!cx_math_is_zero(blindingFactor, BLINDING_FACTOR_SIZE)) {
+			if(!isZeroArraySecure(blindingFactor, BLINDING_FACTOR_SIZE)) {
 			
 				// Get product of the blind and its generator
 				memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
@@ -461,10 +461,10 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, blindingFactor, BLINDING_FACTOR_SIZE));
 				
 				// Check if the result doesn't have an x component of zero
-				if(!cx_math_is_zero((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(!isZeroArraySecure((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Check if product of value and its generator doesn't have an x component of zero
-					if(!cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+					if(!isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 						// Get sum of products
 						CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
@@ -480,7 +480,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 			}
 			
 			// Check if result has an x component of zero
-			if(cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -706,7 +706,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 		// Normalize the secret nonce
 		cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
 		
-	} while(cx_math_is_zero(secretNonce, NONCE_SIZE));
+	} while(isZeroArraySecure(secretNonce, NONCE_SIZE));
 	
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -715,7 +715,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
 	
 	// Check if the result has an x component of zero
-	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	if(isZeroArraySecure(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -747,7 +747,7 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
 	
 	// Check if the result has an x component of zero
-	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	if(isZeroArraySecure(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -1366,7 +1366,7 @@ bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
 	}
 	
 	// Return if the private key doesn't overflow and isn't zero
-	return cx_math_cmp(privateKey, SECP256K1_CURVE_ORDER, length) < 0 && !cx_math_is_zero(privateKey, length);
+	return cx_math_cmp(privateKey, SECP256K1_CURVE_ORDER, length) < 0 && !isZeroArraySecure(privateKey, length);
 }
 
 // Is valid secp256k1 public key
@@ -1513,7 +1513,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 	// Initialize aterm;
 	volatile uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
-	// Initialize y, and z
+	// Initialize y and z
 	volatile uint8_t y[sizeof(runningCommitment)];
 	volatile uint8_t z[sizeof(runningCommitment)];
 	
@@ -1549,7 +1549,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			cx_math_addm((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
 			
 			// Check if alpha or rho is zero
-			if(cx_math_is_zero((uint8_t *)alpha, sizeof(alpha)) || cx_math_is_zero((uint8_t *)rho, sizeof(rho))) {
+			if(isZeroArraySecure((uint8_t *)alpha, sizeof(alpha)) || isZeroArraySecure((uint8_t *)rho, sizeof(rho))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1561,7 +1561,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alpha, sizeof(alpha)));
 			
 			// Check if the result has an x component of zero
-			if(cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1573,7 +1573,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rho, sizeof(rho)));
 			
 			// Check if the result has an x component of zero
-			if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1594,7 +1594,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of aterm to the alpha generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
 				
-				if(cx_math_is_zero((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1606,7 +1606,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
 				
 				// Check if sl or sr is zero
-				if(cx_math_is_zero(sl, SCALAR_SIZE) || cx_math_is_zero(sr, SCALAR_SIZE)) {
+				if(isZeroArraySecure(sl, SCALAR_SIZE) || isZeroArraySecure(sr, SCALAR_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1619,7 +1619,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE));
 				
 				// Check if the result has an x component of zero
-				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1628,7 +1628,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1640,7 +1640,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE));
 				
 				// Check if the result has an x component of zero
-				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1649,7 +1649,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1667,7 +1667,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1680,7 +1680,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1717,7 +1717,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2));
 			
 			// Check if t1 or t2 is zero
-			if(cx_math_is_zero((uint8_t *)t1, sizeof(t1)) || cx_math_is_zero((uint8_t *)t2, sizeof(t2))) {
+			if(isZeroArraySecure((uint8_t *)t1, sizeof(t1)) || isZeroArraySecure((uint8_t *)t2, sizeof(t2))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1730,7 +1730,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, t1Generator, (uint8_t *)t1, sizeof(t1)));
 			
 			// Check if the result has an x component of zero
-			if(cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1742,7 +1742,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			createScalarsFromChaCha20(tau1, tau2, privateNonce, 1);
 			
 			// Check if tau1 or tau2 is zero
-			if(cx_math_is_zero(tau1, SCALAR_SIZE) || cx_math_is_zero(tau2, SCALAR_SIZE)) {
+			if(isZeroArraySecure(tau1, SCALAR_SIZE) || isZeroArraySecure(tau2, SCALAR_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1755,7 +1755,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, tau1Generator, tau1, SCALAR_SIZE));
 			
 			// Check if the result has an x component of zero
-			if(cx_math_is_zero(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1765,10 +1765,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)&tOne[PUBLIC_KEY_PREFIX_SIZE], &tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
 			tOne[0] = (tau1Generator[UNCOMPRESSED_PUBLIC_KEY_SIZE - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 			
-			// Check if the sum of tau1 generator to the t1 generator has an x component of zero
+			// Check if the sum of tau1 generator and the t1 generator has an x component of zero
 			CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, t1Generator, tau1Generator, t1Generator));
 			
-			if(cx_math_is_zero(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&t1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1781,7 +1781,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, t2Generator, (uint8_t *)t2, sizeof(t2)));
 			
 			// Check if the result is has an x component of zero
-			if(cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1794,7 +1794,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, tau2Generator, tau2, SCALAR_SIZE));
 			
 			// Check if the result has an x component of zero
-			if(cx_math_is_zero(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1804,10 +1804,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)&tTwo[PUBLIC_KEY_PREFIX_SIZE], &tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
 			tTwo[0] = (tau2Generator[UNCOMPRESSED_PUBLIC_KEY_SIZE - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 			
-			// Check if the sum of tau2 generator to the t2 generator has an x component of zero
+			// Check if the sum of tau2 generator and the t2 generator has an x component of zero
 			CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, t2Generator, tau2Generator, t2Generator));
 			
-			if(cx_math_is_zero(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&t2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1817,7 +1817,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, &t1Generator[PUBLIC_KEY_PREFIX_SIZE], &t2Generator[PUBLIC_KEY_PREFIX_SIZE]);
 			
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -2156,7 +2156,7 @@ void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8_t *mod
 		TRY {
 
 			// Negate the scalar if it's not zero and negating in a way that tries to mitigate timing attacks
-			cx_math_subm((cx_math_is_zero((uint8_t *)scalar, SCALAR_SIZE) || !negate) ? (uint8_t *)temp : (uint8_t *)scalar, modulo, (uint8_t *)scalar, modulo, SCALAR_SIZE);
+			cx_math_subm((isZeroArraySecure((uint8_t *)scalar, SCALAR_SIZE) | !negate) ? (uint8_t *)temp : (uint8_t *)scalar, modulo, (uint8_t *)scalar, modulo, SCALAR_SIZE);
 		}
 		
 		// Finally

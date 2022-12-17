@@ -35,7 +35,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			// Check if the product of the public key by the private key has an x component of zero
 			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, publicKey.W, (uint8_t *)privateKey.d, privateKey.d_len));
 			
-			if(cx_math_is_zero(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			if(isZeroArraySecure(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -45,7 +45,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			cx_pbkdf2_sha512(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			
 			// Check if shared private key is zero
-			if(cx_math_is_zero((uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE)) {
+			if(isZeroArraySecure((uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
