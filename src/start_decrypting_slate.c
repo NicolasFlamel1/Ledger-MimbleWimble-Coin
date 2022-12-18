@@ -123,7 +123,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 			ephemeralX25519PublicKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce)];
 			
 			// Check if ephemeral X25519 public key is invalid
-			if(isZeroArraySecure(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+			if(cx_math_is_zero(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

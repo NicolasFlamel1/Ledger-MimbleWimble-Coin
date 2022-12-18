@@ -467,7 +467,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				if(!isZeroArraySecure((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Check if product of value and its generator doesn't have an x component of zero
-					if(!isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+					if(!cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 						// Get sum of products
 						CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
@@ -681,13 +681,21 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 }
 
 // Update blinding factor sum
-void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive) {
+void updateBlindingFactorSum(uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive) {
 
-	// Negate the blinding factor if it isn't positive
-	conditionalNegate(blindingFactor, !blindingFactorIsPositive, SECP256K1_CURVE_ORDER);
+	// Check if blinding factor isn't positive
+	if(blindingFactorIsPositive) {
 	
-	// Add blinding factor to the blinding factor sum
-	cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+		// Add blinding factor to the blinding factor sum
+		cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+	}
+	
+	// Otherwise
+	else {
+	
+		// Subtract blinding factor from the blinding factor sum
+		cx_math_subm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+	}
 	
 	// Check if blinding factor sum is invalid
 	if(!isValidSecp256k1PrivateKey(blindingFactorSum, BLINDING_FACTOR_SIZE)) {
@@ -709,7 +717,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 		// Normalize the secret nonce
 		cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
 		
-	} while(isZeroArraySecure(secretNonce, NONCE_SIZE));
+	} while(cx_math_is_zero(secretNonce, NONCE_SIZE));
 	
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -718,18 +726,20 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
 	
 	// Check if the result has an x component of zero
-	if(isZeroArraySecure(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
 	}
 
-	// Negate the secret nonce and the result's y component if the result's y component isn't quadratic residue
+	// Check if the result's y component isn't quadratic residue
 	uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	bool negate = !isQuadraticResidue(y);
+	if(!isQuadraticResidue(y)) {
 	
-	conditionalNegate(secretNonce, negate, SECP256K1_CURVE_ORDER);
-	conditionalNegate(y, negate, SECP256K1_CURVE_PRIME);
+		// Negate the secret nonce and the result's y component 
+		cx_math_subm(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE);
+		cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	}
 	
 	// Check if creating public nonce
 	if(publicNonce) {
@@ -741,7 +751,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 }
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, const uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey) {
 
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -766,10 +776,6 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 	memcpy(uncompressedPublicNonce, publicNonce, COMPRESSED_PUBLIC_KEY_SIZE);
 	uncompressSecp256k1PublicKey(uncompressedPublicNonce);
 	
-	// Negate the secret nonce if the uncompressed public nonce's y component isn't quadratic residue
-	const uint8_t *y = &uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	conditionalNegate(secretNonce, !isQuadraticResidue(y), SECP256K1_CURVE_ORDER);
-	
 	// Get signature hash from the public nonce's x component, public key, and message
 	cx_sha256_t hash;
 	cx_sha256_init(&hash);
@@ -790,9 +796,22 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 		// Try
 		TRY {
 		
-			// Calculate the s component
+			// Multiply blinding factor by the signature hash
 			cx_math_multm((uint8_t *)s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, sizeof(s));
-			cx_math_addm((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s));
+			
+			// Check if the uncompressed public nonce's y component is quadratic residue
+			if(isQuadraticResidue(&uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE])) {
+			
+				// Add secret nonce to the result
+				cx_math_addm((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s));
+			}
+			
+			// Otherwise
+			else {
+			
+				// Subtract secret nonce from the result
+				cx_math_subm((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s));
+			}
 			
 			// Set signature's s component
 			swapEndianness((uint8_t *)s, sizeof(s));
@@ -1452,7 +1471,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	if((y[PUBLIC_KEY_COMPONENT_SIZE - 1] & 1) != (publicKey[0] == ODD_COMPRESSED_PUBLIC_KEY_PREFIX)) {
 	
 		// Negate the y component
-		conditionalNegate(y, true, SECP256K1_CURVE_PRIME);
+		cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	}
 	
 	// Set public key's prefix to be uncompressed
@@ -1542,14 +1561,11 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			// Set proof message in value bytes
 			memcpy(&valueBytes[sizeof(valueBytes) - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
 
-			// Negate the value bytes
-			conditionalNegate(valueBytes, true, SECP256K1_CURVE_ORDER);
-			
 			// Create alpha and rho from the rewind nonce
 			createScalarsFromChaCha20(alpha, rho, rewindNonce, 0);
 
-			// Add value bytes to alpha
-			cx_math_addm((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
+			// Subtract value bytes from alpha
+			cx_math_subm((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
 			
 			// Check if alpha or rho is zero
 			if(isZeroArraySecure((uint8_t *)alpha, sizeof(alpha)) || isZeroArraySecure((uint8_t *)rho, sizeof(rho))) {
@@ -1583,7 +1599,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			}
 
 			// Go through all bits to prove
-			for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+			for(uint_fast8_t i = 0; i < BITS_TO_PROVE; ++i) {
 			
 				// Get bit in the value
 				const bool bit = (value >> i) & 1;
@@ -1622,7 +1638,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
-				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1643,7 +1659,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
-				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1670,7 +1686,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1683,7 +1699,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1699,9 +1715,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
 			
 			// Get the difference of t1 and t2
-			conditionalNegate(t2, true, SECP256K1_CURVE_ORDER);
-
-			cx_math_addm((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1));
+			cx_math_subm((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 			
 			// Divide the difference by two
 			uint8_t twoInverse[SCALAR_SIZE] = {0};
@@ -1710,13 +1724,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			
 			cx_math_multm((uint8_t *)t1, (uint8_t *)t1, twoInverse, SECP256K1_CURVE_ORDER, sizeof(t1));
 			
-			// Get the sum or t2 and t0
-			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t0, SECP256K1_CURVE_ORDER, sizeof(t2));
+			// Get the difference of t2 and t0
+			cx_math_subm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t0, SECP256K1_CURVE_ORDER, sizeof(t2));
 			
-			// Negate t2
-			conditionalNegate(t2, true, SECP256K1_CURVE_ORDER);
-			
-			// Add t1 to t2
+			// Add t1 to the difference
 			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2));
 			
 			// Check if t1 or t2 is zero
@@ -1820,7 +1831,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, &t1Generator[PUBLIC_KEY_PREFIX_SIZE], &t2Generator[PUBLIC_KEY_PREFIX_SIZE]);
 			
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1902,13 +1913,8 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 			// Add commitment to the hash
 			cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, CX_SHA256_SIZE, NULL, 0);
 			
-			// Set parity to if the left part's y component isn't quadratic residue
-			const uint8_t *y = &leftPart[PUBLIC_KEY_COMPONENT_SIZE];
-			uint8_t parity = (bool)!isQuadraticResidue(y) << 1;
-			
-			// Add to parity to if the right part's y component isn't quadratic residue
-			y = &rightPart[PUBLIC_KEY_COMPONENT_SIZE];
-			parity |= (bool)!isQuadraticResidue(y);
+			// Set parity to if the part's y components aren't quadratic residue
+			const uint8_t parity = ((bool)!isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) << 1) | (bool)!isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]);
 			
 			// Add parity to the hash
 			cx_hash((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0);
@@ -1935,62 +1941,54 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 // Create scalars from ChaCha20
 void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index) {
 
-	// Go through counter values
-	for(uint32_t counter = 0;; ++counter) {
+	// Initialize nonce
+	uint32_t nonce[3] = {
 	
-		// Initialize ChaCha20 Poly1305 state
-		volatile struct ChaCha20Poly1305State chaCha20Poly1305State;
-		
-		// Initialize ChaCha20 current state
-		volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State.chaCha20OriginalState)];
+		// Index
+		index >> (sizeof(uint32_t) * BITS_IN_A_BYTE)
+	};
+
+	// Initialize ChaCha20 Poly1305 state
+	volatile struct ChaCha20Poly1305State chaCha20Poly1305State;
 	
-		// Begin try
-		BEGIN_TRY {
-		
-			// Try
-			TRY {
+	// Initialize ChaCha20 current state
+	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State.chaCha20OriginalState)];
+
+	// Begin try
+	BEGIN_TRY {
 	
-				// Initiaize ChaCha20 state with the seed, nonce, and index
-				const uint32_t nonce[] = {
-				
-					// Index
-					index >> (sizeof(uint32_t) * BITS_IN_A_BYTE),
-					
-					// Zero
-					0,
-					
-					// Counter
-					counter
-				};
-				
+		// Try
+		TRY {
+
+			// Loop while ChaCha20 current state as scalars overflows
+			do {
+			
+				// Initialize ChaCha20 state with the seed, nonce, and index
 				initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index, (uint32_t *)chaCha20CurrentState);
 				
-				// Set scalars to the ChaCha20 current state
-				memcpy((uint8_t *)firstScalar,  (uint32_t *)chaCha20CurrentState, SCALAR_SIZE);
-				memcpy((uint8_t *)secondScalar,  (uint32_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SCALAR_SIZE);
-			}
-		
-			// Finally
-			FINALLY {
+				// Increment nonce's counter
+				++nonce[2];
+				
+			} while(cx_math_cmp((uint8_t *)chaCha20CurrentState, SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0 || cx_math_cmp((uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0);
 			
-				// Clear the ChaCha20 current state
-				explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
-				
-				// Clear the ChaCha20 Poly1305 state
-				explicit_bzero((ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
-			}
+			// Set scalars to the ChaCha20 current state
+			memcpy((uint8_t *)firstScalar,  (uint8_t *)chaCha20CurrentState, SCALAR_SIZE);
+			memcpy((uint8_t *)secondScalar,  (uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SCALAR_SIZE);
 		}
+	
+		// Finally
+		FINALLY {
 		
-		// End try
-		END_TRY;
-				
-		// Check if scalars don't overflow
-		if(cx_math_cmp((uint8_t *)firstScalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE) < 0 && cx_math_cmp((uint8_t *)secondScalar, SECP256K1_CURVE_ORDER, SCALAR_SIZE) < 0) {
-
-			// Break
-			break;
+			// Clear the ChaCha20 current state
+			explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
+			
+			// Clear the ChaCha20 Poly1305 state
+			explicit_bzero((ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
 		}
 	}
+	
+	// End try
+	END_TRY;
 }
 
 // Use LR generator
@@ -2007,9 +2005,6 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 	
 	// Initialize rout
 	volatile uint8_t rout[SCALAR_SIZE];
-	
-	// Initialize neg z
-	volatile uint8_t negz[SCALAR_SIZE];
 	
 	// Initialize sr
 	volatile uint8_t sr[SCALAR_SIZE];
@@ -2036,10 +2031,6 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			const uint8_t two[] = {2};
 			cx_math_powm((uint8_t *)z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n));
 			
-			// Get the negation of z
-			memcpy((uint8_t *)negz, z, sizeof(negz));
-			conditionalNegate(negz, true, SECP256K1_CURVE_ORDER);
-			
 			// Create inputs
 			uint8_t inputs[3][SCALAR_SIZE] = {0};
 			inputs[1][sizeof(inputs[1]) - 1] = 1;
@@ -2049,7 +2040,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			volatile uint8_t *outputs[3] = {t0, t1, t2};
 
 			// Go through all bits to prove
-			for(size_t i = 0; i < BITS_TO_PROVE; ++i) {
+			for(uint_fast8_t i = 0; i < BITS_TO_PROVE; ++i) {
 			
 				// Get bit in the value
 				const bool bit = (value >> i) & 1;
@@ -2059,17 +2050,14 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 				lout[SCALAR_SIZE - 1] = bit;
 				
 				// Update lout
-				cx_math_addm((uint8_t *)lout, (uint8_t *)lout, (uint8_t *)negz, SECP256K1_CURVE_ORDER, sizeof(negz));
+				cx_math_subm((uint8_t *)lout, (uint8_t *)lout, z, SECP256K1_CURVE_ORDER, sizeof(lout));
 				
 				// Set bit in rout
 				explicit_bzero((uint8_t *)rout, SCALAR_SIZE - 1);
 				rout[SCALAR_SIZE - 1] = 1 - bit;
 				
-				// Negate rout
-				conditionalNegate(rout, true, SECP256K1_CURVE_ORDER);
-				
 				// Update rout
-				cx_math_addm((uint8_t *)rout, (uint8_t *)rout, z, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+				cx_math_subm((uint8_t *)rout, z, (uint8_t *)rout, SECP256K1_CURVE_ORDER, sizeof(rout));
 				
 				// Create sl and sr
 				createScalarsFromChaCha20(sl, sr, nonce, i + 2);
@@ -2121,9 +2109,6 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			
 			// Clear sr
 			explicit_bzero((uint8_t *)sr, sizeof(sr));
-			
-			// Clear neg z
-			explicit_bzero((uint8_t *)negz, sizeof(negz));
 			
 			// Clear rout
 			explicit_bzero((uint8_t *)rout, sizeof(lout));

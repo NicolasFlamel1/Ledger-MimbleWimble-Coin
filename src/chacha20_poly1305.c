@@ -72,37 +72,41 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 	uint32_t *chaCha20CurrentState = chaCha20ResultingState ? chaCha20ResultingState : alloca(sizeof(chaCha20Poly1305State->chaCha20OriginalState));
 	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
 	
-	// Get the Poly1305 key from the ChaCha20 current state
-	const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
+	// Check if not exporting the ChaCha20 resulting state
+	if(!chaCha20ResultingState) {
 	
-	// Set Poly1305 r to the first part of the ChaCha20 current state
-	memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
-	chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
-	
-	// Clamp Poly1305 r
-	chaCha20Poly1305State->poly1305R[3] &= 15;
-	chaCha20Poly1305State->poly1305R[7] &= 15;
-	chaCha20Poly1305State->poly1305R[11] &= 15;
-	chaCha20Poly1305State->poly1305R[15] &= 15;
-	chaCha20Poly1305State->poly1305R[4] &= 252;
-	chaCha20Poly1305State->poly1305R[8] &= 252;
-	chaCha20Poly1305State->poly1305R[12] &= 252;
-	
-	// Convert Poly1305 r to big endian
-	swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
-	
-	// Set Poly1305 s to the second part of the ChaCha20 current state
-	memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
-	chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
-	
-	// Convert Poly1305 s to big endian
-	swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305S));
-	
-	// Set Poly1305 accumulator to zero
-	explicit_bzero(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
-	
-	// Update Poly1305 accumulator with the additional authenticated data
-	updatePoly1305Accumulator(chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+		// Get the Poly1305 key from the ChaCha20 current state
+		const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
+		
+		// Set Poly1305 r to the first part of the ChaCha20 current state
+		memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
+		chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
+		
+		// Clamp Poly1305 r
+		chaCha20Poly1305State->poly1305R[3] &= 15;
+		chaCha20Poly1305State->poly1305R[7] &= 15;
+		chaCha20Poly1305State->poly1305R[11] &= 15;
+		chaCha20Poly1305State->poly1305R[15] &= 15;
+		chaCha20Poly1305State->poly1305R[4] &= 252;
+		chaCha20Poly1305State->poly1305R[8] &= 252;
+		chaCha20Poly1305State->poly1305R[12] &= 252;
+		
+		// Convert Poly1305 r to big endian
+		swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
+		
+		// Set Poly1305 s to the second part of the ChaCha20 current state
+		memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
+		chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
+		
+		// Convert Poly1305 s to big endian
+		swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305S));
+		
+		// Set Poly1305 accumulator to zero
+		explicit_bzero(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+		
+		// Update Poly1305 accumulator with the additional authenticated data
+		updatePoly1305Accumulator(chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+	}
 }
 
 // Encrypt ChaCha20 Poly1305 data

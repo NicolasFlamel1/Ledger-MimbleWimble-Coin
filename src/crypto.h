@@ -119,13 +119,13 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve);
 
 // Update blinding factor sum
-void updateBlindingFactorSum(uint8_t *blindingFactorSum, uint8_t *blindingFactor, bool blindingFactorIsPositive);
+void updateBlindingFactorSum(uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive);
 
 // Create single-signer nonces
 void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce);
 
 // Create single-signer signature
-void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
+void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *message, const uint8_t *blindingFactor, const uint8_t *secretNonce, const uint8_t *publicNonce, const uint8_t *publicKey);
 
 // Get encrypted data length
 size_t getEncryptedDataLength(size_t dataLength);

@@ -31,7 +31,7 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 	}
 	
 	// Get offset from data
-	uint8_t *offset = data;
+	const uint8_t *offset = data;
 	
 	// Check if offset is invalid
 	if(!isValidSecp256k1PrivateKey(offset, BLINDING_FACTOR_SIZE)) {
