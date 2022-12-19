@@ -32,6 +32,7 @@ add_compile_definitions(HAVE_SHA3)
 add_compile_definitions(HAVE_MATH)
 add_compile_definitions(HAVE_ECDH)
 add_compile_definitions(HAVE_PBKDF2)
+add_compile_definitions(TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES=1)
 
 # Include directories
 include_directories(./simulate ../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include $ENV{BOLOS_SDK}/lib_ux/include)
@@ -72,6 +73,7 @@ add_executable(test_chacha20_poly1305
 	../../src/slate.c
 	../../src/state.c
 	../../src/transaction.c
+	../../src/storage.c
 )
 add_library(chacha20_poly1305 SHARED ../../src/chacha20_poly1305.c)
 target_link_libraries(test_chacha20_poly1305 PUBLIC cmocka crypto chacha20_poly1305)
@@ -84,6 +86,7 @@ add_executable(test_common
 	../../src/slate.c
 	../../src/state.c
 	../../src/transaction.c
+	../../src/storage.c
 )
 add_library(common SHARED ../../src/common.c)
 target_link_libraries(test_common PUBLIC cmocka crypto common)
@@ -99,6 +102,7 @@ add_executable(test_mqs
 	../../src/slate.c
 	../../src/state.c
 	../../src/transaction.c
+	../../src/storage.c
 )
 add_library(mqs SHARED ../../src/mqs.c)
 target_link_libraries(test_mqs PUBLIC cmocka crypto mqs)
@@ -116,6 +120,7 @@ add_executable(test_slatepack
 	../../src/slate.c
 	../../src/state.c
 	../../src/transaction.c
+	../../src/storage.c
 )
 add_library(slatepack SHARED ../../src/slatepack.c)
 target_link_libraries(test_slatepack PUBLIC cmocka crypto slatepack)

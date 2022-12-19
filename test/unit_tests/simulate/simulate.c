@@ -186,6 +186,48 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type, const uint8_t *password, size_t pas
 	assert_true(false);
 }
 
+// ECDSA sign
+int cx_ecdsa_sign(const cx_ecfp_private_key_t *pvkey, int mode, cx_md_t hashID, const unsigned char *hash, unsigned int hash_len, unsigned char *sig, unsigned int sig_len, unsigned int *info) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// ECDSA verify
+bool cx_ecdsa_verify(const cx_ecfp_public_key_t *pukey, int mode, cx_md_t hashID, const unsigned char *hash, unsigned int hash_len, const unsigned char *sig, unsigned int sig_len) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// NVM write
+void nvm_write(void *dst_adr PLENGTH(src_len), void *src_adr PLENGTH(src_len), unsigned int src_len) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// PIC
+void *pic(void *linked_address) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Init private key no throw
+cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t curve, const uint8_t *rawkey, size_t key_len, cx_ecfp_private_key_t *pvkey) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Generate pair no throw
+cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t curve, cx_ecfp_public_key_t *pubkey, cx_ecfp_private_key_t *privkey, bool keepprivate) {
+
+	// Fail test
+	assert_true(false);
+}
+
 // Clear menu buffers
 void clearMenuBuffers(void) {
 
@@ -244,6 +286,34 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 
 // Get X25519 private key from Ed25519 private key
 void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x25519PrivateKey, const cx_ecfp_private_key_t *ed25519PrivateKey) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Get encrypted data length
+size_t getEncryptedDataLength(size_t dataLength) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Encrypt data
+void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Decrypt data
+size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+
+	// Fail test
+	assert_true(false);
+}
+
+// Create single-signer nonces
+void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 
 	// Fail test
 	assert_true(false);
