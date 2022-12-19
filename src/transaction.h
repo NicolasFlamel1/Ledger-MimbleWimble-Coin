@@ -53,8 +53,8 @@ struct Transaction {
 	// Message signed
 	bool messageSigned;
 	
-	// Secret nonce set
-	bool secretNonceSet;
+	// Secret nonce index
+	uint8_t secretNonceIndex;
 	
 	// Address
 	char address[sizeof("tgrin") - sizeof((char)'\0') + SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE];
@@ -71,6 +71,15 @@ extern struct Transaction transaction;
 
 // Reset transaction
 void resetTransaction(void);
+
+// Create and save transaction secret nonce
+void createAndSaveTransactionSecretNonce(void);
+
+// Restore transaction secret nonce
+void restoreTransactionSecretNonce(void);
+
+// Clear transaction secret nonce
+void clearTransactionSecretNonce(void);
 
 
 #endif

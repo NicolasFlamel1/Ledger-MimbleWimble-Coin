@@ -57,6 +57,9 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->maximumFee = UINT64_MAX;
 	#endif
 	
+	// Set current currency information's ID
+	currentCurrencyInformation->id = CURRENCY_ID;
+	
 	// Check if MQS version exists
 	#ifdef CURRENCY_MQS_VERSION
 	

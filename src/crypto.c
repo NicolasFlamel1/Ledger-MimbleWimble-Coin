@@ -121,9 +121,6 @@ static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile ui
 // Use LR generator
 static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
 
-// Conditional negate
-static void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8_t *modulo);
-
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
 
@@ -630,9 +627,6 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 	// Initialize node
 	volatile uint8_t node[NODE_SIZE];
 	
-	// Initialize chain code
-	volatile uint8_t chainCode[CHAIN_CODE_SIZE];
-	
 	// Begin try
 	BEGIN_TRY {
 	
@@ -656,7 +650,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			}
 			
 			// Get chain code from the node
-			memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(addressPrivateKey->d)], CHAIN_CODE_SIZE);
+			volatile uint8_t *chainCode = &node[sizeof(addressPrivateKey->d)];
 			
 			// Derive child key from the address private key and chain code at the index
 			deriveChildKey(addressPrivateKey, chainCode, account, &index, 1, true);
@@ -670,9 +664,6 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			
 			// Clear the node
 			explicit_bzero((uint8_t *)node, sizeof(node));
-			
-			// Clear the chain code
-			explicit_bzero((uint8_t *)chainCode, sizeof(chainCode));
 		}
 	}
 	
@@ -902,8 +893,8 @@ size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLen
 			// Check if last padding byte is invalid
 			if(!result[dataLength - 1] || result[dataLength - 1] > CX_AES_BLOCK_SIZE || result[dataLength - 1] > dataLength) {
 			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
 			// Set decrypted data length
@@ -922,8 +913,8 @@ size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLen
 			// Check if padding is invalid
 			if(invalidPadding) {
 			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
 			}
 		}
 		
@@ -1326,7 +1317,7 @@ bool isValidCommitment(uint8_t *commitment) {
 	// Set result to if the commitment is valid
 	bool result = isValidSecp256k1PublicKey(commitment, COMMITMENT_SIZE);
 	
-	// Revetn the commitment's prefix
+	// Revert the commitment's prefix
 	commitment[0] += COMMITMENT_EVEN_PREFIX - EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 	
 	// Return the result
@@ -1605,10 +1596,12 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				const bool bit = (value >> i) & 1;
 
 				// Set aterm to the generator
-				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i * WINDOW_BITS] : GENERATORS_SECOND_HALF[i * WINDOW_BITS], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 				
-				// Negate the aterm's y component if the bit isn't set
-				conditionalNegate(&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], !bit, SECP256K1_CURVE_PRIME);
+				// Negate the aterm's y component if the bit isn't set in a way that tries to mitigate timing attacks
+				volatile uint8_t *atermY = &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+				
+				cx_math_subm(bit ? (uint8_t *)alpha : (uint8_t *)atermY, SECP256K1_CURVE_PRIME, (uint8_t *)atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 				
 				// Check if the sum of aterm to the alpha generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
@@ -1625,7 +1618,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
 				
 				// Check if sl or sr is zero
-				if(isZeroArraySecure(sl, SCALAR_SIZE) || isZeroArraySecure(sr, SCALAR_SIZE)) {
+				if(cx_math_is_zero(sl, SCALAR_SIZE) || cx_math_is_zero(sr, SCALAR_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1633,7 +1626,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				
 				// Get the product of the generator and sl
 				uint8_t *sterm = (uint8_t *)aterm;
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i * WINDOW_BITS], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
 				
@@ -1647,14 +1640,14 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
 				// Get the product of the generator and sr
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i * WINDOW_BITS], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
 				
@@ -1668,7 +1661,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -2121,34 +2114,6 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			
 			// Clear yn
 			explicit_bzero((uint8_t *)yn, sizeof(yn));
-		}
-	}
-	
-	// End try
-	END_TRY;
-}
-
-// Conditional negate
-void conditionalNegate(volatile uint8_t *scalar, bool negate, const uint8_t *modulo) {
-
-	// Initialize temp
-	volatile uint8_t temp[SCALAR_SIZE];
-
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-
-			// Negate the scalar if it's not zero and negating in a way that tries to mitigate timing attacks
-			cx_math_subm((isZeroArraySecure((uint8_t *)scalar, SCALAR_SIZE) | !negate) ? (uint8_t *)temp : (uint8_t *)scalar, modulo, (uint8_t *)scalar, modulo, SCALAR_SIZE);
-		}
-		
-		// Finally
-		FINALLY {
-		
-			// Clear temp
-			explicit_bzero((uint8_t *)temp, sizeof(temp));
 		}
 	}
 	

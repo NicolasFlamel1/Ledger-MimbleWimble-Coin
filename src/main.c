@@ -12,6 +12,7 @@
 	#include "menus.h"
 	#include "process_requests.h"
 	#include "state.h"
+	#include "storage.h"
 	
 	
 	// Function prototypes
@@ -40,6 +41,9 @@
 			currencyInformation = alloca(sizeof(struct CurrencyInformation));
 			getCurrencyInformation(currencyInformation);
 		}
+		
+		// Initialize storage
+		initializeStorage();
 		
 		// Loop forever
 		while(true) {

@@ -7,6 +7,7 @@
 #include "tor.h"
 #include "transaction.h"
 #include "slatepack.h"
+#include "storage.h"
 
 
 // Supporting function implementation
@@ -30,7 +31,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t)) {
+	if(firstParameter || secondParameter || dataLength < sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint8_t)) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -63,16 +64,19 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 	uint64_t fee;
 	memcpy(&fee, &data[sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input)], sizeof(fee));
 	
+	// Get secret nonce index from data
+	const uint8_t secretNonceIndex = data[sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee)];
+	
 	// Check if an address is provided
 	size_t addressLength = 0;
 	const char *address;
-	if(dataLength != sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee)) {
+	if(dataLength != sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee) + sizeof(secretNonceIndex)) {
 	
 		// Get address length
-		addressLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee));
+		addressLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee) + sizeof(secretNonceIndex));
 		
 		// Get address from data
-		address = (char *)&data[sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee)];
+		address = (char *)&data[sizeof(account) + sizeof(index) + sizeof(output) + sizeof(input) + sizeof(fee) + sizeof(secretNonceIndex)];
 		
 		// Check address length
 		switch(addressLength) {
@@ -150,9 +154,6 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		}
 	}
 	
-	// Create transaction's secret nonce
-	createSingleSignerNonces((uint8_t *)transaction.secretNonce, NULL);
-	
 	// Check if an input exists
 	if(input) {
 	
@@ -170,11 +171,28 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
+		// Check if secret nonce index is invalid
+		if(secretNonceIndex > NUMBER_OF_TRANSACTION_SECRET_NONCES) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
+		// Check if secret nonce index exists and the secret nonce at the index is invalid
+		if(secretNonceIndex && cx_math_is_zero((uint8_t *)storage.transactionSecretNonces[secretNonceIndex - 1], sizeof(storage.transactionSecretNonces[secretNonceIndex - 1]))) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
 		// Set transaction's remaining input
 		transaction.remainingInput = input + fee;
 		
 		// Set transaction's send
 		transaction.send = input - output;
+		
+		// Set transaction secret nonce index
+		transaction.secretNonceIndex = secretNonceIndex;
 	}
 	
 	// Otherwise
@@ -187,8 +205,18 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 			THROW(INVALID_PARAMETERS_ERROR);
 		}
 		
+		// Check if secret nonce index is invalid
+		if(secretNonceIndex) {
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+		
 		// Set transaction's receive
 		transaction.receive = output;
+		
+		// Create transaction's secret nonce
+		createSingleSignerNonces((uint8_t *)transaction.secretNonce, NULL);
 	}
 	
 	// Set transaction's account

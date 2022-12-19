@@ -36,7 +36,7 @@
 
 // Currency information
 struct CurrencyInformation {
-
+	
 	// BIP44 coin type
 	uint32_t bip44CoinType;
 	
@@ -54,6 +54,9 @@ struct CurrencyInformation {
 	
 	// Maximum fee
 	uint64_t maximumFee;
+	
+	// ID
+	uint8_t id;
 	
 	// MQS version
 	uint8_t mqsVersion[CURRENCY_MQS_VERSION_SIZE];

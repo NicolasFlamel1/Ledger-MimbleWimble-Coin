@@ -22,13 +22,11 @@ This app supports the following commands.
 | C7    | 0F          | `CONTINUE_TRANSACTION_INCLUDE_INPUT`              | Includes the input for a provided identifier, value, and switch type in the transaction |
 | C7    | 10          | `CONTINUE_TRANSACTION_APPLY_OFFSET`               | Applies an offset to the transaction's blinding factor |
 | C7    | 11          | `CONTINUE_TRANSACTION_GET_PUBLIC_KEY`             | Returns the transaction's blinding factor's public key |
-| C7    | 12          | `CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE` | Returns the transaction's secret nonce encrypted |
-| C7    | 13          | `CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE` | Sets the transaction's secret nonce to a provided encrypted secret nonce |
-| C7    | 14          | `CONTINUE_TRANSACTION_GET_PUBLIC_NONCE`           | Returns the transaction's public nonce |
-| C7    | 15          | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE`      | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
-| C7    | 16          | `FINISH_TRANSACTION`                              | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
-| C7    | 17          | `GET_MQS_TIMESTAMP_SIGNATURE`                     | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
-| C7    | 18          | `GET_TOR_CERTIFICATE_SIGNATURE`                   | Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index |
+| C7    | 12          | `CONTINUE_TRANSACTION_GET_PUBLIC_NONCE`           | Returns the transaction's public nonce |
+| C7    | 13          | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE`      | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
+| C7    | 14          | `FINISH_TRANSACTION`                              | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
+| C7    | 15          | `GET_MQS_TIMESTAMP_SIGNATURE`                     | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
+| C7    | 16          | `GET_TOR_CERTIFICATE_SIGNATURE`                   | Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index |
 
 ## Response Codes
 
@@ -501,7 +499,7 @@ Returns the AES key used to encrypt the decrypted data chunks if a valid tag is 
 
 #### Description
 
-Prepares the app's internal transaction state to be able to process a transaction that will be provided later as an account at a provided index using a provided output, input, and fee. An optional sender or recipient address depending on if the transaction is received or sent can be provided if this transaction contains a payment proof.
+Prepares the app's internal transaction state to be able to process a transaction that will be provided later as an account at a provided index using a provided output, input, fee, and secret nonce index. The secret nonce index select which previously generated secret nonce to use when sending. An optional sender or recipient address depending on if the transaction is received or sent can be provided if this transaction contains a payment proof.
 
 #### Encoding
 
@@ -520,14 +518,15 @@ Prepares the app's internal transaction state to be able to process a transactio
 
 **Input Data**
 
-| Length                                                  | Name      | Description |
-|---------------------------------------------------------|-----------|-------------|
-| 4                                                       | `account` | Account number (little endian, max 7FFFFFFF)) |
-| 4                                                       | `index`   | Index number (little endian) |
-| 8                                                       | `output`  | Output amount (little endian) |
-| 8                                                       | `input`   | Input amount (little endian) |
-| 8                                                       | `fee`     | Fee amount (little endian) |
-| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `address` | Sender or recipient address of the transaction |
+| Length                                                  | Name                 | Description |
+|---------------------------------------------------------|----------------------|-------------|
+| 4                                                       | `account`            | Account number (little endian, max 7FFFFFFF)) |
+| 4                                                       | `index`              | Index number (little endian) |
+| 8                                                       | `output`             | Output amount (little endian) |
+| 8                                                       | `input`              | Input amount (little endian) |
+| 8                                                       | `fee`                | Fee amount (little endian) |
+| 1                                                       | `secret_nonce_index` | Index of the secret nonce to use or 0 to create secret nonce (max 20) |
+| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `address`            | Sender or recipient address of the transaction |
 
 **Output Data**
 
@@ -609,7 +608,7 @@ Includes the input for a provided identifier, value, and switch type in the tran
 
 #### Description
 
-Applies an offset to the transaction's blinding factor in the app's internal transaction state.
+Applies an offset to the transaction's blinding factor in the app's internal transaction state. Returns the secret nonce index if transaction is send and doesn't have a secret nonce.
 
 #### Encoding
 
@@ -634,9 +633,9 @@ Applies an offset to the transaction's blinding factor in the app's internal tra
 
 **Output Data**
 
-| Length | Name | Description |
-|--------|------|-------------|
-| 0      | N/A  | Unused |
+| Length | Name                 | Description |
+|--------|----------------------|-------------|
+| 0 or 1 | `secret_nonce_index` | Secret nonce index for the send transaction to use |
 
 ### CONTINUE_TRANSACTION_GET_PUBLIC_KEY
 
@@ -671,72 +670,6 @@ Returns the app's internal transaction state's blinding factor's public key.
 |--------|--------------|-------------|
 | 33     | `public_key` | Transaction's blinding factor's public key |
 
-### CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE
-
-#### Description
-
-Returns the app's internal transaction state's secret nonce encrypted.
-
-#### Encoding
-
-**Command**
-
-| Class | Instruction |
-|-------|-------------|
-| C7    | 12          |
-
-**Parameters**
-
-| Parameter | Name | Description |
-|-----------|------|-------------|
-| P1        | N/A  | Unused (must be zero) |
-| P2        | N/A  | Unused (must be zero) |
-
-**Input Data**
-
-| Length | Name | Description |
-|--------|------|-------------|
-| 0      | N/A  | Unused |
-
-**Output Data**
-
-| Length  | Name                     | Description |
-|---------|--------------------------|-------------|
-| Varying | `encrypted_secret_nonce` | Encrypted secret nonce |
-
-### CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE
-
-#### Description
-
-Set the app's internal transaction state's secret nonce.
-
-#### Encoding
-
-**Command**
-
-| Class | Instruction |
-|-------|-------------|
-| C7    | 13          |
-
-**Parameters**
-
-| Parameter | Name | Description |
-|-----------|------|-------------|
-| P1        | N/A  | Unused (must be zero) |
-| P2        | N/A  | Unused (must be zero) |
-
-**Input Data**
-
-| Length  | Name                     | Description |
-|---------|--------------------------|-------------|
-| Varying | `encrypted_secret_nonce` | Encrypted secret nonce |
-
-**Output Data**
-
-| Length | Name | Description |
-|--------|------|-------------|
-| 0      | N/A  | Unused |
-
 ### CONTINUE_TRANSACTION_GET_PUBLIC_NONCE
 
 #### Description
@@ -749,7 +682,7 @@ Returns the app's internal transaction state's public nonce.
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 14          |
+| C7    | 12          |
 
 **Parameters**
 
@@ -782,7 +715,7 @@ Returns the signature for a provided UTF-8 message and public key signed with th
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 15          |
+| C7    | 13          |
 
 **Parameters**
 
@@ -814,7 +747,7 @@ A payment proof will be returned as well if the payment is receiving, a `kernel_
 
 A payment proof will be displayed if a `kernel_commitment` is provided, a `payment_proof` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending and the sender's address if receiving. The `address_type` will be treated as the desired sender's address type if sending.
 
-If a transaction needs to be finalized at a later time, then the app's internal slate state can be restored by starting a transaction, including the same inputs and outputs, applying the same offset, and setting the encrypted secret nonce that was previously obtained with a `CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE` command.
+If a sent transaction needs to be finalized at a later time, then the app's internal slate state can be restored by starting a transaction, including the same inputs and outputs, applying the same offset, and using the secret nonce index that was previously obtained with a `CONTINUE_TRANSACTION_APPLY_OFFSET` command.
 
 #### Encoding
 
@@ -822,7 +755,7 @@ If a transaction needs to be finalized at a later time, then the app's internal 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 16          |
+| C7    | 14          |
 
 **Parameters**
 
@@ -860,7 +793,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 17          |
+| C7    | 15          |
 
 **Parameters**
 
@@ -896,7 +829,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 18          |
+| C7    | 16          |
 
 **Parameters**
 

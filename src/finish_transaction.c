@@ -139,6 +139,20 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 	// Get kernel features from data
 	const enum KernelFeatures kernelFeatures = data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE];
 	
+	// Check if transaction hasn't been started
+	if(!transaction.started) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
+	// Check if transaction has remaining output or input
+	if(transaction.remainingOutput || transaction.remainingInput) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
 	// Check kernel features
 	size_t kernelFeaturesLength;
 	switch(kernelFeatures) {
@@ -210,20 +224,6 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
 	};
-	
-	// Check if transaction hasn't been started
-	if(!transaction.started) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
-	// Check if transaction has remaining output or input
-	if(transaction.remainingOutput || transaction.remainingInput) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
 	
 	// Check if transaction is sending
 	if(transaction.send) {
@@ -497,6 +497,13 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 // Process finish transaction user interaction
 void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 
+	// Check if transaction is sending
+	if(transaction.send) {
+	
+		// Clear transaction secret nonce
+		clearTransactionSecretNonce();
+	}
+
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 	
@@ -650,7 +657,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	
 	// Initialize signature
 	uint8_t signature[SINGLE_SIGNER_COMPACT_SIGNATURE_SIZE];
-
+	
 	// Create single-signer signature from the message, transaction's blinding factor, transaction's secret nonce, public nonce, and public key
 	createSingleSignerSignature(signature, message, (uint8_t *)transaction.blindingFactor, (uint8_t *)transaction.secretNonce, publicNonce, publicKey);
 	

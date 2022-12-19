@@ -85,14 +85,8 @@ const REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION = REQUEST_CONTINUE_T
 // Request continue transaction get public key instruction
 const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION + 1;
 
-// Request continue transaction get encrypted secret nonce instruction
-const REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
-
-// Request continue transaction set encrypted secret nonce instruction
-const REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION + 1;
-
 // Request continue transaction get public nonce instruction
-const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION + 1;
+const REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION + 1;
 
 // Request continue transaction get message signature instruction
 const REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION + 1;
@@ -1999,6 +1993,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 		// Fee
 		Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
+		// Secret nonce index
+		Buffer.from(new Uint8Array([0])),
+		
 		// Address
 		Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? senderAddress : [])
 	]));
@@ -2612,54 +2609,6 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 			break;
 	}
 	
-	// Start transaction on the hardware wallet
-	await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-	
-		// Account
-		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-		
-		// Index
-		Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-		
-		// Output
-		Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-		
-		// Input
-		Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-		
-		// Fee
-		Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-		
-		// Address
-		Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? receiverAddress : [])
-	]));
-	
-	// Include output in the transaction on the hardware wallet
-	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-	
-		// Identifier
-		Buffer.from(OUTPUT_IDENTIFIER.getValue()),
-		
-		// Amount
-		Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-		
-		// Switch type
-		Buffer.from(new Uint8Array([switchType]))
-	]));
-	
-	// Include input in the transaction on the hardware wallet
-	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_INPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-	
-		// Identifier
-		Buffer.from(INPUT_IDENTIFIER.getValue()),
-		
-		// Amount
-		Buffer.from((INPUT.plus(FEE)).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-		
-		// Switch type
-		Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
-	]));
-	
 	// While offset isn't a valid secret key
 	const offset = new Uint8Array(Crypto.BLINDING_FACTOR_LENGTH);
 	do {
@@ -2672,8 +2621,74 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	// Log offset
 	console.log("Using offset: " + Common.toHexString(offset));
 	
-	// Apply offset to the transaction on the hardware wallet
-	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
+	// Start transaction twice to test secret nonce index
+	let secretNonceIndex = 0;
+	for(let i = 0; i < 2; ++i) {
+	
+		// Start transaction on the hardware wallet
+		await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+		
+			// Account
+			Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+			
+			// Index
+			Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+			
+			// Output
+			Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Input
+			Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Fee
+			Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Secret nonce index
+			Buffer.from(new Uint8Array([secretNonceIndex])),
+			
+			// Address
+			Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? receiverAddress : [])
+		]));
+		
+		// Include output in the transaction on the hardware wallet
+		await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+		
+			// Identifier
+			Buffer.from(OUTPUT_IDENTIFIER.getValue()),
+			
+			// Amount
+			Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Switch type
+			Buffer.from(new Uint8Array([switchType]))
+		]));
+		
+		// Include input in the transaction on the hardware wallet
+		await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_INPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+		
+			// Identifier
+			Buffer.from(INPUT_IDENTIFIER.getValue()),
+			
+			// Amount
+			Buffer.from((INPUT.plus(FEE)).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Switch type
+			Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
+		]));
+		
+		// Apply offset to the transaction on the hardware wallet
+		let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
+		
+		// Check if response contains a secret nonce index
+		if(response["length"] > RESPONSE_DELIMITER_LENGTH) {
+		
+			// Get secret nonce index from response
+			secretNonceIndex = response[0];
+			
+			// Log secret nonce index
+			console.log("Secret nonce index: " + secretNonceIndex);
+		}
+	}
 	
 	// Get the output's blinding factor
 	const outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
@@ -2717,18 +2732,6 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	
 	// Log transaction public nonce
 	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
-	
-	// Get the transaction encrypted secret nonce from the hardware wallet
-	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-
-	// Get encrypted secret nonce from response
-	const encryptedSecretNonce = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-	
-	// Log transaction encrypted secret nonce
-	console.log("Transaction encrypted secret nonce: " + Common.toHexString(encryptedSecretNonce));
-	
-	// Set the transaction encrypted secret nonce on the hardware wallet
-	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(encryptedSecretNonce));
 	
 	// Get the message signature from the hardware wallet
 	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([

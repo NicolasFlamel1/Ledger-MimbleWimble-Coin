@@ -9,7 +9,7 @@
 // Supporting function implementation
 
 // Process continue transaction apply offset request
-void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processContinueTransactionApplyOffsetRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -61,11 +61,48 @@ void processContinueTransactionApplyOffsetRequest(__attribute__((unused)) unsign
 		THROW(INVALID_STATE_ERROR);
 	}
 	
+	// Check if a message was signed for the transaction
+	if(transaction.messageSigned) {
+	
+		// Throw invalid state error
+		THROW(INVALID_STATE_ERROR);
+	}
+	
 	// Update transaction's blinding factor with the offset as a negative blinding factor
 	updateBlindingFactorSum((uint8_t *)transaction.blindingFactor, offset, false);
 	
 	// Set that transaction's offset was applied
 	transaction.offsetApplied = true;
+	
+	// Check if transaction is sending
+	if(transaction.send) {
+	
+		// Check if transaction doesn't have a secret nonce
+		if(!transaction.secretNonceIndex) {
+		
+			// Create and save transaction secret nonce
+			createAndSaveTransactionSecretNonce();
+			
+			// Check if response with transaction's secret nonce index will overflow
+			if(willResponseOverflow(*responseLength, sizeof(transaction.secretNonceIndex))) {
+			
+				// Throw length error
+				THROW(ERR_APD_LEN);
+			}
+			
+			// Append transaction's secret nonce index to response
+			memcpy(&G_io_apdu_buffer[*responseLength], &transaction.secretNonceIndex, sizeof(transaction.secretNonceIndex));
+			
+			*responseLength += sizeof(transaction.secretNonceIndex);
+		}
+		
+		// Otherwise
+		else {
+		
+			// Restore transaction secret nonce
+			restoreTransactionSecretNonce();
+		}
+	}
 
 	// Throw success
 	THROW(SWO_SUCCESS);

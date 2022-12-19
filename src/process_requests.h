@@ -67,12 +67,6 @@ enum Instruction {
 	// Continue transaction get public key instruction
 	CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION,
 	
-	// Continue transaction get encrypted secret nonce instruction
-	CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION,
-	
-	// Continue transaction set encrypted secret nonce instruction
-	CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION,
-	
 	// Continue transaction get public nonce instruction
 	CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION,
 	

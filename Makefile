@@ -12,9 +12,9 @@ include $(BOLOS_SDK)/Makefile.defines
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
-APPVERSION_M = 4
+APPVERSION_M = 5
 APPVERSION_N = 0
-APPVERSION_P = 1
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Add security review banner. To be removed once Ledger security review is done.
@@ -54,6 +54,7 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	endif
 
 	# Defines
+	DEFINES += CURRENCY_ID=0
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
@@ -92,6 +93,7 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	endif
 
 	# Defines
+	DEFINES += CURRENCY_ID=1
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
@@ -137,6 +139,7 @@ else ifeq ($(CURRENCY),grin)
 	endif
 
 	# Defines
+	DEFINES += CURRENCY_ID=2
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
@@ -182,6 +185,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	endif
 
 	# Defines
+	DEFINES += CURRENCY_ID=3
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
 	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
@@ -210,6 +214,9 @@ else
 # Display error
 $(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, or grin_testnet)
 endif
+
+# Define total number of supported currencies
+DEFINES += TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES=4
 
 # Check if target is the Nano S
 ifeq ($(TARGET_NAME),TARGET_NANOS)

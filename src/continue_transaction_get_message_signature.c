@@ -111,6 +111,13 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 			createSingleSignerSignature(signature, hash, (uint8_t *)transaction.blindingFactor, (uint8_t *)secretNonce, publicNonce, publicKey);
 		}
 		
+		// Catch invalid parameters error
+		CATCH(INVALID_PARAMETERS_ERROR) {
+		
+			// Throw internal error error
+			THROW(INTERNAL_ERROR_ERROR);
+		}
+		
 		// Finally
 		FINALLY {
 		
@@ -121,6 +128,13 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	
 	// End try
 	END_TRY;
+	
+	// Check if response with signature will overflow
+	if(willResponseOverflow(*responseLength, sizeof(signature))) {
+	
+		// Throw length error
+		THROW(ERR_APD_LEN);
+	}
 	
 	// Append signature to response
 	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));

@@ -6,13 +6,11 @@
 #include "continue_decrypting_slate.h"
 #include "continue_encrypting_slate.h"
 #include "continue_transaction_apply_offset.h"
-#include "continue_transaction_get_encrypted_secret_nonce.h"
 #include "continue_transaction_get_public_key.h"
 #include "continue_transaction_get_public_nonce.h"
 #include "continue_transaction_get_message_signature.h"
 #include "continue_transaction_include_input.h"
 #include "continue_transaction_include_output.h"
-#include "continue_transaction_set_encrypted_secret_nonce.h"
 #include "finish_decrypting_slate.h"
 #include "finish_encrypting_slate.h"
 #include "finish_transaction.h"
@@ -234,24 +232,6 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 				
 					// Process continue transaction get public key request
 					processContinueTransactionGetPublicKeyRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
-					// Break
-					break;
-				
-				// Continue transaction get encrypted secret nonce instruction
-				case CONTINUE_TRANSACTION_GET_ENCRYPTED_SECRET_NONCE_INSTRUCTION:
-				
-					// Process continue transaction get encrypted secret nonce request
-					processContinueTransactionGetEncryptedSecretNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-					
-					// Break
-					break;
-				
-				// Continue transaction set encrypted secret nonce instruction
-				case CONTINUE_TRANSACTION_SET_ENCRYPTED_SECRET_NONCE_INSTRUCTION:
-				
-					// Process continue transaction set encrypted secret nonce request
-					processContinueTransactionSetEncryptedSecretNonceRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 					
 					// Break
 					break;
