@@ -17,8 +17,7 @@ void initializeStorage(void) {
 	// Check if current transaction secret nonce index is invalid
 	if(storage.currentTransactionSecretNonceIndex >= NUMBER_OF_TRANSACTION_SECRET_NONCES) {
 	
-		// Set current transaction secret nonce index to zero
-		const uint8_t zero = 0;
-		nvm_write((void *)&storage.currentTransactionSecretNonceIndex, (void *)&zero, sizeof(zero));
+		// Clear current transaction secret nonce index
+		nvm_write((void *)&storage.currentTransactionSecretNonceIndex, NULL, sizeof(storage.currentTransactionSecretNonceIndex));
 	}
 }
