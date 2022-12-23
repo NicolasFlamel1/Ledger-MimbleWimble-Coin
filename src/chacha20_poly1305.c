@@ -1,5 +1,4 @@
 // Header files
-#include <alloca.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
 #include "chacha20_poly1305.h"
@@ -68,35 +67,55 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 	chaCha20Poly1305State->chaCha20OriginalState[14] = *(uint32_t *)&nonce[sizeof(uint32_t) * 1];
 	chaCha20Poly1305State->chaCha20OriginalState[15] = *(uint32_t *)&nonce[sizeof(uint32_t) * 2];
 	
-	// Initialize ChaCha20 current state
-	uint32_t *chaCha20CurrentState = chaCha20ResultingState ? chaCha20ResultingState : alloca(sizeof(chaCha20Poly1305State->chaCha20OriginalState));
-	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
-	
 	// Check if not exporting the ChaCha20 resulting state
 	if(!chaCha20ResultingState) {
 	
-		// Get the Poly1305 key from the ChaCha20 current state
-		const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
+		// Initialize ChaCha20 current state
+		volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
 		
-		// Set Poly1305 r to the first part of the ChaCha20 current state
-		memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
-		chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
+		// Begin try
+		BEGIN_TRY {
 		
-		// Clamp Poly1305 r
-		chaCha20Poly1305State->poly1305R[3] &= 15;
-		chaCha20Poly1305State->poly1305R[7] &= 15;
-		chaCha20Poly1305State->poly1305R[11] &= 15;
-		chaCha20Poly1305State->poly1305R[15] &= 15;
-		chaCha20Poly1305State->poly1305R[4] &= 252;
-		chaCha20Poly1305State->poly1305R[8] &= 252;
-		chaCha20Poly1305State->poly1305R[12] &= 252;
+			// Try
+			TRY {
+			
+				// Initialize ChaCha20 current state with the ChaCha20 Poly1305 state
+				initializeChaCha20CurrentState(chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+	
+				// Get the Poly1305 key from the ChaCha20 current state
+				const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
+				
+				// Set Poly1305 r to the first part of the ChaCha20 current state
+				memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
+				chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
+				
+				// Clamp Poly1305 r
+				chaCha20Poly1305State->poly1305R[3] &= 15;
+				chaCha20Poly1305State->poly1305R[7] &= 15;
+				chaCha20Poly1305State->poly1305R[11] &= 15;
+				chaCha20Poly1305State->poly1305R[15] &= 15;
+				chaCha20Poly1305State->poly1305R[4] &= 252;
+				chaCha20Poly1305State->poly1305R[8] &= 252;
+				chaCha20Poly1305State->poly1305R[12] &= 252;
+				
+				// Convert Poly1305 r to big endian
+				swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
+				
+				// Set Poly1305 s to the second part of the ChaCha20 current state
+				memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
+				chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
+			}
 		
-		// Convert Poly1305 r to big endian
-		swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
+			// Finally
+			FINALLY {
+			
+				// Clear the ChaCha20 current state
+				explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
+			}
+		}
 		
-		// Set Poly1305 s to the second part of the ChaCha20 current state
-		memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
-		chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
+		// End try
+		END_TRY;
 		
 		// Convert Poly1305 s to big endian
 		swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305S));
@@ -106,6 +125,13 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 		
 		// Update Poly1305 accumulator with the additional authenticated data
 		updatePoly1305Accumulator(chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+	}
+	
+	// Otherwise
+	else {
+	
+		// Initialize resulting ChaCha20 current state with the ChaCha20 Poly1305 state
+		initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20ResultingState);
 	}
 }
 
@@ -123,15 +149,35 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 	
 	// Initialize ChaCha20 current state
-	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
-	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
+	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
 	
-	// Go through all bytes in the data block
-	for(size_t i = 0; i < dataBlockLength; ++i) {
+	// Begin try
+	BEGIN_TRY {
 	
-		// Encrypt the byte with the ChaCha20 current state
-		encryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+		// Try
+		TRY {
+	
+			// Initialize ChaCha20 current state with the ChaCha20 Poly1305 state
+			initializeChaCha20CurrentState(chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+			
+			// Go through all bytes in the data block
+			for(size_t i = 0; i < dataBlockLength; ++i) {
+			
+				// Encrypt the byte with the ChaCha20 current state
+				encryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the ChaCha20 current state
+			explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
+		}
 	}
+	
+	// End try
+	END_TRY;
 	
 	// Update Poly1305 accumulator with the encrypted data block
 	updatePoly1305Accumulator(chaCha20Poly1305State, encryptedDataBlock, dataBlockLength);
@@ -154,15 +200,35 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 	
 	// Initialize ChaCha20 current state
-	uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
-	initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20CurrentState);
+	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
 	
-	// Go through all bytes in the data block
-	for(size_t i = 0; i < dataBlockLength; ++i) {
+	// Begin try
+	BEGIN_TRY {
 	
-		// Decrypt the byte with the ChaCha20 current state
-		decryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+		// Try
+		TRY {
+	
+			// Initialize ChaCha20 current state with the ChaCha20 Poly1305 state
+			initializeChaCha20CurrentState(chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+			
+			// Go through all bytes in the data block
+			for(size_t i = 0; i < dataBlockLength; ++i) {
+			
+				// Decrypt the byte with the ChaCha20 current state
+				decryptedDataBlock[i] = dataBlock[i] ^ ((uint8_t *)chaCha20CurrentState)[i];
+			}
+		}
+		
+		// Finally
+		FINALLY {
+		
+			// Clear the ChaCha20 current state
+			explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
+		}
 	}
+	
+	// End try
+	END_TRY;
 	
 	// Update Poly1305 accumulator with the data block
 	updatePoly1305Accumulator(chaCha20Poly1305State, dataBlock, dataBlockLength);

@@ -12,20 +12,17 @@
 // Generator size
 #define GENERATOR_SIZE 64
 
-// Bits to prove
-#define BITS_TO_PROVE (sizeof(uint64_t) * BITS_IN_A_BYTE)
-
-// Window bits
-#define WINDOW_BITS 1
+// Number of generators
+#define NUMBER_OF_GENERATORS 128
 
 
 // Constants
 
 // Generators first half
-extern const uint8_t GENERATORS_FIRST_HALF[BITS_TO_PROVE * WINDOW_BITS][GENERATOR_SIZE];
+extern const uint8_t GENERATORS_FIRST_HALF[NUMBER_OF_GENERATORS / 2][GENERATOR_SIZE];
 
 // Generators second half
-extern const uint8_t GENERATORS_SECOND_HALF[BITS_TO_PROVE * WINDOW_BITS][GENERATOR_SIZE];
+extern const uint8_t GENERATORS_SECOND_HALF[NUMBER_OF_GENERATORS / 2][GENERATOR_SIZE];
 
 
 #endif

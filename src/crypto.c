@@ -46,6 +46,9 @@
 // Commitment odd prefix
 #define COMMITMENT_ODD_PREFIX 9
 
+// Bits to prove
+#define BITS_TO_PROVE (sizeof(uint64_t) * BITS_IN_A_BYTE)
+
 
 // Constants
 
@@ -79,9 +82,9 @@ static const uint8_t GENERATOR_H[] = {
 	0x50, 0x92, 0x9B, 0x74, 0xC1, 0xA0, 0x49, 0x54, 0xB7, 0x8B, 0x4B, 0x60, 0x35, 0xE9, 0x7A, 0x5E, 0x07, 0x8A, 0x5A, 0x0F, 0x28, 0xEC, 0x96, 0xD5, 0x47, 0xBF, 0xEE, 0x9A, 0xCE, 0x80, 0x3A, 0xC0, 0x31, 0xD3, 0xC6, 0x86, 0x39, 0x73, 0x92, 0x6E, 0x04, 0x9E, 0x63, 0x7C, 0xB1, 0xB5, 0xF4, 0x0A, 0x36, 0xDA, 0xC2, 0x8A, 0xF1, 0x76, 0x69, 0x68, 0xC3, 0x0C, 0x23, 0x13, 0xF3, 0xA3, 0x89, 0x04
 };
 
-// Generator J public
-static const uint8_t GENERATOR_J_PUBLIC[] = {
-	0x5F, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2A, 0x8D, 0x8B, 0x39, 0x7E, 0x9B, 0xF4, 0x54, 0x29, 0x2F, 0x5A, 0x1B, 0x3D, 0x38, 0x85, 0x16, 0xC2, 0xF3, 0x03, 0xFC, 0x95, 0x67, 0xF5, 0x60, 0xB8, 0x3A, 0xC4, 0xC5, 0xA6, 0xDC, 0xA2, 0x01, 0x59, 0xFC, 0x56, 0xCF, 0x74, 0x9A, 0xA6, 0xA5, 0x65, 0x31, 0x6A, 0xA5, 0x03, 0x74, 0x42, 0x3F, 0x42, 0x53, 0x8F, 0xAA, 0x2C, 0xD3, 0x09, 0x3F, 0xA4
+// Generator J
+static const uint8_t GENERATOR_J[] = {
+	0xB8, 0x60, 0xF5, 0x67, 0x95, 0xFC, 0x03, 0xF3, 0xC2, 0x16, 0x85, 0x38, 0x3D, 0x1B, 0x5A, 0x2F, 0x29, 0x54, 0xF4, 0x9B, 0x7E, 0x39, 0x8B, 0x8D, 0x2A, 0x01, 0x93, 0x93, 0x36, 0x21, 0x15, 0x5F, 0xA4, 0x3F, 0x09, 0xD3, 0x2C, 0xAA, 0x8F, 0x53, 0x42, 0x3F, 0x42, 0x74, 0x03, 0xA5, 0x6A, 0x31, 0x65, 0xA5, 0xA6, 0x9A, 0x74, 0xCF, 0x56, 0xFC, 0x59, 0x01, 0xA2, 0xDC, 0xA6, 0xC5, 0xC4, 0x3A
 };
 
 // BIP44 path without coin type and account
@@ -222,23 +225,23 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 		getPrivateKeyAndChainCode(privateKey, chainCode, account);
 	}
 	
-	// Go through the path
-	for(size_t i = 0; i < pathLength; ++i) {
+	// Initialize data
+	volatile uint8_t data[COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint32_t)];
 	
-		// Initialize data
-		volatile uint8_t data[COMPRESSED_PUBLIC_KEY_SIZE + sizeof(path[i])];
+	// Initialize node
+	volatile uint8_t node[NODE_SIZE];
+	
+	// Initialize new private key
+	volatile cx_ecfp_private_key_t newPrivateKey;
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
 		
-		// Initialize node
-		volatile uint8_t node[NODE_SIZE];
-		
-		// Initialize new private key
-		volatile cx_ecfp_private_key_t newPrivateKey;
-		
-		// Begin try
-		BEGIN_TRY {
-		
-			// Try
-			TRY {
+			// Go through the path
+			for(size_t i = 0; i < pathLength; ++i) {
 			
 				// Check if path is hardened
 				if(path[i] & HARDENED_PATH_MASK) {
@@ -296,24 +299,24 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				// Set private key to the new private key
 				memcpy((cx_ecfp_private_key_t *)privateKey, (cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
 			}
-		
-			// Finally
-			FINALLY {
-			
-				// Clear the data
-				explicit_bzero((uint8_t *)data, sizeof(data));
-				
-				// Clear the node
-				explicit_bzero((uint8_t *)node, sizeof(node));
-				
-				// Clear the new private key
-				explicit_bzero((cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
-			}
 		}
+	
+		// Finally
+		FINALLY {
 		
-		// End try
-		END_TRY;
+			// Clear the data
+			explicit_bzero((uint8_t *)data, sizeof(data));
+			
+			// Clear the node
+			explicit_bzero((uint8_t *)node, sizeof(node));
+			
+			// Clear the new private key
+			explicit_bzero((cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
+		}
 	}
+	
+	// End try
+	END_TRY;
 }
 
 // Derive blinding factor
@@ -327,7 +330,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 	volatile cx_sha256_t hash;
 	
 	// Initialize publicKeyGenerator
-	volatile uint8_t publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_J_PUBLIC)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
+	volatile uint8_t publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_J)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
 	// Begin try
 	BEGIN_TRY {
@@ -364,16 +367,11 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 						cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, COMMITMENT_SIZE, NULL, 0);
 						
 						// Get product of the generator public key and the child's private key
-						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_J_PUBLIC, sizeof(GENERATOR_J_PUBLIC));
-						volatile uint8_t *x = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
-						swapEndianness((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
-						volatile uint8_t *y = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-						swapEndianness((uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
-						
+						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_J, sizeof(GENERATOR_J));
 						CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)publicKeyGenerator, (uint8_t *)childPrivateKey.d, BLINDING_FACTOR_SIZE));
 						
 						// Check if the result has an x component of zero
-						if(isZeroArraySecure((uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE)) {
+						if(isZeroArraySecure((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 						
 							// Throw internal error error
 							THROW(INTERNAL_ERROR_ERROR);
@@ -1594,9 +1592,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			
 				// Get bit in the value
 				const bool bit = (value >> i) & 1;
-
+				
 				// Set aterm to the generator
-				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i * WINDOW_BITS] : GENERATORS_SECOND_HALF[i * WINDOW_BITS], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 				
 				// Negate the aterm's y component if the bit isn't set in a way that tries to mitigate timing attacks
 				volatile uint8_t *atermY = &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
@@ -1626,7 +1624,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				
 				// Get the product of the generator and sl
 				uint8_t *sterm = (uint8_t *)aterm;
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i * WINDOW_BITS], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
 				
@@ -1647,7 +1645,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				}
 				
 				// Get the product of the generator and sr
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i * WINDOW_BITS], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
+				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
 				
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
 				
@@ -1701,7 +1699,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			// Get z from running commitment
 			memcpy((uint8_t *)z, (uint8_t *)runningCommitment, sizeof(z));
 			
-			// Create t0 with an LR generator
+			// Create t0, t1, and t2 with an LR generator
 			useLrGenerator(t0, t1, t2, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
 			
 			// Show progress bar
@@ -2172,9 +2170,9 @@ void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *
 	
 	// Check if allocating memory for internal point was successful
 	cx_ecpoint_t internalPoint;
-	const cx_err_t allocError = cx_ecpoint_alloc(&internalPoint, curve);
+	const cx_err_t allocatingError = cx_ecpoint_alloc(&internalPoint, curve);
 	
-	if(!allocError) {
+	if(!allocatingError) {
 	
 		// Set internal point to the point and check if it fails
 		CX_CHECK(cx_ecpoint_init(&internalPoint, &point[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &point[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
@@ -2190,16 +2188,16 @@ void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *
 	else {
 	
 		// Set error
-		error = allocError;
+		error = allocatingError;
 	}
 	
 // End
 end:
 
 	// Check if memory was allocated for internal point
-	if(!allocError) {
+	if(!allocatingError) {
 	
-		// Free memory and set error to if it failed
+		// Free memory and set error to if it fails
 		error = MAX(cx_ecpoint_destroy(&internalPoint), error);
 	}
 	

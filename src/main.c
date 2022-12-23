@@ -128,7 +128,7 @@
 	
 	// Run application
 	void runApplication(void) {
-	
+		
 		// Initialize request length
 		volatile unsigned short requestLength = 0;
 		
