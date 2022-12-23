@@ -12,6 +12,16 @@
 
 	// Header files
 	#include <os_utils.h>
+	
+	// Disable exception handling macros
+	#undef BEGIN_TRY
+	#define BEGIN_TRY
+	#undef TRY
+	#define TRY
+	#undef FINALLY
+	#define FINALLY
+	#undef END_TRY
+	#define END_TRY
 
 // Otherwise
 #else
