@@ -91,11 +91,11 @@ void epochToTime(struct Time *time, uint64_t epoch) {
 	
 	// Remove quadrennials from seconds
 	const uint8_t quadrennials = MIN(seconds / SECONDS_IN_A_QUADRENNIAL, MAXIMUM_QUADRENNIALS);
-	seconds -= quadrennials * SECONDS_IN_A_QUADRENNIAL;
+	seconds -= (uint64_t)quadrennials * SECONDS_IN_A_QUADRENNIAL;
 	
 	// Remove annuals from seconds
 	const uint8_t annuals = MIN(seconds / SECONDS_IN_AN_ANNUAL, MAXIMUM_ANNUALS);
-	seconds -= annuals * SECONDS_IN_AN_ANNUAL;
+	seconds -= (uint64_t)annuals * SECONDS_IN_AN_ANNUAL;
 	
 	// Remove year day from seconds
 	const uint16_t yearDay = seconds / SECONDS_IN_A_DAY;

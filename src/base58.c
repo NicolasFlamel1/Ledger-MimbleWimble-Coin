@@ -132,7 +132,7 @@ size_t base58EncodeGetLength(char *result, const uint8_t *data, size_t length) {
 		
 		// Go through all base 58 components of the byte
 		size_t j = 0;
-		for(size_t k = bufferSize - 1; (byte || j < currentLength) && k >= 0; ++j, --k) {
+		for(size_t k = bufferSize - 1; byte || j < currentLength; ++j, --k) {
 		
 			// Include the current buffer value in the byte
 			uint16_t value = byte + (UINT8_MAX + 1) * buffer[k];
@@ -142,6 +142,13 @@ size_t base58EncodeGetLength(char *result, const uint8_t *data, size_t length) {
 			
 			// Update the byte
 			byte = value / NUMBER_BASE;
+			
+			// Check if at the last component
+			if(!k) {
+			
+				// Break
+				break;
+			}
 		}
 		
 		// Update current length
@@ -214,7 +221,7 @@ size_t base58DecodeGetLength(uint8_t *result, const char *data, size_t length) {
 		
 		// Go through all base 58 components of the byte
 		size_t j = 0;
-		for(size_t k = bufferSize - 1; (byte || j < currentLength) && k >= 0; ++j, --k) {
+		for(size_t k = bufferSize - 1; byte || j < currentLength; ++j, --k) {
 		
 			// Include the current buffer value in the byte
 			uint16_t value = byte + NUMBER_BASE * buffer[k];
@@ -224,6 +231,13 @@ size_t base58DecodeGetLength(uint8_t *result, const char *data, size_t length) {
 			
 			// Update the byte
 			byte = value / (UINT8_MAX + 1);
+			
+			// Check if at the last component
+			if(!k) {
+			
+				// Break
+				break;
+			}
 		}
 		
 		// Update current length
