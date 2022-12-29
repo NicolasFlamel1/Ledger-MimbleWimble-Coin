@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
-#include "common.h"
-#include "crypto.h"
+#include "../common.h"
+#include "../crypto.h"
 #include "get_tor_certificate_signature.h"
-#include "menus.h"
-#include "slatepack.h"
-#include "time.h"
-#include "tor.h"
+#include "../menus.h"
+#include "../slatepack.h"
+#include "../time.h"
+#include "../tor.h"
 
 
 // Definitions

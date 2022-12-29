@@ -1,10 +1,10 @@
 // Header files
 #include <string.h>
-#include "chacha20_poly1305.h"
-#include "common.h"
+#include "../chacha20_poly1305.h"
+#include "../common.h"
 #include "continue_decrypting_slate.h"
-#include "crypto.h"
-#include "slate.h"
+#include "../crypto.h"
+#include "../slate.h"
 
 
 // Supporting function implementation

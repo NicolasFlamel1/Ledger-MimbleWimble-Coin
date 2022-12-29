@@ -1,10 +1,10 @@
 // Header files
 #include <string.h>
 #include <os_io_seproxyhal.h>
-#include "common.h"
-#include "crypto.h"
+#include "../common.h"
+#include "../crypto.h"
 #include "get_bulletproof_components.h"
-#include "menus.h"
+#include "../menus.h"
 
 
 // Definitions

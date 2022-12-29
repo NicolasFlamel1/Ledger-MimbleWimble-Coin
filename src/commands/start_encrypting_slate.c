@@ -1,15 +1,15 @@
 // Header files
 #include <alloca.h>
 #include <string.h>
-#include "chacha20_poly1305.h"
-#include "common.h"
-#include "crypto.h"
-#include "currency_information.h"
-#include "mqs.h"
-#include "slate.h"
-#include "slatepack.h"
+#include "../chacha20_poly1305.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "../currency_information.h"
+#include "../mqs.h"
+#include "../slate.h"
+#include "../slatepack.h"
 #include "start_encrypting_slate.h"
-#include "tor.h"
+#include "../tor.h"
 
 
 // Supporting function implementation

@@ -1,11 +1,11 @@
 // Header files
 #include <string.h>
-#include "common.h"
-#include "currency_information.h"
-#include "menus.h"
-#include "mqs.h"
-#include "slatepack.h"
-#include "tor.h"
+#include "../common.h"
+#include "../currency_information.h"
+#include "../menus.h"
+#include "../mqs.h"
+#include "../slatepack.h"
+#include "../tor.h"
 #include "verify_address.h"
 
 

@@ -3,16 +3,16 @@
 #include <string.h>
 #undef _GNU_SOURCE
 #include <alloca.h>
-#include "blake2b.h"
-#include "common.h"
-#include "crypto.h"
-#include "currency_information.h"
+#include "../blake2b.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "../currency_information.h"
 #include "finish_transaction.h"
-#include "menus.h"
-#include "mqs.h"
-#include "transaction.h"
-#include "slatepack.h"
-#include "tor.h"
+#include "../menus.h"
+#include "../mqs.h"
+#include "../transaction.h"
+#include "../slatepack.h"
+#include "../tor.h"
 
 
 // Definitions

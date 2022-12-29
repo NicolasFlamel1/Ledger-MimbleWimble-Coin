@@ -1,9 +1,9 @@
 // Header files
 #include <string.h>
-#include "chacha20_poly1305.h"
-#include "common.h"
+#include "../chacha20_poly1305.h"
+#include "../common.h"
 #include "finish_encrypting_slate.h"
-#include "slate.h"
+#include "../slate.h"
 
 
 // Supporting function implementation

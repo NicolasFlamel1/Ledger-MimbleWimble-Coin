@@ -1,15 +1,15 @@
 // Header files
 #include <string.h>
-#include "common.h"
-#include "crypto.h"
-#include "continue_transaction_get_public_nonce.h"
-#include "transaction.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "continue_transaction_get_public_key.h"
+#include "../transaction.h"
 
 
 // Supporting function implementation
 
-// Process continue transaction get public nonce request
-void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process continue transaction get public key request
+void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -51,8 +51,8 @@ void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLen
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
 
-	// Initialize public nonce
-	volatile uint8_t publicNonce[COMPRESSED_PUBLIC_KEY_SIZE];
+	// Initialize public key
+	volatile uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
 
 	// Begin try
 	BEGIN_TRY {
@@ -60,11 +60,11 @@ void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLen
 		// Try
 		TRY {
 		
-			// Get private key from the transaction's secret nonce
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce), (cx_ecfp_private_key_t *)&privateKey);
+			// Get private key from the transaction's blinding factor
+			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
 	
-			// Get public nonce from the private key
-			getPublicKeyFromPrivateKey(publicNonce, (cx_ecfp_private_key_t *)&privateKey);
+			// Get public key from the private key
+			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
 		}
 		
 		// Finally
@@ -78,17 +78,17 @@ void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLen
 	// End try
 	END_TRY;
 	
-	// Check if response with the public nonce will overflow
-	if(willResponseOverflow(*responseLength, sizeof(publicNonce))) {
+	// Check if response with the public key will overflow
+	if(willResponseOverflow(*responseLength, sizeof(publicKey))) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 	
-	// Append public nonce to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)publicNonce, sizeof(publicNonce));
+	// Append public key to response
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)publicKey, sizeof(publicKey));
 	
-	*responseLength += sizeof(publicNonce);
+	*responseLength += sizeof(publicKey);
 
 	// Throw success
 	THROW(SWO_SUCCESS);

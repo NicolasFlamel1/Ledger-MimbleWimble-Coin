@@ -1,13 +1,13 @@
 // Header files
 #include <alloca.h>
 #include <string.h>
-#include "common.h"
-#include "crypto.h"
-#include "currency_information.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "../currency_information.h"
 #include "get_address.h"
-#include "mqs.h"
-#include "slatepack.h"
-#include "tor.h"
+#include "../mqs.h"
+#include "../slatepack.h"
+#include "../tor.h"
 
 
 // Supporting function implementation

@@ -1,14 +1,14 @@
 // Header files
 #include <string.h>
-#include "age.h"
-#include "common.h"
-#include "crypto.h"
-#include "currency_information.h"
-#include "mqs.h"
-#include "slate.h"
-#include "slatepack.h"
+#include "../age.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "../currency_information.h"
+#include "../mqs.h"
+#include "../slate.h"
+#include "../slatepack.h"
 #include "start_decrypting_slate.h"
-#include "tor.h"
+#include "../tor.h"
 
 
 // Supporting function implementation

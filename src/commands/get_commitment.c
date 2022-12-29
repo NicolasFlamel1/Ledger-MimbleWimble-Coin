@@ -1,15 +1,14 @@
 // Header files
 #include <string.h>
-#include "common.h"
-#include "continue_transaction_include_output.h"
-#include "crypto.h"
-#include "transaction.h"
+#include "../common.h"
+#include "../crypto.h"
+#include "get_commitment.h"
 
 
 // Supporting function implementation
 
-// Process continue transaction include output request
-void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+// Process get commitment request
+void processGetCommitmentRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -24,14 +23,25 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + IDENTIFIER_SIZE + sizeof(uint64_t) + sizeof(uint8_t)) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Get account from data
+	uint32_t account;
+	memcpy(&account, data, sizeof(account));
+	
+	// Check if account is invalid
+	if(account > MAXIMUM_ACCOUNT) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get identifer depth from data
-	const uint8_t identifierDepth = data[0];
+	const uint8_t identifierDepth = data[sizeof(account)];
 	
 	// Check if identifier depth is invalid
 	if(identifierDepth > IDENTIFIER_MAXIMUM_DEPTH) {
@@ -42,7 +52,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	
 	// Get identifier path from data
 	uint32_t identifierPath[IDENTIFIER_MAXIMUM_DEPTH];
-	memcpy(identifierPath, &data[sizeof(identifierDepth)], sizeof(identifierPath));
+	memcpy(identifierPath, &data[sizeof(account) + sizeof(identifierDepth)], sizeof(identifierPath));
 	
 	// Go through all parts in the identifier path
 	for(size_t i = 0; i < ARRAYLEN(identifierPath); ++i) {
@@ -53,7 +63,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	
 	// Get value from data
 	uint64_t value;
-	memcpy(&value, &data[IDENTIFIER_SIZE], sizeof(value));
+	memcpy(&value, &data[sizeof(account) + IDENTIFIER_SIZE], sizeof(value));
 	
 	// Check if value is invalid
 	if(!value) {
@@ -63,7 +73,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	}
 	
 	// Get switch type from data
-	const enum SwitchType switchType = data[IDENTIFIER_SIZE + sizeof(uint64_t)];
+	const enum SwitchType switchType = data[sizeof(account) + IDENTIFIER_SIZE + sizeof(uint64_t)];
 	
 	// Check if switch type is invalid
 	if(switchType != REGULAR_SWITCH_TYPE) {
@@ -72,29 +82,11 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Check if transaction hasn't been started
-	if(!transaction.started) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
-	// Check if transaction has no more remaining output
-	if(!transaction.remainingOutput) {
-	
-		// Throw invalid state error
-		THROW(INVALID_STATE_ERROR);
-	}
-	
-	// Check if value is too big for the transaction's remaining output
-	if(value > transaction.remainingOutput) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
 	// Initialize blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
+	
+	// Initialize commit
+	volatile uint8_t commitment[COMMITMENT_SIZE];
 	
 	// Begin try
 	BEGIN_TRY {
@@ -103,10 +95,10 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 		TRY {
 	
 			// Derive blinding factor
-			deriveBlindingFactor(blindingFactor, transaction.account, value, identifierPath, identifierDepth, switchType);
+			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			
-			// Update transaction's blinding factor with the positive blinding factor
-			updateBlindingFactorSum((uint8_t *)transaction.blindingFactor, (uint8_t *)blindingFactor, true);
+			// Commit value with the blinding factor
+			commitValue(commitment, value, (uint8_t *)blindingFactor, true);
 		}
 		
 		// Finally
@@ -120,8 +112,17 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	// End try
 	END_TRY;
 	
-	// Remove value from the transaction's remaining output
-	transaction.remainingOutput -= value;
+	// Check if response with the commitment will overflow
+	if(willResponseOverflow(*responseLength, sizeof(commitment))) {
+	
+		// Throw length error
+		THROW(ERR_APD_LEN);
+	}
+
+	// Append commitment to response
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)commitment, sizeof(commitment));
+	
+	*responseLength += sizeof(commitment);
 	
 	// Throw success
 	THROW(SWO_SUCCESS);

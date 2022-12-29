@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
-#include "common.h"
-#include "crypto.h"
+#include "../common.h"
+#include "../crypto.h"
 #include "get_mqs_timestamp_signature.h"
-#include "menus.h"
-#include "time.h"
-#include "mqs.h"
+#include "../menus.h"
+#include "../time.h"
+#include "../mqs.h"
 
 
 // Supporting function implementation

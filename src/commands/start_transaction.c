@@ -1,13 +1,13 @@
 // Header files
 #include <string.h>
-#include "common.h"
-#include "currency_information.h"
-#include "mqs.h"
+#include "../common.h"
+#include "../currency_information.h"
+#include "../mqs.h"
 #include "start_transaction.h"
-#include "tor.h"
-#include "transaction.h"
-#include "slatepack.h"
-#include "storage.h"
+#include "../tor.h"
+#include "../transaction.h"
+#include "../slatepack.h"
+#include "../storage.h"
 
 
 // Supporting function implementation

@@ -1,15 +1,14 @@
 // Header files
 #include <string.h>
-#include "common.h"
-#include "crypto.h"
-#include "get_root_public_key.h"
-#include "menus.h"
+#include "../common.h"
+#include "../menus.h"
+#include "verify_root_public_key.h"
 
 
 // Supporting function implementation
 
-// Process get root public key request
-void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+// Process verify root public key request
+void processVerifyRootPublicKeyRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -41,27 +40,6 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
-	// Copy account into the kernel features details text or account index line buffer
-	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
-	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
-	
-	// Show export root public key menu
-	showMenu(EXPORT_ROOT_PUBLIC_KEY_MENU);
-	
-	// Set response flags to send response later
-	*responseFlags |= IO_ASYNCH_REPLY;
-}
-
-// Process get root public key user interaction
-void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
-
-	// Get request's data
-	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
-	
-	// Get account from data
-	uint32_t account;
-	memcpy(&account, data, sizeof(account));
-
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
 	
@@ -80,17 +58,9 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 			// Get root public key from the private key
 			getPublicKeyFromPrivateKey(rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
 			
-			// Check if response with the root public key will overflow
-			if(willResponseOverflow(*responseLength, sizeof(rootPublicKey))) {
-			
-				// Throw length error
-				THROW(ERR_APD_LEN);
-			}
-			
-			// Append root public key to response
-			memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
-			
-			*responseLength += sizeof(rootPublicKey);
+			// Copy root public key into the public key or address line buffer
+			toHexString(publicKeyOrAddressLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
+			publicKeyOrAddressLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 		}
 		
 		// Finally
@@ -106,6 +76,16 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 	
 	// End try
 	END_TRY;
+	
+	// Show verify root public key menu
+	showMenu(VERIFY_ROOT_PUBLIC_KEY_MENU);
+	
+	// Set response flags to send response later
+	*responseFlags |= IO_ASYNCH_REPLY;
+}
+
+// Process verify root public key user interaction
+void processVerifyRootPublicKeyUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
 
 	// Throw success
 	THROW(SWO_SUCCESS);

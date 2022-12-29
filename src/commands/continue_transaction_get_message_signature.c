@@ -1,10 +1,10 @@
 // Header files
 #include <string.h>
-#include "blake2b.h"
-#include "common.h"
+#include "../blake2b.h"
+#include "../common.h"
 #include "continue_transaction_get_message_signature.h"
-#include "crypto.h"
-#include "transaction.h"
+#include "../crypto.h"
+#include "../transaction.h"
 
 
 // Supporting function implementation

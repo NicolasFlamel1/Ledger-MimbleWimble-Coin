@@ -1,9 +1,9 @@
 // Header files
 #include <string.h>
-#include "common.h"
+#include "../common.h"
 #include "continue_transaction_include_input.h"
-#include "crypto.h"
-#include "transaction.h"
+#include "../crypto.h"
+#include "../transaction.h"
 
 
 // Supporting function implementation
