@@ -75,10 +75,10 @@ enum Menu {
 // Global variables
 
 // Time, processing message, progress bar message, or currency name line buffer
-extern char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
+extern volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
-extern char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+extern volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
 // Verify address, approve transaction, or currency version line buffer
 extern char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];

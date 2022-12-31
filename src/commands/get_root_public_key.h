@@ -9,7 +9,7 @@
 void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process get root public key user interaction
-void processGetRootPublicKeyUserInteraction(unsigned short *responseLength);
+void processGetRootPublicKeyUserInteraction(volatile unsigned short *responseLength);
 
 
 #endif

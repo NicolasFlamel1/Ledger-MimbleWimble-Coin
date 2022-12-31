@@ -76,7 +76,7 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short length) {
 }
 
 // IO event
-unsigned char io_event(__attribute__((unused)) unsigned char channel ) {
+unsigned char io_event(__attribute__((unused)) unsigned char channel) {
 
 	// Check event
 	switch(G_io_seproxyhal_spi_buffer[0]) {

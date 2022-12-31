@@ -152,7 +152,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 			}
 			
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
-			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0, NULL);
+			initializeChaCha20Poly1305(&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0, NULL);
 		}
 		
 		// Finally
@@ -173,7 +173,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		THROW(ERR_APD_LEN);
 	}
 	
-	// Append nonce to response	
+	// Append nonce to response
 	memcpy(&G_io_apdu_buffer[*responseLength], nonce, sizeof(nonce));
 	
 	*responseLength += sizeof(nonce);
@@ -181,7 +181,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	// Check if salt exists
 	if(saltLength) {
 	
-		// Append salt to response	
+		// Append salt to response
 		memcpy(&G_io_apdu_buffer[*responseLength], salt, saltLength);
 		
 		*responseLength += saltLength;

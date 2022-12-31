@@ -153,7 +153,7 @@ void toString(char *result, uint64_t value, uint8_t fractionalDigits) {
 					buffer[--length] = '0';
 				}
 			}
-		}	
+		}
 	} while(value || fractionalDigits);
 	
 	// Copy used buffer to the result

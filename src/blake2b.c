@@ -81,7 +81,7 @@ static const uint64_t INITIALIZATION_VECTOR[] = {
 // Supporting function implementation
 
 // Get BLAKE2b
-void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size_t inputLength, const uint8_t *key, size_t keyLength) {
+void getBlake2b(volatile uint8_t *output, size_t outputLength, const uint8_t *input, size_t inputLength, const uint8_t *key, size_t keyLength) {
 
 	// Initialize hash
 	volatile cx_blake2b_t hash;
@@ -126,7 +126,7 @@ void getBlake2b(uint8_t *output, size_t outputLength, const uint8_t *input, size
 			}
 	
 			// Get hash
-			cx_hash((cx_hash_t *)&hash.header, CX_LAST, input, inputLength, output, outputLength);
+			cx_hash((cx_hash_t *)&hash.header, CX_LAST, input, inputLength, (uint8_t *)output, outputLength);
 		}
 		
 		// Finally

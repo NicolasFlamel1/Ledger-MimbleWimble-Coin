@@ -2041,6 +2041,15 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	// Log transaction public nonce
 	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
 	
+	// Get the message signature from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
+
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log message signature
+	console.log("Message signature: " + Common.toHexString(response));
+	
 	// Check if features is coinbase
 	if(features === SlateKernel.COINBASE_FEATURES) {
 		
@@ -2065,22 +2074,6 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 		// Get public key from transaction public key
 		var publicKey = expectedTransactionPublicKey;
 	}
-	
-	// Get the message signature from the hardware wallet
-	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-	
-		// Public key
-		Buffer.from(publicKey),
-		
-		// Message
-		Buffer.from((new TextEncoder()).encode(MESSAGE))
-	]));
-
-	// Remove response code from response
-	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-	
-	// Log message signature
-	console.log("Message signature: " + Common.toHexString(response));
 	
 	// Check if message signature is invalid
 	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
@@ -2734,14 +2727,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
 	
 	// Get the message signature from the hardware wallet
-	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-	
-		// Public key
-		Buffer.from(publicKey),
-		
-		// Message
-		Buffer.from((new TextEncoder()).encode(MESSAGE))
-	]));
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
 
 	// Remove response code from response
 	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);

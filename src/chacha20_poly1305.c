@@ -41,7 +41,7 @@ static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter, uint32_t *chaCha20ResultingState) {
+void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter, uint32_t *chaCha20ResultingState) {
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -80,13 +80,13 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 			TRY {
 			
 				// Initialize ChaCha20 current state with the ChaCha20 Poly1305 state
-				initializeChaCha20CurrentState(chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+				initializeChaCha20CurrentState((struct ChaCha20Poly1305State *)chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
 	
 				// Get the Poly1305 key from the ChaCha20 current state
 				const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
 				
 				// Set Poly1305 r to the first part of the ChaCha20 current state
-				memcpy(chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
+				memcpy((uint8_t *)chaCha20Poly1305State->poly1305R, poly1305Key, sizeof(chaCha20Poly1305State->poly1305R) - 1);
 				chaCha20Poly1305State->poly1305R[sizeof(chaCha20Poly1305State->poly1305R) - 1] = 0;
 				
 				// Clamp Poly1305 r
@@ -102,7 +102,7 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 				swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305R, sizeof(chaCha20Poly1305State->poly1305R));
 				
 				// Set Poly1305 s to the second part of the ChaCha20 current state
-				memcpy(chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
+				memcpy((uint8_t *)chaCha20Poly1305State->poly1305S, &poly1305Key[sizeof(chaCha20Poly1305State->poly1305R) - 1], sizeof(chaCha20Poly1305State->poly1305S) - 1);
 				chaCha20Poly1305State->poly1305S[sizeof(chaCha20Poly1305State->poly1305S) - 1] = 0;
 			}
 		
@@ -121,22 +121,22 @@ void initializeChaCha20Poly1305(struct ChaCha20Poly1305State *chaCha20Poly1305St
 		swapEndianness((uint8_t *)&chaCha20Poly1305State->poly1305S, sizeof(chaCha20Poly1305State->poly1305S));
 		
 		// Set Poly1305 accumulator to zero
-		explicit_bzero(chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+		explicit_bzero((uint8_t *)chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
 		
 		// Update Poly1305 accumulator with the additional authenticated data
-		updatePoly1305Accumulator(chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+		updatePoly1305Accumulator((struct ChaCha20Poly1305State *)chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
 	}
 	
 	// Otherwise
 	else {
 	
 		// Initialize resulting ChaCha20 current state with the ChaCha20 Poly1305 state
-		initializeChaCha20CurrentState(chaCha20Poly1305State, chaCha20ResultingState);
+		initializeChaCha20CurrentState((struct ChaCha20Poly1305State *)chaCha20Poly1305State, chaCha20ResultingState);
 	}
 }
 
 // Encrypt ChaCha20 Poly1305 data
-void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -180,14 +180,14 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	END_TRY;
 	
 	// Update Poly1305 accumulator with the encrypted data block
-	updatePoly1305Accumulator(chaCha20Poly1305State, encryptedDataBlock, dataBlockLength);
+	updatePoly1305Accumulator(chaCha20Poly1305State, (uint8_t *)encryptedDataBlock, dataBlockLength);
 	
 	// Update the data length
 	chaCha20Poly1305State->dataLength += dataBlockLength;
 }
 
 // Decrypt ChaCha20 Poly1305 data
-void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -364,7 +364,7 @@ void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305Sta
 			cx_math_add(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, block, sizeof(chaCha20Poly1305State->poly1305Accumulator));
 			
 			// Multiply the Poly1305 accumulator by the Poly1305 r and modulo it by the Poly1305 p
-			cx_math_multm(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305R, POLY1305_P, sizeof(chaCha20Poly1305State->poly1305Accumulator));	
+			cx_math_multm(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305R, POLY1305_P, sizeof(chaCha20Poly1305State->poly1305Accumulator));
 		}
 	}
 }

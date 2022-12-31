@@ -193,7 +193,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 		checksum = updateChecksum(checksum);
 	}
 	
-	// Update the checksum with the final constant 
+	// Update the checksum with the final constant
 	checksum ^= CHECKSUM_FINAL_CONSTANT;
 	
 	// Go through all checksum characters
@@ -273,7 +273,7 @@ size_t getBech32DecodedLength(const char *data, size_t length) {
 		checksum = updateChecksum(checksum);
 	}
 	
-	// Update the checksum with the final constant 
+	// Update the checksum with the final constant
 	checksum ^= CHECKSUM_FINAL_CONSTANT;
 	
 	// Go through all checksum characters

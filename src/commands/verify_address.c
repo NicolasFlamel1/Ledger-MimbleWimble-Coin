@@ -75,7 +75,7 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			getMqsAddress(mqsAddress, account, index);
 			
 			// Copy MQS address into the public key or address line buffer
-			memcpy(publicKeyOrAddressLineBuffer, mqsAddress, sizeof(mqsAddress));
+			memcpy((char *)publicKeyOrAddressLineBuffer, mqsAddress, sizeof(mqsAddress));
 			publicKeyOrAddressLineBuffer[sizeof(mqsAddress)] = '\0';
 		
 			// Break
@@ -102,7 +102,7 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			getTorAddress(torAddress, account, index);
 			
 			// Copy Tor address into the public key or address line buffer
-			memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
+			memcpy((char *)publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
 			publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
 			
 			// Break
@@ -130,7 +130,7 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 				getSlatepackAddress(slatepackAddress, account, index);
 				
 				// Copy Slatepack address into the public key or address line buffer
-				memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+				memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
 				publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
 			}
 			

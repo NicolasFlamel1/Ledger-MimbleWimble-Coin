@@ -63,7 +63,7 @@ void processContinueTransactionIncludeOutputRequest(__attribute__((unused)) unsi
 	}
 	
 	// Get switch type from data
-	const enum SwitchType switchType = data[IDENTIFIER_SIZE + sizeof(uint64_t)];
+	const enum SwitchType switchType = data[IDENTIFIER_SIZE + sizeof(value)];
 	
 	// Check if switch type is invalid
 	if(switchType != REGULAR_SWITCH_TYPE) {

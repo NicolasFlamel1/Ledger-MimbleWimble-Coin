@@ -338,7 +338,7 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 }
 
 // Process user interaction
-void processUserInteraction(size_t instruction, bool isApprovedResult, bool showProcessing) {
+void processUserInteraction(enum Instruction instruction, bool isApprovedResult, bool showProcessing) {
 	
 	// Initialize response length
 	volatile unsigned short responseLength = 0;
@@ -356,7 +356,7 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 				if(showProcessing) {
 				
 					// Set time, processing menu, progress bar message, or currency name line buffer
-					strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing");
+					strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing");
 			
 					// Show processing menu
 					showMenu(PROCESSING_MENU);
@@ -372,7 +372,7 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 					case GET_ROOT_PUBLIC_KEY_INSTRUCTION:
 					
 						// Process get root public key user interaction
-						processGetRootPublicKeyUserInteraction((unsigned short *)&responseLength);
+						processGetRootPublicKeyUserInteraction(&responseLength);
 						
 						// Break
 						break;
@@ -421,6 +421,12 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 					
 						// break
 						break;
+					
+					// Default
+					default:
+					
+						// Throw unknown instruction error
+						THROW(UNKNOWN_INSTRUCTION_ERROR);
 				}
 			}
 			

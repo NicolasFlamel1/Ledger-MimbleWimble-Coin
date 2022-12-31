@@ -42,9 +42,6 @@
 			getCurrencyInformation(currencyInformation);
 		}
 		
-		// Initialize storage
-		initializeStorage();
-		
 		// Loop forever
 		while(true) {
 		
@@ -62,6 +59,9 @@
 			
 				// Try
 				TRY {
+				
+					// Initialize storage
+					initializeStorage();
 				
 					// Initialize HAL
 					io_seproxyhal_init();
@@ -273,15 +273,15 @@
 	// Main function
 	__attribute__((section(".boot"))) int main() {
 
+		// Get current currency information
+		struct CurrencyInformation currentCurrencyInformation;
+		getCurrencyInformation(&currentCurrencyInformation);
+		
 		// Begin try
 		BEGIN_TRY {
 		
 			// Try
 			TRY {
-			
-				// Get current currency information
-				struct CurrencyInformation currentCurrencyInformation;
-				getCurrencyInformation(&currentCurrencyInformation);
 				
 				// Initialize library parameters
 				unsigned int libraryParameters[] ={

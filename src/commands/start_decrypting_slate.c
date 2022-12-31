@@ -66,9 +66,9 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 	// Check address length
 	size_t sharedPrivateKeyLength;
 	uint8_t *salt = NULL;
-	uint8_t *ephemeralX25519PublicKey = NULL;
-	uint8_t *encryptedFileKey = NULL;
-	uint8_t *payloadNonce = NULL;
+	const uint8_t *ephemeralX25519PublicKey = NULL;
+	const uint8_t *encryptedFileKey = NULL;
+	const uint8_t *payloadNonce = NULL;
 	switch(addressLength) {
 	
 		// MQS address size
@@ -186,7 +186,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 			}
 			
 			// Initialize ChaCha20 Poly1305 with the shared private key and nonce
-			initializeChaCha20Poly1305((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0, NULL);
+			initializeChaCha20Poly1305(&slate.chaCha20Poly1305State, (uint8_t *)sharedPrivateKey, nonce, NULL, 0, 0, NULL);
 		}
 		
 		// Finally

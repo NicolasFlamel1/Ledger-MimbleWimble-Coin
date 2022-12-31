@@ -51,9 +51,6 @@
 // Maximum DER signature size
 #define MAXIMUM_DER_SIGNATURE_SIZE 72
 
-// Keep private
-#define KEEP_PRIVATE_KEY 1
-
 // Even compressed public key prefix
 #define EVEN_COMPRESSED_PUBLIC_KEY_PREFIX 0x02
 
@@ -99,9 +96,6 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 
 // Get public key from private key
 void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_private_key_t *privateKey);
-
-// Derive child key
-void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode);
 
 // Derive blinding factor
 void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType);
@@ -149,7 +143,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength);
 void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, size_t senderAddressLength);
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength);
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength);
 
 // Is valid commitment
 bool isValidCommitment(uint8_t *commitment);

@@ -115,6 +115,9 @@ static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = {'G', 'r', 'i', 'n', 'b', 'o'
 
 // Function prototypes
 
+// Derive child key
+static void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode);
+
 // Bulletproof update commitment
 static void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *leftPart, const uint8_t *rightPart);
 
@@ -194,7 +197,7 @@ void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_priva
 		TRY {
 	
 			// Get uncompressed public key from the private key
-			cx_ecfp_generate_pair(CX_CURVE_SECP256K1, (cx_ecfp_public_key_t *)&uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, KEEP_PRIVATE_KEY);
+			cx_ecfp_generate_pair(CX_CURVE_SECP256K1, (cx_ecfp_public_key_t *)&uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, true);
 			
 			// Set prefix in the public key
 			publicKey[0] = (uncompressedPublicKey.W[uncompressedPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
@@ -208,110 +211,6 @@ void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_priva
 		
 			// Clear the uncompressed public key
 			explicit_bzero((cx_ecfp_public_key_t *)&uncompressedPublicKey, sizeof(uncompressedPublicKey));
-		}
-	}
-	
-	// End try
-	END_TRY;
-}
-
-// Derive child key
-void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode) {
-
-	// Check if not using the provided private key and chain code
-	if(!useProvidedPrivateKeyAndChainCode) {
-
-		// Get private key and chain code
-		getPrivateKeyAndChainCode(privateKey, chainCode, account);
-	}
-	
-	// Initialize data
-	volatile uint8_t data[COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint32_t)];
-	
-	// Initialize node
-	volatile uint8_t node[NODE_SIZE];
-	
-	// Initialize new private key
-	volatile cx_ecfp_private_key_t newPrivateKey;
-	
-	// Begin try
-	BEGIN_TRY {
-	
-		// Try
-		TRY {
-		
-			// Go through the path
-			for(size_t i = 0; i < pathLength; ++i) {
-			
-				// Check if path is hardened
-				if(path[i] & HARDENED_PATH_MASK) {
-				
-					// Set the first part of data to zero
-					data[0] = 0;
-					
-					// Append private key to the data
-					memcpy((uint8_t *)&data[sizeof(data[0])], (uint8_t *)privateKey->d, privateKey->d_len);
-				}
-				
-				// Otherwise
-				else {
-				
-					// Change the private key's curve
-					cx_curve_t curve = privateKey->curve;
-					privateKey->curve = CX_CURVE_SECP256K1;
-				
-					// Get compressed public key from the private key set it in the data
-					getPublicKeyFromPrivateKey(data, (cx_ecfp_private_key_t *)privateKey);
-					
-					// Restore the private key's curve
-					privateKey->curve = curve;
-				}
-				
-				// Append the path to the data
-				U4BE_ENCODE((uint8_t *)data, COMPRESSED_PUBLIC_KEY_SIZE, path[i]);
-				
-				// Get the path's node as the HMAC-SHA512 of the data with the chain code as the key
-				cx_hmac_sha512((uint8_t *)chainCode, CHAIN_CODE_SIZE, (uint8_t *)data, sizeof(data), (uint8_t *)node, sizeof(node));
-				
-				// Get new private key from node
-				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
-				
-				// Check if new private key isn't a valid private key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
-				
-					// Throw internal error error
-					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Add private key to the new private key
-				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);
-				
-				// Check if new private key isn't a valid private key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
-				
-					// Throw internal error error
-					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Get chain code from the node
-				memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(newPrivateKey.d)], CHAIN_CODE_SIZE);
-				
-				// Set private key to the new private key
-				memcpy((cx_ecfp_private_key_t *)privateKey, (cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
-			}
-		}
-	
-		// Finally
-		FINALLY {
-		
-			// Clear the data
-			explicit_bzero((uint8_t *)data, sizeof(data));
-			
-			// Clear the node
-			explicit_bzero((uint8_t *)node, sizeof(node));
-			
-			// Clear the new private key
-			explicit_bzero((cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
 		}
 	}
 	
@@ -520,7 +419,7 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 	volatile cx_ecfp_private_key_t privateKey;
 	
 	// Initialize public key
-	volatile uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE]; 
+	volatile uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
 	
 	// Initialize rewind hash
 	volatile uint8_t rewindHash[NONCE_SIZE];
@@ -538,10 +437,10 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
 			
 			// Get rewind hash from the public key
-			getBlake2b((uint8_t *)rewindHash, sizeof(rewindHash), (uint8_t *)publicKey, sizeof(publicKey), NULL, 0);
+			getBlake2b(rewindHash, sizeof(rewindHash), (uint8_t *)publicKey, sizeof(publicKey), NULL, 0);
 			
 			// Get rewind nonce from the rewind hash and the commitment
-			getBlake2b((uint8_t *)rewindNonce, NONCE_SIZE, (uint8_t *)rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
+			getBlake2b(rewindNonce, NONCE_SIZE, (uint8_t *)rewindHash, sizeof(rewindHash), commitment, COMMITMENT_SIZE);
 			
 			// Check if rewind nonce isn't a valid secret key
 			if(!isValidSecp256k1PrivateKey((uint8_t *)rewindNonce, NONCE_SIZE)) {
@@ -588,10 +487,10 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 			deriveBlindingFactor(privateRootKey, account, 0, NULL, 0, NO_SWITCH_TYPE);
 			
 			// Get private hash from the private root key
-			getBlake2b((uint8_t *)privateHash, sizeof(privateHash), (uint8_t *)privateRootKey, sizeof(privateRootKey), NULL, 0);
+			getBlake2b(privateHash, sizeof(privateHash), (uint8_t *)privateRootKey, sizeof(privateRootKey), NULL, 0);
 			
 			// Get private nonce from the private hash and the commitment
-			getBlake2b((uint8_t *)privateNonce, NONCE_SIZE, (uint8_t *)privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
+			getBlake2b(privateNonce, NONCE_SIZE, (uint8_t *)privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
 			
 			// Check if private nonce isn't a valid secret key
 			if(!isValidSecp256k1PrivateKey((uint8_t *)privateNonce, NONCE_SIZE)) {
@@ -725,7 +624,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	uint8_t *y = &generator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 	if(!isQuadraticResidue(y)) {
 	
-		// Negate the secret nonce and the result's y component 
+		// Negate the secret nonce and the result's y component
 		cx_math_subm(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE);
 		cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	}
@@ -1172,7 +1071,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 }
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, uint8_t *signature, size_t signatureLength) {
+bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
 
 	// Check receiver address length
 	switch(receiverAddressLength) {
@@ -1486,7 +1385,7 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t i
 			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_Ed25519);
 			
 			// Get address public key from address private key
-			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
 			
 			// Compress the address public key
 			cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
@@ -1612,7 +1511,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				
 				// Create sl and sr from rewind nonce
 				uint8_t *sl = (uint8_t *)alpha;
-				uint8_t *sr  = (uint8_t *)rho;
+				uint8_t *sr = (uint8_t *)rho;
 				createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
 				
 				// Check if sl or sr is zero
@@ -1886,6 +1785,110 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 	END_TRY;
 }
 
+// Derive child key
+void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode) {
+
+	// Check if not using the provided private key and chain code
+	if(!useProvidedPrivateKeyAndChainCode) {
+
+		// Get private key and chain code
+		getPrivateKeyAndChainCode(privateKey, chainCode, account);
+	}
+	
+	// Initialize data
+	volatile uint8_t data[COMPRESSED_PUBLIC_KEY_SIZE + sizeof(uint32_t)];
+	
+	// Initialize node
+	volatile uint8_t node[NODE_SIZE];
+	
+	// Initialize new private key
+	volatile cx_ecfp_private_key_t newPrivateKey;
+	
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Go through the path
+			for(size_t i = 0; i < pathLength; ++i) {
+			
+				// Check if path is hardened
+				if(path[i] & HARDENED_PATH_MASK) {
+				
+					// Set the first part of data to zero
+					data[0] = 0;
+					
+					// Append private key to the data
+					memcpy((uint8_t *)&data[sizeof(data[0])], (uint8_t *)privateKey->d, privateKey->d_len);
+				}
+				
+				// Otherwise
+				else {
+				
+					// Change the private key's curve
+					cx_curve_t curve = privateKey->curve;
+					privateKey->curve = CX_CURVE_SECP256K1;
+				
+					// Get compressed public key from the private key set it in the data
+					getPublicKeyFromPrivateKey(data, (cx_ecfp_private_key_t *)privateKey);
+					
+					// Restore the private key's curve
+					privateKey->curve = curve;
+				}
+				
+				// Append the path to the data
+				U4BE_ENCODE((uint8_t *)data, COMPRESSED_PUBLIC_KEY_SIZE, path[i]);
+				
+				// Get the path's node as the HMAC-SHA512 of the data with the chain code as the key
+				cx_hmac_sha512((uint8_t *)chainCode, CHAIN_CODE_SIZE, (uint8_t *)data, sizeof(data), (uint8_t *)node, sizeof(node));
+				
+				// Get new private key from node
+				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
+				
+				// Check if new private key isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+				}
+				
+				// Add private key to the new private key
+				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);
+				
+				// Check if new private key isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+				}
+				
+				// Get chain code from the node
+				memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(newPrivateKey.d)], CHAIN_CODE_SIZE);
+				
+				// Set private key to the new private key
+				memcpy((cx_ecfp_private_key_t *)privateKey, (cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
+			}
+		}
+	
+		// Finally
+		FINALLY {
+		
+			// Clear the data
+			explicit_bzero((uint8_t *)data, sizeof(data));
+			
+			// Clear the node
+			explicit_bzero((uint8_t *)node, sizeof(node));
+			
+			// Clear the new private key
+			explicit_bzero((cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
+		}
+	}
+	
+	// End try
+	END_TRY;
+}
+
 // Bulletproof update commitment
 void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *leftPart, const uint8_t *rightPart) {
 
@@ -1955,7 +1958,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 			do {
 			
 				// Initialize ChaCha20 state with the seed, nonce, and index
-				initializeChaCha20Poly1305((ChaCha20Poly1305State *)&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index, (uint32_t *)chaCha20CurrentState);
+				initializeChaCha20Poly1305(&chaCha20Poly1305State, seed, (uint8_t *)nonce, NULL, 0, index, (uint32_t *)chaCha20CurrentState);
 				
 				// Increment nonce's counter
 				++nonce[2];
@@ -1963,8 +1966,8 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 			} while(cx_math_cmp((uint8_t *)chaCha20CurrentState, SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0 || cx_math_cmp((uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0);
 			
 			// Set scalars to the ChaCha20 current state
-			memcpy((uint8_t *)firstScalar,  (uint8_t *)chaCha20CurrentState, SCALAR_SIZE);
-			memcpy((uint8_t *)secondScalar,  (uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SCALAR_SIZE);
+			memcpy((uint8_t *)firstScalar, (uint8_t *)chaCha20CurrentState, SCALAR_SIZE);
+			memcpy((uint8_t *)secondScalar, (uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SCALAR_SIZE);
 		}
 	
 		// Finally

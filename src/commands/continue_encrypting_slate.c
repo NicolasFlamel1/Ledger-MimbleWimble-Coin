@@ -55,7 +55,7 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 	
 	*responseLength += sizeof(encryptedData);
 	
-	// Check if at the last data 
+	// Check if at the last data
 	if(dataLength < CHACHA20_BLOCK_SIZE) {
 	
 		// Set thatslate encrypting state is complete

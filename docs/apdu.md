@@ -707,7 +707,7 @@ Returns the app's internal transaction state's public nonce.
 
 #### Description
 
-Returns the signature for a provided UTF-8 message and public key signed with the app's internal transaction state's blinding factor.
+Returns the signature for a provided UTF-8 message signed with the app's internal transaction state's blinding factor.
 
 #### Encoding
 
@@ -728,7 +728,6 @@ Returns the signature for a provided UTF-8 message and public key signed with th
 
 | Length  | Name         | Description |
 |---------|--------------|-------------|
-| 33      | `public_key` | Public key |
 | Varying | `message`    | UTF-8 message |
 
 **Output Data**

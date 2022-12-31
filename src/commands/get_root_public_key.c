@@ -53,7 +53,7 @@ void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *resp
 }
 
 // Process get root public key user interaction
-void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
+void processGetRootPublicKeyUserInteraction(volatile unsigned short *responseLength) {
 
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];

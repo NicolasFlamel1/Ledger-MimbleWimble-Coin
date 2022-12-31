@@ -22,30 +22,20 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength <= COMPRESSED_PUBLIC_KEY_SIZE) {
-	
-		// Throw invalid parameters error
-		THROW(INVALID_PARAMETERS_ERROR);
-	}
-	
-	// Get public key from data
-	const uint8_t *publicKey = data;
-	
-	// Check if public key is invalid
-	if(!isValidSecp256k1PublicKey(publicKey, COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(firstParameter || secondParameter || !dataLength) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 	
 	// Get message from data
-	const char *message = (char *)&data[COMPRESSED_PUBLIC_KEY_SIZE];
+	const char *message = (char *)data;
 	
 	// Get message length
-	const size_t messageLength = dataLength - COMPRESSED_PUBLIC_KEY_SIZE;
+	const size_t messageLength = dataLength;
 	
 	// Check if message is invalid
 	if(!isValidUtf8String(message, messageLength)) {
@@ -86,6 +76,9 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 	uint8_t hash[SINGLE_SIGNER_MESSAGE_SIZE];
 	getBlake2b(hash, sizeof(hash), (uint8_t *)message, messageLength, NULL, 0);
 	
+	// Initialize private key
+	volatile cx_ecfp_private_key_t privateKey;
+
 	// Initialize secret nonce
 	volatile uint8_t secretNonce[NONCE_SIZE];
 	
@@ -98,6 +91,13 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		// Try
 		TRY {
 		
+			// Get private key from the transaction's blinding factor
+			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor), (cx_ecfp_private_key_t *)&privateKey);
+	
+			// Get public key from the private key
+			uint8_t publicKey[COMPRESSED_PUBLIC_KEY_SIZE];
+			getPublicKeyFromPrivateKey(publicKey, (cx_ecfp_private_key_t *)&privateKey);
+			
 			// Loop while secret nonce is the same as the transaction's secret nonce
 			uint8_t publicNonce[COMPRESSED_PUBLIC_KEY_SIZE];
 			do {
@@ -123,6 +123,9 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		
 			// Clear the secret nonce
 			explicit_bzero((uint8_t *)secretNonce, sizeof(secretNonce));
+			
+			// Clear the private key
+			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
 		}
 	}
 	

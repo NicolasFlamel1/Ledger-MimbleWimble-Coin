@@ -7,6 +7,12 @@
 #include "mqs.h"
 
 
+// Definitions
+
+// MQS shared private key number of iterations
+#define MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS 100
+
+
 // Supporting function implementation
 
 // Create MQS shared private key

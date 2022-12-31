@@ -197,13 +197,13 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	#if BAGL_HEIGHT < 64
 	
 		// Copy time into the time, processing message, progress bar message, or currency name line buffer
-		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		SPRINTF((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	
 	// Otherwise
 	#else
 	
 		// Copy time into the time, processing message, progress bar message, or currency name line buffer
-		SPRINTF(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+		SPRINTF((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
 	// Check currency allows Tor addresses
@@ -214,7 +214,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		getTorAddressFromPublicKey(torAddress, signedPublicKey);
 		
 		// Copy Tor address into the public key or address line buffer
-		memcpy(publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
+		memcpy((char *)publicKeyOrAddressLineBuffer, torAddress, sizeof(torAddress));
 		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
 		
 		// Set address type line buffer
@@ -232,7 +232,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		getSlatepackAddressFromPublicKey(slatepackAddress, signedPublicKey);
 		
 		// Copy Slatepack address into the public key or address line buffer
-		memcpy(publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
+		memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
 		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
 		
 		// Set address type line buffer

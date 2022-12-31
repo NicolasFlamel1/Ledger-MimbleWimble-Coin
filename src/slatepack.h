@@ -10,7 +10,7 @@
 
 // Definitions
 
-// Slatepack address without human-readable part size 
+// Slatepack address without human-readable part size
 #define SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE 59
 
 // Slatepack shared private key size

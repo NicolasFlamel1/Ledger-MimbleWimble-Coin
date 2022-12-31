@@ -256,7 +256,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Get signature from data
-			uint8_t *signature = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
+			const uint8_t *signature = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE];
 			
 			// Get signature length
 			const size_t signatureLength = dataLength - (COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength + COMMITMENT_SIZE);
@@ -331,8 +331,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Copy address into the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
-			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
+			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy((char *)publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
@@ -346,7 +346,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Clear the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer
@@ -381,8 +381,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Copy address into the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
-			memcpy(publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
+			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			memcpy((char *)publicKeyOrAddressLineBuffer, transaction.address, transaction.addressLength);
 		}
 		
 		// Otherwise
@@ -396,7 +396,7 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 			}
 			
 			// Clear the public key or address line buffer
-			explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer
@@ -699,7 +699,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						{
 							// Get address public key from the address private key
 							cx_ecfp_public_key_t addressPublicKey;
-							cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+							cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
 							
 							// Check if the address public key is in the payment proof message
 							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
@@ -745,7 +745,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						{
 							// Get address public key from address private key
 							cx_ecfp_public_key_t addressPublicKey;
-							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, KEEP_PRIVATE_KEY);
+							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
 							
 							// Compress the address public key
 							cx_edwards_compress_point(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len);

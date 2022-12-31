@@ -30,10 +30,10 @@
 // Global variables
 
 // Time, processing message, progress bar message, or currency name line buffer
-char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
+volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
 
 // Public key or address line buffer
-char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
 // Verify address, approve transaction, or currency version line buffer
 char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
@@ -72,7 +72,7 @@ bagl_icon_details_t currencyIconBuffer;
 		&currencyIconBuffer,
 		
 		// First line
-		timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
+		(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
 		
 		// Second line
 		"is ready"
@@ -113,7 +113,7 @@ static UX_STEP_NOCB(mainMenuCurrencyScreen,
 	.title = "Currency",
 	
 	// Text
-	.text = timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+	.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
 });
 
 // Check if device doesn't have low height
@@ -343,7 +343,7 @@ static UX_STEP_NOCB(verifyRootPublicKeyMenuPublicKeyScreen,
 	.title = "Root Public Key",
 	
 	// Text
-	.text = publicKeyOrAddressLineBuffer
+	.text = (char *)publicKeyOrAddressLineBuffer
 });
 
 // Verify root public key menu valid screen
@@ -416,7 +416,7 @@ static UX_STEP_NOCB(verifyAddressMenuAddressScreen,
 	.title = addressTypeLineBuffer,
 	
 	// Text
-	.text = publicKeyOrAddressLineBuffer
+	.text = (char *)publicKeyOrAddressLineBuffer
 });
 
 // Verify address menu valid screen
@@ -492,7 +492,7 @@ static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
 	.title = "Time And Date",
 	
 	// Text
-	.text = timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+	.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
 });
 
 // Sign MQS timestamp menu warning screen one
@@ -619,7 +619,7 @@ static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
 	.title = "Expires",
 	
 	// Text
-	.text = timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+	.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
 });
 
 // Sign Tor certificate menu address screen
@@ -643,7 +643,7 @@ static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
 	.title = addressTypeLineBuffer,
 	
 	// Text
-	.text = publicKeyOrAddressLineBuffer
+	.text = (char *)publicKeyOrAddressLineBuffer
 });
 
 // Sign Tor certificate menu warning screen one
@@ -889,7 +889,7 @@ static UX_STEP_NOCB(approveTransactionMenuProofAddressScreen,
 	.title = "Proof Address",
 	
 	// Text
-	.text = publicKeyOrAddressLineBuffer
+	.text = (char *)publicKeyOrAddressLineBuffer
 });
 
 // Approve transaction menu no payment proof screen
@@ -935,7 +935,7 @@ static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
 	&C_icon_processing,
 	
 	// Bold line
-	timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+	(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
 });
 
 // Processing menu
@@ -952,7 +952,7 @@ static const bagl_element_t PROGRESS_BAR[] = {
 	{{BAGL_RECTANGLE, 0x00, 0, 0, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 	
 	// Text
-	{{BAGL_LABELINE, 0x0, 0,  (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer},
+	{{BAGL_LABELINE, 0x0, 0, (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer},
 	
 	// Outline
 	{{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING, (BAGL_HEIGHT / 2) + 5, BAGL_WIDTH - (PROGRESS_BAR_PADDING * 2), PROGRESS_BAR_HEIGHT, 1, 3, BAGL_OUTLINE, 0xFFFFFF, 0x000000, 0, 0}, NULL}
@@ -971,10 +971,10 @@ static unsigned int progressBar_button(unsigned int buttonMask, unsigned int but
 void clearMenuBuffers(void) {
 	
 	// Clear the time, processing message, progress bar message, or currency name line buffer
-	explicit_bzero(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+	explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
 	
 	// Clear the public key or address line buffer
-	explicit_bzero(publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+	explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
 	// Clear the verify address, approve transaction, or currency version line buffer
 	explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
@@ -998,7 +998,7 @@ void clearMenuBuffers(void) {
 	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
 	
 	// Copy currency information to buffers
-	memcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
+	memcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
 	memcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, currencyInformation->version, sizeof(currencyInformation->version));
 	memcpy(&currencyIconBuffer, &currencyInformation->iconDetails, sizeof(currencyInformation->iconDetails));
 }
@@ -1209,7 +1209,7 @@ void showMenu(enum Menu menu) {
 				}
 				
 				// Check if public key or address line buffer isn't empty
-				if(strlen(publicKeyOrAddressLineBuffer)) {
+				if(strlen((char *)publicKeyOrAddressLineBuffer)) {
 				
 					// Set approve transaction menu to use proof address screen
 					approveTransactionMenu[index++] = &approveTransactionMenuProofAddressScreen;

@@ -69,7 +69,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case SENDING_TRANSACTION_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction");
+			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction");
 			
 			// Break
 			break;
@@ -78,7 +78,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction");
+			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction");
 			
 			// Break
 			break;
@@ -87,7 +87,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case CREATING_COINBASE_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase");
+			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase");
 			
 			// Break
 			break;
@@ -143,7 +143,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	}
 	
 	// Get switch type from data
-	const enum SwitchType switchType = data[sizeof(account) + IDENTIFIER_SIZE + sizeof(uint64_t)];
+	const enum SwitchType switchType = data[sizeof(account) + IDENTIFIER_SIZE + sizeof(value)];
 	
 	// Check if switch type is invalid
 	if(switchType != REGULAR_SWITCH_TYPE) {
