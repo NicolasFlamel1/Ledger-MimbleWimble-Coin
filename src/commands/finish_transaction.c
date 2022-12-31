@@ -350,7 +350,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer
-		strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send");
+		explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+		strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
@@ -400,7 +401,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		}
 		
 		// Set verify address, approve transaction, or currency version line buffer
-		strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive");
+		explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+		strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
 		
 		// Copy transaction's output into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
@@ -425,7 +427,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case PLAIN_FEATURES:
 		
 			// Set kernel features or transaction type line buffer
-			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Plain");
+			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Plain", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Clear the kernel features details title line buffer
 			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
@@ -437,7 +440,8 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case COINBASE_FEATURES:
 		
 			// Set kernel features or transaction type line buffer
-			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Coinbase");
+			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Coinbase", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Clear the kernel features details title line buffer
 			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
@@ -449,10 +453,12 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		case HEIGHT_LOCKED_FEATURES:
 		
 			// Set kernel features or transaction type line buffer
-			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Height Locked");
+			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Height Locked", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Set kernel features details title line buffer
-			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height");
+			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+			strncpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height", sizeof(kernelFeaturesDetailsTitleLineBuffer) - sizeof((char)'\0'));
 			
 			// Get lock height from data
 			uint64_t lockHeight;
@@ -470,10 +476,12 @@ void processFinishTransactionRequest(__attribute__((unused)) unsigned short *res
 		default:
 		
 			// Set kernel features or transaction type line buffer
-			strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "No Recent Duplicate");
+			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "No Recent Duplicate", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Set kernel features details title line buffer
-			strcpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height");
+			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+			strncpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height", sizeof(kernelFeaturesDetailsTitleLineBuffer) - sizeof((char)'\0'));
 			
 			// Get relative height from data
 			uint16_t relativeHeight;

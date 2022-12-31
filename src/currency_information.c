@@ -68,13 +68,13 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	#endif
 	
 	// Set current currency information's name
-	strcpy(currentCurrencyInformation->name, CURRENCY_NAME);
+	strncpy(currentCurrencyInformation->name, CURRENCY_NAME, sizeof(currentCurrencyInformation->name) - sizeof((char)'\0'));
 	
 	// Set current currency information's abbreviation
-	strcpy(currentCurrencyInformation->abbreviation, CURRENCY_ABBREVIATION);
+	strncpy(currentCurrencyInformation->abbreviation, CURRENCY_ABBREVIATION, sizeof(currentCurrencyInformation->abbreviation) - sizeof((char)'\0'));
 	
 	// Set current currency information's version
-	strcpy(currentCurrencyInformation->version, CURRENCY_VERSION);
+	strncpy(currentCurrencyInformation->version, CURRENCY_VERSION, sizeof(currentCurrencyInformation->version) - sizeof((char)'\0'));
 	
 	// Set current currency information's icon details
 	memcpy(&currentCurrencyInformation->iconDetails, &CURRENCY_ICON_DETAILS, sizeof(CURRENCY_ICON_DETAILS));
@@ -92,6 +92,6 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	#ifdef CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART
 	
 		// Set current currency information's Slatepack address human readable part
-		strcpy(currentCurrencyInformation->slatepackAddressHumanReadablePart, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART);
+		strncpy(currentCurrencyInformation->slatepackAddressHumanReadablePart, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART, sizeof(currentCurrencyInformation->slatepackAddressHumanReadablePart) - sizeof((char)'\0'));
 	#endif
 }

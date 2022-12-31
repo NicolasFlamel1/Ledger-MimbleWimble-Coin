@@ -218,10 +218,12 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		publicKeyOrAddressLineBuffer[sizeof(torAddress)] = '\0';
 		
 		// Set address type line buffer
-		strcpy(addressTypeLineBuffer, "Tor Address");
+		explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
+		strncpy(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 		
 		// Set kernel features or transaction type line buffer
-		strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Tor");
+		explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+		strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Tor", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 	}
 	
 	// Check currency allows Slatepack addresses
@@ -236,10 +238,12 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
 		
 		// Set address type line buffer
-		strcpy(addressTypeLineBuffer, "Slatepack Address");
+		explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
+		strncpy(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 		
 		// Set kernel features or transaction type line buffer
-		strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "Slatepack");
+		explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+		strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Slatepack", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 	}
 	
 	// Copy account into the kernel features details text or account index line buffer

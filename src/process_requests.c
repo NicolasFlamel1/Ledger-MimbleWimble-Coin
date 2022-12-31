@@ -356,7 +356,8 @@ void processUserInteraction(enum Instruction instruction, bool isApprovedResult,
 				if(showProcessing) {
 				
 					// Set time, processing menu, progress bar message, or currency name line buffer
-					strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing");
+					explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+					strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
 			
 					// Show processing menu
 					showMenu(PROCESSING_MENU);

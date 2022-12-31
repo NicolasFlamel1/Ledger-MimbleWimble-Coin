@@ -69,7 +69,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case SENDING_TRANSACTION_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction");
+			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;
@@ -78,7 +79,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction");
+			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;
@@ -87,7 +89,8 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		case CREATING_COINBASE_MESSAGE_TYPE:
 		
 			// Set time, processing menu, progress bar message, or currency name line buffer
-			strcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase");
+			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;

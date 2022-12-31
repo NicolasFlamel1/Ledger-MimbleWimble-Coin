@@ -103,7 +103,8 @@ void processGetMqsTimestampSignatureRequest(__attribute__((unused)) unsigned sho
 	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
 	
 	// Set kernel features or transaction type line buffer
-	strcpy(kernelFeaturesOrTransactionTypeLineBuffer, "MQS");
+	explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+	strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "MQS", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 	
 	// Show sign MQS timestamp menu
 	showMenu(SIGN_MQS_TIMESTAMP_MENU);

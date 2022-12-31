@@ -65,10 +65,12 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			}
 			
 			// Set verify address, approve transaction, or currency version line buffer
-			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS");
+			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
-			strcpy(addressTypeLineBuffer, "MQS Address");
+			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
+			strncpy(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get MQS address
 			char mqsAddress[MQS_ADDRESS_SIZE];
@@ -92,10 +94,12 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			}
 		
 			// Set verify address, approve transaction, or currency version line buffer
-			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor");
+			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
-			strcpy(addressTypeLineBuffer, "Tor Address");
+			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
+			strncpy(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get Tor address
 			char torAddress[TOR_ADDRESS_SIZE];
@@ -119,10 +123,12 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 			}
 			
 			// Set verify address, approve transaction, or currency version line buffer
-			strcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack");
+			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
-			strcpy(addressTypeLineBuffer, "Slatepack Address");
+			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
+			strncpy(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			{
 				// Get Slatepack address
