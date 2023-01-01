@@ -47,7 +47,7 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 	
 		// Test epoch to time
-		cmocka_unit_test(testEpochToTime),
+		cmocka_unit_test(testEpochToTime)
 	};
 	
 	// Return performing tests

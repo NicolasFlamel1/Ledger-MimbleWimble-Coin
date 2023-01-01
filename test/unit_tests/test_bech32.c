@@ -47,7 +47,7 @@ int main(void) {
 
 // Supporting function implementation
 
-// Test Encode
+// Test encode
 void testEncode(void **state) {
 
 	// Get output length
@@ -65,7 +65,7 @@ void testEncode(void **state) {
 	assert_string_equal(output, OUTPUT);
 }
 
-// Test Decode
+// Test decode
 void testDecode(void **state) {
 
 	// Get input length

@@ -193,7 +193,7 @@ jobs:
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
- 
+
   job_scan_build:
     name: Clang Static Analyzer
     needs: job_build_debug

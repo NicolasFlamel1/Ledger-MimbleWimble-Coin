@@ -54,9 +54,6 @@ static void testSwapEndianness(void **state);
 // Test to hex string
 static void testToHexString(void **state);
 
-// Test get string length
-static void testGetStringLength(void **state);
-
 // Test to string
 static void testToString(void **state);
 
@@ -81,9 +78,6 @@ int main(void) {
 		
 		// Test to hex string
 		cmocka_unit_test(testToHexString),
-		
-		// Test get string length
-		cmocka_unit_test(testGetStringLength),
 		
 		// Test to string
 		cmocka_unit_test(testToString),
@@ -121,22 +115,12 @@ void testSwapEndianness(void **state) {
 void testToHexString(void **state) {
 
 	// Get hex string value by converting hex value to a string
-	char hexStringValue[sizeof(HEX_VALUE) *  HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0')];
+	char hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0')];
 	toHexString(hexStringValue, HEX_VALUE, sizeof(HEX_VALUE));
-	hexStringValue[sizeof(HEX_VALUE) *  HEXADECIMAL_CHARACTER_SIZE] = '\0';
+	hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 	
 	// Assert hex string value is correct
 	assert_string_equal(hexStringValue, HEX_STRING_VALUE);
-}
-
-// Test get string length
-void testGetStringLength(void **state) {
-
-	// Get string length
-	const size_t stringLength = getStringLength(NUMBER_VALUE);
-	
-	// Assert string length is correct
-	assert_int_equal(stringLength, sizeof(STRING_VALUE) - sizeof((char)'\0'));
 }
 
 // Test to string

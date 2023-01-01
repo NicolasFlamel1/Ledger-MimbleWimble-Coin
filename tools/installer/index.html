@@ -259,7 +259,7 @@
 					let macInitializationVector = new Uint8Array(AES_IV_SIZE);
 					
 					// Add alert
-					addAlert("Installing the " + application + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + Common.toHexString(APPLICATIONS[application]["Hash"][walletType]).toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " +  walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
+					addAlert("Installing the " + application + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + Common.toHexString(APPLICATIONS[application]["Hash"][walletType]).toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " + walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
 					
 					// Go through all APDU commands
 					for(let i = 0; i < APPLICATIONS[application]["APDU Commands"][walletType]["length"]; ++i) {

@@ -321,7 +321,7 @@ class Slate {
 					// Check if slate's version is at least version three
 					if(this.getVersion().isGreaterThanOrEqualTo(Slate.VERSION_THREE) === true) {
 					
-						// Set serialized slate's time to live cut off height 
+						// Set serialized slate's time to live cut off height
 						serializedSlate["ttl_cutoff_height"] = (this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT) ? this.getTimeToLiveCutOffHeight().toFixed() : Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT;
 						
 						// Set serialized slate's payment proof
@@ -4956,7 +4956,7 @@ class Slate {
 					// Set kernel lock height to no lock height
 					var kernelLockHeight = Slate.NO_LOCK_HEIGHT;
 					
-					// Set kernel relative height to  relative height
+					// Set kernel relative height to relative height
 					var kernelRelativeHeight = this.getRelativeHeight();
 				
 					// Break
