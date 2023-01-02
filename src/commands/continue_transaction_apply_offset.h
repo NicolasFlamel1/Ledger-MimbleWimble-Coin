@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction apply offset request
-void processContinueTransactionApplyOffsetRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionApplyOffsetRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

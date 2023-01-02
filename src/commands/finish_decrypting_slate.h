@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process finish decrypting slate request
-void processFinishDecryptingSlateRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processFinishDecryptingSlateRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

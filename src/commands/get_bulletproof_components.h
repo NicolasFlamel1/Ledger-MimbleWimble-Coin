@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get bulletproof components request
-void processGetBulletproofComponentsRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetBulletproofComponentsRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

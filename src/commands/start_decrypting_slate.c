@@ -14,7 +14,7 @@
 // Supporting function implementation
 
 // Process start decrypting slate request
-void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned short *responseLength, __attribute__((unused)) const unsigned char *responseFlags) {
 
 	// Reset the slate
 	resetSlate();
@@ -29,7 +29,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint32_t) + CHACHA20_NONCE_SIZE) {
@@ -65,7 +65,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 	
 	// Check address length
 	size_t sharedPrivateKeyLength;
-	uint8_t *salt = NULL;
+	const uint8_t *salt = NULL;
 	const uint8_t *ephemeralX25519PublicKey = NULL;
 	const uint8_t *encryptedFileKey = NULL;
 	const uint8_t *payloadNonce = NULL;
@@ -123,7 +123,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) unsigned short *
 			ephemeralX25519PublicKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce)];
 			
 			// Check if ephemeral X25519 public key is invalid
-			if(cx_math_is_zero(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+			if(isZeroArraySecure(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

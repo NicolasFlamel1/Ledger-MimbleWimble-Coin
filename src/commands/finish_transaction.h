@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process finish transaction request
-void processFinishTransactionRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processFinishTransactionRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process finish transaction user interaction
 void processFinishTransactionUserInteraction(unsigned short *responseLength);

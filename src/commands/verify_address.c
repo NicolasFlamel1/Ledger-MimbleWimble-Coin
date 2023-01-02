@@ -12,7 +12,7 @@
 // Supporting function implementation
 
 // Process verify address request
-void processVerifyAddressRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -158,7 +158,7 @@ void processVerifyAddressRequest(__attribute__((unused)) unsigned short *respons
 }
 
 // Process verify address user interaction
-void processVerifyAddressUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
+void processVerifyAddressUserInteraction(__attribute__((unused)) const unsigned short *responseLength) {
 
 	// Throw success
 	THROW(SWO_SUCCESS);

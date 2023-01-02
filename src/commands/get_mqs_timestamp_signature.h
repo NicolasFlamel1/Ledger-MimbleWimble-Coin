@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get MQS timestamp signature request
-void processGetMqsTimestampSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetMqsTimestampSignatureRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process get MQS timestamp signature user interaction
 void processGetMqsTimestampSignatureUserInteraction(unsigned short *responseLength);

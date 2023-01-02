@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get address request
-void processGetAddressRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetAddressRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

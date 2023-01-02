@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction get public nonce request
-void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

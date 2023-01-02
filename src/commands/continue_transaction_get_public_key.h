@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction get public key request
-void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

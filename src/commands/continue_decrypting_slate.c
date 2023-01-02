@@ -10,7 +10,7 @@
 // Supporting function implementation
 
 // Process continue decrypting slate request
-void processContinueDecryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processContinueDecryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) const unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];

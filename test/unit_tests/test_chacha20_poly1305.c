@@ -116,9 +116,9 @@ void testResultingState(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
 	ChaCha20Poly1305State chaCha20Poly1305State;
-	uint32_t chaCha20ResultingState[sizeof(chaCha20Poly1305State.chaCha20OriginalState) / sizeof(chaCha20Poly1305State.chaCha20OriginalState[0])];
-	initializeChaCha20Poly1305(&chaCha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, chaCha20ResultingState);
+	uint32_t resultingState[sizeof(chaCha20Poly1305State.chaCha20OriginalState) / sizeof(chaCha20Poly1305State.chaCha20OriginalState[0])];
+	initializeChaCha20Poly1305(&chaCha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, resultingState);
 	
 	// Assert resulting state is correct
-	assert_memory_equal(chaCha20ResultingState, RESULTING_STATE, sizeof(RESULTING_STATE));
+	assert_memory_equal(resultingState, RESULTING_STATE, sizeof(RESULTING_STATE));
 }

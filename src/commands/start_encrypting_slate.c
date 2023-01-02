@@ -15,7 +15,7 @@
 // Supporting function implementation
 
 // Process start encrypting slate request
-void processStartEncryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processStartEncryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) const unsigned char *responseFlags) {
 	
 	// Reset the slate
 	resetSlate();

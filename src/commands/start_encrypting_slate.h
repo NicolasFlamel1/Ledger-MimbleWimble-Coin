@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process start encrypting slate request
-void processStartEncryptingSlateRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processStartEncryptingSlateRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

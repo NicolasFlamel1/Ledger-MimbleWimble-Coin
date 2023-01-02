@@ -6,10 +6,10 @@
 // Function prototypes
 
 // Process verify root public key request
-void processVerifyRootPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processVerifyRootPublicKeyRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process verify root public key user interaction
-void processVerifyRootPublicKeyUserInteraction(unsigned short *responseLength);
+void processVerifyRootPublicKeyUserInteraction(const unsigned short *responseLength);
 
 
 #endif

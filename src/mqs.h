@@ -22,7 +22,7 @@
 // Function prototypes
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, uint8_t *salt);
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, const uint8_t *salt);
 
 // Get public key from MQS address
 bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqsAddress, size_t length);

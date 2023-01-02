@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction get message signature request
-void processContinueTransactionGetMessageSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionGetMessageSignatureRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

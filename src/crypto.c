@@ -161,15 +161,15 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 			// Derive node and chain code from path and seed key
 			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip44Path, ARRAYLEN(bip44Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY));
 			
-			// Get private key from node
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);
-			
-			// Check if private key isn't a valid secret key
-			if(!isValidSecp256k1PrivateKey((uint8_t *)privateKey->d, privateKey->d_len)) {
+			// Check if node isn't a valid secret key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey->d))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Get private key from node
+			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);
 		}
 		
 		// Finally
@@ -346,7 +346,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
 				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 				
-				unsafePointScalarMultiply(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp));
+				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp)));
 			}
 			
 			// Check if the blinding factor isn't zero
@@ -361,7 +361,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 				if(!isZeroArraySecure((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Check if product of value and its generator doesn't have an x component of zero
-					if(!cx_math_is_zero((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+					if(!isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 						// Get sum of products
 						CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
@@ -536,15 +536,15 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
 			cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
 			
-			// Get address private key from node
-			cx_ecfp_init_private_key(curve, (uint8_t *)node, sizeof(addressPrivateKey->d), (cx_ecfp_private_key_t *)addressPrivateKey);
-			
-			// Check if address private key isn't a valid private key
-			if(!isValidSecp256k1PrivateKey((uint8_t *)addressPrivateKey->d, addressPrivateKey->d_len)) {
+			// Check if node isn't a valid private key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(addressPrivateKey->d))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Get address private key from node
+			cx_ecfp_init_private_key(curve, (uint8_t *)node, sizeof(addressPrivateKey->d), (cx_ecfp_private_key_t *)addressPrivateKey);
 			
 			// Get chain code from the node
 			volatile uint8_t *chainCode = &node[sizeof(addressPrivateKey->d)];
@@ -605,7 +605,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 		// Normalize the secret nonce
 		cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
 		
-	} while(cx_math_is_zero(secretNonce, NONCE_SIZE));
+	} while(isZeroArraySecure(secretNonce, NONCE_SIZE));
 	
 	// Get the product of the secret nonce and its generator
 	uint8_t generator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -614,7 +614,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, generator, secretNonce, NONCE_SIZE));
 	
 	// Check if the result has an x component of zero
-	if(cx_math_is_zero(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+	if(isZeroArraySecure(&generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -804,7 +804,7 @@ size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLen
 			for(size_t i = 0; i < dataLength; ++i) {
 			
 				// Update invalid padding in a way that tries to mitigate timing attacks
-				invalidPadding |= result[i] ^ ((i >= decryptedDataLength) ? result[dataLength - 1] : result[i]);
+				invalidPadding |= (bool)(result[i] ^ ((i >= decryptedDataLength) ? result[dataLength - 1] : result[i]));
 			}
 			
 			// Check if padding is invalid
@@ -853,6 +853,13 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 			// Swap the hash's endianness
 			swapEndianness((uint8_t *)hash, sizeof(x25519PrivateKey->d));
 			
+			// Check if the hash is invalid
+			if(isZeroArraySecure((uint8_t *)hash, sizeof(x25519PrivateKey->d))) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+			
 			// Get X25519 private key from the hash
 			cx_ecfp_init_private_key(CX_CURVE_Curve25519, (uint8_t *)hash, sizeof(x25519PrivateKey->d), (cx_ecfp_private_key_t *)x25519PrivateKey);
 		}
@@ -882,18 +889,33 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	// Get uncompressed Ed25519 public key's y value
 	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 
-	// Compute the X25519 public key as the sum of one and y divided by the difference of one and y
+	// Get the sum of one and y and the difference of one and y
 	uint8_t one[SCALAR_SIZE] = {0};
 	one[sizeof(one) - 1] = 1;
 	
-	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, ED25519_PUBLIC_KEY_SIZE);
+	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE);
 	cx_math_subm(y, one, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 	
+	// Check if the difference of one and y is zero
+	if(isZeroArraySecure(y, PUBLIC_KEY_COMPONENT_SIZE)) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
+	
+	// Compute the X25519 public key as the sum of one and y divided by the difference of one and y
 	cx_math_invprimem(y, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_PRIME, ED25519_PUBLIC_KEY_SIZE);
+	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE);
 	
 	// Swap the X25519 public key's endianness
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
+	
+	// Check if the X25519 public key is invalid
+	if(isZeroArraySecure(x25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
 }
 
 // Get payment proof message length
@@ -1515,7 +1537,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				createScalarsFromChaCha20(sl, sr, rewindNonce, i + 2);
 				
 				// Check if sl or sr is zero
-				if(cx_math_is_zero(sl, SCALAR_SIZE) || cx_math_is_zero(sr, SCALAR_SIZE)) {
+				if(isZeroArraySecure(sl, SCALAR_SIZE) || isZeroArraySecure(sr, SCALAR_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1528,7 +1550,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
-				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1537,7 +1559,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1549,7 +1571,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
 				
 				// Check if the result has an x component of zero
-				if(cx_math_is_zero(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1558,7 +1580,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Check if the sum of sterm to the rho generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
-				if(cx_math_is_zero((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
@@ -1568,7 +1590,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				if(!(i % 4)) {
 				
 					// Show progress bar
-					showProgressBar(map(i, 0, BITS_TO_PROVE, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4));
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4));
 				}
 			}
 			
@@ -1576,7 +1598,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1589,7 +1611,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1721,7 +1743,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, &t1Generator[PUBLIC_KEY_PREFIX_SIZE], &t2Generator[PUBLIC_KEY_PREFIX_SIZE]);
 			
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || cx_math_is_zero((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -1827,7 +1849,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				else {
 				
 					// Change the private key's curve
-					cx_curve_t curve = privateKey->curve;
+					const cx_curve_t curve = privateKey->curve;
 					privateKey->curve = CX_CURVE_SECP256K1;
 				
 					// Get compressed public key from the private key set it in the data
@@ -1843,15 +1865,15 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				// Get the path's node as the HMAC-SHA512 of the data with the chain code as the key
 				cx_hmac_sha512((uint8_t *)chainCode, CHAIN_CODE_SIZE, (uint8_t *)data, sizeof(data), (uint8_t *)node, sizeof(node));
 				
-				// Get new private key from node
-				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
-				
-				// Check if new private key isn't a valid private key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
+				// Check if the node isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(newPrivateKey.d))) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
+				
+				// Get new private key from the node
+				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
 				
 				// Add private key to the new private key
 				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);

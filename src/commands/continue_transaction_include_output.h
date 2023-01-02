@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction include output request
-void processContinueTransactionIncludeOutputRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionIncludeOutputRequest(const unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

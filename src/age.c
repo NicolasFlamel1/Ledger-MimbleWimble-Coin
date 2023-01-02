@@ -116,6 +116,13 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t i
 			// Create payload key from file key and payload nonce
 			cx_hkdf_extract(CX_SHA256, (uint8_t *)fileKey, sizeof(fileKey), (uint8_t *)payloadNonce, AGE_PAYLOAD_NONCE_SIZE, (uint8_t *)pseudorandomKey);
 			cx_hkdf_expand(CX_SHA256, (uint8_t *)pseudorandomKey, sizeof(pseudorandomKey), (uint8_t *)PAYLOAD_KEY_INFO, sizeof(PAYLOAD_KEY_INFO), (uint8_t *)payloadKey, AGE_PAYLOAD_KEY_SIZE);
+			
+			// Check if payload key is zero
+			if(isZeroArraySecure((uint8_t *)payloadKey, AGE_PAYLOAD_KEY_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
 		}
 		
 		// Finally

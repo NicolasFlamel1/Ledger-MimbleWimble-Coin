@@ -43,7 +43,7 @@ enum KernelFeatures {
 // Supporting function implementation
 
 // Process finish transaction request
-void processFinishTransactionRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processFinishTransactionRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -800,7 +800,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	}
 	
 	// Append signature to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, sizeof(signature));
+	memcpy(&G_io_apdu_buffer[*responseLength], signature, sizeof(signature));
 	
 	*responseLength += sizeof(signature);
 	

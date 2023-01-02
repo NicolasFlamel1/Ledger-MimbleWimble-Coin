@@ -317,7 +317,7 @@ void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20
 	memcpy(chaCha20CurrentState, chaCha20Poly1305State->chaCha20OriginalState, sizeof(chaCha20Poly1305State->chaCha20OriginalState));
 	
 	// Go through ten iterations
-	for(uint8_t i = 0; i < 10; ++i) {
+	for(uint_fast8_t i = 0; i < 10; ++i) {
 	
 		// Perform two rounds on the ChaCha20 current state
 		quarterRound(&chaCha20CurrentState[0], &chaCha20CurrentState[4], &chaCha20CurrentState[8], &chaCha20CurrentState[12]);

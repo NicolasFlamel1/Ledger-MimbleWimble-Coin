@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get root public key request
-void processGetRootPublicKeyRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetRootPublicKeyRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process get root public key user interaction
 void processGetRootPublicKeyUserInteraction(volatile unsigned short *responseLength);

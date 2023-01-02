@@ -8,7 +8,7 @@
 // Supporting function implementation
 
 // Process verify root public key request
-void processVerifyRootPublicKeyRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+void processVerifyRootPublicKeyRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -85,7 +85,7 @@ void processVerifyRootPublicKeyRequest(__attribute__((unused)) unsigned short *r
 }
 
 // Process verify root public key user interaction
-void processVerifyRootPublicKeyUserInteraction(__attribute__((unused)) unsigned short *responseLength) {
+void processVerifyRootPublicKeyUserInteraction(__attribute__((unused)) const unsigned short *responseLength) {
 
 	// Throw success
 	THROW(SWO_SUCCESS);

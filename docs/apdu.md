@@ -808,7 +808,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 | 4      | `account`          | Account number (little endian, max 7FFFFFFF)) |
 | 4      | `index`            | Index number (little endian) |
 | 4      | `timestamp`        | Timestamp epoch to sign (little endian, max 23FFFFFFDC00) |
-| 2      | `time zone offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
+| 2      | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
 
 **Output Data**
 
@@ -844,7 +844,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 | 4       | `account`          | Account number (little endian, max 7FFFFFFF)) |
 | 4       | `index`            | Index number (little endian) |
 | Varying | `tor_certificate`  | Ed25519_signing_cert without header and signature to sign |
-| 2       | `time zone offset` | Time zone offset in minutes used when displaying the Tor certificate's expiration timestamp (little endian, signed, min -780, max 900) |
+| 2       | `time_zone_offset` | Time zone offset in minutes used when displaying the Tor certificate's expiration timestamp (little endian, signed, min -780, max 900) |
 
 **Output Data**
 

@@ -30,6 +30,13 @@ void createAndSaveTransactionSecretNonce(void) {
 	uint8_t encryptedSecretNonce[sizeof(storage.transactionSecretNonces[storage.currentTransactionSecretNonceIndex])];
 	encryptData(encryptedSecretNonce, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce), (uint8_t *)transaction.blindingFactor, sizeof(transaction.blindingFactor));
 	
+	// Check if encrypted secret nonce is invalid
+	if(isZeroArraySecure(encryptedSecretNonce, sizeof(encryptedSecretNonce))) {
+	
+		// Throw internal error error
+		THROW(INTERNAL_ERROR_ERROR);
+	}
+	
 	// Store encrypted secret nonce in storage at the current transaction secret nonce index
 	nvm_write((void *)storage.transactionSecretNonces[storage.currentTransactionSecretNonceIndex], (void *)encryptedSecretNonce, sizeof(encryptedSecretNonce));
 	

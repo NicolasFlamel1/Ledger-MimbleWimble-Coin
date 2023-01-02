@@ -6,10 +6,10 @@
 // Function prototypes
 
 // Process verify address request
-void processVerifyAddressRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processVerifyAddressRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process verify address user interaction
-void processVerifyAddressUserInteraction(unsigned short *responseLength);
+void processVerifyAddressUserInteraction(const unsigned short *responseLength);
 
 
 #endif

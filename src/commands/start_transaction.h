@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process start transaction request
-void processStartTransactionRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processStartTransactionRequest(const unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

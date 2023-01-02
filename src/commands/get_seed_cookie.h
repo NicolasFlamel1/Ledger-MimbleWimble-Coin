@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get seed cookie request
-void processGetSeedCookieRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetSeedCookieRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

@@ -9,7 +9,7 @@
 // Supporting function implementation
 
 // Process get root public key request
-void processGetRootPublicKeyRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetRootPublicKeyRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];

@@ -16,7 +16,7 @@
 // Supporting function implementation
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, uint8_t *salt) {
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, const uint8_t *salt) {
 
 	// Check if getting public key from address failed
 	cx_ecfp_public_key_t publicKey;
@@ -48,7 +48,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 			}
 			
 			// Get shared private key from the tweaked public key and salt
-			cx_pbkdf2_sha512(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
+			cx_pbkdf2_sha512(&publicKey.W[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, (uint8_t *)salt, MQS_SHARED_PRIVATE_KEY_SALT_SIZE, MQS_SHARED_PRIVATE_KEY_NUMBER_OF_ITERATIONS, (uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE);
 			
 			// Check if shared private key is zero
 			if(isZeroArraySecure((uint8_t *)sharedPrivateKey, MQS_SHARED_PRIVATE_KEY_SIZE)) {

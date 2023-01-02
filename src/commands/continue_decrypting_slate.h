@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue decrypting slate request
-void processContinueDecryptingSlateRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueDecryptingSlateRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process continue transaction include input request
-void processContinueTransactionIncludeInputRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processContinueTransactionIncludeInputRequest(const unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

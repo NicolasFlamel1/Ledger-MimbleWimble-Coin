@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get commitment request
-void processGetCommitmentRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetCommitmentRequest(unsigned short *responseLength, const unsigned char *responseFlags);
 
 
 #endif

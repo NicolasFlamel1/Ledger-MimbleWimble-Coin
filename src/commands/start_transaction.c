@@ -13,7 +13,7 @@
 // Supporting function implementation
 
 // Process start transaction request
-void processStartTransactionRequest(__attribute__((unused)) unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processStartTransactionRequest(__attribute__((unused)) const unsigned short *responseLength, __attribute__((unused)) const unsigned char *responseFlags) {
 
 	// Reset the transaction
 	resetTransaction();
@@ -179,7 +179,7 @@ void processStartTransactionRequest(__attribute__((unused)) unsigned short *resp
 		}
 		
 		// Check if secret nonce index exists and the secret nonce at the index is invalid
-		if(secretNonceIndex && cx_math_is_zero((uint8_t *)storage.transactionSecretNonces[secretNonceIndex - 1], sizeof(storage.transactionSecretNonces[secretNonceIndex - 1]))) {
+		if(secretNonceIndex && isZeroArraySecure((uint8_t *)storage.transactionSecretNonces[secretNonceIndex - 1], sizeof(storage.transactionSecretNonces[secretNonceIndex - 1]))) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);

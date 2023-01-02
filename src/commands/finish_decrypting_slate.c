@@ -9,7 +9,7 @@
 // Supporting function implementation
 
 // Process finish decrypting slate request
-void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) unsigned char *responseFlags) {
+void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attribute__((unused)) const unsigned char *responseFlags) {
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
@@ -21,7 +21,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
 	
 	// Get request's data
-	uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
+	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength != POLY1305_TAG_SIZE) {
@@ -38,7 +38,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 	}
 	
 	// Get tag from data
-	uint8_t *tag = data;
+	const uint8_t *tag = data;
 	
 	// Initialize expected tag
 	volatile uint8_t expectedTag[POLY1305_TAG_SIZE];
@@ -53,7 +53,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, expectedTag);
 			
 			// Check if tag isn't equal to the expected tag
-			if(os_secure_memcmp(tag, (uint8_t *)expectedTag, sizeof(expectedTag))) {
+			if(os_secure_memcmp((uint8_t *)tag, (uint8_t *)expectedTag, sizeof(expectedTag))) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

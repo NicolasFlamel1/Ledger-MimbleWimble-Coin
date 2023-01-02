@@ -26,7 +26,7 @@
 // Supporting function implementation
 
 // Process get Tor certificate signature request
-void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned short *responseLength, unsigned char *responseFlags) {
+void processGetTorCertificateSignatureRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Check currency doesn't allow Tor and Slatepack addresses
 	if(!currencyInformation->enableTorAddress && !currencyInformation->enableSlatepackAddress) {
@@ -75,8 +75,11 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	// Get certificate length
 	const size_t certificateLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(int16_t));
 	
+	// Get certificate type
+	const uint8_t certificateType = certificate[sizeof(uint8_t)];
+	
 	// Check if certificate type is invalid
-	if(certificate[sizeof(uint8_t)] != SIGNED_CERTIFICATE_TYPE) {
+	if(certificateType != SIGNED_CERTIFICATE_TYPE) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -84,13 +87,13 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	
 	// Get certificate expiration
 	uint32_t certificateExpiration;
-	memcpy(&certificateExpiration, &certificate[sizeof(uint8_t) + sizeof(uint8_t)], sizeof(certificateExpiration));
+	memcpy(&certificateExpiration, &certificate[sizeof(uint8_t) + sizeof(certificateType)], sizeof(certificateExpiration));
 	
 	// Convert certificate expiration big endian to little endian
 	certificateExpiration = os_swap_u32(certificateExpiration);
 	
 	// Get signed public key
-	const uint8_t *signedPublicKey = &certificate[sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t)];
+	const uint8_t *signedPublicKey = &certificate[sizeof(uint8_t) + sizeof(certificateType) + sizeof(certificateExpiration) + sizeof(uint8_t)];
 	
 	// Check if signed public key is invalid
 	if(!isValidEd25519PublicKey(signedPublicKey, ED25519_PUBLIC_KEY_SIZE)) {
@@ -100,10 +103,10 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	}
 	
 	// Get number of certificate extensions
-	const uint8_t numberOfCertificateExtensions = certificate[sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE];
+	const uint8_t numberOfCertificateExtensions = certificate[sizeof(uint8_t) + sizeof(certificateType) + sizeof(certificateExpiration) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE];
 	
 	// Initialize current extension index
-	size_t currentExtensionIndex = sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(uint8_t);
+	size_t currentExtensionIndex = sizeof(uint8_t) + sizeof(certificateType) + sizeof(certificateExpiration) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE + sizeof(numberOfCertificateExtensions);
 	
 	// Initialize signing public key
 	const uint8_t *signingPublicKey = NULL;
@@ -126,24 +129,24 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 		extensionLength = os_swap_u16(extensionLength);
 		
 		// Get extension type
-		const uint8_t extensionType = certificate[currentExtensionIndex + sizeof(uint16_t)];
+		const uint8_t extensionType = certificate[currentExtensionIndex + sizeof(extensionLength)];
 		
 		// Check if extension type is signing public key
 		if(extensionType == SIGNING_PUBLIC_KEY_EXTENSION_TYPE) {
 		
 			// Check if signing public key alreay exists or the extension is invalid
-			if(signingPublicKey || extensionLength != ED25519_PUBLIC_KEY_SIZE || certificateLength < currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE) {
+			if(signingPublicKey || extensionLength != ED25519_PUBLIC_KEY_SIZE || certificateLength < currentExtensionIndex + sizeof(extensionLength) + sizeof(extensionType) + sizeof(uint8_t) + ED25519_PUBLIC_KEY_SIZE) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Get signing public key from the extension
-			signingPublicKey = &certificate[currentExtensionIndex + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t)];
+			signingPublicKey = &certificate[currentExtensionIndex + sizeof(extensionLength) + sizeof(extensionType) + sizeof(uint8_t)];
 		}
 		
 		// Update current extension index
-		currentExtensionIndex += sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + extensionLength;
+		currentExtensionIndex += sizeof(extensionLength) + sizeof(extensionType) + sizeof(uint8_t) + extensionLength;
 	}
 	
 	// Check if certificate is invalid
@@ -166,6 +169,13 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) unsigned s
 	
 	// Check if the signing public key isn't the Ed25519 public key
 	if(memcmp(signingPublicKey, ed25519PublicKey, sizeof(ed25519PublicKey))) {
+	
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+	
+	// Check if the signed public key is the Ed25519 public key
+	if(!memcmp(signedPublicKey, ed25519PublicKey, sizeof(ed25519PublicKey))) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);

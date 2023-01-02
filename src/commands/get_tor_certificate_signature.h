@@ -6,7 +6,7 @@
 // Function prototypes
 
 // Process get Tor certificate signature request
-void processGetTorCertificateSignatureRequest(unsigned short *responseLength, unsigned char *responseFlags);
+void processGetTorCertificateSignatureRequest(const unsigned short *responseLength, unsigned char *responseFlags);
 
 // Process get Tor certificate signature user interaction
 void processGetTorCertificateSignatureUserInteraction(unsigned short *responseLength);
