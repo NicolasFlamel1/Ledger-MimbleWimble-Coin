@@ -1278,7 +1278,7 @@ class Slatepack {
 						reject("Invalid shared secret key");
 					}
 				}
-			});				
+			});
 		}
 		
 		// Decrypt

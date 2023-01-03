@@ -552,6 +552,58 @@ class Consensus {
 			// Return no explorer URL
 			return null;
 		}
+		
+		// Hardware waller starting height
+		static get HARDWARE_WALLET_STARTING_HEIGHT() {
+		
+			// Check wallet type
+			switch(Consensus.getWalletType()) {
+			
+				// MWC wallet
+				case Consensus.MWC_WALLET_TYPE:
+				
+					// Check network type
+					switch(Consensus.getNetworkType()) {
+					
+						// Mainnet network
+						case Consensus.MAINNET_NETWORK_TYPE:
+						
+							// Return hardware wallet starting height
+							return 1239928;
+						
+						// Testnet network
+						case Consensus.TESTNET_NETWORK_TYPE:
+						
+							// Return hardware wallet starting height
+							return 1115028;
+					}
+					
+					// Break
+					break;
+				
+				// GRIN wallet
+				case Consensus.GRIN_WALLET_TYPE:
+				
+					// Check network type
+					switch(Consensus.getNetworkType()) {
+					
+						// Mainnet network
+						case Consensus.MAINNET_NETWORK_TYPE:
+						
+							// Return hardware wallet starting height
+							return 1687446;
+						
+						// Testnet network
+						case Consensus.TESTNET_NETWORK_TYPE:
+						
+							// Return hardware wallet starting height
+							return 1195819;
+					}
+					
+					// Break
+					break;
+			}
+		}
 	
 	// Private
 	

@@ -1094,10 +1094,10 @@ class Slate {
 					var hardwareWallet = secretKeyOrHardwareWallet;
 					
 					// Return applying offset to the transaction with the hardware wallet
-					return hardwareWallet.applyOffsetToTransaction(self.getOffset(), hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function() {
+					return hardwareWallet.applyOffsetToTransaction(self.getOffset(), hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(secretNonceIndex) {
 					
-						// Resolve
-						resolve();
+						// Resolve secret nonce index
+						resolve(secretNonceIndex);
 					
 					// Catch errors
 					}).catch(function(error) {
@@ -1144,7 +1144,7 @@ class Slate {
 		}
 		
 		// Add participant
-		addParticipant(secretKeyOrHardwareWallet, secretNonceOrEncryptedSecretNonce, message, isMainnet, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
+		addParticipant(secretKeyOrHardwareWallet, secretNonce, message, isMainnet, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
 		
 			// Set self
 			var self = this;
@@ -1267,7 +1267,7 @@ class Slate {
 									var hardwareWallet = secretKeyOrHardwareWallet;
 									
 									// Return getting the transaction message signature with the hardware wallet
-									return hardwareWallet.getTransactionMessageSignature(message, publicBlindExcess, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(messageSignature) {
+									return hardwareWallet.getTransactionMessageSignature(message, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(messageSignature) {
 									
 										// Resolve message signature
 										resolve(messageSignature);
@@ -1301,9 +1301,6 @@ class Slate {
 							
 								// Check if a secret key is provided
 								if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
-								
-									// Get secret nonce
-									var secretNonce = secretNonceOrEncryptedSecretNonce;
 								
 									// Check if getting a public nonce from secret nonce failed
 									var publicNonce = Secp256k1Zkp.publicKeyFromSecretKey(secretNonce);
@@ -1367,7 +1364,7 @@ class Slate {
 									else {
 									
 										// Return creating partial signature
-										return self.createPartialSignature(secretKeyOrHardwareWallet, secretNonceOrEncryptedSecretNonce, true, isMainnet, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(partialSignature) {
+										return self.createPartialSignature(secretKeyOrHardwareWallet, secretNonce, true, isMainnet, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(partialSignature) {
 										
 											// Resolve partial signature
 											resolve(partialSignature);
@@ -1459,7 +1456,7 @@ class Slate {
 		}
 		
 		// Finalize
-		finalize(secretKeyOrHardwareWallet, secretNonceOrEncryptedSecretNonce, baseFee, isMainnet, verifyAsynchronous = false, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
+		finalize(secretKeyOrHardwareWallet, secretNonce, baseFee, isMainnet, verifyAsynchronous = false, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
 		
 			// Set self
 			var self = this;
@@ -1468,7 +1465,7 @@ class Slate {
 			return new Promise(function(resolve, reject) {
 			
 				// Return creating partial signature
-				return self.createPartialSignature(secretKeyOrHardwareWallet, secretNonceOrEncryptedSecretNonce, false, isMainnet, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(partialSignature) {
+				return self.createPartialSignature(secretKeyOrHardwareWallet, secretNonce, false, isMainnet, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(partialSignature) {
 				
 					// Get sender participant
 					var senderParticipant = self.getParticipant(SlateParticipant.SENDER_ID);
@@ -2558,10 +2555,10 @@ class Slate {
 			}
 		}
 		
-		// No encrypted secret nonce
-		static get NO_ENCRYPTED_SECRET_NONCE() {
+		// No secret nonce
+		static get NO_SECRET_NONCE() {
 		
-			// Return no encrypted secret nonce
+			// Return no secret nonce
 			return null;
 		}
 		
@@ -5017,7 +5014,7 @@ class Slate {
 		}
 		
 		// Create partial signature
-		createPartialSignature(secretKeyOrHardwareWallet, secretNonceOrEncryptedSecretNonce, isNewParticipant, isMainnet, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
+		createPartialSignature(secretKeyOrHardwareWallet, secretNonce, isNewParticipant, isMainnet, hardwareWalletLockedText = HardwareWallet.NO_TEXT, hardwareWalletLockedTextArguments = [], allowUnlock = false, preventMessages = false, cancelOccurred = Common.NO_CANCEL_OCCURRED) {
 		
 			// Set self
 			var self = this;
@@ -5088,9 +5085,6 @@ class Slate {
 							// Check if a secret key is provided
 							if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
 							
-								// Get secret nonce
-								var secretNonce = secretNonceOrEncryptedSecretNonce;
-							
 								// Check if getting a public nonce from secret nonce failed
 								var publicNonce = Secp256k1Zkp.publicKeyFromSecretKey(secretNonce);
 								
@@ -5114,52 +5108,18 @@ class Slate {
 								// Get hardware wallet
 								var hardwareWallet = secretKeyOrHardwareWallet;
 								
-								// Get encrypted secret nonce
-								var encryptedSecretNonce = secretNonceOrEncryptedSecretNonce;
+								// Return getting the transaction public nonce with the hardware wallet
+								return hardwareWallet.getTransactionPublicNonce(hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(publicNonce) {
 								
-								// Check if encrypted secret nonce exists
-								if(encryptedSecretNonce !== Slate.NO_ENCRYPTED_SECRET_NONCE) {
+									// Resolve public nonce
+									resolve(publicNonce);
 								
-									// Return setting the transaction encrypted secret nonce with the hardware wallet
-									return hardwareWallet.setTransactionEncryptedSecretNonce(encryptedSecretNonce, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function() {
-									
-										// Return getting the transaction public nonce with the hardware wallet
-										return hardwareWallet.getTransactionPublicNonce(hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(publicNonce) {
-										
-											// Resolve public nonce
-											resolve(publicNonce);
-										
-										// Catch errors
-										}).catch(function(error) {
-										
-											// Reject error
-											reject(error);
-										});
-									
-									// Catch errors
-									}).catch(function(error) {
-									
-										// Reject error
-										reject(error);
-									});
-								}
+								// Catch errors
+								}).catch(function(error) {
 								
-								// Otherwise
-								else {
-								
-									// Return getting the transaction public nonce with the hardware wallet
-									return hardwareWallet.getTransactionPublicNonce(hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(publicNonce) {
-									
-										// Resolve public nonce
-										resolve(publicNonce);
-									
-									// Catch errors
-									}).catch(function(error) {
-									
-										// Reject error
-										reject(error);
-									});
-								}
+									// Reject error
+									reject(error);
+								});
 							}
 						});
 					};
@@ -5250,9 +5210,6 @@ class Slate {
 											// Get secret key
 											var secretKey = secretKeyOrHardwareWallet;
 											
-											// Get secret nonce
-											var secretNonce = secretNonceOrEncryptedSecretNonce;
-							
 											// Check if creating partial signature from the message to sign, secret key, secret nonce, public blind excess sum, and public nonce sum failed
 											var partialSignature = Secp256k1Zkp.createSingleSignerSignature(messageToSign, secretKey, secretNonce, publicBlindExcessSum, publicNonceSum, publicNonceSum);
 											

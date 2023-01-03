@@ -1646,7 +1646,7 @@ class Wallet {
 												if(self.isHardwareConnected() === true) {
 											
 													// Return starting transaction for the reward amount with the hardware wallet
-													return self.getHardwareWallet().startTransaction(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, reward, new BigNumber(0), new BigNumber(0), HardwareWallet.NO_ADDRESS, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function() {
+													return self.getHardwareWallet().startTransaction(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, reward, new BigNumber(0), new BigNumber(0), HardwareWallet.NO_SECRET_NONCE_INDEX, HardwareWallet.NO_ADDRESS, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function() {
 													
 														// Check if hardware wallet is connected
 														if(self.isHardwareConnected() === true) {
@@ -1834,7 +1834,7 @@ class Wallet {
 									
 										// Reject error
 										reject(error);
-									});	
+									});
 								}
 								
 								// Otherwise
