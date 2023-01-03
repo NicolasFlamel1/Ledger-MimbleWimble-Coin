@@ -61,7 +61,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 	const size_t humanReadablePartLength = strlen(humanReadablePart);
 	
 	// Append human-readable part in the result
-	memcpy(result, humanReadablePart, strlen(humanReadablePart));
+	memcpy(result, humanReadablePart, humanReadablePartLength);
 	
 	// Append separator to the result
 	result[humanReadablePartLength] = SEPARATOR;
