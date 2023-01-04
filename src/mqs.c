@@ -133,7 +133,7 @@ void getMqsAddressFromPublicKey(char *mqsAddress, const uint8_t *publicKey) {
 	base58EncodeWithChecksum(mqsAddress, addressData, sizeof(addressData));
 }
 
-// Get Mqs address
+// Get MQS address
 void getMqsAddress(char *mqsAddress, uint32_t account, uint32_t index) {
 
 	// Initialize address private key

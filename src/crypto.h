@@ -148,6 +148,9 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 // Is valid commitment
 bool isValidCommitment(uint8_t *commitment);
 
+// Is valid Ed25519 private key
+bool isValidEd25519PrivateKey(const uint8_t *privateKey, size_t length);
+
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
 

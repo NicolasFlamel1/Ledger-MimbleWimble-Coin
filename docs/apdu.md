@@ -188,7 +188,7 @@ Returns the account's commitment for the provided identifier, value, and switch 
 
 Returns the account's bulletproof components tau x, t one, and t two for the provided identifier, value, and switch type. These bulletproof components can be used to create a bulletproof. A processing message is displayed on the device for the duration of this command that shows either sending transaction, receiving transaction, or creating coinbase depending on the parameter provided.
 
-This command takes about 58 seconds to complete on a Ledger Nano S hardware wallet and about 28 seconds to complete on a Ledger Nano S Plus hardware wallet.
+This command takes about 50 seconds to complete on a Ledger Nano S hardware wallet and about 25 seconds to complete on a Ledger Nano S Plus hardware wallet.
 
 #### Encoding
 

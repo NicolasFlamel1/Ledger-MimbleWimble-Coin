@@ -30,7 +30,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 // Get MQS address from public key
 void getMqsAddressFromPublicKey(char *mqsAddress, const uint8_t *publicKey);
 
-// Get Mqs address
+// Get MQS address
 void getMqsAddress(char *mqsAddress, uint32_t account, uint32_t index);
 
 

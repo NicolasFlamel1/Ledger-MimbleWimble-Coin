@@ -37,8 +37,11 @@
 // Address private key blinding factor value
 #define ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE 713
 
+// Ed25519 private key size
+#define ED25519_PRIVATE_KEY_SIZE 32
+
 // Secp256k1 private key size
-#define SECP256k1_PRIVATE_KEY_SIZE 32
+#define SECP256K1_PRIVATE_KEY_SIZE 32
 
 // Commitment even prefix
 #define COMMITMENT_EVEN_PREFIX 8
@@ -130,8 +133,8 @@ static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile 
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
 
-// Unsafe point scalar multiply
-static void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *scalar, size_t scalarLength);
+// Generator double point scalar multiply
+static void generatorDoublePointScalarMultiply(uint8_t *result, size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
 
 
 // Supporting function implementation
@@ -471,8 +474,8 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 // Get private nonce
 void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uint8_t *commitment) {
 
-	// Initialize private root key
-	volatile uint8_t privateRootKey[SECP256k1_PRIVATE_KEY_SIZE];
+	// Initialize private key
+	volatile cx_ecfp_private_key_t privateKey;
 	
 	// Initialize private hash
 	volatile uint8_t privateHash[NONCE_SIZE];
@@ -483,11 +486,11 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 		// Try
 		TRY {
 		
-			// Derive private root key
-			deriveBlindingFactor(privateRootKey, account, 0, NULL, 0, NO_SWITCH_TYPE);
+			// Get private key
+			getPrivateKeyAndChainCode(&privateKey, NULL, account);
 			
-			// Get private hash from the private root key
-			getBlake2b(privateHash, sizeof(privateHash), (uint8_t *)privateRootKey, sizeof(privateRootKey), NULL, 0);
+			// Get private hash from the private key
+			getBlake2b(privateHash, sizeof(privateHash), (uint8_t *)privateKey.d, privateKey.d_len, NULL, 0);
 			
 			// Get private nonce from the private hash and the commitment
 			getBlake2b(privateNonce, NONCE_SIZE, (uint8_t *)privateHash, sizeof(privateHash), commitment, COMMITMENT_SIZE);
@@ -506,8 +509,8 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 			// Clear the private hash
 			explicit_bzero((uint8_t *)privateHash, sizeof(privateHash));
 		
-			// Clear the private root key
-			explicit_bzero((uint8_t *)privateRootKey, sizeof(privateRootKey));
+			// Clear the private key
+			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
 		}
 	}
 	
@@ -524,6 +527,9 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 	// Initialize node
 	volatile uint8_t node[NODE_SIZE];
 	
+	// Private key
+	volatile cx_ecfp_private_key_t privateKey;
+	
 	// Begin try
 	BEGIN_TRY {
 	
@@ -537,20 +543,59 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
 			
 			// Check if node isn't a valid private key
-			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(addressPrivateKey->d))) {
+			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey.d))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
-			// Get address private key from node
-			cx_ecfp_init_private_key(curve, (uint8_t *)node, sizeof(addressPrivateKey->d), (cx_ecfp_private_key_t *)addressPrivateKey);
+			// Get private key from node
+			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
 			
 			// Get chain code from the node
-			volatile uint8_t *chainCode = &node[sizeof(addressPrivateKey->d)];
+			volatile uint8_t *chainCode = &node[sizeof(privateKey.d)];
 			
-			// Derive child key from the address private key and chain code at the index
-			deriveChildKey(addressPrivateKey, chainCode, account, &index, 1, true);
+			// Derive child key from the private key and chain code at the index
+			deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
+			
+			// Check curve
+			switch(curve) {
+			
+				// Secp256k1
+				case CX_CURVE_SECP256K1:
+				
+					// Check if private key isn't a valid private key
+					if(!isValidSecp256k1PrivateKey((uint8_t *)privateKey.d, privateKey.d_len)) {
+					
+						// Throw internal error error
+						THROW(INTERNAL_ERROR_ERROR);
+					}
+					
+					// Break
+					break;
+				
+				// Ed25519
+				case CX_CURVE_Ed25519:
+				
+					// Check if private key isn't a valid private key
+					if(!isValidEd25519PrivateKey((uint8_t *)privateKey.d, privateKey.d_len)) {
+					
+						// Throw internal error error
+						THROW(INTERNAL_ERROR_ERROR);
+					}
+					
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+			}
+			
+			// Get address private key from the private key
+			cx_ecfp_init_private_key(curve, (uint8_t *)privateKey.d, privateKey.d_len, (cx_ecfp_private_key_t *)addressPrivateKey);
 		}
 		
 		// Finally
@@ -561,6 +606,9 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 			
 			// Clear the node
 			explicit_bzero((uint8_t *)node, sizeof(node));
+			
+			// Clear the private key
+			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
 		}
 	}
 	
@@ -1243,6 +1291,20 @@ bool isValidCommitment(uint8_t *commitment) {
 	return result;
 }
 
+// Is valid Ed25519 private key
+bool isValidEd25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != ED25519_PRIVATE_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Return true
+	return true;
+}
+
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 
@@ -1291,7 +1353,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
 
 	// Check if length is invalid
-	if(length != SECP256k1_PRIVATE_KEY_SIZE) {
+	if(length != SECP256K1_PRIVATE_KEY_SIZE) {
 	
 		// Return false
 		return false;
@@ -1442,7 +1504,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 	volatile uint8_t alphaGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	volatile uint8_t rhoGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_G)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
-	// Initialize aterm;
+	// Initialize aterm
 	volatile uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
 	// Initialize y and z
@@ -1543,42 +1605,19 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
-				// Get the product of the generator and sl
-				uint8_t *sterm = (uint8_t *)aterm;
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_FIRST_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
-				
-				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sl, SCALAR_SIZE);
+				// Get the sum of the product of the generator and sl and the product of the generator and sr
+				volatile uint8_t *sterm = aterm;
+				generatorDoublePointScalarMultiply((uint8_t *)sterm, i, sl, sr);
 				
 				// Check if the result has an x component of zero
-				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure((uint8_t *)&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
-				// Check if the sum of sterm to the rho generator has an x component of zero
-				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
-				
-				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-				
-					// Throw internal error error
-					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Get the product of the generator and sr
-				memcpy(&sterm[PUBLIC_KEY_PREFIX_SIZE], GENERATORS_SECOND_HALF[i], UNCOMPRESSED_PUBLIC_KEY_SIZE - PUBLIC_KEY_PREFIX_SIZE);
-				
-				unsafePointScalarMultiply(CX_CURVE_SECP256K1, sterm, sr, SCALAR_SIZE);
-				
-				// Check if the result has an x component of zero
-				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-				
-					// Throw internal error error
-					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Check if the sum of sterm to the rho generator has an x component of zero
-				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
+				// Check if the sum of result and the rho generator has an x component of zero
+				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, (uint8_t *)sterm));
 				
 				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
@@ -1848,15 +1887,8 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				// Otherwise
 				else {
 				
-					// Change the private key's curve
-					const cx_curve_t curve = privateKey->curve;
-					privateKey->curve = CX_CURVE_SECP256K1;
-				
 					// Get compressed public key from the private key set it in the data
 					getPublicKeyFromPrivateKey(data, (cx_ecfp_private_key_t *)privateKey);
-					
-					// Restore the private key's curve
-					privateKey->curve = curve;
 				}
 				
 				// Append the path to the data
@@ -1873,7 +1905,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				}
 				
 				// Get new private key from the node
-				cx_ecfp_init_private_key(privateKey->curve, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
+				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
 				
 				// Add private key to the new private key
 				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);
@@ -1885,11 +1917,11 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
+				// Get private key from the new private key
+				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)newPrivateKey.d, newPrivateKey.d_len, (cx_ecfp_private_key_t *)privateKey);
+				
 				// Get chain code from the node
 				memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(newPrivateKey.d)], CHAIN_CODE_SIZE);
-				
-				// Set private key to the new private key
-				memcpy((cx_ecfp_private_key_t *)privateKey, (cx_ecfp_private_key_t *)&newPrivateKey, sizeof(newPrivateKey));
 			}
 		}
 	
@@ -2184,46 +2216,93 @@ bool isQuadraticResidue(const uint8_t *component) {
 	return result;
 }
 
-// Unsafe point scalar multiply
-void unsafePointScalarMultiply(cx_curve_t curve, uint8_t *point, const uint8_t *scalar, size_t scalarLength) {
+// Generator double point scalar multiply
+void generatorDoublePointScalarMultiply(uint8_t *result, size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo) {
 
 	// Lock big number processor and throw error if it fails
 	CX_THROW(cx_bn_lock(CX_BN_WORD_ALIGNEMENT, 0));
 	
-	// Initialize error
+	// Initialize values
 	cx_err_t error;
+	cx_ecpoint_t generatorPointOne;
+	cx_ecpoint_t generatorPointTwo;
+	cx_ecpoint_t resultPoint;
+	cx_err_t allocatingGeneratorPointTwoError = !CX_OK;
+	cx_err_t allocatingResultPointError = !CX_OK;
 	
-	// Check if allocating memory for internal point was successful
-	cx_ecpoint_t internalPoint;
-	const cx_err_t allocatingError = cx_ecpoint_alloc(&internalPoint, curve);
+	// Check if allocating memory for generator point one was successful
+	const cx_err_t allocatingGeneratorPointOneError = cx_ecpoint_alloc(&generatorPointOne, CX_CURVE_SECP256K1);
 	
-	if(!allocatingError) {
+	if(!allocatingGeneratorPointOneError) {
 	
-		// Set internal point to the point and check if it fails
-		CX_CHECK(cx_ecpoint_init(&internalPoint, &point[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &point[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+		// Check if allocating memory for generator point two was successful
+		allocatingGeneratorPointTwoError = cx_ecpoint_alloc(&generatorPointTwo, CX_CURVE_SECP256K1);
 		
-		// Perform point scalar multiplication and check if it fails
-		CX_CHECK(cx_ecpoint_scalarmul(&internalPoint, scalar, scalarLength));
+		if(!allocatingGeneratorPointTwoError) {
 		
-		// Set point to the result and check if it fails
-		CX_CHECK(cx_ecpoint_export(&internalPoint, &point[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &point[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+			// Check if allocating memory for result point was successful
+			allocatingResultPointError = cx_ecpoint_alloc(&resultPoint, CX_CURVE_SECP256K1);
+			
+			if(!allocatingResultPointError) {
+	
+				// Set generator point one and check if it fails
+				CX_CHECK(cx_ecpoint_init(&generatorPointOne, GENERATORS_FIRST_HALF[index], PUBLIC_KEY_COMPONENT_SIZE, &GENERATORS_FIRST_HALF[index][PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+				
+				// Set generator point two and check if it fails
+				CX_CHECK(cx_ecpoint_init(&generatorPointTwo, GENERATORS_SECOND_HALF[index], PUBLIC_KEY_COMPONENT_SIZE, &GENERATORS_SECOND_HALF[index][PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+				
+				// Perform double point scalar multiplication and check if it fails
+				CX_CHECK(cx_ecpoint_double_scalarmul(&resultPoint, &generatorPointOne, &generatorPointTwo, scalarOne, SCALAR_SIZE, scalarTwo, SCALAR_SIZE));
+				
+				// Set result and check if it fails
+				CX_CHECK(cx_ecpoint_export(&resultPoint, &result[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, &result[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], PUBLIC_KEY_COMPONENT_SIZE));
+			}
+		
+			// Otherwise
+			else {
+			
+				// Set error
+				error = allocatingResultPointError;
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// Set error
+			error = allocatingGeneratorPointTwoError;
+		}
 	}
 	
 	// Otherwise
 	else {
 	
 		// Set error
-		error = allocatingError;
+		error = allocatingGeneratorPointOneError;
 	}
 	
 // End
 end:
 
-	// Check if memory was allocated for internal point
-	if(!allocatingError) {
+	// Check if memory was allocated for generator point one
+	if(!allocatingGeneratorPointOneError) {
 	
 		// Free memory and set error to if it fails
-		error = MAX(cx_ecpoint_destroy(&internalPoint), error);
+		error = MAX(cx_ecpoint_destroy(&generatorPointOne), error);
+	}
+	
+	// Check if memory was allocated for generator point two
+	if(!allocatingGeneratorPointTwoError) {
+	
+		// Free memory and set error to if it fails
+		error = MAX(cx_ecpoint_destroy(&generatorPointTwo), error);
+	}
+	
+	// Check if memory was allocated for result point
+	if(!allocatingResultPointError) {
+	
+		// Free memory and set error to if it fails
+		error = MAX(cx_ecpoint_destroy(&resultPoint), error);
 	}
 	
 	// Unlock big number processor and throw error if it fails
