@@ -340,44 +340,35 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 		// Try
 		TRY {
 		
-			// Check if value isn't zero
-			if(value) {
-
-				// Get product of the value and its generator
-				memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
-				uint8_t temp[BLINDING_FACTOR_SIZE] = {0};
-				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
-				U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
-				
-				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp)));
+			// Get product of the value and its generator
+			memcpy((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H, sizeof(GENERATOR_H));
+			uint8_t temp[BLINDING_FACTOR_SIZE] = {0};
+			U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint32_t), value);
+			U4BE_ENCODE(temp, sizeof(temp) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+			
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, temp, sizeof(temp)));
+			
+			// Check if result has an x component of zero
+			if(isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
-			// Check if the blinding factor isn't zero
-			if(!isZeroArraySecure(blindingFactor, BLINDING_FACTOR_SIZE)) {
+			// Get product of the blind and its generator
+			memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
 			
-				// Get product of the blind and its generator
-				memcpy((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
-				
-				CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, blindingFactor, BLINDING_FACTOR_SIZE));
-				
-				// Check if the result doesn't have an x component of zero
-				if(!isZeroArraySecure((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-				
-					// Check if product of value and its generator doesn't have an x component of zero
-					if(!isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
-				
-						// Get sum of products
-						CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
-					}
-					
-					// Otherwise
-					else {
-					
-						// Get sum of products
-						memcpy((uint8_t *)valueGenerator, (uint8_t *)blindGenerator, sizeof(valueGenerator));
-					}
-				}
+			CX_THROW(cx_ecfp_scalar_mult_no_throw(CX_CURVE_SECP256K1, (uint8_t *)blindGenerator, blindingFactor, BLINDING_FACTOR_SIZE));
+			
+			// Check if result has an x component of zero
+			if(isZeroArraySecure((uint8_t *)&blindGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+			
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Get sum of products
+			CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)valueGenerator, (uint8_t *)valueGenerator, (uint8_t *)blindGenerator));
 			
 			// Check if result has an x component of zero
 			if(isZeroArraySecure((uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
