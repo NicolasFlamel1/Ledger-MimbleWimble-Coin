@@ -458,103 +458,161 @@ class Crypto {
 			// Return promise
 			return new Promise(function(resolve, reject) {
 			
-				// Return deriving root key from extended private key, address key amount, root identifier, and regular switch type
-				return Crypto.deriveSecretKey(extendedPrivateKey, Crypto.ADDRESS_KEY_AMOUNT, new Identifier(Identifier.ROOT_SERIALIZED_IDENTIFIER), Crypto.SWITCH_TYPE_REGULAR).then(function(rootKey) {
+				// Check wallet type
+				switch(Consensus.getWalletType()) {
 				
-					// Return creating crypto key from address key seed
-					return crypto["subtle"].importKey("raw", (new TextEncoder()).encode(Crypto.ADDRESS_KEY_SEED), {
-					
-						// Name
-						"name": Crypto.ADDRESS_KEY_ENCRYPTION_ALGORITHM,
+					// MWC wallet
+					case Consensus.MWC_WALLET_TYPE:
+			
+						// Return deriving root key from extended private key, address key amount, root identifier, and regular switch type
+						return Crypto.deriveSecretKey(extendedPrivateKey, Crypto.ADDRESS_KEY_AMOUNT, new Identifier(Identifier.ROOT_SERIALIZED_IDENTIFIER), Crypto.SWITCH_TYPE_REGULAR).then(function(rootKey) {
 						
-						// Hash
-						"hash": {
-						
-							// Name
-							"name": Crypto.ADDRESS_KEY_DIGEST_ALGORITHM
-						}
-					}, false, [
-					
-						// Sign
-						"sign"
-					
-					]).then(function(cryptoKey) {
-					
-						// Return creating address extended private key from signing the root key
-						return crypto["subtle"].sign(Crypto.ADDRESS_KEY_ENCRYPTION_ALGORITHM, cryptoKey, rootKey).then(function(addressExtendedPrivateKey) {
-						
-							// Securely clear root key
-							rootKey.fill(0);
-						
-							// Get address extended private key in correct format
-							addressExtendedPrivateKey = new Uint8Array(addressExtendedPrivateKey);
+							// Return creating crypto key from address key seed
+							return crypto["subtle"].importKey("raw", (new TextEncoder()).encode(Crypto.ADDRESS_KEY_SEED), {
 							
-							// Get secret key and chain code from address extended private key
-							var secretKey = addressExtendedPrivateKey.subarray(0, Crypto.SECP256K1_SECRET_KEY_LENGTH);
-							var chainCode = addressExtendedPrivateKey.subarray(Crypto.CHAIN_CODE_LENGTH);
-							
-							// Check if secret key is a valid secret key
-							if(Secp256k1Zkp.isValidSecretKey(secretKey) === true) {
-							
-								// Return updating the next secret key and chain code using the index
-								return Crypto.deriveSecretKeyAndChainCode(secretKey, chainCode, index).then(function(value) {
+								// Name
+								"name": Crypto.ADDRESS_KEY_ENCRYPTION_ALGORITHM,
 								
-									// Securely clear address extended private key
-									addressExtendedPrivateKey.fill(0);
+								// Hash
+								"hash": {
+								
+									// Name
+									"name": Crypto.ADDRESS_KEY_DIGEST_ALGORITHM
+								}
+							}, false, [
+							
+								// Sign
+								"sign"
+							
+							]).then(function(cryptoKey) {
+							
+								// Return creating address extended private key from signing the root key
+								return crypto["subtle"].sign(Crypto.ADDRESS_KEY_ENCRYPTION_ALGORITHM, cryptoKey, rootKey).then(function(addressExtendedPrivateKey) {
+								
+									// Securely clear root key
+									rootKey.fill(0);
+								
+									// Get address extended private key in correct format
+									addressExtendedPrivateKey = new Uint8Array(addressExtendedPrivateKey);
 									
-									// Securely clear the chain code
-									value[Crypto.CHAIN_CODE_INDEX].fill(0);
-								
-									// Resolve the secret key
-									resolve(value[Crypto.SECRET_KEY_INDEX]);
+									// Get secret key and chain code from address extended private key
+									var secretKey = addressExtendedPrivateKey.subarray(0, Crypto.SECP256K1_SECRET_KEY_LENGTH);
+									var chainCode = addressExtendedPrivateKey.subarray(Crypto.CHAIN_CODE_LENGTH);
+									
+									// Check if secret key is a valid secret key
+									if(Secp256k1Zkp.isValidSecretKey(secretKey) === true) {
+									
+										// Return updating the next secret key and chain code using the index
+										return Crypto.deriveSecretKeyAndChainCode(secretKey, chainCode, index).then(function(value) {
+										
+											// Securely clear address extended private key
+											addressExtendedPrivateKey.fill(0);
+											
+											// Securely clear the chain code
+											value[Crypto.CHAIN_CODE_INDEX].fill(0);
+										
+											// Resolve the secret key
+											resolve(value[Crypto.SECRET_KEY_INDEX]);
+										
+										// Catch errors
+										}).catch(function(error) {
+										
+											// Securely clear address extended private key
+											addressExtendedPrivateKey.fill(0);
+										
+											// Reject error
+											reject(error);
+										});
+									}
+									
+									// Otherwise
+									else {
+									
+										// Securely clear address extended private key
+										addressExtendedPrivateKey.fill(0);
+									
+										// Reject error
+										reject("Secret key is not a valid secret key.");
+									}
 								
 								// Catch errors
 								}).catch(function(error) {
 								
-									// Securely clear address extended private key
-									addressExtendedPrivateKey.fill(0);
+									// Securely clear root key
+									rootKey.fill(0);
 								
 									// Reject error
 									reject(error);
 								});
-							}
 							
-							// Otherwise
-							else {
+							// Catch errors
+							}).catch(function(error) {
 							
-								// Securely clear address extended private key
-								addressExtendedPrivateKey.fill(0);
+								// Securely clear root key
+								rootKey.fill(0);
 							
 								// Reject error
-								reject("Secret key is not a valid secret key.");
-							}
+								reject(error);
+							});
 						
 						// Catch errors
 						}).catch(function(error) {
-						
-							// Securely clear root key
-							rootKey.fill(0);
 						
 							// Reject error
 							reject(error);
 						});
 					
-					// Catch errors
-					}).catch(function(error) {
+					// GRIN wallet
+					case Consensus.GRIN_WALLET_TYPE:
 					
-						// Securely clear root key
-						rootKey.fill(0);
-					
-						// Reject error
-						reject(error);
-					});
-				
-				// Catch errors
-				}).catch(function(error) {
-				
-					// Reject error
-					reject(error);
-				});
+						// Create child identifier
+						var childIdentifier = new Identifier().getChild();
+						childIdentifier.getPaths()[1] = 1;
+						childIdentifier.getPaths()[childIdentifier.getDepth() - 1] = index;
+						
+						// Return deriving root key from extended private key, child identifier, and no switch type
+						return Crypto.deriveSecretKey(extendedPrivateKey, new BigNumber(0), childIdentifier, Crypto.SWITCH_TYPE_NONE).then(function(rootKey) {
+						
+							// Check if getting secret key from root key was successful
+							var secretKey = Blake2b.compute(Crypto.SECP256K1_SECRET_KEY_LENGTH, rootKey, new Uint8Array([]));
+							
+							if(secretKey !== Blake2b.OPERATION_FAILED) {
+							
+								// Securely clear root key
+								rootKey.fill(0);
+							
+								// Check if secret key is a valid secret key
+								if(Secp256k1Zkp.isValidSecretKey(secretKey) === true) {
+							
+									// Resolve the secret key
+									resolve(secretKey);
+								}
+								
+								// Otherwise
+								else {
+								
+									// Reject error
+									reject("Secret key is not a valid secret key.");
+								}
+							}
+							
+							// Otherwise
+							else {
+							
+								// Securely clear root key
+								rootKey.fill(0);
+							
+								// Reject error
+								reject("Getting secret key from root key failed.");
+							}
+						
+						// Catch errors
+						}).catch(function(error) {
+						
+							// Reject error
+							reject(error);
+						});
+				}
 			});
 		}
 		

@@ -154,6 +154,12 @@ bool isValidEd25519PrivateKey(const uint8_t *privateKey, size_t length);
 // Is valid Ed25519 public key
 bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length);
 
+// Is valid X25519 private key
+bool isValidX25519PrivateKey(const uint8_t *privateKey, size_t length);
+
+// Is valid X25519 public key
+bool isValidX25519PublicKey(const uint8_t *publicKey, size_t length);
+
 // Is valid secp256k1 private key
 bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length);
 

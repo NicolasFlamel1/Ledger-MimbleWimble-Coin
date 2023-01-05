@@ -57,7 +57,7 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 		// MQS address type
 		case MQS_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -86,7 +86,7 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 		// Tor address type
 		case TOR_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -115,7 +115,7 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 		// Slatepack address type
 		case SLATEPACK_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow Slatepack addresses
+			// Check if currency doesn't allow Slatepack addresses
 			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error

@@ -74,7 +74,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// MQS address size
 		case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -93,7 +93,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -109,7 +109,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// Slatepack address size
 		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 		
-			// Check currency doesn't allow Slatepack addresses
+			// Check if currency doesn't allow Slatepack addresses
 			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error
@@ -123,7 +123,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 			ephemeralX25519PublicKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce)];
 			
 			// Check if ephemeral X25519 public key is invalid
-			if(isZeroArraySecure(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+			if(!isValidX25519PublicKey(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

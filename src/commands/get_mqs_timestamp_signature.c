@@ -15,7 +15,7 @@
 // Process get MQS timestamp signature request
 void processGetMqsTimestampSignatureRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
-	// Check currency doesn't allow MQS addresses
+	// Check if currency doesn't allow MQS addresses
 	if(!currencyInformation->enableMqsAddress) {
 	
 		// Throw unknown instruction error

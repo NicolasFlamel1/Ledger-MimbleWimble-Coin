@@ -73,7 +73,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// MQS address type
 		case MQS_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -86,7 +86,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// Tor address type
 		case TOR_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -99,7 +99,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// Slatepack address type
 		case SLATEPACK_ADDRESS_TYPE:
 		
-			// Check currency doesn't allow Slatepack addresses
+			// Check if currency doesn't allow Slatepack addresses
 			if(!currencyInformation->enableSlatepackAddress) {
 			
 				// Throw invalid parameters error

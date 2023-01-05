@@ -28,7 +28,7 @@
 // Process get Tor certificate signature request
 void processGetTorCertificateSignatureRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
-	// Check currency doesn't allow Tor and Slatepack addresses
+	// Check if currency doesn't allow Tor and Slatepack addresses
 	if(!currencyInformation->enableTorAddress && !currencyInformation->enableSlatepackAddress) {
 	
 		// Throw unknown instruction error
@@ -216,7 +216,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) const unsi
 		snprintf((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer), "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 	#endif
 	
-	// Check currency allows Tor addresses
+	// Check if currency allows Tor addresses
 	if(currencyInformation->enableTorAddress) {
 	
 		// Get Tor address from the signed public key
@@ -236,7 +236,7 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) const unsi
 		strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Tor", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 	}
 	
-	// Check currency allows Slatepack addresses
+	// Otherwise if check currency allows Slatepack addresses
 	else if(currencyInformation->enableSlatepackAddress) {
 	
 		// Get Slatepack address from the signed public key

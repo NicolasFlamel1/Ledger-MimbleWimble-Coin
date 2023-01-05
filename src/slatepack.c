@@ -126,7 +126,7 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 		return false;
 	}
 	
-	// Check if Slatepack adderss's human-readable part is invalid
+	// Check if Slatepack address's human-readable part is invalid
 	if(memcmp(slatepackAddress, currencyInformation->slatepackAddressHumanReadablePart, strlen(currencyInformation->slatepackAddressHumanReadablePart))) {
 	
 		// Return false

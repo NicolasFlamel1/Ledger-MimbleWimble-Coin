@@ -40,6 +40,9 @@
 // Ed25519 private key size
 #define ED25519_PRIVATE_KEY_SIZE 32
 
+// X25519 private key size
+#define X25519_PRIVATE_KEY_SIZE 32
+
 // Secp256k1 private key size
 #define SECP256K1_PRIVATE_KEY_SIZE 32
 
@@ -527,27 +530,66 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 		// Try
 		TRY {
 		
-			// Derive blinding factor from the address private key blinding factor value and the root path
-			deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
+			// Check if currency allows MQS addresses or Tor addresses
+			if(currencyInformation->enableMqsAddress || currencyInformation->enableTorAddress) {
+		
+				// Derive blinding factor from the address private key blinding factor value and the root path
+				deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
+				
+				// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
+				cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
+				
+				// Check if node isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey.d))) {
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+				}
+				
+				// Get private key from node
+				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
+				
+				// Get chain code from the node
+				volatile uint8_t *chainCode = &node[sizeof(privateKey.d)];
+				
+				// Derive child key from the private key and chain code at the index
+				deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
+			}
 			
-			// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
-			cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
+			// Otherwise check if currency allows Slatepack addresses
+			else if(currencyInformation->enableSlatepackAddress) {
 			
-			// Check if node isn't a valid private key
-			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey.d))) {
+				// Initialize child path
+				const uint32_t childPath[] = {
+					0,
+					1,
+					index
+				};
+				
+				// Derive blinding factor from the child path
+				deriveBlindingFactor(blindingFactor, account, 0, childPath, ARRAYLEN(childPath), NO_SWITCH_TYPE);
+				
+				// Get hash from the blinding factor
+				volatile uint8_t *hash = node;
+				getBlake2b(hash, SECP256K1_PRIVATE_KEY_SIZE, (uint8_t *)blindingFactor, sizeof(blindingFactor), NULL, 0);
+				
+				// Check if hash isn't a valid private key
+				if(!isValidSecp256k1PrivateKey((uint8_t *)hash, SECP256K1_PRIVATE_KEY_SIZE)) {
+				
+					// Throw internal error error
+					THROW(INTERNAL_ERROR_ERROR);
+				}
+				
+				// Get private key from hash
+				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
+			}
+			
+			// Otherwise
+			else {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
-			
-			// Get private key from node
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
-			
-			// Get chain code from the node
-			volatile uint8_t *chainCode = &node[sizeof(privateKey.d)];
-			
-			// Derive child key from the private key and chain code at the index
-			deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
 			
 			// Check curve
 			switch(curve) {
@@ -892,8 +934,8 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 			// Swap the hash's endianness
 			swapEndianness((uint8_t *)hash, sizeof(x25519PrivateKey->d));
 			
-			// Check if the hash is invalid
-			if(isZeroArraySecure((uint8_t *)hash, sizeof(x25519PrivateKey->d))) {
+			// Check if the hash isn't a valid private key
+			if(!isValidX25519PrivateKey((uint8_t *)hash, sizeof(x25519PrivateKey->d))) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -950,7 +992,7 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
 	
 	// Check if the X25519 public key is invalid
-	if(isZeroArraySecure(x25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
+	if(!isValidX25519PublicKey(x25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
 	
 		// Throw internal error error
 		THROW(INTERNAL_ERROR_ERROR);
@@ -966,7 +1008,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		// MQS address size
 		case MQS_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -979,7 +1021,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -995,7 +1037,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 			// Check if sender address length is a Slatepack address's length
 			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 		
-				// Check currency doesn't allow Slatepack addresses
+				// Check if currency doesn't allow Slatepack addresses
 				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
@@ -1027,7 +1069,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 		// MQS address size
 		case MQS_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -1056,7 +1098,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -1088,7 +1130,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 			// Check if sender address length is a Slatepack address's length
 			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 			
-				// Check currency doesn't allow Slatepack addresses
+				// Check if currency doesn't allow Slatepack addresses
 				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
@@ -1140,7 +1182,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		// MQS address size
 		case MQS_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow MQS addresses
+			// Check if currency doesn't allow MQS addresses
 			if(!currencyInformation->enableMqsAddress) {
 			
 				// Throw invalid parameters error
@@ -1181,7 +1223,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check currency doesn't allow Tor addresses
+			// Check if currency doesn't allow Tor addresses
 			if(!currencyInformation->enableTorAddress) {
 			
 				// Throw invalid parameters error
@@ -1221,7 +1263,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, con
 			// Check if receiver address length is a Slatepack address's length
 			if(receiverAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 		
-				// Check currency doesn't allow Slatepack addresses
+				// Check if currency doesn't allow Slatepack addresses
 				if(!currencyInformation->enableSlatepackAddress) {
 				
 					// Throw invalid parameters error
@@ -1318,6 +1360,64 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
 			
 			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		}
+		
+		// Catch all errors
+		CATCH_ALL {
+			
+			// Return false
+			return false;
+		}
+		
+		// Finally
+		FINALLY {
+		
+		}
+	}
+	
+	// End try
+	END_TRY;
+	
+	// Return true
+	return true;
+}
+
+// Is valid X25519 private key
+bool isValidX25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != X25519_PRIVATE_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Return true
+	return true;
+}
+
+// Is valid X25519 public key
+bool isValidX25519PublicKey(const uint8_t *publicKey, size_t length) {
+
+	// Check if length is invalid
+	if(length != X25519_PUBLIC_KEY_SIZE) {
+	
+		// Return false
+		return false;
+	}
+
+	// Begin try
+	BEGIN_TRY {
+	
+		// Try
+		TRY {
+		
+			// Uncompress the public key
+			uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
+			uncompressedPublicKey[0] = X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
+			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
+			
+			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
 		}
 		
 		// Catch all errors

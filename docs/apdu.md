@@ -136,7 +136,7 @@ Returns the SHA512 hash of the account's root public key. This hash can be used 
 
 **Input Data**
 
-| Length | Name         | Description |
+| Length | Name      | Description |
 |--------|-----------|-------------|
 | 4      | `account` | Account number (little endian, max 0x7FFFFFFF)) |
 
@@ -425,8 +425,8 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 **Output Data**
 
-| Length | Name    | Description |
-|--------|---------|-------------|
+| Length | Name | Description |
+|--------|------|-------------|
 | 0      | N/A  | Unused |
 
 ### CONTINUE_DECRYPTING_SLATE
