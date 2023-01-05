@@ -6,7 +6,7 @@
 const Common = require("./common.js");
 const crypto = require("crypto");
 const Ed25519 = require("./Ed25519-0.0.22.js");
-const X25519 = require("./X25519-0.0.22.js");
+const X25519 = require("./X25519-0.0.23.js");
 const chacha = require("./ChaCha-2.1.0.js");
 
 
