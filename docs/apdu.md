@@ -2,31 +2,31 @@
 
 This app supports the following commands.
 
-| Class | Instruction | Name                                              | Description |
-|-------|-------------|---------------------------------------------------|-------------|
-| C7    | 00          | `GET_ROOT_PUBLIC_KEY`                             | Returns an account's root public key |
-| C7    | 01          | `GET_ADDRESS`                                     | Returns an account's address at a provided index |
-| C7    | 02          | `GET_SEED_COOKIE`                                 | Returns an account's seed cookie |
-| C7    | 03          | `GET_COMMITMENT`                                  | Returns an account's commitment for a provided identifier, value, and switch type |
-| C7    | 04          | `GET_BULLETPROOF_COMPONENTS`                      | Returns an account's bulletproof components for a provided identifier, value, and switch type |
-| C7    | 05          | `VERIFY_ROOT_PUBLIC_KEY`                          | Returns if the user verifies that an account's root public key is valid |
-| C7    | 06          | `VERIFY_ADDRESS`                                  | Returns if the user verifies that an account's address at a provided index is valid |
-| C7    | 07          | `START_ENCRYPTING_SLATE`                          | Return a random nonce and optional salt that will be used to encrypt data that will be provided later for an account at a provided index |
-| C7    | 08          | `CONTINUE_ENCRYPTING_SLATE`                       | Returns the encrypted version of the provided data |
-| C7    | 09          | `FINISH_ENCRYPTING_SLATE`                         | Returns the tag of the data that was encrypted |
-| C7    | 0A          | `START_DECRYPTING_SLATE`                          | Prepares to start decrypted data that will be provided later with a provided nonce and optional salt for an account at a provided index |
-| C7    | 0B          | `CONTINUE_DECRYPTING_SLATE`                       | Returns the decrypted version of the provided data that has then been encrypted with a random AES key |
-| C7    | 0C          | `FINISH_DECRYPTING_SLATE`                         | Returns the random AES key used to decrypted the data that was previously returned if a valid tag is provided |
-| C7    | 0D          | `START_TRANSACTION`                               | Starts a transaction for provided output, input, and fee amounts for an account at a provided index |
-| C7    | 0E          | `CONTINUE_TRANSACTION_INCLUDE_OUTPUT`             | Includes the output for a provided identifier, value, and switch type in the transaction |
-| C7    | 0F          | `CONTINUE_TRANSACTION_INCLUDE_INPUT`              | Includes the input for a provided identifier, value, and switch type in the transaction |
-| C7    | 10          | `CONTINUE_TRANSACTION_APPLY_OFFSET`               | Applies an offset to the transaction's blinding factor |
-| C7    | 11          | `CONTINUE_TRANSACTION_GET_PUBLIC_KEY`             | Returns the transaction's blinding factor's public key |
-| C7    | 12          | `CONTINUE_TRANSACTION_GET_PUBLIC_NONCE`           | Returns the transaction's public nonce |
-| C7    | 13          | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE`      | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
-| C7    | 14          | `FINISH_TRANSACTION`                              | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
-| C7    | 15          | `GET_MQS_TIMESTAMP_SIGNATURE`                     | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
-| C7    | 16          | `GET_TOR_CERTIFICATE_SIGNATURE`                   | Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index |
+| Class | Instruction | Name                                         | Description |
+|-------|-------------|----------------------------------------------|-------------|
+| 0xC7  | 0x00        | `GET_ROOT_PUBLIC_KEY`                        | Returns an account's root public key |
+| 0xC7  | 0x01        | `GET_ADDRESS`                                | Returns an account's address at a provided index |
+| 0xC7  | 0x02        | `GET_SEED_COOKIE`                            | Returns an account's seed cookie |
+| 0xC7  | 0x03        | `GET_COMMITMENT`                             | Returns an account's commitment for a provided identifier, value, and switch type |
+| 0xC7  | 0x04        | `GET_BULLETPROOF_COMPONENTS`                 | Returns an account's bulletproof components for a provided identifier, value, and switch type |
+| 0xC7  | 0x05        | `VERIFY_ROOT_PUBLIC_KEY`                     | Returns if the user verifies that an account's root public key is valid |
+| 0xC7  | 0x06        | `VERIFY_ADDRESS`                             | Returns if the user verifies that an account's address at a provided index is valid |
+| 0xC7  | 0x07        | `START_ENCRYPTING_SLATE`                     | Return a random nonce and optional salt that will be used to encrypt data that will be provided later for an account at a provided index |
+| 0xC7  | 0x08        | `CONTINUE_ENCRYPTING_SLATE`                  | Returns the encrypted version of the provided data |
+| 0xC7  | 0x09        | `FINISH_ENCRYPTING_SLATE`                    | Returns the tag of the data that was encrypted |
+| 0xC7  | 0x0A        | `START_DECRYPTING_SLATE`                     | Prepares to start decrypted data that will be provided later with a provided nonce and optional salt for an account at a provided index |
+| 0xC7  | 0x0B        | `CONTINUE_DECRYPTING_SLATE`                  | Returns the decrypted version of the provided data that has then been encrypted with a random AES key |
+| 0xC7  | 0x0C        | `FINISH_DECRYPTING_SLATE`                    | Returns the random AES key used to decrypted the data that was previously returned if a valid tag is provided |
+| 0xC7  | 0x0D        | `START_TRANSACTION`                          | Starts a transaction for provided output, input, and fee amounts for an account at a provided index |
+| 0xC7  | 0x0E        | `CONTINUE_TRANSACTION_INCLUDE_OUTPUT`        | Includes the output for a provided identifier, value, and switch type in the transaction |
+| 0xC7  | 0x0F        | `CONTINUE_TRANSACTION_INCLUDE_INPUT`         | Includes the input for a provided identifier, value, and switch type in the transaction |
+| 0xC7  | 0x10        | `CONTINUE_TRANSACTION_APPLY_OFFSET`          | Applies an offset to the transaction's blinding factor |
+| 0xC7  | 0x11        | `CONTINUE_TRANSACTION_GET_PUBLIC_KEY`        | Returns the transaction's blinding factor's public key |
+| 0xC7  | 0x12        | `CONTINUE_TRANSACTION_GET_PUBLIC_NONCE`      | Returns the transaction's public nonce |
+| 0xC7  | 0x13        | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE` | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
+| 0xC7  | 0x14        | `FINISH_TRANSACTION`                         | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
+| 0xC7  | 0x15        | `GET_MQS_TIMESTAMP_SIGNATURE`                | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
+| 0xC7  | 0x16        | `GET_TOR_CERTIFICATE_SIGNATURE`              | Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index |
 
 ## Response Codes
 
@@ -58,7 +58,7 @@ Returns an account's root public key after displaying a message on the device's 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 00          |
+| 0xC7  | 0x00        |
 
 **Parameters**
 
@@ -71,7 +71,7 @@ Returns an account's root public key after displaying a message on the device's 
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
-| 4      | `account` | Account number (little endian, max 7FFFFFFF) |
+| 4      | `account` | Account number (little endian, max 0x7FFFFFFF) |
 
 **Output Data**
 
@@ -91,20 +91,20 @@ Returns an account's MQS, Tor, or Slatepack address at a provided index. This ad
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 01          |
+| 0xC7  | 0x01        |
 
 **Parameters**
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | 00 for MQS, 01 for Tor, or 02 for Slatepack address |
+| P1        | `address_type` | 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
-| 4      | `account` | Account number (little endian, max 7FFFFFFF)) |
+| 4      | `account` | Account number (little endian, max 0x7FFFFFFF)) |
 | 4      | `index`   | Index number (little endian) |
 
 **Output Data**
@@ -125,7 +125,7 @@ Returns the SHA512 hash of the account's root public key. This hash can be used 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 02          |
+| 0xC7  | 0x02        |
 
 **Parameters**
 
@@ -136,9 +136,9 @@ Returns the SHA512 hash of the account's root public key. This hash can be used 
 
 **Input Data**
 
-| Length  | Name         | Description |
-|---------|--------------|-------------|
-| 4       | `account`    | Account number (little endian, max 7FFFFFFF)) |
+| Length | Name         | Description |
+|--------|--------------|-------------|
+| 4      | `account`    | Account number (little endian, max 0x7FFFFFFF)) |
 
 **Output Data**
 
@@ -158,7 +158,7 @@ Returns the account's commitment for the provided identifier, value, and switch 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 03          |
+| 0xC7  | 0x03        |
 
 **Parameters**
 
@@ -169,12 +169,12 @@ Returns the account's commitment for the provided identifier, value, and switch 
 
 **Input Data**
 
-| Length  | Name          | Description |
-|---------|---------------|-------------|
-| 4       | `account`     | Account number (little endian, max 7FFFFFFF)) |
-| 17      | `identifier`  | Identifier |
-| 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 01 for regular |
+| Length | Name          | Description |
+|--------|---------------|-------------|
+| 4      | `account`     | Account number (little endian, max 0x7FFFFFFF)) |
+| 17     | `identifier`  | Identifier |
+| 8      | `value`       | Value to commit (little endian) |
+| 1      | `switch_type` | 0x01 for regular |
 
 **Output Data**
 
@@ -196,23 +196,23 @@ This command takes about 50 seconds to complete on a Ledger Nano S hardware wall
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 04          |
+| 0xC7  | 0x04        |
 
 **Parameters**
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `message_type` | 00 for sending transaction, 01 for receiving transaction, or 02 for creating coinbase |
+| P1        | `message_type` | 0x00 for sending transaction, 0x01 for receiving transaction, or 0x02 for creating coinbase |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
-| Length  | Name          | Description |
-|---------|---------------|-------------|
-| 4       | `account`     | Account number (little endian, max 7FFFFFFF)) |
-| 17      | `identifier`  | Identifier |
-| 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 01 for regular |
+| Length | Name          | Description |
+|--------|---------------|-------------|
+| 4      | `account`     | Account number (little endian, max 0x7FFFFFFF)) |
+| 17     | `identifier`  | Identifier |
+| 8      | `value`       | Value to commit (little endian) |
+| 1      | `switch_type` | 0x01 for regular |
 
 **Output Data**
 
@@ -234,7 +234,7 @@ Displays the account's root public key on the device and returns if the user ver
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 05          |
+| 0xC7  | 0x05        |
 
 **Parameters**
 
@@ -245,9 +245,9 @@ Displays the account's root public key on the device and returns if the user ver
 
 **Input Data**
 
-| Length  | Name         | Description |
-|---------|--------------|-------------|
-| 4       | `account`    | Account number (little endian, max 7FFFFFFF)) |
+| Length | Name         | Description |
+|--------|--------------|-------------|
+| 4      | `account`    | Account number (little endian, max 0x7FFFFFFF)) |
 
 **Output Data**
 
@@ -267,20 +267,20 @@ Displays the account's MQS, Tor, or Slatepack address at a provided index on the
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 06          |
+| 0xC7  | 0x06        |
 
 **Parameters**
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | 00 for MQS, 01 for Tor, or 02 for Slatepack address |
+| P1        | `address_type` | 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
 | Length | Name      | Description |
 |--------|-----------|-------------|
-| 4      | `account` | Account number (little endian, max 7FFFFFFF)) |
+| 4      | `account` | Account number (little endian, max 0x7FFFFFFF)) |
 | 4      | `index`   | Index number (little endian) |
 
 **Output Data**
@@ -301,7 +301,7 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 07          |
+| 0xC7  | 0x07        |
 
 **Parameters**
 
@@ -314,7 +314,7 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 
 | Length                   | Name                | Description |
 |--------------------------|---------------------|-------------|
-| 4                        | `account`           | Account number (little endian, max 7FFFFFFF)) |
+| 4                        | `account`           | Account number (little endian, max 0x7FFFFFFF)) |
 | 4                        | `index`             | Index number (little endian) |
 | 52 for MQS or 56 for Tor | `recipient_address` | Address that will be able to decrypt the data |
 
@@ -337,7 +337,7 @@ Encrypts the provided data using the app's internal slate state and returns it. 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 08          |
+| 0xC7  | 0x08        |
 
 **Parameters**
 
@@ -348,15 +348,15 @@ Encrypts the provided data using the app's internal slate state and returns it. 
 
 **Input Data**
 
-| Length | Name   | Description |
-|--------|--------|-------------|
-| <= 64  | `data` | Data chunk to encrypt |
+| Length        | Name   | Description |
+|---------------|--------|-------------|
+| > 0 and <= 64 | `data` | Data chunk to encrypt |
 
 **Output Data**
 
-| Length | Name             | Description |
-|--------|------------------|-------------|
-| <= 64  | `encrypted_data` | Encrypted version of the provided data chunk that is the same size as the provided data chunk |
+| Length        | Name             | Description |
+|---------------|------------------|-------------|
+| > 0 and <= 64 | `encrypted_data` | Encrypted version of the provided data chunk that is the same size as the provided data chunk |
 
 ### FINISH_ENCRYPTING_SLATE
 
@@ -370,7 +370,7 @@ Returns the tag for all the data that was encrypted.
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 09          |
+| 0xC7  | 0x09        |
 
 **Parameters**
 
@@ -403,7 +403,7 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0A          |
+| 0xC7  | 0x0A        |
 
 **Parameters**
 
@@ -416,7 +416,7 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 | Length                                       | Name                                            | Description |
 |----------------------------------------------|-------------------------------------------------|-------------|
-| 4                                            | `account`                                       | Account number (little endian, max 7FFFFFFF)) |
+| 4                                            | `account`                                       | Account number (little endian, max 0x7FFFFFFF)) |
 | 4                                            | `index`                                         | Index number (little endian) |
 | 12                                           | `nonce`                                         | Nonce that was used to encrypt the data |
 | 52 for MQS, 56 for Tor, and 32 for Slatepack | `sender_address_or_ephemeral_x25519_public_key` | Address or ephemeral X25519 public key that will be able to decrypt the data |
@@ -441,7 +441,7 @@ Decrypts the provided data using the app's internal slate state and returns it e
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0B          |
+| 0xC7  | 0x0B        |
 
 **Parameters**
 
@@ -452,15 +452,15 @@ Decrypts the provided data using the app's internal slate state and returns it e
 
 **Input Data**
 
-| Length | Name             | Description |
-|--------|------------------|-------------|
-| <= 64  | `encrypted_data` | Data chunk to decrypt |
+| Length        | Name             | Description |
+|---------------|------------------|-------------|
+| > 0 and <= 64 | `encrypted_data` | Data chunk to decrypt |
 
 **Output Data**
 
-| Length                | Name   | Description |
-|-----------------------|--------|-------------|
-| <= 70 | `data` | Decrypted version of the provided data chunk encrypted with a random AES key which results in the size being the size of the `encrypted_data` ceil to the next 16 bytre boundary |
+| Length          | Name   | Description |
+|--------------- -|--------|-------------|
+| >= 16 and <= 80 | `data` | Decrypted version of the provided data chunk encrypted with a random AES key which results in the size being the size of the `encrypted_data` ceil to the next 16 byte boundary |
 
 ### FINISH_DECRYPTING_SLATE
 
@@ -474,7 +474,7 @@ Returns the AES key used to encrypt the decrypted data chunks if a valid tag is 
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0C          |
+| 0xC7  | 0x0C        |
 
 **Parameters**
 
@@ -507,7 +507,7 @@ Prepares the app's internal transaction state to be able to process a transactio
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0D          |
+| 0xC7  | 0x0D        |
 
 **Parameters**
 
@@ -520,7 +520,7 @@ Prepares the app's internal transaction state to be able to process a transactio
 
 | Length                                                  | Name                 | Description |
 |---------------------------------------------------------|----------------------|-------------|
-| 4                                                       | `account`            | Account number (little endian, max 7FFFFFFF)) |
+| 4                                                       | `account`            | Account number (little endian, max 0x7FFFFFFF)) |
 | 4                                                       | `index`              | Index number (little endian) |
 | 8                                                       | `output`             | Output amount (little endian) |
 | 8                                                       | `input`              | Input amount (little endian) |
@@ -546,7 +546,7 @@ Includes the output for a provided identifier, value, and switch type in the tra
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0E          |
+| 0xC7  | 0x0E        |
 
 **Parameters**
 
@@ -557,11 +557,11 @@ Includes the output for a provided identifier, value, and switch type in the tra
 
 **Input Data**
 
-| Length  | Name          | Description |
-|---------|---------------|-------------|
-| 17      | `identifier`  | Identifier |
-| 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 01 for regular |
+| Length | Name          | Description |
+|--------|---------------|-------------|
+| 17     | `identifier`  | Identifier |
+| 8      | `value`       | Value to commit (little endian) |
+| 1      | `switch_type` | 0x01 for regular |
 
 **Output Data**
 
@@ -581,7 +581,7 @@ Includes the input for a provided identifier, value, and switch type in the tran
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 0F          |
+| 0xC7  | 0x0F        |
 
 **Parameters**
 
@@ -592,11 +592,11 @@ Includes the input for a provided identifier, value, and switch type in the tran
 
 **Input Data**
 
-| Length  | Name          | Description |
-|---------|---------------|-------------|
-| 17      | `identifier`  | Identifier |
-| 8       | `value`       | Value to commit (little endian) |
-| 1       | `switch_type` | 01 for regular |
+| Length | Name          | Description |
+|--------|---------------|-------------|
+| 17     | `identifier`  | Identifier |
+| 8      | `value`       | Value to commit (little endian) |
+| 1      | `switch_type` | 0x01 for regular |
 
 **Output Data**
 
@@ -616,7 +616,7 @@ Applies an offset to the transaction's blinding factor in the app's internal tra
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 10          |
+| 0xC7  | 0x10        |
 
 **Parameters**
 
@@ -627,9 +627,9 @@ Applies an offset to the transaction's blinding factor in the app's internal tra
 
 **Input Data**
 
-| Length  | Name     | Description |
-|---------|----------|-------------|
-| 32      | `offset` | Offset |
+| Length | Name     | Description |
+|--------|----------|-------------|
+| 32     | `offset` | Offset |
 
 **Output Data**
 
@@ -649,7 +649,7 @@ Returns the app's internal transaction state's blinding factor's public key.
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 11          |
+| 0xC7  | 0x11        |
 
 **Parameters**
 
@@ -682,7 +682,7 @@ Returns the app's internal transaction state's public nonce.
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 12          |
+| 0xC7  | 0x12        |
 
 **Parameters**
 
@@ -715,7 +715,7 @@ Returns the signature for a provided UTF-8 message signed with the app's interna
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 13          |
+| 0xC7  | 0x13        |
 
 **Parameters**
 
@@ -726,9 +726,9 @@ Returns the signature for a provided UTF-8 message signed with the app's interna
 
 **Input Data**
 
-| Length  | Name         | Description |
-|---------|--------------|-------------|
-| Varying | `message`    | UTF-8 message |
+| Length  | Name      | Description |
+|---------|-----------|-------------|
+| Varying | `message` | UTF-8 message |
 
 **Output Data**
 
@@ -754,31 +754,31 @@ If a sent transaction needs to be finalized at a later time, then the app's inte
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 14          |
+| 0xC7  | 0x14        |
 
 **Parameters**
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | Optional 00 for MQS, 01 for Tor, or 02 for Slatepack address that will be used if creating a payment proof |
+| P1        | `address_type` | Optional 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address that will be used if creating a payment proof |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
-| Length                                                  | Name                 | Description |
-|---------------------------------------------------------|----------------------|-------------|
-| 33                                                      | `public_nonce`       | Public nonce |
-| 33                                                      | `public_key`         | Public key |
-| 1, 3, or 9                                              | `kernel_information` | 00 for plain, 01 for coinbase, 02 and lock height (8 bytes, little endian) for height locked, or 03 and relative height (2 bytes, little endian, max 10080) |
-| 0 or 33                                                 | `kernel_commitment`  | Optional kernel commitment that will be used for creating or displaying a payment proof |
-| 0, <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`      | Optional receiver's payment proof signature that will be used when displaying a payment proof
+| Length                                                          | Name                 | Description |
+|-----------------------------------------------------------------|----------------------|-------------|
+| 33                                                              | `public_nonce`       | Public nonce |
+| 33                                                              | `public_key`         | Public key |
+| 1, 3, or 9                                                      | `kernel_information` | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
+| 0 or 33                                                         | `kernel_commitment`  | Optional kernel commitment that will be used for creating or displaying a payment proof |
+| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`      | Optional receiver's payment proof signature that will be used when displaying a payment proof
 
 **Output Data**
 
-| Length                                                 | Name            | Description |
-|--------------------------------------------------------|-----------------|-------------|
-| 64                                                     | `signature`     | Single-signer signature for the transaction and kernel information |
-| 0, <= 72 for MQS or 64 for Tor and Slatepack signature | `payment_proof` | Optional receiver's payment proof signature |
+| Length                                                         | Name            | Description |
+|----------------------------------------------------------------|-----------------|-------------|
+| 64                                                             | `signature`     | Single-signer signature for the transaction and kernel information |
+| 0, > 0 and <= 72 for MQS or 64 for Tor and Slatepack signature | `payment_proof` | Optional receiver's payment proof signature |
 
 ### GET_MQS_TIMESTAMP_SIGNATURE
 
@@ -792,7 +792,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 15          |
+| 0xC7  | 0x15        |
 
 **Parameters**
 
@@ -805,16 +805,16 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 
 | Length | Name               | Description |
 |--------|--------------------|-------------|
-| 4      | `account`          | Account number (little endian, max 7FFFFFFF)) |
+| 4      | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
 | 4      | `index`            | Index number (little endian) |
-| 4      | `timestamp`        | Timestamp epoch to sign (little endian, max 23FFFFFFDC00) |
+| 8      | `timestamp`        | Timestamp epoch to sign (little endian, max 0x23FFFFFFDC00) |
 | 2      | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
 
 **Output Data**
 
 | Length        | Name        | Description |
 |---------------|-------------|-------------|
-| <= 72 | `signature` | DER signature of the timestamp |
+| > 0 and <= 72 | `signature` | DER signature of the timestamp |
 
 ### GET_TOR_CERTIFICATE_SIGNATURE
 
@@ -828,7 +828,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 
 | Class | Instruction |
 |-------|-------------|
-| C7    | 16          |
+| 0xC7  | 0x16        |
 
 **Parameters**
 
@@ -841,7 +841,7 @@ Returns the signature for a provided Tor certificate signed with an account's To
 
 | Length  | Name               | Description |
 |---------|--------------------|-------------|
-| 4       | `account`          | Account number (little endian, max 7FFFFFFF)) |
+| 4       | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
 | 4       | `index`            | Index number (little endian) |
 | Varying | `tor_certificate`  | Ed25519_signing_cert without header and signature to sign |
 | 2       | `time_zone_offset` | Time zone offset in minutes used when displaying the Tor certificate's expiration timestamp (little endian, signed, min -780, max 900) |
