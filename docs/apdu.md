@@ -137,8 +137,8 @@ Returns the SHA512 hash of the account's root public key. This hash can be used 
 **Input Data**
 
 | Length | Name         | Description |
-|--------|--------------|-------------|
-| 4      | `account`    | Account number (little endian, max 0x7FFFFFFF)) |
+|--------|-----------|-------------|
+| 4      | `account` | Account number (little endian, max 0x7FFFFFFF)) |
 
 **Output Data**
 
@@ -178,9 +178,9 @@ Returns the account's commitment for the provided identifier, value, and switch 
 
 **Output Data**
 
-| Length | Name          | Description |
-|--------|---------------|-------------|
-| 33     | `commitment`  | The account's commitment for the provided identifier, value, and switch type |
+| Length | Name         | Description |
+|--------|--------------|-------------|
+| 33     | `commitment` | The account's commitment for the provided identifier, value, and switch type |
 
 ### GET_BULLETPROOF_COMPONENTS
 
@@ -216,11 +216,11 @@ This command takes about 50 seconds to complete on a Ledger Nano S hardware wall
 
 **Output Data**
 
-| Length | Name     | Description |
-|--------|----------|-------------|
-| 32     | `tau_x`  | The tau x bulletproof component |
-| 33     | `t_one`  | The t one bulletproof component |
-| 33     | `t_two`  | The t two bulletproof component |
+| Length | Name    | Description |
+|--------|---------|-------------|
+| 32     | `tau_x` | The tau x bulletproof component |
+| 33     | `t_one` | The t one bulletproof component |
+| 33     | `t_two` | The t two bulletproof component |
 
 ### VERIFY_ROOT_PUBLIC_KEY
 
@@ -245,9 +245,9 @@ Displays the account's root public key on the device and returns if the user ver
 
 **Input Data**
 
-| Length | Name         | Description |
-|--------|--------------|-------------|
-| 4      | `account`    | Account number (little endian, max 0x7FFFFFFF)) |
+| Length | Name      | Description |
+|--------|-----------|-------------|
+| 4      | `account` | Account number (little endian, max 0x7FFFFFFF)) |
 
 **Output Data**
 
