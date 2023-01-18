@@ -95,12 +95,18 @@
 				// Catch IO reset error
 				CATCH(EXCEPTION_IO_RESET) {
 					
+					// Close try
+					CLOSE_TRY;
+					
 					// Continue
 					continue;
 				}
 				
 				// Catch all errors
 				CATCH_ALL {
+					
+					// Close try
+					CLOSE_TRY;
 					
 					// Break
 					break;

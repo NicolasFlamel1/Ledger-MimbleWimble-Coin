@@ -25,23 +25,23 @@ void exitApplication(void) {
 	clearMenuBuffers();
 
 	// Begin try
-	BEGIN_TRY_L(exit) {
+	BEGIN_TRY {
 	
 		// Try
-		TRY_L(exit) {
+		TRY {
 		
 			// Exit OS
 			os_sched_exit(-1);
 		}
 		
 		// Finally
-		FINALLY_L(exit) {
+		FINALLY {
 		
 		}
 	}
 	
 	// End try
-	END_TRY_L(exit);
+	END_TRY;
 }
 
 // Will response overflow

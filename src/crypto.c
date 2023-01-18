@@ -1365,6 +1365,9 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 		// Catch all errors
 		CATCH_ALL {
 			
+			// Close try
+			CLOSE_TRY;
+			
 			// Return false
 			return false;
 		}
@@ -1423,6 +1426,9 @@ bool isValidX25519PublicKey(const uint8_t *publicKey, size_t length) {
 		// Catch all errors
 		CATCH_ALL {
 			
+			// Close try
+			CLOSE_TRY;
+			
 			// Return false
 			return false;
 		}
@@ -1479,6 +1485,9 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 		
 		// Catch all errors
 		CATCH_ALL {
+			
+			// Close try
+			CLOSE_TRY;
 			
 			// Return false
 			return false;
