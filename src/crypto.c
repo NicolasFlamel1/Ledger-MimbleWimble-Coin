@@ -264,12 +264,12 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 					{
 					
 						// Get commitment from value and child's private key
-						volatile uint8_t *commitment = &publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
+						uint8_t *commitment = (uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE];
 						commitValue(commitment, value, (uint8_t *)childPrivateKey.d, true);
 						
 						// Add commitment to the hash
 						cx_sha256_init((cx_sha256_t *)&hash);
-						cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, COMMITMENT_SIZE, NULL, 0);
+						cx_hash((cx_hash_t *)&hash, 0, commitment, COMMITMENT_SIZE, NULL, 0);
 						
 						// Get product of the generator public key and the child's private key
 						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_J, sizeof(GENERATOR_J));
@@ -381,18 +381,18 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 			}
 			
 			// Copy x component to the commitment
-			volatile uint8_t *x = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
-			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)x, PUBLIC_KEY_COMPONENT_SIZE);
+			const uint8_t *x = (uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE];
+			memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE], x, PUBLIC_KEY_COMPONENT_SIZE);
 			
 			// Set commitment's prefix to if the y component is quadratic residue
-			volatile uint8_t *y = &valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-			commitment[0] = isQuadraticResidue((uint8_t *)y) ? COMMITMENT_EVEN_PREFIX : COMMITMENT_ODD_PREFIX;
+			const uint8_t *y = (uint8_t *)&valueGenerator[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+			commitment[0] = isQuadraticResidue(y) ? COMMITMENT_EVEN_PREFIX : COMMITMENT_ODD_PREFIX;
 			
 			// Check if not compressing the commitment
 			if(!compress) {
 			
 				// Copy y component to the commitment
-				memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], (uint8_t *)y, PUBLIC_KEY_COMPONENT_SIZE);
+				memcpy((uint8_t *)&commitment[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE], y, PUBLIC_KEY_COMPONENT_SIZE);
 			}
 		}
 		
@@ -550,7 +550,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
 				
 				// Get chain code from the node
-				volatile uint8_t *chainCode = &node[sizeof(privateKey.d)];
+				uint8_t *chainCode = (uint8_t *)&node[sizeof(privateKey.d)];
 				
 				// Derive child key from the private key and chain code at the index
 				deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
@@ -570,18 +570,18 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 				deriveBlindingFactor(blindingFactor, account, 0, childPath, ARRAYLEN(childPath), NO_SWITCH_TYPE);
 				
 				// Get hash from the blinding factor
-				volatile uint8_t *hash = node;
+				uint8_t *hash = (uint8_t *)node;
 				getBlake2b(hash, SECP256K1_PRIVATE_KEY_SIZE, (uint8_t *)blindingFactor, sizeof(blindingFactor), NULL, 0);
 				
 				// Check if hash isn't a valid private key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)hash, SECP256K1_PRIVATE_KEY_SIZE)) {
+				if(!isValidSecp256k1PrivateKey(hash, SECP256K1_PRIVATE_KEY_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
 				// Get private key from hash
-				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
+				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
 			}
 			
 			// Otherwise
@@ -1671,9 +1671,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 				
 				// Negate the aterm's y component if the bit isn't set in a way that tries to mitigate timing attacks
-				volatile uint8_t *atermY = &aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+				uint8_t *atermY = (uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 				
-				cx_math_subm(bit ? (uint8_t *)alpha : (uint8_t *)atermY, SECP256K1_CURVE_PRIME, (uint8_t *)atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+				cx_math_subm(bit ? (uint8_t *)alpha : atermY, SECP256K1_CURVE_PRIME, atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
 				
 				// Check if the sum of aterm to the alpha generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
@@ -1697,18 +1697,18 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				}
 				
 				// Get the sum of the product of the generator and sl and the product of the generator and sr
-				volatile uint8_t *sterm = aterm;
-				generatorDoublePointScalarMultiply((uint8_t *)sterm, i, sl, sr);
+				uint8_t *sterm = (uint8_t *)aterm;
+				generatorDoublePointScalarMultiply(sterm, i, sl, sr);
 				
 				// Check if the result has an x component of zero
-				if(isZeroArraySecure((uint8_t *)&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
+				if(isZeroArraySecure(&sterm[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 				
 				// Check if the sum of result and the rho generator has an x component of zero
-				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, (uint8_t *)sterm));
+				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)rhoGenerator, (uint8_t *)rhoGenerator, sterm));
 				
 				if(isZeroArraySecure((uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE)) {
 				
@@ -2176,7 +2176,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			cx_math_subm(inputs[2], SECP256K1_CURVE_ORDER, inputs[1], SECP256K1_CURVE_ORDER, sizeof(inputs[1]));
 			
 			// Create outputs
-			volatile uint8_t *outputs[3] = {t0, t1, t2};
+			uint8_t *outputs[3] = {(uint8_t *)t0, (uint8_t *)t1, (uint8_t *)t2};
 
 			// Go through all bits to prove
 			for(uint_fast8_t i = 0; i < BITS_TO_PROVE; ++i) {
@@ -2218,7 +2218,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 					
 					// Update output with lout and rout
 					cx_math_multm((uint8_t *)tempLout, (uint8_t *)tempLout, (uint8_t *)tempRout, SECP256K1_CURVE_ORDER, sizeof(tempLout));
-					cx_math_addm((uint8_t *)outputs[j], (uint8_t *)outputs[j], (uint8_t *)tempLout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					cx_math_addm(outputs[j], outputs[j], (uint8_t *)tempLout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 				}
 				
 				// Update yn and z22n generator

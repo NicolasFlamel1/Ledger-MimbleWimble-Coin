@@ -18,6 +18,12 @@
 
 	// Progress bar height
 	#define PROGRESS_BAR_HEIGHT 10
+	
+	// Start of text next to picture
+	#define START_OF_TEXT_NEXT_TO_PICTURE 41
+	
+	// Largest character width
+	#define LARGEST_CHARACTER_WIDTH 10
 
 // Otherwise
 #else
@@ -62,22 +68,18 @@ bagl_icon_details_t currencyIconBuffer;
 
 // Constants
 
-// Check if device doesn't have low height
-#if BAGL_HEIGHT >= 64
-
-	// Main menu currency name ready screen
-	static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
-			
-		// Picture
-		&currencyIconBuffer,
+// Main menu currency name ready screen
+static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
 		
-		// First line
-		(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
-		
-		// Second line
-		"is ready"
-	});
-#endif
+	// Picture
+	&currencyIconBuffer,
+	
+	// First line
+	(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
+	
+	// Second line
+	"is ready"
+});
 
 // Main menu ready screen
 static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
@@ -164,34 +166,8 @@ static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
 	"Back to dashboard"
 });
 
-// Check if device has low height
-#if BAGL_HEIGHT < 64
-
-	// Main menu
-	static UX_FLOW(mainMenu,
-
-		// Main menu ready screen
-		&mainMenuReadyScreen,
-		
-		// Main menu currency screen
-		&mainMenuCurrencyScreen,
-		
-		// Main menu version multiline screen
-		&mainMenuVersionMultilineScreen,
-		
-		// Main menu exit screen
-		&mainMenuExitScreen,
-		
-		// Loop
-		FLOW_LOOP
-	);
-
-// Otherwise
-#else
-
-	// Main menu
-	static const ux_flow_step_t *mainMenu[6];
-#endif
+// Main menu
+static const ux_flow_step_t *mainMenu[6];
 
 // Export root public key menu notify screen
 static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
@@ -1032,61 +1008,68 @@ void showMenu(enum Menu menu) {
 		// Main menu
 		case MAIN_MENU:
 		
-			// Check if device doesn't have low height
-			#if BAGL_HEIGHT >= 64
+			{
 		
+				// Initialize index
+				size_t index = 0;
+				
+				// Check if device doesn't have low height
+				#if BAGL_HEIGHT >= 64
+				
+					// Check if currency information name can fit on one line
+					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->name, strlen(currencyInformation->name), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+					
+						// Set main menu to use currency name ready screen
+						mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
+					}
+					else
+				
+				// Otherwise
+				#else
+				
+					// Check if currency information name can fit
+					if(strlen(currencyInformation->name) <= (BAGL_WIDTH - START_OF_TEXT_NEXT_TO_PICTURE) / LARGEST_CHARACTER_WIDTH) {
+					
+						// Set main menu to use currency name ready screen
+						mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
+					}
+					else
+				#endif
 				{
 			
-					// Initialize index
-					size_t index = 0;
+					// Set main menu to use ready screen
+					mainMenu[index++] = &mainMenuReadyScreen;
 					
-					// Check if device doesn't have low height
-					#if BAGL_HEIGHT >= 64
-					
-						// Check if currency information name can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->name, strlen(currencyInformation->name), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
-						
-							// Set main menu to use currency name ready screen
-							mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
-						}
-						else
-					#endif
-					{
-				
-						// Set main menu to use ready screen
-						mainMenu[index++] = &mainMenuReadyScreen;
-						
-						// Set main menu to use currency screen
-						mainMenu[index++] = &mainMenuCurrencyScreen;
-					}
-					
-					// Check if device doesn't have low height
-					#if BAGL_HEIGHT >= 64
-					
-						// Check if currency information version can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->version, strlen(currencyInformation->version), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
-						
-							// Set main menu to use version single line screen
-							mainMenu[index++] = &mainMenuVersionSingleLineScreen;
-						}
-						else
-					#endif
-					{
-					
-						// Set main menu to use version multiline screen
-						mainMenu[index++] = &mainMenuVersionMultilineScreen;
-					}
-					
-					// Set main menu to use exit screen
-					mainMenu[index++] = &mainMenuExitScreen;
-					
-					// End main menu
-					mainMenu[index++] = FLOW_LOOP;
-					
-					// End main menu
-					mainMenu[index++] = FLOW_END_STEP;
+					// Set main menu to use currency screen
+					mainMenu[index++] = &mainMenuCurrencyScreen;
 				}
-			#endif
+				
+				// Check if device doesn't have low height
+				#if BAGL_HEIGHT >= 64
+				
+					// Check if currency information version can fit on one line
+					if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->version, strlen(currencyInformation->version), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+					
+						// Set main menu to use version single line screen
+						mainMenu[index++] = &mainMenuVersionSingleLineScreen;
+					}
+					else
+				#endif
+				{
+				
+					// Set main menu to use version multiline screen
+					mainMenu[index++] = &mainMenuVersionMultilineScreen;
+				}
+				
+				// Set main menu to use exit screen
+				mainMenu[index++] = &mainMenuExitScreen;
+				
+				// End main menu
+				mainMenu[index++] = FLOW_LOOP;
+				
+				// End main menu
+				mainMenu[index++] = FLOW_END_STEP;
+			}
 			
 			// Set menu steps to main menu
 			menuSteps = mainMenu;
