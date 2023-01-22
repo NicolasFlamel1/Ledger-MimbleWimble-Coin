@@ -3,8 +3,8 @@
 
 
 // Requires
-const crypto = require("crypto");
-const Secp256k1Zkp = require("./secp256k1-zkp-0.0.27.js");
+const crypto = require("node:crypto")["webcrypto"];
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.28.js");
 const chacha = require("./ChaCha-2.1.0.js");
 const Common = require("./common.js");
 const Consensus = require("./consensus.js");
