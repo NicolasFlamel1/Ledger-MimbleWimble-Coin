@@ -5,7 +5,7 @@
 // Requires
 const SpeculosTransport = require("@ledgerhq/hw-transport-node-speculos")["default"];
 const http = require("http");
-const crypto = require("crypto");
+const crypto = require("node:crypto")["webcrypto"];
 const Blake2b = require("./BLAKE2b-0.0.2.js");
 const Ed25519 = require("./Ed25519-0.0.22.js");
 const X25519 = require("./X25519-0.0.23.js");
