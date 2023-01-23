@@ -2,12 +2,8 @@
 "use strict";
 
 
-// Check if module exists
-if(typeof module === "object" && module !== null && "exports" in module === true) {
-
-	// Requires
-	var BigNumber = require("./bignumber.js-9.0.2.js");
-}
+// Requires
+var BigNumber = require("./bignumber.js-9.0.2.js");
 
 
 // Classes
@@ -1435,12 +1431,8 @@ class Common {
 // Set global object's common
 globalThis["Common"] = Common;
 
-// Check if module exists
-if(typeof module === "object" && module !== null && "exports" in module === true) {
-
-	// Export Common
-	module["exports"] = Common;
-}
+// Export Common
+module["exports"] = Common;
 
 // Check if jQuery exists
 if(typeof jQuery === "function") {

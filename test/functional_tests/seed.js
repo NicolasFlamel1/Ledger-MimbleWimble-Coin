@@ -3,8 +3,8 @@
 
 
 // Requires
-const crypto = require("node:crypto")["webcrypto"];
-const Secp256k1Zkp = require("./secp256k1-zkp-0.0.28.js");
+const crypto = require("crypto")["webcrypto"];
+const Secp256k1Zkp = require("./secp256k1-zkp-0.0.29.js");
 const Common = require("./common.js");
 const Identifier = require("./identifier.js");
 const Crypto = require("./crypto.js");

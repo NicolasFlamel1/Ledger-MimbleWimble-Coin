@@ -1,5 +1,5 @@
 // Requires
-const crypto = require("node:crypto")["webcrypto"];
+const crypto = require("crypto")["webcrypto"];
 
 
 var secp256k1Zkp = (() => {

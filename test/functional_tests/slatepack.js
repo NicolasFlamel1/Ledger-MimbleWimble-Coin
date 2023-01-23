@@ -3,7 +3,7 @@
 
 
 // Requires
-const crypto = require("node:crypto")["webcrypto"];
+const crypto = require("crypto")["webcrypto"];
 const X25519 = require("./X25519-0.0.23.js");
 const bech32 = require("./bech32-2.0.0.js");
 const chacha = require("./ChaCha-2.1.0.js");
