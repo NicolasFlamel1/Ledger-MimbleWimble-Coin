@@ -4,9 +4,8 @@
 	<meta charset="UTF-8">
 
 	<script src="LedgerJS_Browser-0.0.1.js"></script>
-	<script src="../../test/functional_tests/secp256k1-zkp-0.0.27.js"></script>
-	<script src="../../test/functional_tests/common.js"></script>
-	<script src="applications.js"></script>
+	<script src="secp256k1-zkp-0.0.28.js"></script>
+	<script src="apps.js"></script>
 	
 	<script>
 	
@@ -26,9 +25,9 @@
 			// Get form
 			const form = document.querySelector("form");
 			
-			// Go through all applications
+			// Go through all apps
 			let firstButton = true;
-			for(const [application, information] of Object.entries(APPLICATIONS)) {
+			for(const [app, information] of Object.entries(APPS)) {
 			
 				// Check if first button
 				if(firstButton === true) {
@@ -54,10 +53,10 @@
 				form.appendChild(button);
 				
 				// Set button's text
-				button["textContent"] = "Install " + application + " app v" + information["Version"];
+				button["textContent"] = "Install " + app + " app v" + information["Version"];
 				
-				// Set button's application
-				button["dataset"]["application"] = application;
+				// Set button's app
+				button["dataset"]["app"] = app;
 			}
 			
 			// Get buttons
@@ -87,11 +86,11 @@
 				// Prevent default
 				event.preventDefault();
 				
-				// Set application from button
-				const application = button["dataset"]["application"];
+				// Set app from button
+				const app = button["dataset"]["app"];
 				
 				// Set text's text
-				text["textContent"] = "Installing the " + application + " app…";
+				text["textContent"] = "Installing the " + app + " app…";
 				
 				// Go through all buttons
 				for(let i = 0; i < buttons["length"]; ++i) {
@@ -130,7 +129,7 @@
 					}
 					
 					// Verify that device has the correct target ID
-					await hardwareWallet.send(0xE0, 0x04, 0x00, 0x00, Buffer.from(APPLICATIONS[application]["Target ID"][walletType]));
+					await hardwareWallet.send(0xE0, 0x04, 0x00, 0x00, Buffer.from(fromHexString(TARGET_IDS[walletType])));
 					
 					// Create nonce
 					const nonce = crypto.getRandomValues(new Uint8Array(NONCE_LENGTH));
@@ -148,7 +147,7 @@
 					const publicKey = Secp256k1Zkp.publicKeyFromSecretKey(privateKey);
 					
 					// Set message
-					let message = Common.mergeArrays([
+					let message = mergeArrays([
 					
 						// One
 						new Uint8Array([1]),
@@ -164,7 +163,7 @@
 					let signature = Secp256k1Zkp.createMessageHashSignature(messageHash, privateKey);
 					
 					// Set certificate
-					let certificate = Common.mergeArrays([
+					let certificate = mergeArrays([
 					
 						// Uncompressed public key length
 						new Uint8Array([Secp256k1Zkp.uncompressPublicKey(publicKey)["length"]]),
@@ -180,7 +179,7 @@
 					]);
 					
 					// Add alert
-					addAlert("Requesting authority on the " + walletName + ". Verify that the public key displayed on the hardware wallet is " + Common.toHexString(Secp256k1Zkp.uncompressPublicKey(publicKey)).toUpperCase() + ". Do not proceed if the public key is different.");
+					addAlert("Requesting authority on the " + walletName + ". Verify that the public key displayed on the hardware wallet is " + toHexString(Secp256k1Zkp.uncompressPublicKey(publicKey)).toUpperCase() + ". Do not proceed if the public key is different.");
 					
 					// Request authority to the device
 					await hardwareWallet.send(0xE0, 0x51, 0x00, 0x00, Buffer.from(certificate));
@@ -192,7 +191,7 @@
 					const ephemeralPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(ephemeralPrivateKey);
 					
 					// Set message
-					message = Common.mergeArrays([
+					message = mergeArrays([
 					
 						// Seventeen
 						new Uint8Array([17]),
@@ -214,7 +213,7 @@
 					signature = Secp256k1Zkp.createMessageHashSignature(messageHash, privateKey);
 					
 					// Set certificate
-					certificate = Common.mergeArrays([
+					certificate = mergeArrays([
 					
 						// Uncompressed ephemeral public key length
 						new Uint8Array([Secp256k1Zkp.uncompressPublicKey(ephemeralPublicKey)["length"]]),
@@ -259,40 +258,47 @@
 					let macInitializationVector = new Uint8Array(AES_IV_SIZE);
 					
 					// Add alert
-					addAlert("Installing the " + application + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + Common.toHexString(APPLICATIONS[application]["Hash"][walletType]).toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " + walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
+					addAlert("Installing the " + app + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + APPS[app]["Hash"][walletType].trim().toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " + walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
+					
+					// Get APDU commands
+					const apduCommands = APPS[app]["APDU Commands"][walletType].split("\n");
 					
 					// Go through all APDU commands
-					for(let i = 0; i < APPLICATIONS[application]["APDU Commands"][walletType]["length"]; ++i) {
+					for(let i = 0; i < apduCommands["length"]; ++i) {
 					
 						// Get APDU command
-						const apduCommand = Common.fromHexString(APPLICATIONS[application]["APDU Commands"][walletType][i]);
+						const apduCommand = fromHexString(apduCommands[i].trim());
 						
-						// Get command class
-						const commandClass = apduCommand[0];
+						// Check if APDU command exists
+						if(apduCommand["length"] !== 0) {
 						
-						// Get command instruction
-						const commandInstruction = apduCommand[1];
-						
-						// Get command parameter one
-						const commandParameterOne = apduCommand[2];
-						
-						// Get command parameter two
-						const commandParameterTwo = apduCommand[3];
-						
-						// Get command data
-						const commandData = apduCommand.subarray(5);
-						
-						// Encrypt the command data
-						const encryptedData = await encrypt(sharedPrivateKey, encryptionInitializationVector, macInitializationVector, commandData);
-						
-						// Update encryption initialization vector
-						encryptionInitializationVector = encryptedData[1];
-						
-						// Update MAC initialization vector
-						macInitializationVector = encryptedData[2];
-						
-						// Send encrypted data to device
-						await hardwareWallet.send(commandClass, commandInstruction, commandParameterOne, commandParameterTwo, Buffer.from(encryptedData[0]));
+							// Get command class
+							const commandClass = apduCommand[0];
+							
+							// Get command instruction
+							const commandInstruction = apduCommand[1];
+							
+							// Get command parameter one
+							const commandParameterOne = apduCommand[2];
+							
+							// Get command parameter two
+							const commandParameterTwo = apduCommand[3];
+							
+							// Get command data
+							const commandData = apduCommand.subarray(5);
+							
+							// Encrypt the command data
+							const encryptedData = await encrypt(sharedPrivateKey, encryptionInitializationVector, macInitializationVector, commandData);
+							
+							// Update encryption initialization vector
+							encryptionInitializationVector = encryptedData[1];
+							
+							// Update MAC initialization vector
+							macInitializationVector = encryptedData[2];
+							
+							// Send encrypted data to device
+							await hardwareWallet.send(commandClass, commandInstruction, commandParameterOne, commandParameterTwo, Buffer.from(encryptedData[0]));
+						}
 					}
 					
 					// Add alert
@@ -309,7 +315,7 @@
 					if(typeof error === "object" && error !== null && "statusCode" in error === true && (error["statusCode"] === 0x6A83 || error["statusCode"] === 0x6811)) {
 					
 						// Add alert
-						addAlert("One or more of the app's dependencies are not currently installed on the " + walletName + ". The MimbleWimble Coin app v" + APPLICATIONS[application]["Version"] + " must be installed on the hardware wallet in order for this app to be installed.");
+						addAlert("One or more of the app's dependencies are not currently installed on the " + walletName + ". The MimbleWimble Coin app v" + APPS[app]["Version"] + " must be installed on the hardware wallet in order for this app to be installed.");
 					}
 					
 					// Otherwise check if error is a storage requirement error
@@ -338,6 +344,7 @@
 			text["textContent"] = "Ready.";
 		});
 		
+		
 		// Supporting function implementation
 		
 		// Derive AES key
@@ -350,7 +357,7 @@
 			for(let retryIndex = 0;; ++retryIndex) {
 			
 				// Derive private key from the key index, retry index, and shared private key
-				const derivedPrivateKey = new Uint8Array(await crypto["subtle"].digest("SHA-256", Common.mergeArrays([
+				const derivedPrivateKey = new Uint8Array(await crypto["subtle"].digest("SHA-256", mergeArrays([
 				
 					// Key index as uint32 and retry index
 					new Uint8Array([0x00, 0x00, 0x00, keyIndex, retryIndex]),
@@ -390,7 +397,7 @@
 			const MAC_KEY_INDEX = 1;
 		
 			// Append one hundered and twenty-eight to data
-			data = Common.mergeArrays([
+			data = mergeArrays([
 			
 				// Data
 				data,
@@ -403,7 +410,7 @@
 			while(data["length"] % AES_BLOCK_SIZE !== 0) {
 			
 				// Append AES padding to data
-				data = Common.mergeArrays([
+				data = mergeArrays([
 				
 					// Data
 					data,
@@ -475,7 +482,7 @@
 			return [
 			
 				// Encrypted data and MAC data
-				Common.mergeArrays([
+				mergeArrays([
 				
 					// Encrypted data
 					encryptedData,
@@ -507,9 +514,211 @@
 			// Set alert's text
 			alert["textContent"] = text;
 		}
+		
+		// From hex string
+		function fromHexString(hexString) {
+		
+			// Hex character to value
+			const HEX_CHARACTER_TO_VALUE = {
+				
+				// Zero
+				"0": 0x00,
+				
+				// One
+				"1": 0x01,
+				
+				// Two
+				"2": 0x02,
+				
+				// Three
+				"3": 0x03,
+				
+				// Four
+				"4": 0x04,
+				
+				// Five
+				"5": 0x05,
+				
+				// Six
+				"6": 0x06,
+				
+				// Seven
+				"7": 0x07,
+				
+				// Eight
+				"8": 0x08,
+				
+				// Nine
+				"9": 0x09,
+				
+				// Uppercase a
+				"A": 0x0A,
+				
+				// Uppercase b
+				"B": 0x0B,
+				
+				// Uppercase c
+				"C": 0x0C,
+				
+				// Uppercase d
+				"D": 0x0D,
+				
+				// Uppercase e
+				"E": 0x0E,
+				
+				// Uppercase f
+				"F": 0x0F,
+				
+				// Lowercase a
+				"a": 0x0A,
+				
+				// Lowercase b
+				"b": 0x0B,
+				
+				// Lowercase c
+				"c": 0x0C,
+				
+				// Lowercase d
+				"d": 0x0D,
+				
+				// Lowercase e
+				"e": 0x0E,
+				
+				// Lowercase f
+				"f": 0x0F
+			};
+			
+			// Hex number length
+			const HEX_NUMBER_LENGTH = "FF"["length"];
+			
+			// Bits in a byte
+			const BITS_IN_A_BYTE = 8;
+		
+			// Initialize result
+			const result = new Uint8Array(hexString["length"] / HEX_NUMBER_LENGTH);
+
+			// Go through all bytes in the result
+			for(let i = 0; i < result["length"]; ++i) {
+			
+				// Set character as a byte in the result
+				result[i] = (HEX_CHARACTER_TO_VALUE[hexString[i * HEX_NUMBER_LENGTH]] << (BITS_IN_A_BYTE / 2)) | HEX_CHARACTER_TO_VALUE[hexString[i * HEX_NUMBER_LENGTH + 1]];
+			}
+			
+			// Return result
+			return result;
+		}
+		
+		// To hex string
+		function toHexString(byteArray) {
+
+			// Value to hex character
+			const VALUE_TO_HEX_CHARACTER = [
+			
+				// Zero
+				"0",
+				
+				// One
+				"1",
+				
+				// Two
+				"2",
+				
+				// Three
+				"3",
+				
+				// Four
+				"4",
+				
+				// Five
+				"5",
+				
+				// Six
+				"6",
+				
+				// Seven
+				"7",
+				
+				// Eight
+				"8",
+				
+				// Nine
+				"9",
+				
+				// A
+				"a",
+				
+				// B
+				"b",
+				
+				// C
+				"c",
+				
+				// D
+				"d",
+				
+				// E
+				"e",
+				
+				// F
+				"f"
+			];
+			
+			// Bits in a byte
+			const BITS_IN_A_BYTE = 8;
+			
+			// Initialize result
+			let result = "";
+			
+			// Go through all bytes in the byte array
+			for(let i = 0; i < byteArray["length"]; ++i) {
+			
+				// Get byte
+				const byte = byteArray[i];
+				
+				// Append byte as characters to the result
+				result = result.concat(VALUE_TO_HEX_CHARACTER[byte >>> (BITS_IN_A_BYTE / 2)], VALUE_TO_HEX_CHARACTER[byte & 0x0F]);
+			}
+			
+			// Return result
+			return result;
+		}
+		
+		// Merge arrays
+		function mergeArrays(arrays) {
+		
+			// Initialize result
+			let result = new Uint8Array([]);
+		
+			// Go through all arrays
+			for(let i = 0; i < arrays["length"]; ++i) {
+			
+				// Get array
+				const array = arrays[i];
+				
+				// Set updated result to be the length of the current result and the array
+				const updatedResult = new Uint8Array(result["length"] + array["length"]);
+				
+				// Set arrays in the updated result
+				updatedResult.set(result);
+				updatedResult.set(array, result["length"]);
+				
+				// Set result to the updated result
+				result = updatedResult;
+			}
+		
+			// Return result
+			return result;
+		}
 	</script>
+	
+	<style>
+		* {
+			word-break: break-word;
+		}
+	</style>
 </head>
 <body>
+	<h3>Ledger App Installer</h3>
 	<p>Loading…</p>
 	<form>
 	</form>
