@@ -290,7 +290,7 @@
 			TRY {
 				
 				// Initialize library parameters
-				unsigned int libraryParameters[] ={
+				const unsigned int libraryParameters[] ={
 				
 					// Library name
 					(unsigned int)LIBRARY_NAME,
