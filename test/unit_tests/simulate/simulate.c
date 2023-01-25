@@ -243,7 +243,7 @@ void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_priva
 }
 
 // Get address private key
-void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve) {
+void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, const uint32_t account, const uint32_t index, const cx_curve_t curve) {
 
 	// Fail test
 	assert_true(false);
@@ -257,21 +257,21 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 }
 
 // Is valid secp256k1 public key
-bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, const size_t length) {
 
 	// Fail test
 	assert_true(false);
 }
 
 // Get Ed25519 public key
-void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t index) {
+void getEd25519PublicKey(uint8_t *ed25519PublicKey, const uint32_t account, const uint32_t index) {
 
 	// Fail test
 	assert_true(false);
 }
 
 // Is valid Ed25519 public key
-bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
+bool isValidEd25519PublicKey(const uint8_t *publicKey, const size_t length) {
 
 	// Fail test
 	assert_true(false);
@@ -292,21 +292,21 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 }
 
 // Get encrypted data length
-size_t getEncryptedDataLength(size_t dataLength) {
+size_t getEncryptedDataLength(const size_t dataLength) {
 
 	// Fail test
 	assert_true(false);
 }
 
 // Encrypt data
-void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dataLength, const uint8_t *key, const size_t keyLength) {
 
 	// Fail test
 	assert_true(false);
 }
 
 // Decrypt data
-size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+size_t decryptData(volatile uint8_t *result, const uint8_t *data, const size_t dataLength, const uint8_t *key, const size_t keyLength) {
 
 	// Fail test
 	assert_true(false);
