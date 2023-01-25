@@ -16,7 +16,7 @@
 // Supporting function implementation
 
 // Create MQS shared private key
-void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, const uint8_t *salt) {
+void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const uint32_t account, const uint32_t index, const char *address, const uint8_t *salt) {
 
 	// Check if getting public key from address failed
 	cx_ecfp_public_key_t publicKey;
@@ -71,7 +71,7 @@ void createMqsSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t acco
 }
 
 // Get public key from MQS address
-bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqsAddress, size_t length) {
+bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqsAddress, const size_t length) {
 
 	// Check if length is invalid
 	if(length != MQS_ADDRESS_SIZE) {
@@ -134,7 +134,7 @@ void getMqsAddressFromPublicKey(char *mqsAddress, const uint8_t *publicKey) {
 }
 
 // Get MQS address
-void getMqsAddress(char *mqsAddress, uint32_t account, uint32_t index) {
+void getMqsAddress(char *mqsAddress, const uint32_t account, const uint32_t index) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;

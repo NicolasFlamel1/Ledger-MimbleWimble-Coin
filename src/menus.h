@@ -114,10 +114,10 @@ void clearMenuBuffers(void);
 void showMainMenu(void);
 
 // Show menu
-void showMenu(enum Menu menu);
+void showMenu(const enum Menu menu);
 
 // Show progress bar
-void showProgressBar(uint8_t percent);
+void showProgressBar(const uint8_t percent);
 
 
 #endif

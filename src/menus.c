@@ -938,7 +938,7 @@ static const bagl_element_t PROGRESS_BAR[] = {
 // Function prototypes
 
 // Progress bar button
-static unsigned int progressBar_button(unsigned int buttonMask, unsigned int buttonMaskCounter);
+static unsigned int progressBar_button(const unsigned int buttonMask, const unsigned int buttonMaskCounter);
 
 
 // Supporting function implementation
@@ -1236,7 +1236,7 @@ void showMenu(enum Menu menu) {
 }
 
 // Show progress bar
-void showProgressBar(uint8_t percent) {
+void showProgressBar(const uint8_t percent) {
 	
 	// Get percent width
 	const short percentWidth = (BAGL_WIDTH - ((PROGRESS_BAR_PADDING + 1) * 2)) * percent / MAXIMUM_PROGRESS_BAR_PERCENT;
@@ -1270,7 +1270,7 @@ void showProgressBar(uint8_t percent) {
 }
 
 // Progress bar button
-unsigned int progressBar_button(__attribute__((unused)) unsigned int buttonMask, __attribute__((unused)) unsigned int buttonMaskCounter) {
+unsigned int progressBar_button(__attribute__((unused)) const unsigned int buttonMask, __attribute__((unused)) const unsigned int buttonMaskCounter) {
 
 	// Return zero
 	return 0;

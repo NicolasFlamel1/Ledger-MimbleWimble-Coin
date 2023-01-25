@@ -68,13 +68,13 @@ static const uint16_t DAYS_SINCE_JANUARY_FIRST[2][MONTHS_IN_A_YEAR + 1] = {
 // Function prototypes
 
 // Is leap year
-static bool isLeapYear(uint32_t year);
+static bool isLeapYear(const uint32_t year);
 
 
 // Supporting function implementation
 
 // Epoch to time
-void epochToTime(struct Time *time, uint64_t epoch) {
+void epochToTime(struct Time *time, const uint64_t epoch) {
 
 	// Based on code by Alexey Frunze and Andre Kampling (https://stackoverflow.com/a/11197532)
 
@@ -138,7 +138,7 @@ void epochToTime(struct Time *time, uint64_t epoch) {
 }
 
 // Is leap year
-bool isLeapYear(uint32_t year) {
+bool isLeapYear(const uint32_t year) {
 
 	// Return if year is a leap year
 	return !(year % 4) && (year % 100 || !(year % 400));

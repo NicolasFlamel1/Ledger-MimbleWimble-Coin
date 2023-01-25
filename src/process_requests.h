@@ -87,10 +87,10 @@ enum Instruction {
 // Function prototypes
 
 // Process request
-void processRequest(unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags);
+void processRequest(const unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags);
 
 // Process user interaction
-void processUserInteraction(enum Instruction instruction, bool isApprovedResult, bool showProcessing);
+void processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing);
 
 
 #endif

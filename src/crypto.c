@@ -122,28 +122,28 @@ static const char ADDRESS_PRIVATE_KEY_HASH_KEY[] = {'G', 'r', 'i', 'n', 'b', 'o'
 // Function prototypes
 
 // Derive child key
-static void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode);
+static void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t account, const uint32_t *path, const size_t pathLength, const bool useProvidedPrivateKeyAndChainCode);
 
 // Bulletproof update commitment
 static void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *leftPart, const uint8_t *rightPart);
 
 // Create scalars from ChaCha20
-static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index);
+static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, const uint64_t index);
 
 // Use LR generator
-static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value);
+static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value);
 
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
 
 // Generator double point scalar multiply
-static void generatorDoublePointScalarMultiply(uint8_t *result, size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
+static void generatorDoublePointScalarMultiply(uint8_t *result, const size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
 
 
 // Supporting function implementation
 
 // Get private key and chain code
-void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account) {
+void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t account) {
 
 	// Copy BIP44 path without coin type and account
 	uint32_t bip44Path[ARRAYLEN(BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT)];
@@ -225,7 +225,7 @@ void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_priva
 }
 
 // Derive blinding factor
-void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, uint64_t value, const uint32_t *path, size_t pathLength, enum SwitchType switchType) {
+void deriveBlindingFactor(volatile uint8_t *blindingFactor, const uint32_t account, const uint64_t value, const uint32_t *path, const size_t pathLength, const enum SwitchType switchType) {
 
 	// Initialize child private key and chain code
 	volatile cx_ecfp_private_key_t childPrivateKey;
@@ -331,7 +331,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, uint32_t account, ui
 }
 
 // Commit value
-void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *blindingFactor, bool compress) {
+void commitValue(volatile uint8_t *commitment, const uint64_t value, const uint8_t *blindingFactor,const  bool compress) {
 
 	// Initialize generators
 	volatile uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
@@ -410,7 +410,7 @@ void commitValue(volatile uint8_t *commitment, uint64_t value, const uint8_t *bl
 }
 
 // Get rewind nonce
-void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8_t *commitment) {
+void getRewindNonce(volatile uint8_t *rewindNonce, const uint32_t account, const uint8_t *commitment) {
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -466,7 +466,7 @@ void getRewindNonce(volatile uint8_t *rewindNonce, uint32_t account, const uint8
 }
 
 // Get private nonce
-void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uint8_t *commitment) {
+void getPrivateNonce(volatile uint8_t *privateNonce, const uint32_t account, const uint8_t *commitment) {
 
 	// Initialize private key
 	volatile cx_ecfp_private_key_t privateKey;
@@ -513,7 +513,7 @@ void getPrivateNonce(volatile uint8_t *privateNonce, uint32_t account, const uin
 }
 
 // Get address private key
-void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uint32_t account, uint32_t index, cx_curve_t curve) {
+void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, const uint32_t account, const uint32_t index, const cx_curve_t curve) {
 
 	// Initialize blinding factor
 	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
@@ -650,7 +650,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, uin
 }
 
 // Update blinding factor sum
-void updateBlindingFactorSum(uint8_t *blindingFactorSum, const uint8_t *blindingFactor, bool blindingFactorIsPositive) {
+void updateBlindingFactorSum(uint8_t *blindingFactorSum, const uint8_t *blindingFactor, const bool blindingFactorIsPositive) {
 
 	// Check if blinding factor isn't positive
 	if(blindingFactorIsPositive) {
@@ -800,14 +800,14 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 }
 
 // Get encrypted data length
-size_t getEncryptedDataLength(size_t dataLength) {
+size_t getEncryptedDataLength(const size_t dataLength) {
 
 	// Return encrypted data length
 	return dataLength + ((dataLength % CX_AES_BLOCK_SIZE) ? CX_AES_BLOCK_SIZE - dataLength % CX_AES_BLOCK_SIZE : CX_AES_BLOCK_SIZE);
 }
 
 // Encrypt data
-void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dataLength, const uint8_t *key, const size_t keyLength) {
 
 	// Initialize padded data
 	volatile uint8_t paddedData[getEncryptedDataLength(dataLength)];
@@ -848,7 +848,7 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLengt
 }
 
 // Decrypt data
-size_t decryptData(volatile uint8_t *result, const uint8_t *data, size_t dataLength, const uint8_t *key, size_t keyLength) {
+size_t decryptData(volatile uint8_t *result, const uint8_t *data, const size_t dataLength, const uint8_t *key, const size_t keyLength) {
 
 	// Initialize decryption key
 	volatile cx_aes_key_t decryptionKey;
@@ -1000,7 +1000,7 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 }
 
 // Get payment proof message length
-size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) {
+size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAddressLength) {
 
 	// Check sender address length
 	switch(senderAddressLength) {
@@ -1061,7 +1061,7 @@ size_t getPaymentProofMessageLength(uint64_t value, size_t senderAddressLength) 
 }
 
 // Get payment proof message
-void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, size_t senderAddressLength) {
+void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_t *kernelCommitment, const char *senderAddress, const size_t senderAddressLength) {
 
 	// Check sender address length
 	switch(senderAddressLength) {
@@ -1174,7 +1174,7 @@ void getPaymentProofMessage(uint8_t *message, uint64_t value, const uint8_t *ker
 }
 
 // Verify payment proof message
-bool verifyPaymentProofMessage(const uint8_t *message, size_t messageLength, const char *receiverAddress, size_t receiverAddressLength, const uint8_t *signature, size_t signatureLength) {
+bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLength, const char *receiverAddress, const size_t receiverAddressLength, const uint8_t *signature, const size_t signatureLength) {
 
 	// Check receiver address length
 	switch(receiverAddressLength) {
@@ -1315,7 +1315,7 @@ bool isValidCommitment(uint8_t *commitment) {
 	commitment[0] -= COMMITMENT_EVEN_PREFIX - EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 	
 	// Set result to if the commitment is valid
-	bool result = isValidSecp256k1PublicKey(commitment, COMMITMENT_SIZE);
+	const bool result = isValidSecp256k1PublicKey(commitment, COMMITMENT_SIZE);
 	
 	// Revert the commitment's prefix
 	commitment[0] += COMMITMENT_EVEN_PREFIX - EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
@@ -1325,7 +1325,7 @@ bool isValidCommitment(uint8_t *commitment) {
 }
 
 // Is valid Ed25519 private key
-bool isValidEd25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, size_t length) {
+bool isValidEd25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != ED25519_PRIVATE_KEY_SIZE) {
@@ -1339,7 +1339,7 @@ bool isValidEd25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey,
 }
 
 // Is valid Ed25519 public key
-bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
+bool isValidEd25519PublicKey(const uint8_t *publicKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != ED25519_PUBLIC_KEY_SIZE) {
@@ -1386,7 +1386,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, size_t length) {
 }
 
 // Is valid X25519 private key
-bool isValidX25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, size_t length) {
+bool isValidX25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != X25519_PRIVATE_KEY_SIZE) {
@@ -1400,7 +1400,7 @@ bool isValidX25519PrivateKey(__attribute__((unused)) const uint8_t *privateKey, 
 }
 
 // Is valid X25519 public key
-bool isValidX25519PublicKey(const uint8_t *publicKey, size_t length) {
+bool isValidX25519PublicKey(const uint8_t *publicKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != X25519_PUBLIC_KEY_SIZE) {
@@ -1447,7 +1447,7 @@ bool isValidX25519PublicKey(const uint8_t *publicKey, size_t length) {
 }
 
 // Is valid secp256k1 private key
-bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
+bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != SECP256K1_PRIVATE_KEY_SIZE) {
@@ -1461,7 +1461,7 @@ bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, size_t length) {
 }
 
 // Is valid secp256k1 public key
-bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
+bool isValidSecp256k1PublicKey(const uint8_t *publicKey, const size_t length) {
 
 	// Check if length is invalid
 	if(length != COMPRESSED_PUBLIC_KEY_SIZE) {
@@ -1510,7 +1510,7 @@ bool isValidSecp256k1PublicKey(const uint8_t *publicKey, size_t length) {
 void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 
 	// Get public key's x component
-	uint8_t *x = &publicKey[PUBLIC_KEY_PREFIX_SIZE];
+	const uint8_t *x = &publicKey[PUBLIC_KEY_PREFIX_SIZE];
 
 	// Check if public key's prefix is invalid or its x component overflows
 	if((publicKey[0] != EVEN_COMPRESSED_PUBLIC_KEY_PREFIX && publicKey[0] != ODD_COMPRESSED_PUBLIC_KEY_PREFIX) || cx_math_cmp(x, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE) >= 0) {
@@ -1551,7 +1551,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 }
 
 // Get Ed25519 public key
-void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t index) {
+void getEd25519PublicKey(uint8_t *ed25519PublicKey, const uint32_t account, const uint32_t index) {
 
 	// Initialize address private key
 	volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -1591,7 +1591,7 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, uint32_t account, uint32_t i
 }
 
 // Calculate bulletproof components
-void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tOne, volatile uint8_t *tTwo, uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
+void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tOne, volatile uint8_t *tTwo, const uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage) {
 
 	// Initialize running commitment
 	volatile uint8_t runningCommitment[CX_SHA256_SIZE] = {0};
@@ -1947,7 +1947,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 }
 
 // Derive child key
-void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, uint32_t account, const uint32_t *path, size_t pathLength, bool useProvidedPrivateKeyAndChainCode) {
+void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t account, const uint32_t *path, const size_t pathLength, const bool useProvidedPrivateKeyAndChainCode) {
 
 	// Check if not using the provided private key and chain code
 	if(!useProvidedPrivateKeyAndChainCode) {
@@ -2087,7 +2087,7 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 }
 
 // Create scalars from ChaCha20
-void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, uint64_t index) {
+void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, const uint64_t index) {
 
 	// Initialize nonce
 	uint32_t nonce[3] = {
@@ -2140,7 +2140,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 }
 
 // Use LR generator
-void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, uint64_t value) {
+void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value) {
 
 	// Initialize yn
 	volatile uint8_t yn[SCALAR_SIZE] = {0};
@@ -2317,7 +2317,7 @@ bool isQuadraticResidue(const uint8_t *component) {
 }
 
 // Generator double point scalar multiply
-void generatorDoublePointScalarMultiply(uint8_t *result, size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo) {
+void generatorDoublePointScalarMultiply(uint8_t *result, const size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo) {
 
 	// Lock big number processor and throw error if it fails
 	CX_THROW(cx_bn_lock(CX_BN_WORD_ALIGNEMENT, 0));

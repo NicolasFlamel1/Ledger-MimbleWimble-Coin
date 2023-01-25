@@ -73,13 +73,13 @@ enum AddressType {
 void exitApplication(void);
 
 // Will response overflow
-bool willResponseOverflow(unsigned short currentLength, size_t change);
+bool willResponseOverflow(const unsigned short currentLength, const size_t change);
 
 // Swap endianness
-void swapEndianness(uint8_t *value, size_t length);
+void swapEndianness(uint8_t *value, const size_t length);
 
 // To hex string
-void toHexString(char *result, const uint8_t *value, size_t length);
+void toHexString(char *result, const uint8_t *value, const size_t length);
 
 // Get string length
 size_t getStringLength(uint64_t value);
@@ -88,13 +88,13 @@ size_t getStringLength(uint64_t value);
 void toString(char *result, uint64_t value, uint8_t fractionalDigits);
 
 // Is valid UTF-8 string
-bool isValidUtf8String(const char *text, size_t length);
+bool isValidUtf8String(const char *text, const size_t length);
 
 // Map
-uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t newTo);
+uint8_t map(const uint8_t value, const uint8_t from, const uint8_t to, const uint8_t newFrom, const uint8_t newTo);
 
 // Is zero array secure
-bool isZeroArraySecure(const uint8_t *value, size_t length);
+bool isZeroArraySecure(const uint8_t *value, const size_t length);
 
 
 #endif

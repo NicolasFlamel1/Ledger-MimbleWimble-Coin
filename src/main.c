@@ -22,7 +22,7 @@
 	
 	
 	// Main function
-	__attribute__((section(".boot"))) int main(int parameters) {
+	__attribute__((section(".boot"))) int main(const int parameters) {
 	
 		// Enable interrupts
 		__asm volatile("cpsie i");
@@ -277,7 +277,7 @@
 
 
 	// Main function
-	__attribute__((section(".boot"))) int main() {
+	__attribute__((section(".boot"))) int main(void) {
 
 		// Get current currency information
 		struct CurrencyInformation currentCurrencyInformation;

@@ -34,7 +34,7 @@ void getChecksum(uint8_t *checksum, const uint8_t *data);
 // Supporting function implementation
 
 // Get public key from Tor address
-bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const char *torAddress, size_t length) {
+bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const char *torAddress, const size_t length) {
 
 	// Check if length is invalid
 	if(length != TOR_ADDRESS_SIZE) {
@@ -118,7 +118,7 @@ void getTorAddressFromPublicKey(char *torAddress, const uint8_t *publicKey) {
 }
 
 // Get Tor address
-void getTorAddress(char *torAddress, uint32_t account, uint32_t index) {
+void getTorAddress(char *torAddress, const uint32_t account, const uint32_t index) {
 
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];

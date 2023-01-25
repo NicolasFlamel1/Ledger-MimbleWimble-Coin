@@ -61,7 +61,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 	const char *address = (char *)&data[sizeof(account) + sizeof(index) + sizeof(nonce)];
 	
 	// Get address length
-	size_t addressLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(nonce));
+	const size_t addressLength = dataLength - (sizeof(account) + sizeof(index) + sizeof(nonce));
 	
 	// Check address length
 	size_t sharedPrivateKeyLength;

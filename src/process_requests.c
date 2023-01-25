@@ -40,7 +40,7 @@
 // Supporting function implementation
 
 // Process request
-void processRequest(unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags) {
+void processRequest(const unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags) {
 
 	// Begin try
 	BEGIN_TRY {
@@ -338,7 +338,7 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 }
 
 // Process user interaction
-void processUserInteraction(enum Instruction instruction, bool isApprovedResult, bool showProcessing) {
+void processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing) {
 	
 	// Initialize response length
 	volatile unsigned short responseLength = 0;

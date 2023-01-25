@@ -24,7 +24,7 @@ static const char PAYLOAD_KEY_INFO[] = {'p', 'a', 'y', 'l', 'o', 'a', 'd'};
 // Supporting function implementation
 
 // Get age payload key
-void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t index, const uint8_t *ephemeralX25519PublicKey, const uint8_t *encryptedFileKey, const uint8_t *payloadNonce) {
+void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, const uint32_t index, const uint8_t *ephemeralX25519PublicKey, const uint8_t *encryptedFileKey, const uint8_t *payloadNonce) {
 
 	// Initialize Ed25519 private key
 	volatile cx_ecfp_private_key_t ed25519PrivateKey;

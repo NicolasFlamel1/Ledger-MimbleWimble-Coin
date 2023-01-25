@@ -21,28 +21,28 @@
 // Function prototypes
 
 // Get base58 encoded length
-size_t getBase58EncodedLength(const uint8_t *data, size_t length);
+size_t getBase58EncodedLength(const uint8_t *data, const size_t length);
 
 // Base58 encode
-void base58Encode(char *result, const uint8_t *data, size_t length);
+void base58Encode(char *result, const uint8_t *data, const size_t length);
 
 // Get base58 encoded length with checksum
-size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, size_t length);
+size_t getBase58EncodedLengthWithChecksum(const uint8_t *data, const size_t length);
 
 // Base58 encode with checksum
-void base58EncodeWithChecksum(char *result, uint8_t *data, size_t length);
+void base58EncodeWithChecksum(char *result, uint8_t *data, const size_t length);
 
 // Get base58 decoded length
-size_t getBase58DecodedLength(const char *data, size_t length);
+size_t getBase58DecodedLength(const char *data, const size_t length);
 
 // Base58 decode
-void base58Decode(uint8_t *result, const char *data, size_t length);
+void base58Decode(uint8_t *result, const char *data, const size_t length);
 
 // Get base58 decoded length with checksum
-size_t getBase58DecodedLengthWithChecksum(const char *data, size_t length);
+size_t getBase58DecodedLengthWithChecksum(const char *data, const size_t length);
 
 // Base58 decode with checksum
-bool base58DecodeWithChecksum(uint8_t *result, const char *data, size_t length);
+bool base58DecodeWithChecksum(uint8_t *result, const char *data, const size_t length);
 
 
 #endif

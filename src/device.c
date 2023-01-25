@@ -26,7 +26,7 @@ void io_seproxyhal_display(const bagl_element_t *element) {
 }
 
 // IO exchange
-unsigned short io_exchange_al(unsigned char channel, unsigned short length) {
+unsigned short io_exchange_al(const unsigned char channel, const unsigned short length) {
 
 	// Check channel
 	switch(channel & ~IO_FLAGS) {
@@ -76,7 +76,7 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short length) {
 }
 
 // IO event
-unsigned char io_event(__attribute__((unused)) unsigned char channel) {
+unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 
 	// Check event
 	switch(G_io_seproxyhal_spi_buffer[0]) {

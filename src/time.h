@@ -53,7 +53,7 @@ struct Time {
 // Function prototypes
 
 // Epoch to time
-void epochToTime(struct Time *time, uint64_t epoch);
+void epochToTime(struct Time *time, const uint64_t epoch);
 
 
 #endif

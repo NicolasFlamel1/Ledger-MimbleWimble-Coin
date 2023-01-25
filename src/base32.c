@@ -22,20 +22,20 @@ static const char CHARACTERS[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', '
 // Function prototypes
 
 // Get number of padding characters
-static size_t getNumberOfPaddingCharacters(size_t length);
+static size_t getNumberOfPaddingCharacters(const size_t length);
 
 
 // Supporting function implementation
 
 // Get base32 encoded length
-size_t getBase32EncodedLength(size_t length) {
+size_t getBase32EncodedLength(const size_t length) {
 
 	// Return base32 encoded length
 	return length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + getNumberOfPaddingCharacters(length);
 }
 
 // Base32 encode
-void base32Encode(char *result, const uint8_t *data, size_t length) {
+void base32Encode(char *result, const uint8_t *data, const size_t length) {
 
 	// Get number of padding characters
 	const size_t numberOfPaddingCharacters = getNumberOfPaddingCharacters(length);
@@ -146,7 +146,7 @@ void base32Encode(char *result, const uint8_t *data, size_t length) {
 }
 
 // Get base32 decoded length
-size_t getBase32DecodedLength(const char *data, size_t length) {
+size_t getBase32DecodedLength(const char *data, const size_t length) {
 
 	// Get start of padding in the data
 	const char *startOfPadding = memchr(data, PADDING_CHARACTER, length);
@@ -189,7 +189,7 @@ size_t getBase32DecodedLength(const char *data, size_t length) {
 }
 
 // Base32 decode
-void base32Decode(uint8_t *result, const char *data, size_t length) {
+void base32Decode(uint8_t *result, const char *data, const size_t length) {
 
 	// Get number of bytes
 	const size_t numberOfBytes = getBase32DecodedLength(data, length);
@@ -265,7 +265,7 @@ void base32Decode(uint8_t *result, const char *data, size_t length) {
 }
 
 // Get number of padding characters
-size_t getNumberOfPaddingCharacters(size_t length) {
+size_t getNumberOfPaddingCharacters(const size_t length) {
 
 	// Check how many bits the final quantum represents
 	switch(length % BITS_PER_CHARACTER) {

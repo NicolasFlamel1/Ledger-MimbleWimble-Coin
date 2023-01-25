@@ -11,7 +11,7 @@
 // Supporting function implementation
 
 // Create Slatepack shared private key
-void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_t account, uint32_t index, const char *address, size_t addressLength) {
+void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const uint32_t account, const uint32_t index, const char *address, const size_t addressLength) {
 
 	// Check address length
 	cx_ecfp_public_key_t publicKey;
@@ -117,7 +117,7 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, uint32_
 }
 
 // Get public key from Slatepack address
-bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const char *slatepackAddress, size_t length) {
+bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const char *slatepackAddress, const size_t length) {
 
 	// Check if length is invalid
 	if(length != SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
@@ -180,7 +180,7 @@ void getSlatepackAddressFromPublicKey(char *slatepackAddress, const uint8_t *pub
 }
 
 // Get Slatepack address
-void getSlatepackAddress(char *slatepackAddress, uint32_t account, uint32_t index) {
+void getSlatepackAddress(char *slatepackAddress, const uint32_t account, const uint32_t index) {
 
 	// Get Ed25519 public key
 	uint8_t ed25519PublicKey[ED25519_PUBLIC_KEY_SIZE];

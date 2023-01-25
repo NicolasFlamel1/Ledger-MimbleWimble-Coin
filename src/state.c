@@ -17,7 +17,7 @@ void resetState(void) {
 }
 
 // Reset unrelated state
-void resetUnrelatedState(enum Instruction instruction) {
+void resetUnrelatedState(const enum Instruction instruction) {
 
 	// Check instruction
 	switch(instruction) {

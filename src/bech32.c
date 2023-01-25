@@ -48,14 +48,14 @@ static uint32_t updateChecksum(uint32_t checksum);
 // Supporting function implementation
 
 // Get Bech32 encoded length
-size_t getBech32EncodedLength(size_t length, const char *humanReadablePart) {
+size_t getBech32EncodedLength(const size_t length, const char *humanReadablePart) {
 
 	// Return Bech32 encoded length
 	return strlen(humanReadablePart) + SEPARATOR_SIZE + length * BITS_IN_A_BYTE / BITS_PER_CHARACTER + ((length % BITS_PER_CHARACTER) ? 1 : 0) + CHECKSUM_SIZE;
 }
 
 // Bech32 encode
-void bech32Encode(char *result, const uint8_t *data, size_t length, const char *humanReadablePart) {
+void bech32Encode(char *result, const uint8_t *data, const size_t length, const char *humanReadablePart) {
 
 	// Get human-readable part length
 	const size_t humanReadablePartLength = strlen(humanReadablePart);
@@ -205,7 +205,7 @@ void bech32Encode(char *result, const uint8_t *data, size_t length, const char *
 }
 
 // Get Bech32 decoded length
-size_t getBech32DecodedLength(const char *data, size_t length) {
+size_t getBech32DecodedLength(const char *data, const size_t length) {
 
 	// Get separator index
 	const char *separatorIndex = (char *)memrchr(data, SEPARATOR, length);
@@ -292,7 +292,7 @@ size_t getBech32DecodedLength(const char *data, size_t length) {
 }
 
 // Bech32 decode
-void bech32Decode(uint8_t *result, const char *data, size_t length) {
+void bech32Decode(uint8_t *result, const char *data, const size_t length) {
 
 	// Get number of bytes
 	const size_t numberOfBytes = getBech32DecodedLength(data, length);

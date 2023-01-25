@@ -29,19 +29,19 @@ static const uint8_t POLY1305_P[] = {0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0
 static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
 
 // Rotate left
-static void rotateLeft(uint32_t *value, size_t bits);
+static void rotateLeft(uint32_t *value, const size_t bits);
 
 // Initialize ChaCha20 current state
 static void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
 
 // Update Poly1305 accumulator
-static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength);
+static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength);
 
 
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, size_t additionalAuthenticatedDataLength, uint32_t counter, uint32_t *chaCha20ResultingState) {
+void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, const size_t additionalAuthenticatedDataLength, const uint32_t counter, uint32_t *chaCha20ResultingState) {
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -136,7 +136,7 @@ void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20P
 }
 
 // Encrypt ChaCha20 Poly1305 data
-void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *encryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *encryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -187,7 +187,7 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 }
 
 // Decrypt ChaCha20 Poly1305 data
-void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *decryptedDataBlock, const uint8_t *dataBlock, size_t dataBlockLength) {
+void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *decryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -304,7 +304,7 @@ void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d) {
 }
 
 // Rotate left
-void rotateLeft(uint32_t *value, size_t bits) {
+void rotateLeft(uint32_t *value, const size_t bits) {
 
 	// Rotate value left by number of bits
 	*value = (*value << bits) | (*value >> (sizeof(*value) * BITS_IN_A_BYTE - bits));
@@ -339,7 +339,7 @@ void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20
 }
 
 // Update Poly1305 accumulator
-void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, size_t valueLength) {
+void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength) {
 
 	// Go through all blocks in the value
 	for(size_t i = 0; i <= valueLength / POLY1305_BLOCK_SIZE; ++i) {

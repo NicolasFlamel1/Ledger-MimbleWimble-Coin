@@ -25,7 +25,7 @@
 // Function prototypes
 
 // Get age payload key
-void getAgePayloadKey(volatile uint8_t *payloadKey, uint32_t account, uint32_t index, const uint8_t *ephemeralX25519PublicKey, const uint8_t *encryptedFileKey, const uint8_t *payloadNonce);
+void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, const uint32_t index, const uint8_t *ephemeralX25519PublicKey, const uint8_t *encryptedFileKey, const uint8_t *payloadNonce);
 
 
 #endif

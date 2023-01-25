@@ -45,14 +45,14 @@ void exitApplication(void) {
 }
 
 // Will response overflow
-bool willResponseOverflow(unsigned short currentLength, size_t lengthChange) {
+bool willResponseOverflow(const unsigned short currentLength, const size_t lengthChange) {
 					
 	// Return if response's length with the change will overflow
 	return USHRT_MAX - currentLength < lengthChange || currentLength + lengthChange >= sizeof(G_io_apdu_buffer);
 }
 
 // Swap endianness
-void swapEndianness(uint8_t *value, size_t length) {
+void swapEndianness(uint8_t *value, const size_t length) {
 
 	// Go through all byte pairs in the value
 	for(size_t i = 0; i < length / 2; ++i) {
@@ -63,7 +63,7 @@ void swapEndianness(uint8_t *value, size_t length) {
 }
 
 // To hex string
-void toHexString(char *result, const uint8_t *value, size_t length) {
+void toHexString(char *result, const uint8_t *value, const size_t length) {
 
 	// Go through all bytes in the value
 	for(size_t i = 0; i < length; ++i) {
@@ -161,7 +161,7 @@ void toString(char *result, uint64_t value, uint8_t fractionalDigits) {
 }
 
 // Is valid UTF-8 string
-bool isValidUtf8String(const char *text, size_t length) {
+bool isValidUtf8String(const char *text, const size_t length) {
 
 	// Go through all UTF-8 code points in the text
 	for(size_t i = 0; i < length;) {
@@ -235,14 +235,14 @@ bool isValidUtf8String(const char *text, size_t length) {
 }
 
 // Map
-uint8_t map(uint8_t value, uint8_t from, uint8_t to, uint8_t newFrom, uint8_t newTo) {
+uint8_t map(const uint8_t value, const uint8_t from, const uint8_t to, const uint8_t newFrom, const uint8_t newTo) {
 
 	// Return value mapped to new range
 	return (newTo - newFrom) * (value - from) / (to - from) + newFrom;
 }
 
 // Is zero array secure
-bool isZeroArraySecure(const uint8_t *value, size_t length) {
+bool isZeroArraySecure(const uint8_t *value, const size_t length) {
 
 	// Initialize result
 	uint8_t result = 0;
