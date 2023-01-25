@@ -2131,7 +2131,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 			explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
 			
 			// Clear the ChaCha20 Poly1305 state
-			explicit_bzero((ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
+			explicit_bzero((struct ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
 		}
 	}
 	

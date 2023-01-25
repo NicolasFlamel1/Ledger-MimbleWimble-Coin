@@ -41,7 +41,7 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 	uint8_t encryptedData[dataLength];
 	
 	// Encrypt ChaCha20 Poly1305 data
-	encryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, encryptedData, data, dataLength);
+	encryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, encryptedData, data, dataLength);
 	
 	// Check if response with the encrypted data will overflow
 	if(willResponseOverflow(*responseLength, sizeof(encryptedData))) {

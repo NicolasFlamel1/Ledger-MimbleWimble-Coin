@@ -241,7 +241,7 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *tag) {
 
 	// Initialize copy
-	volatile ChaCha20Poly1305State copy;
+	volatile struct ChaCha20Poly1305State copy;
 	
 	// Begin try
 	BEGIN_TRY {
@@ -250,7 +250,7 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 		TRY {
 		
 			// Copy the ChaCha20 Poly1305 state
-			memcpy((ChaCha20Poly1305State *)&copy, chaCha20Poly1305State, sizeof(copy));
+			memcpy((struct ChaCha20Poly1305State *)&copy, chaCha20Poly1305State, sizeof(copy));
 
 			// Append additional authenticated data length and encrypted data length
 			uint8_t lengths[sizeof(copy.additionalAuthenticatedDataLength) + sizeof(copy.dataLength)];
@@ -258,7 +258,7 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 			memcpy(&lengths[sizeof(copy.additionalAuthenticatedDataLength)], (uint8_t *)&copy.dataLength, sizeof(copy.dataLength));
 
 			// Update Poly1305 accumulator with the lengths
-			updatePoly1305Accumulator((ChaCha20Poly1305State *)&copy, lengths, sizeof(lengths));
+			updatePoly1305Accumulator((struct ChaCha20Poly1305State *)&copy, lengths, sizeof(lengths));
 			
 			// Add Poly1305 s to the Poly1305 accumulator
 			cx_math_add((uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305S, sizeof(copy.poly1305Accumulator));
@@ -274,7 +274,7 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 		FINALLY {
 		
 			// Clear the copy
-			explicit_bzero((ChaCha20Poly1305State *)&copy, sizeof(copy));
+			explicit_bzero((struct ChaCha20Poly1305State *)&copy, sizeof(copy));
 		}
 	}
 	

@@ -103,10 +103,10 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			// Decrypt file key with the wrap key
 			const uint8_t FILE_KEY_NONCE[CHACHA20_NONCE_SIZE] = {0};
 			initializeChaCha20Poly1305(&chaCha20Poly1305State, (uint8_t *)wrapKey, FILE_KEY_NONCE, NULL, 0, 0, NULL);
-			decryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&chaCha20Poly1305State, fileKey, encryptedFileKey, AGE_FILE_KEY_SIZE);
+			decryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&chaCha20Poly1305State, fileKey, encryptedFileKey, AGE_FILE_KEY_SIZE);
 			
 			// Check if file key's tag isn't correct
-			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&chaCha20Poly1305State, tag);
+			getChaCha20Poly1305Tag((struct ChaCha20Poly1305State *)&chaCha20Poly1305State, tag);
 			if(os_secure_memcmp((uint8_t *)&encryptedFileKey[AGE_FILE_KEY_SIZE], (uint8_t *)tag, sizeof(tag))) {
 			
 				// Throw invalid parameters error
@@ -144,7 +144,7 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			explicit_bzero((uint8_t *)wrapKey, sizeof(wrapKey));
 			
 			// Clear the ChaCha20 Poly1305 state
-			explicit_bzero((ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
+			explicit_bzero((struct ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
 			
 			// Clear the file key
 			explicit_bzero((uint8_t *)fileKey, sizeof(fileKey));

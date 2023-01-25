@@ -26,7 +26,7 @@
 // Structures
 
 // ChaCha20 Poly1305 state
-typedef struct ChaCha20Poly1305State {
+struct ChaCha20Poly1305State {
 
 	// ChaCha20 original state
 	uint32_t chaCha20OriginalState[CHACHA20_BLOCK_SIZE / sizeof(uint32_t)];
@@ -45,8 +45,7 @@ typedef struct ChaCha20Poly1305State {
 	
 	// Data length
 	uint64_t dataLength;
-
-} ChaCha20Poly1305State;
+};
 
 
 // Function prototypes
