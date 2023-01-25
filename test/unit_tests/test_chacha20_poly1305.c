@@ -71,7 +71,7 @@ int main(void) {
 void testEncrypt(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
-	ChaCha20Poly1305State chaCha20Poly1305State;
+	struct ChaCha20Poly1305State chaCha20Poly1305State;
 	initializeChaCha20Poly1305(&chaCha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, NULL);
 	
 	// Encrypt the data
@@ -93,7 +93,7 @@ void testEncrypt(void **state) {
 void testDecrypt(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
-	ChaCha20Poly1305State chaCha20Poly1305State;
+	struct ChaCha20Poly1305State chaCha20Poly1305State;
 	initializeChaCha20Poly1305(&chaCha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, NULL);
 	
 	// Decrypt the encrypted data
@@ -115,7 +115,7 @@ void testDecrypt(void **state) {
 void testResultingState(void **state) {
 
 	// Initialize ChaCha20 Poly1305 state
-	ChaCha20Poly1305State chaCha20Poly1305State;
+	struct ChaCha20Poly1305State chaCha20Poly1305State;
 	uint32_t resultingState[sizeof(chaCha20Poly1305State.chaCha20OriginalState) / sizeof(chaCha20Poly1305State.chaCha20OriginalState[0])];
 	initializeChaCha20Poly1305(&chaCha20Poly1305State, KEY, NONCE, ADDITIONAL_AUTHENTICATED_DATA, sizeof(ADDITIONAL_AUTHENTICATED_DATA), COUNTER, resultingState);
 	
