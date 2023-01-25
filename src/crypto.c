@@ -971,8 +971,9 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 
 	// Get the sum of one and y and the difference of one and y
-	uint8_t one[SCALAR_SIZE] = {0};
-	one[sizeof(one) - 1] = 1;
+	const uint8_t one[SCALAR_SIZE] = {
+		[SCALAR_SIZE - 1] = 1
+	};
 	
 	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE);
 	cx_math_subm(y, one, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
@@ -1524,8 +1525,9 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	const uint8_t three = 3;
 	cx_math_powm(ySquared, x, &three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
-	uint8_t seven[SCALAR_SIZE] = {0};
-	seven[sizeof(seven) - 1] = 7;
+	const uint8_t seven[SCALAR_SIZE] = {
+		[SCALAR_SIZE - 1] = 7
+	};
 	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
 	
 	// Return if the y squared isn't quadratic residue
@@ -1769,8 +1771,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			cx_math_subm((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 			
 			// Divide the difference by two
-			uint8_t twoInverse[SCALAR_SIZE] = {0};
-			twoInverse[sizeof(twoInverse) - 1] = 2;
+			uint8_t twoInverse[SCALAR_SIZE] = {
+				[SCALAR_SIZE - 1] = 2
+			};
 			cx_math_invprimem(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, sizeof(twoInverse));
 			
 			cx_math_multm((uint8_t *)t1, (uint8_t *)t1, twoInverse, SECP256K1_CURVE_ORDER, sizeof(t1));
@@ -2143,7 +2146,9 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value) {
 
 	// Initialize yn
-	volatile uint8_t yn[SCALAR_SIZE] = {0};
+	volatile uint8_t yn[SCALAR_SIZE] = {
+		[SCALAR_SIZE - 1] = 1
+	};
 	
 	// Initialize z22n
 	volatile uint8_t z22n[SCALAR_SIZE];
@@ -2172,16 +2177,17 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 		// Try
 		TRY {
 		
-			// Set yn to one
-			yn[sizeof(yn) - 1] = 1;
-			
 			// Set z22n to z squared
 			const uint8_t two[] = {2};
 			cx_math_powm((uint8_t *)z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n));
 			
 			// Create inputs
-			uint8_t inputs[3][SCALAR_SIZE] = {0};
-			inputs[1][sizeof(inputs[1]) - 1] = 1;
+			uint8_t inputs[3][SCALAR_SIZE] = {
+				{0},
+				{
+					[SCALAR_SIZE - 1] = 1
+				}
+			};
 			cx_math_subm(inputs[2], SECP256K1_CURVE_ORDER, inputs[1], SECP256K1_CURVE_ORDER, sizeof(inputs[1]));
 			
 			// Create outputs
