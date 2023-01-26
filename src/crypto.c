@@ -2183,8 +2183,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			
 			// Create inputs
 			uint8_t inputs[3][SCALAR_SIZE] = {
-				{0},
-				{
+				[1] = {
 					[SCALAR_SIZE - 1] = 1
 				}
 			};
