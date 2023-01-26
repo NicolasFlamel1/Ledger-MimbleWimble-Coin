@@ -187,7 +187,7 @@ void bech32Encode(char *result, const uint8_t *data, const size_t length, const 
 	}
 	
 	// Go through all checksum characters
-	for(size_t i = 0; i < CHECKSUM_SIZE; ++i) {
+	for(uint_fast8_t i = 0; i < CHECKSUM_SIZE; ++i) {
 	
 		// Update the checksum
 		checksum = updateChecksum(checksum);
@@ -197,7 +197,7 @@ void bech32Encode(char *result, const uint8_t *data, const size_t length, const 
 	checksum ^= CHECKSUM_FINAL_CONSTANT;
 	
 	// Go through all checksum characters
-	for(size_t i = 0; i < CHECKSUM_SIZE; ++i) {
+	for(uint_fast8_t i = 0; i < CHECKSUM_SIZE; ++i) {
 	
 		// Append checksum character to the result
 		result[index + humanReadablePartLength + SEPARATOR_SIZE + i] = CHARACTERS[(checksum >> ((BITS_PER_CHARACTER - i) * BITS_PER_CHARACTER)) & 0b11111];
@@ -267,7 +267,7 @@ size_t getBech32DecodedLength(const char *data, const size_t length) {
 	}
 	
 	// Go through all checksum characters
-	for(size_t i = 0; i < CHECKSUM_SIZE; ++i) {
+	for(uint_fast8_t i = 0; i < CHECKSUM_SIZE; ++i) {
 	
 		// Update the checksum
 		checksum = updateChecksum(checksum);
@@ -277,7 +277,7 @@ size_t getBech32DecodedLength(const char *data, const size_t length) {
 	checksum ^= CHECKSUM_FINAL_CONSTANT;
 	
 	// Go through all checksum characters
-	for(size_t i = 0; i < CHECKSUM_SIZE; ++i) {
+	for(uint_fast8_t i = 0; i < CHECKSUM_SIZE; ++i) {
 	
 		// Check if checksum character is invalid
 		if(data[length - CHECKSUM_SIZE + i] != CHARACTERS[(checksum >> ((BITS_PER_CHARACTER - i) * BITS_PER_CHARACTER)) & 0b11111]) {
