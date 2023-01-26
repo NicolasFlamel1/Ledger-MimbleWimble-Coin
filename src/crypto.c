@@ -331,7 +331,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, const uint32_t accou
 }
 
 // Commit value
-void commitValue(volatile uint8_t *commitment, const uint64_t value, const uint8_t *blindingFactor,const  bool compress) {
+void commitValue(volatile uint8_t *commitment, const uint64_t value, const uint8_t *blindingFactor, const bool compress) {
 
 	// Initialize generators
 	volatile uint8_t valueGenerator[PUBLIC_KEY_PREFIX_SIZE + sizeof(GENERATOR_H)] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
