@@ -397,7 +397,7 @@ jobs:
           name: scan-build
           path: scan-build
 
-       - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
+      - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
         run: |
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Stax SDK
