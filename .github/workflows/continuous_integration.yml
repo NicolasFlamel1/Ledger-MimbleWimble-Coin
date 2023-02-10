@@ -194,6 +194,66 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
+      - name: Build Stax MimbleWimble Coin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
+
+      - name: Upload Stax MimbleWimble Coin app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax MimbleWimble Coin floonet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
+
+      - name: Upload Stax MimbleWimble Coin floonet app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-floonet-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin
+
+      - name: Upload Stax Grin app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-grin-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin testnet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet
+
+      - name: Upload Stax Grin testnet app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-grin-testnet-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
   job_scan_build:
     name: Clang Static Analyzer
     needs: job_build_debug
@@ -330,6 +390,50 @@ jobs:
         run: |
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+       - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Stax SDK
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Stax MimbleWimble Coin floonet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Stax SDK
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Stax Grin app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Stax SDK
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Build Stax Grin testnet app with Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -704,3 +808,111 @@ jobs:
       #- name: Kill Speculos
       #  run: |
       #    kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Stax MimbleWimble Coin app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-stax
+          path: bin-mimblewimble-coin-stax
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-stax/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Stax MimbleWimble Coin app
+        run: |
+          node test/functional_tests/main.js mimblewimble_coin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-stax-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Stax MimbleWimble Coin floonet app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-floonet-stax
+          path: bin-mimblewimble-coin-floonet-stax
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-mimblewimble-coin-floonet-stax/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Stax MimbleWimble Coin floonet app
+        run: |
+          node test/functional_tests/main.js mimblewimble_coin_floonet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-floonet-stax-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Stax Grin app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-grin-stax
+          path: bin-grin-stax
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-stax/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Stax Grin app
+        run: |
+          node test/functional_tests/main.js grin speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-grin-stax-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Stax Grin testnet app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-grin-testnet-stax
+          path: bin-grin-testnet-stax
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-testnet-stax/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Stax Grin testnet app
+        run: |
+          node test/functional_tests/main.js grin_testnet speculos
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-grin-testnet-stax-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)

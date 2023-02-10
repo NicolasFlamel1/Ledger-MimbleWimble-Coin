@@ -22,11 +22,21 @@
 // Currency information version size
 #define CURRENCY_INFORMATION_VERSION_SIZE sizeof("6.0.1")
 
-// Currency information icon colors size
-#define CURRENCY_INFORMATION_ICON_COLORS_SIZE 2
+// Check if has BAGL
+#ifdef HAVE_BAGL
 
-// Currency information icon bitmap size
-#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
+	// Currency information icon colors size
+	#define CURRENCY_INFORMATION_ICON_COLORS_SIZE 2
+
+	// Currency information icon bitmap size
+	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
+
+// Otherwise check if has NBGL
+#elif defined HAVE_NBGL
+
+	// Currency information icon bitmap size
+	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 298
+#endif
 
 // Currency information Slatepack address human-readable part size
 #define CURRENCY_INFORMATION_SLATEPACK_ADDRESS_HUMAN_READABLE_PART_SIZE sizeof("tgrin")
@@ -70,14 +80,27 @@ struct CurrencyInformation {
 	// Version
 	char version[CURRENCY_INFORMATION_VERSION_SIZE];
 	
-	// Icon colors
-	unsigned int iconColors[CURRENCY_INFORMATION_ICON_COLORS_SIZE];
+	// Check if has BAGL
+	#ifdef HAVE_BAGL
 	
-	// Icon bitmap
-	unsigned char iconBitmap[CURRENCY_INFORMATION_ICON_BITMAP_SIZE];
+		// Icon colors
+		unsigned int iconColors[CURRENCY_INFORMATION_ICON_COLORS_SIZE];
+		
+		// Icon bitmap
+		unsigned char iconBitmap[CURRENCY_INFORMATION_ICON_BITMAP_SIZE];
+		
+		// Icon details
+		bagl_icon_details_t iconDetails;
+		
+	// Otherwise check if has NBGL
+	#elif defined HAVE_NBGL
 	
-	// Icon details
-	bagl_icon_details_t iconDetails;
+		// Icon bitmap
+		unsigned char iconBitmap[CURRENCY_INFORMATION_ICON_BITMAP_SIZE];
+		
+		// Icon details
+		nbgl_icon_details_t iconDetails;
+	#endif
 	
 	// Slatepack human-readable part
 	char slatepackAddressHumanReadablePart[CURRENCY_INFORMATION_SLATEPACK_ADDRESS_HUMAN_READABLE_PART_SIZE];

@@ -66,7 +66,7 @@
 					// Initialize HAL
 					io_seproxyhal_init();
 					
-					// Check if target has Bluetooth
+					// Check if has Bluetooth
 					#ifdef HAVE_BLE
 					
 						// Set plane mode
@@ -80,12 +80,24 @@
 					// Show main menu
 					showMainMenu();
 					
-					// Check if target has Bluetooth
+					// Check if has Bluetooth
 					#ifdef HAVE_BLE
 					
-						// Restart Bluetooth
+						// Shutdown Bluetooth
 						BLE_power(0, NULL);
-						BLE_power(1, "Nano X");
+						
+						// Check if target is the Nano X
+						#ifdef TARGET_NANOX
+						
+							// Start Bluetooth
+							BLE_power(1, "Nano X");
+						
+						// Otherwise check if target is the Stax
+						#elif defined TARGET_STAX
+						
+							// Start Bluetooth
+							BLE_power(1, "Stax");
+						#endif
 					#endif
 					
 					// Run application
@@ -290,7 +302,7 @@
 			TRY {
 				
 				// Initialize library parameters
-				const unsigned int libraryParameters[] ={
+				unsigned int libraryParameters[] ={
 				
 					// Library name
 					(unsigned int)LIBRARY_NAME,

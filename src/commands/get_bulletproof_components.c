@@ -213,11 +213,15 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Finally
 		FINALLY {
 		
-			// Show main menu
-			showMainMenu();
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
 			
-			// Wait for display to update
-			UX_WAIT_DISPLAYED();
+				// Show main menu
+				showMainMenu();
+				
+				// Wait for display to update
+				UX_WAIT_DISPLAYED();
+			#endif
 		
 			// Clear the blinding factor
 			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));

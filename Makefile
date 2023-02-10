@@ -17,12 +17,23 @@ APPVERSION_N = 0
 APPVERSION_P = 1
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
-# Add security review banner. To be removed once Ledger security review is done.
-APP_LOAD_PARAMS += --tlvraw 9F:01
-DEFINES += HAVE_PENDING_REVIEW_SCREEN
+# Check if target isn't the Stax
+ifneq ($(TARGET_NAME),TARGET_STAX)
+
+	# Add security review banner. To be removed once Ledger security review is done.
+	APP_LOAD_PARAMS += --tlvraw 9F:01
+	DEFINES += HAVE_PENDING_REVIEW_SCREEN
+endif
 
 # Emulator flags
-EMULATOR_FLAGS = --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+
+# Check if target version is defined
+ifneq ($(TARGET_VERSION),)
+
+	# SDK emulator flag
+	EMULATOR_FLAGS += --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION))))
+endif
 
 # Check if currency isn't defined
 ifndef CURRENCY
@@ -46,6 +57,12 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0xA00
 
+	# Otherwise check if target is the Stax
+	else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+		APP_LOAD_PARAMS += --appFlags 0xA00
+
 	# Otherwise
 	else
 
@@ -63,9 +80,22 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
-	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
-	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	
+	# Check if target is the Stax
+	ifeq ($(TARGET_NAME),TARGET_STAX)
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_big_bitmap
+	
+	# Otherwise
+	else
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
+		DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	endif
 
 	# Icon
 	ICON = MimbleWimble Coin
@@ -81,6 +111,12 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 
 	# Check if target is the Nano X
 	ifeq ($(TARGET_NAME),TARGET_NANOX)
+
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+		APP_LOAD_PARAMS += --appFlags 0x200
+
+	# Otherwise check if target is the Stax
+	else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
@@ -102,9 +138,22 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
-	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-	DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
-	DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	
+	# Check if target is the Stax
+	ifeq ($(TARGET_NAME),TARGET_STAX)
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_big_bitmap
+	
+	# Otherwise
+	else
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
+		DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
+	endif
 
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -131,6 +180,12 @@ else ifeq ($(CURRENCY),grin)
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
 
+	# Otherwise check if target is the Stax
+	else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+		APP_LOAD_PARAMS += --appFlags 0x200
+
 	# Otherwise
 	else
 
@@ -148,9 +203,22 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
-	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
-	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	
+	# Check if target is the Stax
+	ifeq ($(TARGET_NAME),TARGET_STAX)
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_big_bitmap
+	
+	# Otherwise
+	else
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
+		DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	endif
 
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -177,6 +245,12 @@ else ifeq ($(CURRENCY),grin_testnet)
 		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 		APP_LOAD_PARAMS += --appFlags 0x200
 
+	# Otherwise check if target is the Stax
+	else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+		APP_LOAD_PARAMS += --appFlags 0x200
+
 	# Otherwise
 	else
 
@@ -194,9 +268,22 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
 	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
-	DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-	DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
-	DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	
+	# Check if target is the Stax
+	ifeq ($(TARGET_NAME),TARGET_STAX)
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_big_bitmap
+	
+	# Otherwise
+	else
+	
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
+		DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
+		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
+	endif
 
 	# Defines library
 	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
@@ -235,6 +322,12 @@ else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Icon name
 	ICONNAME="icons/$(ICON)/nanosplus_app.gif"
+
+# Otherwise check if target is the Stax
+else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# Icon name
+	ICONNAME="icons/$(ICON)/stax_app.gif"
 endif
 
 # Make command
@@ -246,7 +339,7 @@ DEFINES += APPNAME=\"$(APPNAME)\"
 DEFINES += APPVERSION=\"$(APPVERSION)\"
 DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_BAGL HAVE_UX_FLOW HAVE_SPRINTF
+DEFINES += HAVE_SPRINTF
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 DEFINES += USB_SEGMENT_SIZE=64
 DEFINES += BLE_SEGMENT_SIZE=32
@@ -255,6 +348,12 @@ DEFINES += UNUSED\(x\)=\(void\)x
 
 # Check if target is the Nano X
 ifeq ($(TARGET_NAME),TARGET_NANOX)
+
+	# Target specific defines
+	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+
+# Otherwise check if target is the Stax
+else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Target specific defines
 	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
@@ -271,12 +370,31 @@ else
 
 	# Target specific defines
 	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-	DEFINES += HAVE_GLO096
-	DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
-	DEFINES += HAVE_BAGL_ELLIPSIS
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+endif
+
+# Check if target is the Stax
+ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# Target specific defines
+	DEFINES += NBGL_QRCODE
+
+# Otherwise
+else
+
+	# Target specific defines
+	DEFINES += HAVE_BAGL HAVE_UX_FLOW
+	
+	# Check if target isn't the nano S
+	ifneq ($(TARGET_NAME),TARGET_NANOS)
+	
+		# Target specific defines
+		DEFINES += HAVE_GLO096
+		DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
+		DEFINES += HAVE_BAGL_ELLIPSIS
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+	endif
 endif
 
 # Set debug
@@ -355,10 +473,23 @@ include $(BOLOS_SDK)/Makefile.glyphs
 
 # Compiler settings
 APP_SOURCE_PATH += src
-SDK_SOURCE_PATH += lib_stusb lib_stusb_impl lib_ux
+SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+
+# Check if target isn't the Stax
+ifneq ($(TARGET_NAME),TARGET_STAX)
+
+	# Target specific compiler settings
+	SDK_SOURCE_PATH += lib_ux
+endif
 
 # Check if target is the Nano X
 ifeq ($(TARGET_NAME),TARGET_NANOX)
+
+	# Target specific compiler settings
+	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
+
+# Otherwise check if target is the Stax
+else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Target specific compiler settings
 	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
@@ -380,7 +511,7 @@ delete:
 run: all
 
 	# Run application in emulator
-	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION)))) $(EMULATOR_FLAGS)
+	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf $(EMULATOR_FLAGS)
 
 # Functional tests
 functional_tests: all

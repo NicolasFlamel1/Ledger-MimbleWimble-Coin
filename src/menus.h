@@ -17,7 +17,7 @@
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 // Verify address, approve transaction, or currency version line buffer size
-#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE sizeof("Verify Slatepack\naddress")
 
 // Address type line buffer size
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
@@ -101,8 +101,18 @@ extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_L
 // Kernel features details text or account index line buffer
 extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
-// Currency icon buffer
-extern bagl_icon_details_t currencyIconBuffer;
+// Check if has BAGL
+#ifdef HAVE_BAGL
+
+	// Currency icon buffer
+	extern bagl_icon_details_t currencyIconBuffer;
+
+// Otherwise check if has NBGL
+#elif defined HAVE_NBGL
+
+	// Currency icon buffer
+	extern nbgl_icon_details_t currencyIconBuffer;
+#endif
 
 
 // Function prototypes

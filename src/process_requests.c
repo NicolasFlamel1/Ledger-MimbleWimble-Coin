@@ -355,15 +355,19 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 				// Check if showing processing
 				if(showProcessing) {
 				
-					// Set time, processing menu, progress bar message, or currency name line buffer
-					explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-					strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
-			
-					// Show processing menu
-					showMenu(PROCESSING_MENU);
+					// Check if has BAGL
+					#ifdef HAVE_BAGL
+				
+						// Set time, processing menu, progress bar message, or currency name line buffer
+						explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+						strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+				
+						// Show processing menu
+						showMenu(PROCESSING_MENU);
 					
-					// Wait for display to update
-					UX_WAIT_DISPLAYED();
+						// Wait for display to update
+						UX_WAIT_DISPLAYED();
+					#endif
 				}
 			
 				// Check instruction
@@ -504,8 +508,12 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 		// Finally
 		FINALLY {
 		
-			// Show main menu
-			showMainMenu();
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+		
+				// Show main menu
+				showMainMenu();
+			#endif
 		}
 	}
 	

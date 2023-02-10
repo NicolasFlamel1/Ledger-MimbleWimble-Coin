@@ -18,12 +18,16 @@ bolos_ux_params_t G_ux_params;
 
 // Supporting function implementation
 
-// HAL display
-void io_seproxyhal_display(const bagl_element_t *element) {
+// Check if has BAGL
+#ifdef HAVE_BAGL
 
-	// HAL default display
-	io_seproxyhal_display_default(element);
-}
+	// HAL display
+	void io_seproxyhal_display(const bagl_element_t *element) {
+
+		// HAL default display
+		io_seproxyhal_display_default(element);
+	}
+#endif
 
 // IO exchange
 unsigned short io_exchange_al(const unsigned char channel, const unsigned short length) {
@@ -93,8 +97,12 @@ unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 		// Button push event
 		case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
 		
-			// UX button push event
-			UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// UX button push event
+				UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+			#endif
 			
 			// Break
 			break;
@@ -109,8 +117,18 @@ unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 				THROW(EXCEPTION_IO_RESET);
 			}
 			
-			// UX default event
-			UX_DEFAULT_EVENT();
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// UX displayed event
+				UX_DISPLAYED_EVENT({});
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// UX default event
+				UX_DEFAULT_EVENT();
+			#endif
 			
 			// Break
 			break;
@@ -118,8 +136,18 @@ unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 		// Display processed event
 		case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
 		
-			// UX displayed event
-			UX_DISPLAYED_EVENT({});
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// UX displayed event
+				UX_DISPLAYED_EVENT({});
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// UX default event
+				UX_DEFAULT_EVENT();
+			#endif
 			
 			// Break
 			break;

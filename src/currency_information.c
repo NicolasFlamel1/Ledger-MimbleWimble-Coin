@@ -79,14 +79,28 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	// Set current currency information's icon details
 	memcpy(&currentCurrencyInformation->iconDetails, &CURRENCY_ICON_DETAILS, sizeof(CURRENCY_ICON_DETAILS));
 	
-	currentCurrencyInformation->iconDetails.colors = currentCurrencyInformation->iconColors;
-	currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
+	// Check if has BAGL
+	#ifdef HAVE_BAGL
 	
-	// Set current currency information's icon colors
-	memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
+		// Set current currency information's icon details
+		currentCurrencyInformation->iconDetails.colors = currentCurrencyInformation->iconColors;
+		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
+		
+		// Set current currency information's icon colors
+		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
+		
+		// Set current currency information's icon bitmap
+		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
 	
-	// Set current currency information's icon bitmap
-	memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
+	// Otherwise check if has NBGL
+	#elif defined HAVE_NBGL
+	
+		// Set current currency information's icon details
+		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
+		
+		// Set current currency information's icon bitmap
+		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
+	#endif
 	
 	// Check if Slatepack address human-readable part exists
 	#ifdef CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART
