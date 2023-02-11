@@ -311,7 +311,7 @@ jobs:
 
       - name: Build Nano X MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -322,7 +322,7 @@ jobs:
 
       - name: Build Nano X MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -333,7 +333,7 @@ jobs:
 
       - name: Build Nano X Grin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -344,7 +344,7 @@ jobs:
 
       - name: Build Nano X Grin testnet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -355,7 +355,7 @@ jobs:
 
       - name: Build Nano S Plus MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -366,7 +366,7 @@ jobs:
 
       - name: Build Nano S Plus MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -377,7 +377,7 @@ jobs:
 
       - name: Build Nano S Plus Grin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -388,7 +388,7 @@ jobs:
 
       - name: Build Nano S Plus Grin testnet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -399,7 +399,7 @@ jobs:
 
       - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -410,7 +410,7 @@ jobs:
 
       - name: Build Stax MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -421,7 +421,7 @@ jobs:
 
       - name: Build Stax Grin app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -432,7 +432,7 @@ jobs:
 
       - name: Build Stax Grin testnet app with Clang Static Analyzer
         run: |
-          make clean
+          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
