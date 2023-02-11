@@ -267,7 +267,6 @@ jobs:
 
       - name: Build Nano S MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin
 
       - uses: actions/upload-artifact@v3
@@ -276,9 +275,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin_floonet
 
       - uses: actions/upload-artifact@v3
@@ -287,9 +290,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Grin app with Clang Static Analyzer
         run: |
-          make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin
 
       - uses: actions/upload-artifact@v3
@@ -298,9 +305,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Grin testnet app with Clang Static Analyzer
         run: |
-          make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin_testnet
 
       - uses: actions/upload-artifact@v3
@@ -309,9 +320,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano X MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -320,9 +335,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano X MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -331,9 +350,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano X Grin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -342,9 +365,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano X Grin testnet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano X SDK
 
       - uses: actions/upload-artifact@v3
@@ -353,9 +380,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Plus MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -364,9 +395,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Plus MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -375,9 +410,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Plus Grin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -386,9 +425,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Nano S Plus Grin testnet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$NANOSP_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$NANOSP_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano S Plus SDK
 
       - uses: actions/upload-artifact@v3
@@ -397,9 +440,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -408,9 +455,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Stax MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -419,9 +470,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Stax Grin app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -430,9 +485,13 @@ jobs:
           name: scan-build
           path: scan-build
 
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
       - name: Build Stax Grin testnet app with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=$STAX_SDK
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Stax SDK
 
       - uses: actions/upload-artifact@v3
@@ -440,6 +499,11 @@ jobs:
         with:
           name: scan-build
           path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
 
   job_unit_test:
     name: Unit test
