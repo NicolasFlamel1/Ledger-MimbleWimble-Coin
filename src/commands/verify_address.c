@@ -148,6 +148,9 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Show verify address menu

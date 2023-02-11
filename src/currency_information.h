@@ -107,6 +107,25 @@ struct CurrencyInformation {
 };
 
 
+// Constants
+
+// Currency IDs
+enum CurrencyIds {
+
+	// MimbleWimble Coin
+	MIMBLEWIMBLE_COIN,
+	
+	// MimbleWimble Coin floonet
+	MIMBLEWIMBLE_COIN_FLOONET,
+	
+	// Grin
+	GRIN,
+	
+	// Grin testnet
+	GRIN_TESTNET
+};
+
+
 // Global variables
 
 // Currency information

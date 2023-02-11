@@ -143,6 +143,9 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Initialize shared private key

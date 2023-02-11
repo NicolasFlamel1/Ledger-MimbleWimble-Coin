@@ -101,19 +101,6 @@ extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_L
 // Kernel features details text or account index line buffer
 extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
-// Check if has BAGL
-#ifdef HAVE_BAGL
-
-	// Currency icon buffer
-	extern bagl_icon_details_t currencyIconBuffer;
-
-// Otherwise check if has NBGL
-#elif defined HAVE_NBGL
-
-	// Currency icon buffer
-	extern nbgl_icon_details_t currencyIconBuffer;
-#endif
-
 
 // Function prototypes
 

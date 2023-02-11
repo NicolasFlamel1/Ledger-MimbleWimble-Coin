@@ -275,29 +275,44 @@ size_t getNumberOfPaddingCharacters(const size_t length) {
 		
 			// Return number of padding characters
 			return 6;
+			
+			// Break
+			break;
 		
 		// Two
 		case 2:
 		
 			// Return number of padding characters
 			return 4;
+			
+			// Break
+			break;
 		
 		// Three
 		case 3:
 		
 			// Return number of padding characters
 			return 3;
+			
+			// Break
+			break;
 		
 		// Four
 		case 4:
 		
 			// Return number of padding characters
 			return 1;
+			
+			// Break
+			break;
 		
 		// Default
 		default:
 		
 			// Return number of padding characters
 			return 0;
+			
+			// Break
+			break;
 	}
 }

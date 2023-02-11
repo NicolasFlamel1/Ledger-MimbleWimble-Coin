@@ -83,21 +83,9 @@
 					// Check if has Bluetooth
 					#ifdef HAVE_BLE
 					
-						// Shutdown Bluetooth
+						// Restart Bluetooth
 						BLE_power(0, NULL);
-						
-						// Check if target is the Nano X
-						#ifdef TARGET_NANOX
-						
-							// Start Bluetooth
-							BLE_power(1, "Nano X");
-						
-						// Otherwise check if target is the Stax
-						#elif defined TARGET_STAX
-						
-							// Start Bluetooth
-							BLE_power(1, "Stax");
-						#endif
+						BLE_power(1, NULL);
 					#endif
 					
 					// Run application
@@ -212,6 +200,9 @@
 				// Catch IO reset error
 				CATCH(EXCEPTION_IO_RESET) {
 				
+					// Close try
+					CLOSE_TRY;
+				
 					// Throw IO reset error
 					THROW(EXCEPTION_IO_RESET);
 				}
@@ -240,6 +231,9 @@
 							// Check if response with the error will overflow
 							if(willResponseOverflow(responseLength, sizeof(uint16_t))) {
 							
+								// Close try
+								CLOSE_TRY;
+							
 								// Throw length error
 								THROW(ERR_APD_LEN);
 							}
@@ -251,16 +245,22 @@
 								U2BE_ENCODE(G_io_apdu_buffer, responseLength, error);
 							
 								responseLength += sizeof(uint16_t);
-								
-								// Break
-								break;
 							}
+							
+							// Break
+							break;
 						
 						// Default
 						default:
 						
+							// Close try
+							CLOSE_TRY;
+						
 							// Throw error
 							THROW(error);
+							
+							// Break
+							break;
 					}
 				}
 				

@@ -100,6 +100,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Get account from data
@@ -189,7 +192,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	
 		// Try
 		TRY {
-		
+			
 			// Show progress bar
 			showProgressBar(0);
 			
@@ -213,6 +216,15 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Finally
 		FINALLY {
 		
+			// Clear the blinding factor
+			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
+			
+			// Clear the rewind nonce
+			explicit_bzero((uint8_t *)rewindNonce, sizeof(rewindNonce));
+			
+			// Clear the private nonce
+			explicit_bzero((uint8_t *)privateNonce, sizeof(privateNonce));
+			
 			// Check if has BAGL
 			#ifdef HAVE_BAGL
 			
@@ -222,15 +234,6 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 				// Wait for display to update
 				UX_WAIT_DISPLAYED();
 			#endif
-		
-			// Clear the blinding factor
-			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
-			
-			// Clear the rewind nonce
-			explicit_bzero((uint8_t *)rewindNonce, sizeof(rewindNonce));
-			
-			// Clear the private nonce
-			explicit_bzero((uint8_t *)privateNonce, sizeof(privateNonce));
 		}
 	}
 	

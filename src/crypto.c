@@ -625,6 +625,9 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
+					
+					// Break
+					break;
 			}
 			
 			// Get address private key from the private key
@@ -1018,6 +1021,9 @@ size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAdd
 			
 			// Return payment proof message length
 			return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
+			
+			// Break
+			break;
 		
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
@@ -1031,6 +1037,9 @@ size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAdd
 			
 			// Return payment proof message length
 			return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
+			
+			// Break
+			break;
 		
 		// Default
 		default:

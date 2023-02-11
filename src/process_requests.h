@@ -90,7 +90,7 @@ enum Instruction {
 void processRequest(const unsigned short requestLength, volatile unsigned short *responseLength, volatile unsigned char *responseFlags);
 
 // Process user interaction
-void processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing);
+bool processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing);
 
 
 #endif

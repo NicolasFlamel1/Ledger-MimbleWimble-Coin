@@ -232,6 +232,9 @@ const DEFAULT_CURRENCY = "mimblewimble_coin";
 	// Get use Speculos from the command line arguments if provided
 	const useSpeculos = process["argv"]["length"] >= 4 && process["argv"][3] === "speculos";
 	
+	// Get target from the command line arguments if provided
+	const target = (useSpeculos === true && process["argv"]["length"] >= 5) ? process["argv"][4] : null;
+	
 	// Log message
 	console.log("Using currency: " + currency);
 
@@ -239,7 +242,7 @@ const DEFAULT_CURRENCY = "mimblewimble_coin";
 	await initializeDependencies();
 	
 	// Perform tests
-	await performTests(useSpeculos);
+	await performTests(useSpeculos, target);
 })();
 
 
@@ -262,7 +265,7 @@ async function initializeDependencies() {
 }
 
 // Perform tests
-async function performTests(useSpeculos) {
+async function performTests(useSpeculos, target) {
 	
 	// Try
 	try {
@@ -276,6 +279,13 @@ async function performTests(useSpeculos) {
 				// APDU port
 				"apduPort": SPECULOS_APDU_PORT
 			});
+			
+			// Check if target exists
+			if(target !== null) {
+			
+				// Set hardware wallet's device model
+				hardwareWallet["deviceModel"] = target;
+			}
 		}
 		
 		// Otherwise
@@ -904,102 +914,113 @@ async function getCommitmentTest(hardwareWallet, extendedPrivateKey, switchType)
 // Get bulletproof test
 async function getBulletproofTest(hardwareWallet, extendedPrivateKey, switchType, messageType) {
 
-	// Log message
-	console.log("Running get bulletproof test");
-	
-	// Amount
-	const AMOUNT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
-	
-	// Identifier
-	const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-	
-	// Log amount
-	console.log("Using amount: " + AMOUNT.toFixed());
-	
-	// Log identifier
-	console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
-	
-	// Check switch type
-	switch(switchType) {
-	
-		// Switch type none
-		case Crypto.SWITCH_TYPE_NONE:
-		
-			// Log switch type
-			console.log("Using switch type: none");
-		
-			// Break
-			break;
-		
-		// Regular switch type
-		case Crypto.SWITCH_TYPE_REGULAR:
-		
-			// Log switch type
-			console.log("Using switch type: regular");
-		
-			// Break
-			break;
-	}
-	
-	// Initialize proof builder with the extended private key
-	const proofBuilder = new NewProofBuilder();
-	await proofBuilder.initialize(extendedPrivateKey);
-	
-	// Get expected bulletproof from the extended private key, amount, identifier, switch type, and proof builder
-	const expectedBulletproof = await Crypto.proof(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType, proofBuilder);
-	
-	// Get bulletproof components from the hardware wallet
-	const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION, messageType, NO_PARAMETER, Buffer.concat([
-				
-		// Account
-		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-		
-		// Identifier
-		Buffer.from(IDENTIFIER.getValue()),
+	// Check if not using Speculos with the Stax
+	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"] !== "stax") {
+
+		// Log message
+		console.log("Running get bulletproof test");
 		
 		// Amount
-		Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+		const AMOUNT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
 		
-		// Switch type
-		Buffer.from(new Uint8Array([switchType]))
-	]));
-	
-	// Get tau x from response
-	const tauX = response.subarray(0, Crypto.TAU_X_LENGTH);
-	
-	// Get t one from response
-	const tOne = response.subarray(Crypto.TAU_X_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
-	
-	// Get t two from response
-	const tTwo = response.subarray(Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
-	
-	// Get commitment from the extended private key, amount, identifier, and switch type
-	const commitment = await Crypto.commit(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType);
-	
-	// Get rewind nonce from the proof builder and the commitment
-	const rewindNonce = await proofBuilder.rewindNonce(commitment);
-	
-	// Get proof message from identifier and switch type
-	const proofMessage = proofBuilder.proofMessage(IDENTIFIER, switchType);
-	
-	// Create bulletproof with the tau x, t one, t two, commit, amount, rewind nonce, and proof message
-	const bulletproof = Secp256k1Zkp.createBulletproofBlindless(tauX, tOne, tTwo, commitment, AMOUNT.toFixed(), rewindNonce, new Uint8Array([]), proofMessage);
-	
-	// Log commitment
-	console.log("Bulletproof: " + Common.toHexString(bulletproof));
-	
-	// Check if commitment is invalid
-	if(Common.arraysAreEqual(bulletproof, expectedBulletproof) === false) {
-	
+		// Identifier
+		const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
+		
+		// Log amount
+		console.log("Using amount: " + AMOUNT.toFixed());
+		
+		// Log identifier
+		console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
+		
+		// Check switch type
+		switch(switchType) {
+		
+			// Switch type none
+			case Crypto.SWITCH_TYPE_NONE:
+			
+				// Log switch type
+				console.log("Using switch type: none");
+			
+				// Break
+				break;
+			
+			// Regular switch type
+			case Crypto.SWITCH_TYPE_REGULAR:
+			
+				// Log switch type
+				console.log("Using switch type: regular");
+			
+				// Break
+				break;
+		}
+		
+		// Initialize proof builder with the extended private key
+		const proofBuilder = new NewProofBuilder();
+		await proofBuilder.initialize(extendedPrivateKey);
+		
+		// Get expected bulletproof from the extended private key, amount, identifier, switch type, and proof builder
+		const expectedBulletproof = await Crypto.proof(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType, proofBuilder);
+		
+		// Get bulletproof components from the hardware wallet
+		const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_BULLETPROOF_COMPONENTS_INSTRUCTION, messageType, NO_PARAMETER, Buffer.concat([
+					
+			// Account
+			Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+			
+			// Identifier
+			Buffer.from(IDENTIFIER.getValue()),
+			
+			// Amount
+			Buffer.from(AMOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+			
+			// Switch type
+			Buffer.from(new Uint8Array([switchType]))
+		]));
+		
+		// Get tau x from response
+		const tauX = response.subarray(0, Crypto.TAU_X_LENGTH);
+		
+		// Get t one from response
+		const tOne = response.subarray(Crypto.TAU_X_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+		
+		// Get t two from response
+		const tTwo = response.subarray(Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH, Crypto.TAU_X_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH + Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+		
+		// Get commitment from the extended private key, amount, identifier, and switch type
+		const commitment = await Crypto.commit(extendedPrivateKey, AMOUNT, IDENTIFIER, switchType);
+		
+		// Get rewind nonce from the proof builder and the commitment
+		const rewindNonce = await proofBuilder.rewindNonce(commitment);
+		
+		// Get proof message from identifier and switch type
+		const proofMessage = proofBuilder.proofMessage(IDENTIFIER, switchType);
+		
+		// Create bulletproof with the tau x, t one, t two, commit, amount, rewind nonce, and proof message
+		const bulletproof = Secp256k1Zkp.createBulletproofBlindless(tauX, tOne, tTwo, commitment, AMOUNT.toFixed(), rewindNonce, new Uint8Array([]), proofMessage);
+		
+		// Log commitment
+		console.log("Bulletproof: " + Common.toHexString(bulletproof));
+		
+		// Check if commitment is invalid
+		if(Common.arraysAreEqual(bulletproof, expectedBulletproof) === false) {
+		
+			// Log message
+			console.log("Invalid bulletproof");
+			
+			// Throw error
+			throw "Failed running get bulletproof test";
+		}
+		
 		// Log message
-		console.log("Invalid bulletproof");
-		
-		// Throw error
-		throw "Failed running get bulletproof test";
+		console.log("Passed getting bulletproof test");
 	}
 	
-	// Log message
-	console.log("Passed getting bulletproof test");
+	// Otherwise
+	else {
+	
+		// Log message
+		console.log("Skipped running get bulletproof test");
+	}
 }
 
 // Verify root public key test
@@ -3152,223 +3173,234 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 // Get Tor certificate signature test
 async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey, addressType) {
 
-	// Log message
-	console.log("Running get Tor certificate signature test");
-	
-	// Certificate header length
-	const CERTIFICATE_HEADER_LENGTH = 32;
-	
-	// Certificate expiration offset
-	const CERTIFICATE_EXPIRATION_OFFSET = CERTIFICATE_HEADER_LENGTH + 2;
-	
-	// Certificate public key offset
-	const CERTIFICATE_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 7;
-	
-	// Certificate signing public key offset
-	const CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 44;
-	
-	// Certificate signature offset
-	const CERTIFICATE_SIGNATURE_OFFSET = CERTIFICATE_HEADER_LENGTH + 76;
-	
-	// Certificate expiration to epoch time scalar
-	const CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR = 60 * 60;
-	
-	// Certificate (contents of an ed25519_signing_cert file created with the command `tor --keygen --SigningKeyLifetime '6 months'`)
-	const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d0000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd4582410100200400b3ee07b33145c47278e7f35468247a4d13905595fe98a533f1b5120609229429fafef1e44a3f25add4570fb3bd0806a9b6a6afeaf32fffd3a40152e5abb6e763069e76ceec0b4027d8a88e37443d304ef963003d44c48c27235f71494778d60d");
-	
-	// Get Tor private key from the extended private key
-	const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-	
-	// Get Tor public key from the Tor private key
-	const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-	
-	// Replace signing public key in certificate with the Tor public key
-	const certificate = Common.mergeArrays([CERTIFICATE.subarray(0, CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET), torPublicKey, CERTIFICATE.subarray(CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET + torPublicKey["length"])]);
-	
-	// Log certificate
-	console.log("Using certificate: " + Common.toHexString(CERTIFICATE));
-	
-	// Get the expected Tor certificate signature from the certificate and Tor private key
-	const expectedTorCertificateSignature = Ed25519.sign(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
-	
-	// Get certification's expiration
-	const expiration = certificate.subarray(CERTIFICATE_EXPIRATION_OFFSET, CERTIFICATE_EXPIRATION_OFFSET + Uint32Array["BYTES_PER_ELEMENT"]).slice().reverse();
-	
-	// Get expiration as a timestamp
-	const expirationTimestamp = (new Uint32Array(expiration["buffer"]))[0] * CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR;
-	
-	// Get time zone offset
-	const timeZoneOffset = (new Date()).getTimezoneOffset();
-	
-	// Log time zone offset
-	console.log("Using time zone offset: " + timeZoneOffset.toFixed());
-	
-	// Get timestamp as a date
-	const date = new Date((expirationTimestamp - timeZoneOffset * Common.SECONDS_IN_A_MINUTE) * Common.MILLISECONDS_IN_A_SECOND);
-	
-	// Check if not using Speculos
-	if(hardwareWallet instanceof SpeculosTransport === false) {
-	
+	// Check if not using Speculos with the Stax
+	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"] !== "stax") {
+
 		// Log message
-		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+		console.log("Running get Tor certificate signature test");
 		
-		// Log message
-		console.log("Verify that the certificate expires on the device on: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC" + ((timeZoneOffset > 0) ? "-" : "+") + (timeZoneOffset / Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0") + ":" + (timeZoneOffset % Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0"));
+		// Certificate header length
+		const CERTIFICATE_HEADER_LENGTH = 32;
 		
-		// Check address type
-		switch(addressType) {
+		// Certificate expiration offset
+		const CERTIFICATE_EXPIRATION_OFFSET = CERTIFICATE_HEADER_LENGTH + 2;
 		
-			// Tor address type
-			case TOR_ADDRESS_TYPE:
+		// Certificate public key offset
+		const CERTIFICATE_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 7;
 		
-				// Get certificate's address
-				var address = Tor.publicKeyToTorAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
-				
-				// Log message
-				console.log("Verify that the certificate's Tor address on the device is: " + address);
-				
-				// Break
-				break;
+		// Certificate signing public key offset
+		const CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET = CERTIFICATE_HEADER_LENGTH + 44;
+		
+		// Certificate signature offset
+		const CERTIFICATE_SIGNATURE_OFFSET = CERTIFICATE_HEADER_LENGTH + 76;
+		
+		// Certificate expiration to epoch time scalar
+		const CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR = 60 * 60;
+		
+		// Certificate (contents of an ed25519_signing_cert file created with the command `tor --keygen --SigningKeyLifetime '6 months'`)
+		const CERTIFICATE = Common.fromHexString("3d3d206564323535313976312d636572743a207479706534203d3d0000000000010400070003019e5fd5f3a704fb52aa3e54a835e12ae102d0b44b785f239467a1523ffd4582410100200400b3ee07b33145c47278e7f35468247a4d13905595fe98a533f1b5120609229429fafef1e44a3f25add4570fb3bd0806a9b6a6afeaf32fffd3a40152e5abb6e763069e76ceec0b4027d8a88e37443d304ef963003d44c48c27235f71494778d60d");
+		
+		// Get Tor private key from the extended private key
+		const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+		
+		// Get Tor public key from the Tor private key
+		const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+		
+		// Replace signing public key in certificate with the Tor public key
+		const certificate = Common.mergeArrays([CERTIFICATE.subarray(0, CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET), torPublicKey, CERTIFICATE.subarray(CERTIFICATE_SIGNING_PUBLIC_KEY_OFFSET + torPublicKey["length"])]);
+		
+		// Log certificate
+		console.log("Using certificate: " + Common.toHexString(CERTIFICATE));
+		
+		// Get the expected Tor certificate signature from the certificate and Tor private key
+		const expectedTorCertificateSignature = Ed25519.sign(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET), torPrivateKey);
+		
+		// Get certification's expiration
+		const expiration = certificate.subarray(CERTIFICATE_EXPIRATION_OFFSET, CERTIFICATE_EXPIRATION_OFFSET + Uint32Array["BYTES_PER_ELEMENT"]).slice().reverse();
+		
+		// Get expiration as a timestamp
+		const expirationTimestamp = (new Uint32Array(expiration["buffer"]))[0] * CERTIFICATE_EXPIRATION_TO_EPOCH_TIME_SCALAR;
+		
+		// Get time zone offset
+		const timeZoneOffset = (new Date()).getTimezoneOffset();
+		
+		// Log time zone offset
+		console.log("Using time zone offset: " + timeZoneOffset.toFixed());
+		
+		// Get timestamp as a date
+		const date = new Date((expirationTimestamp - timeZoneOffset * Common.SECONDS_IN_A_MINUTE) * Common.MILLISECONDS_IN_A_SECOND);
+		
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+		
+			// Log message
+			console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
 			
-			// Slatepack address type
-			case SLATEPACK_ADDRESS_TYPE:
-		
-				// Get certificate's address
-				var address = Slatepack.publicKeyToSlatepackAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
+			// Log message
+			console.log("Verify that the certificate expires on the device on: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC" + ((timeZoneOffset > 0) ? "-" : "+") + (timeZoneOffset / Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0") + ":" + (timeZoneOffset % Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0"));
+			
+			// Check address type
+			switch(addressType) {
+			
+				// Tor address type
+				case TOR_ADDRESS_TYPE:
+			
+					// Get certificate's address
+					var address = Tor.publicKeyToTorAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
+					
+					// Log message
+					console.log("Verify that the certificate's Tor address on the device is: " + address);
+					
+					// Break
+					break;
 				
-				// Log message
-				console.log("Verify that the certificate's Slatepack address on the device is: " + address);
-				
-				// Break
-				break;
+				// Slatepack address type
+				case SLATEPACK_ADDRESS_TYPE:
+			
+					// Get certificate's address
+					var address = Slatepack.publicKeyToSlatepackAddress(certificate.subarray(CERTIFICATE_PUBLIC_KEY_OFFSET, CERTIFICATE_PUBLIC_KEY_OFFSET + Crypto.ED25519_PUBLIC_KEY_LENGTH));
+					
+					// Log message
+					console.log("Verify that the certificate's Slatepack address on the device is: " + address);
+					
+					// Break
+					break;
+			}
 		}
+		
+		// Convert time zone offset to the correct format
+		const timeZoneOffsetBuffer = new ArrayBuffer(Uint16Array["BYTES_PER_ELEMENT"]);
+		const timeZoneOffsetBufferView = new DataView(timeZoneOffsetBuffer);
+		timeZoneOffsetBufferView.setUint16(0, timeZoneOffset, true);
+		
+		// Check if using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === true) {
+		
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "certificate?",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Account.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Expires.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^.+ress.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "The host will",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "listen for the",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "transactions",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "Approve",
+						"actions": [
+						
+							// Push both
+							["button", 1, true],
+							["button", 2, true],
+							["button", 1, false],
+							["button", 2, false]
+						]
+					}
+				]
+			});
+		}
+		
+		// Get the Tor certificate signature from the hardware wallet
+		let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+					
+			// Account
+			Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+			
+			// Index
+			Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+			
+			// Certificate
+			Buffer.from(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET)),
+			
+			// Time zone offset
+			Buffer.from(new Uint8Array(timeZoneOffsetBuffer))
+		]));
+		
+		// Remove response code from response
+		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+		
+		// Log Tor certificate signature
+		console.log("Tor certificate signature: " + Common.toHexString(response));
+		
+		// Check if Tor certificate signature is invalid
+		if(Common.arraysAreEqual(response, expectedTorCertificateSignature) === false) {
+		
+			// Log message
+			console.log("Invalid Tor certificate signature");
+			
+			// Throw error
+			throw "Failed running get Tor certificate signature test";
+		}
+		
+		// Log signed Tor certificate
+		console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
+		
+		// Log message
+		console.log("Passed getting Tor certificate signature test");
 	}
 	
-	// Convert time zone offset to the correct format
-	const timeZoneOffsetBuffer = new ArrayBuffer(Uint16Array["BYTES_PER_ELEMENT"]);
-	const timeZoneOffsetBufferView = new DataView(timeZoneOffsetBuffer);
-	timeZoneOffsetBufferView.setUint16(0, timeZoneOffset, true);
-	
-	// Check if using Speculos
-	if(hardwareWallet instanceof SpeculosTransport === true) {
-	
-		// Set automation
-		await setAutomation({
-			"version": 1,
-			"rules": [
-				{
-					"text": "certificate?",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"regexp": "^Account.*$",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"regexp": "^Expires.*$",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"regexp": "^.+ress.*$",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"text": "The host will",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"text": "listen for the",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"text": "transactions",
-					"actions": [
-					
-						// Push right
-						["button", 2, true],
-						["button", 2, false]
-					]
-				},
-				{
-					"text": "Approve",
-					"actions": [
-					
-						// Push both
-						["button", 1, true],
-						["button", 2, true],
-						["button", 1, false],
-						["button", 2, false]
-					]
-				}
-			]
-		});
-	}
-	
-	// Get the Tor certificate signature from the hardware wallet
-	let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-				
-		// Account
-		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-		
-		// Index
-		Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-		
-		// Certificate
-		Buffer.from(certificate.subarray(CERTIFICATE_HEADER_LENGTH, CERTIFICATE_SIGNATURE_OFFSET)),
-		
-		// Time zone offset
-		Buffer.from(new Uint8Array(timeZoneOffsetBuffer))
-	]));
-	
-	// Remove response code from response
-	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-	
-	// Log Tor certificate signature
-	console.log("Tor certificate signature: " + Common.toHexString(response));
-	
-	// Check if Tor certificate signature is invalid
-	if(Common.arraysAreEqual(response, expectedTorCertificateSignature) === false) {
+	// Otherwise
+	else {
 	
 		// Log message
-		console.log("Invalid Tor certificate signature");
-		
-		// Throw error
-		throw "Failed running get Tor certificate signature test";
+		console.log("Skipped running get Tor certificate signature test");
 	}
-	
-	// Log signed Tor certificate
-	console.log("Signed Tor certificate: " + Common.toHexString(certificate.subarray(0, CERTIFICATE_SIGNATURE_OFFSET)) + Common.toHexString(response));
-	
-	// Log message
-	console.log("Passed getting Tor certificate signature test");
 }

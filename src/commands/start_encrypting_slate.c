@@ -112,6 +112,9 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Initialize nonce

@@ -286,11 +286,17 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 				
 					// Throw unknown instruction error
 					THROW(UNKNOWN_INSTRUCTION_ERROR);
+					
+					// Break
+					break;
 			}
 		}
 		
 		// Catch IO reset error
 		CATCH(EXCEPTION_IO_RESET) {
+		
+			// Close try
+			CLOSE_TRY;
 		
 			// Throw IO reset error
 			THROW(EXCEPTION_IO_RESET);
@@ -299,12 +305,18 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 		// Catch length error
 		CATCH(ERR_APD_LEN) {
 		
+			// Close try
+			CLOSE_TRY;
+		
 			// Throw length error
 			THROW(ERR_APD_LEN);
 		}
 		
 		// Catch other errors
 		CATCH_OTHER(error) {
+		
+			// Close try
+			CLOSE_TRY;
 		
 			// Check error type
 			switch(error & ERROR_TYPE_MASK) {
@@ -318,12 +330,18 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 				
 					// Throw error
 					THROW(error);
+					
+					// Break
+					break;
 				
 				// Default
 				default:
 		
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
+					
+					// Break
+					break;
 			}
 		}
 		
@@ -338,10 +356,13 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 }
 
 // Process user interaction
-void processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing) {
+bool processUserInteraction(const enum Instruction instruction, const bool isApprovedResult, const bool showProcessing) {
 	
 	// Initialize response length
 	volatile unsigned short responseLength = 0;
+	
+	// Initialize operation failed
+	volatile bool operationFailed = false;
 	
 	// Begin try
 	BEGIN_TRY {
@@ -354,17 +375,17 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 			
 				// Check if showing processing
 				if(showProcessing) {
-				
+					
 					// Check if has BAGL
 					#ifdef HAVE_BAGL
-				
+					
 						// Set time, processing menu, progress bar message, or currency name line buffer
 						explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
 						strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
 				
 						// Show processing menu
 						showMenu(PROCESSING_MENU);
-					
+						
 						// Wait for display to update
 						UX_WAIT_DISPLAYED();
 					#endif
@@ -432,6 +453,9 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 					
 						// Throw unknown instruction error
 						THROW(UNKNOWN_INSTRUCTION_ERROR);
+						
+						// Break
+						break;
 				}
 			}
 			
@@ -446,12 +470,18 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 		// Catch IO reset error
 		CATCH(EXCEPTION_IO_RESET) {
 		
+			// Close try
+			CLOSE_TRY;
+		
 			// Throw IO reset error
 			THROW(EXCEPTION_IO_RESET);
 		}
 		
 		// Catch length error
 		CATCH(ERR_APD_LEN) {
+		
+			// Close try
+			CLOSE_TRY;
 		
 			// Throw length error
 			THROW(ERR_APD_LEN);
@@ -477,12 +507,18 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 				
 					// Reset state
 					resetState();
+					
+					// Set operation failed
+					operationFailed = true;
 				
 				// Success
 				case SWO_SUCCESS:
 				
 					// Check if response with the error will overflow
 					if(willResponseOverflow(responseLength, sizeof(uint16_t))) {
+					
+						// Close try
+						CLOSE_TRY;
 				
 						// Throw length error
 						THROW(ERR_APD_LEN);
@@ -498,10 +534,10 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 						
 						// Send response
 						io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, responseLength);
-						
-						// Break
-						break;
 					}
+					
+					// Break
+					break;
 			}
 		}
 		
@@ -519,4 +555,7 @@ void processUserInteraction(const enum Instruction instruction, const bool isApp
 	
 	// End try
 	END_TRY;
+	
+	// Return if operation didn't fail
+	return !operationFailed;
 }

@@ -56,9 +56,6 @@ unsigned short io_exchange_al(const unsigned char channel, const unsigned short 
 					// Reset
 					reset();
 				}
-				
-				// Break
-				break;
 			}
 			
 			// Otherwise
@@ -67,6 +64,9 @@ unsigned short io_exchange_al(const unsigned char channel, const unsigned short 
 				// Return receiving message
 				return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
 			}
+			
+			// Break
+			break;
 		
 		// Default
 		default:
@@ -116,22 +116,6 @@ unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 				// Throw IO reset error
 				THROW(EXCEPTION_IO_RESET);
 			}
-			
-			// Check if has BAGL
-			#ifdef HAVE_BAGL
-			
-				// UX displayed event
-				UX_DISPLAYED_EVENT({});
-			
-			// Otherwise check if has NBGL
-			#elif defined HAVE_NBGL
-			
-				// UX default event
-				UX_DEFAULT_EVENT();
-			#endif
-			
-			// Break
-			break;
 		
 		// Display processed event
 		case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:

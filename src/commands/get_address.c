@@ -128,6 +128,9 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Check if response with the address will overflow

@@ -114,6 +114,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	}
 	
 	// Get public nonce from data
@@ -223,6 +226,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
+			
+			// Break
+			break;
 	};
 	
 	// Check if transaction is sending

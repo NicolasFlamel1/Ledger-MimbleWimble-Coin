@@ -114,6 +114,15 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 		// Catch invalid parameters error
 		CATCH(INVALID_PARAMETERS_ERROR) {
 		
+			// Clear the secret nonce
+			explicit_bzero((uint8_t *)secretNonce, sizeof(secretNonce));
+			
+			// Clear the private key
+			explicit_bzero((cx_ecfp_private_key_t *)&privateKey, sizeof(privateKey));
+			
+			// Close try
+			CLOSE_TRY;
+			
 			// Throw internal error error
 			THROW(INTERNAL_ERROR_ERROR);
 		}

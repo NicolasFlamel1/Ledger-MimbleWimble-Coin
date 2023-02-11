@@ -8,7 +8,7 @@
 #include "process_requests.h"
 
 // Check if has NBGL
-#if defined HAVE_NBGL
+#ifdef HAVE_NBGL
 
 	// Header files
 	#include <nbgl_use_case.h>
@@ -73,13 +73,61 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 #ifdef HAVE_BAGL
 
 	// Currency icon buffer
-	bagl_icon_details_t currencyIconBuffer;
+	static bagl_icon_details_t currencyIconBuffer;
 
 // Otherwise check if has NBGL
 #elif defined HAVE_NBGL
 
 	// Currency icon buffer
-	nbgl_icon_details_t currencyIconBuffer;
+	static nbgl_icon_details_t currencyIconBuffer;
+	
+	// Export root public key menu tag value pairs
+	static nbgl_layoutTagValue_t exportRootPublicKeyMenuTagValuePairs[3];
+	
+	// Export root public key menu tag value list
+	static nbgl_layoutTagValueList_t exportRootPublicKeyMenuTagValueList;
+	
+	// Export root public key menu info long press
+	static nbgl_pageInfoLongPress_t exportRootPublicKeyMenuInfoLongPress;
+	
+	// Verify root public key menu tag value pairs
+	static nbgl_layoutTagValue_t verifyRootPublicKeyMenuTagValuePairs[1];
+	
+	// Verify root public key menu content
+	static nbgl_pageContent_t verifyRootPublicKeyMenuContent;
+	
+	// Verify root public key menu navigation info
+	static nbgl_pageNavigationInfo_t verifyRootPublicKeyMenuNavigationInfo;
+	
+	// Verify address menu tag value pairs
+	static nbgl_layoutTagValue_t verifyAddressMenuTagValuePairs[1];
+	
+	// Verify address menu content
+	static nbgl_pageContent_t verifyAddressMenuContent;
+	
+	// Verify address menu modal layout
+	static nbgl_layout_t verifyAddressMenuModalLayout;
+	
+	// Verify address navigation info
+	static nbgl_pageNavigationInfo_t verifyAddressMenuNavigationInfo;
+	
+	// Sign MQS timestamp menu tag value pairs
+	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[3];
+	
+	// Sign MQS timestamp menu tag value list
+	static nbgl_layoutTagValueList_t signMqsTimestampMenuTagValueList;
+	
+	// Sign MQS timestamp menu info long press
+	static nbgl_pageInfoLongPress_t signMqsTimestampMenuInfoLongPress;
+	
+	// Sign Tor certificate menu tag value pairs
+	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[4];
+	
+	// Sign Tor certificate menu tag value list
+	static nbgl_layoutTagValueList_t signTorCertificateMenuTagValueList;
+	
+	// Sign Tor certificate menu info long press
+	static nbgl_pageInfoLongPress_t signTorCertificateMenuInfoLongPress;
 #endif
 
 
@@ -962,6 +1010,19 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	
 	// About menu info contents
 	static const char *const ABOUT_MENU_INFO_CONTENTS[] = {verifyAddressApproveTransactionOrCurrencyVersionLineBuffer};
+	
+	// Result tokens
+	enum ResultTokens {
+	
+		// Confirm token
+		CONFIRM_TOKEN,
+		
+		// Reject token
+		REJECT_TOKEN,
+		
+		// Show QR token
+		SHOW_QR_TOKEN
+	};
 #endif
 
 
@@ -980,28 +1041,64 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static void showAboutMenu(void);
 	
 	// About menu display callback
-	static bool aboutMenuDisplayCallback(uint8_t page, nbgl_pageContent_t *content);
+	static bool aboutMenuDisplayCallback(const uint8_t page, nbgl_pageContent_t *content);
 	
 	// Export root public key menu continue callback
 	static void exportRootPublicKeyMenuContinueCallback(void);
 	
-	// Export root public key menu continue display callback
-	static bool exportRootPublicKeyMenuContinueDisplayCallback(uint8_t page, nbgl_pageContent_t *content);
-	
 	// Export root public key menu choice callback
-	static void exportRootPublicKeyMenuChoiceCallback(bool confirm);
+	static void exportRootPublicKeyMenuChoiceCallback(const bool confirm);
+	
+	// Export root public key menu confirm reject callback
+	static void exportRootPublicKeyMenuConfirmRejectCallback(void);
 	
 	// Export root public key menu reject callback
 	static void exportRootPublicKeyMenuRejectCallback(void);
+	
+	// Verify root public key menu continue callback
+	static void verifyRootPublicKeyMenuContinueCallback(void);
+	
+	// Verify root public key menu choice callback
+	static void verifyRootPublicKeyMenuChoiceCallback(const int token, const uint8_t index);
+	
+	// Verify root public key menu reject callback
+	static void verifyRootPublicKeyMenuRejectCallback(void);
 	
 	// Verify address menu continue callback
 	static void verifyAddressMenuContinueCallback(void);
 	
 	// Verify address menu choice callback
-	static void verifyAddressMenuChoiceCallback(bool confirm);
+	static void verifyAddressMenuChoiceCallback(const int token, const uint8_t index);
+	
+	// Verify address menu modal exit callback
+	static void verifyAddressMenuModalExitCallback(const int token, const uint8_t index);
 	
 	// Verify address menu reject callback
 	static void verifyAddressMenuRejectCallback(void);
+	
+	// Sign MQS timestamp menu continue callback
+	static void signMqsTimestampMenuContinueCallback(void);
+	
+	// Sign MQS timestamp menu choice callback
+	static void signMqsTimestampMenuChoiceCallback(const bool confirm);
+	
+	// Sign MQS timestamp menu confirm reject callback
+	static void signMqsTimestampMenuConfirmRejectCallback(void);
+	
+	// Sign MQS timestamp menu reject callback
+	static void signMqsTimestampMenuRejectCallback(void);
+	
+	// Sign Tor certificate menu continue callback
+	static void signTorCertificateMenuContinueCallback(void);
+	
+	// Sign Tor certificate menu choice callback
+	static void signTorCertificateMenuChoiceCallback(const bool confirm);
+	
+	// Sign Tor certificate menu confirm reject callback
+	static void signTorCertificateMenuConfirmRejectCallback(void);
+	
+	// Sign Tor certificate menu reject callback
+	static void signTorCertificateMenuRejectCallback(void);
 #endif
 
 
@@ -1314,16 +1411,36 @@ void showMenu(enum Menu menu) {
 			// Main menu
 			case MAIN_MENU:
 			
-				// Show main menu
-				nbgl_useCaseHome((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, &currencyIconBuffer, "Application is ready", false, showAboutMenu, exitApplication);
+				// Check currency ID
+				switch(currencyInformation->id) {
 				
+					// MimbleWimble Coin floonet
+					case MIMBLEWIMBLE_COIN_FLOONET:
+					
+						// Show main menu
+						nbgl_useCaseHome("MimbleWimble Coin\nFloonet", &currencyIconBuffer, "Application is ready", false, showAboutMenu, exitApplication);
+						
+						// Break
+						break;
+				
+					// Default
+					default:
+					
+						// Show main menu
+						nbgl_useCaseHome((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, &currencyIconBuffer, "Application is ready", false, showAboutMenu, exitApplication);
+						
+						// Break
+						break;
+				}
+			
 				// Break
 				break;
 			
 			// Export root public key menu
 			case EXPORT_ROOT_PUBLIC_KEY_MENU:
 			
-				//nbgl_useCaseReviewStart(&C_round_warning_64px, "Export root public key?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuRejectCallback);
+				// Show export root public key menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Export root public key?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1331,14 +1448,35 @@ void showMenu(enum Menu menu) {
 			// Verify root public key menu
 			case VERIFY_ROOT_PUBLIC_KEY_MENU:
 			
+				// Show verify root public key menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify root public key", NULL, "Cancel", verifyRootPublicKeyMenuContinueCallback, verifyRootPublicKeyMenuRejectCallback);
+			
 				// Break
 				break;
 			
 			// Verify address menu
 			case VERIFY_ADDRESS_MENU:
 			
-				// Append text to verify address, approve transaction, or currency version line buffer
-				strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "\naddress", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+				// Check if MQS address is being verified
+				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Append text to verify address, approve transaction, or currency version line buffer
+					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, " address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+				}
+				
+				// Otherwise check if a Tor address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Append text to verify address, approve transaction, or currency version line buffer
+					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, " address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+				}
+				
+				// Otherwise check if a Slatepack address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Append text to verify address, approve transaction, or currency version line buffer
+					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "\naddress", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+				}
 			
 				// Show verify address menu
 				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
@@ -1349,18 +1487,26 @@ void showMenu(enum Menu menu) {
 			// Sign MQS timestamp menu
 			case SIGN_MQS_TIMESTAMP_MENU:
 			
+				// Show sign MQS timestamp menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Sign MQS timestamp?", NULL, "Deny", signMqsTimestampMenuContinueCallback, signMqsTimestampMenuConfirmRejectCallback);
+				
 				// Break
 				break;
 			
 			// Sign Tor certificate menu
 			case SIGN_TOR_CERTIFICATE_MENU:
 			
+				// Show sign Tor certificate menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Sign Tor certificate?", NULL, "Deny", signTorCertificateMenuContinueCallback, signTorCertificateMenuConfirmRejectCallback);
+				
 				// Break
 				break;
 			
 			// Approve transaction menu
 			case APPROVE_TRANSACTION_MENU:
 			
+				// TODO
+				
 				// Break
 				break;
 			
@@ -1376,9 +1522,19 @@ void showMenu(enum Menu menu) {
 	#endif
 }
 
-// Show progress bar
-void showProgressBar(const uint8_t percent) {
-	
+// Check if has BAGL
+#ifdef HAVE_BAGL
+
+	// Show progress bar
+	void showProgressBar(const uint8_t percent) {
+
+// Otherwise check if has NBGL
+#elif defined HAVE_NBGL
+
+	// Show progress bar
+	void showProgressBar(__attribute__((unused)) const uint8_t percent) {
+#endif
+
 	// Check if has BAGL
 	#ifdef HAVE_BAGL
 	
@@ -1435,9 +1591,9 @@ void showProgressBar(const uint8_t percent) {
 	}
 	
 	// About menu display callback
-	bool aboutMenuDisplayCallback(__attribute__((unused)) uint8_t page, nbgl_pageContent_t *content) {
+	bool aboutMenuDisplayCallback(__attribute__((unused)) const uint8_t page, nbgl_pageContent_t *content) {
 	
-		// Set context to use about menu info
+		// Set content to use about menu info
 		content->type = INFOS_LIST;
 		content->infosList.nbInfos = ARRAYLEN(ABOUT_MENU_INFO_TYPES);
 		content->infosList.infoTypes = (const char **)ABOUT_MENU_INFO_TYPES;
@@ -1447,68 +1603,269 @@ void showProgressBar(const uint8_t percent) {
 		return true;
 	}
 	
-	/*// Export root public key menu continue callback
+	// Export root public key menu continue callback
 	void exportRootPublicKeyMenuContinueCallback(void) {
 	
-		// Show export root public key details
-		nbgl_useCaseRegularReview(0, 1, "Deny", NULL, exportRootPublicKeyMenuContinueDisplayCallback, exportRootPublicKeyMenuChoiceCallback);
-	}
-	
-	// Export root public key menu continue display callback
-	bool exportRootPublicKeyMenuContinueDisplayCallback(__attribute__((unused)) uint8_t page, nbgl_pageContent_t *content) {
-	
-		content->type = INFO_LONG_PRESS,
-		content->infoLongPress.icon = &C_round_warning_64px;
-		content->infoLongPress.text = "Confirm transaction\nMyCoin send";
-		content->infoLongPress.longPressText = "Hold to send";
+		// Set export root public key menu tag value pairs
+		exportRootPublicKeyMenuTagValuePairs[0].item = "Account Index";
+		exportRootPublicKeyMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		
-		// Return true
-		return true;
-	}
-	
-	// Export root public key menu reject callback
-	void exportRootPublicKeyMenuRejectCallback(void) {
-	
-		// Show status
-		nbgl_useCaseStatus("Exporting root public\nkey denied", false, showMainMenu);
+		exportRootPublicKeyMenuTagValuePairs[1].item = "" ;
+		exportRootPublicKeyMenuTagValuePairs[1].value = "";
+		
+		exportRootPublicKeyMenuTagValuePairs[2].item = "*The host will be able to view\nthe account's transactions";
+		exportRootPublicKeyMenuTagValuePairs[2].value = "";
+		
+		// Set export root public key menu tag value list
+		exportRootPublicKeyMenuTagValueList.nbPairs = ARRAYLEN(exportRootPublicKeyMenuTagValuePairs);
+		exportRootPublicKeyMenuTagValueList.pairs = exportRootPublicKeyMenuTagValuePairs;
+		
+		// Set export root public key menu info long press
+		exportRootPublicKeyMenuInfoLongPress.icon = &currencyIconBuffer;
+		exportRootPublicKeyMenuInfoLongPress.text = "Export root public key";
+		exportRootPublicKeyMenuInfoLongPress.longPressText = "Hold to export";
+		
+		// Show static review
+		nbgl_useCaseStaticReview(&exportRootPublicKeyMenuTagValueList, &exportRootPublicKeyMenuInfoLongPress, "Deny", exportRootPublicKeyMenuChoiceCallback);
 	}
 	
 	// Export root public key menu choice callback
-	void exportRootPublicKeyMenuChoiceCallback(bool confirm) {
+	void exportRootPublicKeyMenuChoiceCallback(const bool confirm) {
 	
 		// Check if confirmed
 		if(confirm) {
 		
-			// Show status
-			nbgl_useCaseStatus("Exporting root public\nkey approved", true, showMainMenu);
+			// Check if processing user interaction was successful
+			if(processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true)) {
+			
+				// Show status
+				nbgl_useCaseStatus("ROOT PUBLIC\nKEY EXPORTED", true, showMainMenu);
+			}
+			
+			// Otherwise
+			else {
+			
+				// Show status
+				nbgl_useCaseStatus("Exporting root public\nkey failed", false, showMainMenu);
+			}
 		}
 		
 		// Otherwise
 		else {
 		
-			// Export root public key menu reject callback
-			exportRootPublicKeyMenuRejectCallback();
+			// Export root public key menu confirm reject callback
+			exportRootPublicKeyMenuConfirmRejectCallback();
 		}
-	}*/
+	}
+	
+	// Export root public key menu confirm reject callback
+	void exportRootPublicKeyMenuConfirmRejectCallback(void) {
+	
+		// Show confirm
+		nbgl_useCaseConfirm("Deny exporting root\npublic key?", NULL, "Yes, deny", "Go back", exportRootPublicKeyMenuRejectCallback);
+	}
+	
+	// Export root public key menu reject callback
+	void exportRootPublicKeyMenuRejectCallback(void) {
+	
+		// Process user interaction
+		processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false, false);
+		
+		// Show status
+		nbgl_useCaseStatus("Exporting root public\nkey denied", false, showMainMenu);
+	}
+	
+	// Verify root public key menu continue callback
+	void verifyRootPublicKeyMenuContinueCallback(void) {
+	
+		// Set verify root public key menu tag value pairs
+		verifyRootPublicKeyMenuTagValuePairs[0].item = "Root Public Key";
+		verifyRootPublicKeyMenuTagValuePairs[0].value = (char *)publicKeyOrAddressLineBuffer;
+		
+		// Set verify root public key menu content
+		verifyRootPublicKeyMenuContent.type = TAG_VALUE_CONFIRM;
+		verifyRootPublicKeyMenuContent.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
+		verifyRootPublicKeyMenuContent.tagValueConfirm.tagValueList.nbPairs = ARRAYLEN(verifyRootPublicKeyMenuTagValuePairs);
+		verifyRootPublicKeyMenuContent.tagValueConfirm.tagValueList.pairs = verifyRootPublicKeyMenuTagValuePairs;
+		verifyRootPublicKeyMenuContent.tagValueConfirm.confirmationText = "Confirm";
+		verifyRootPublicKeyMenuContent.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
+		
+		// Set verify root public key menu navigation info
+		verifyRootPublicKeyMenuNavigationInfo.navType = NAV_WITH_TAP;
+		verifyRootPublicKeyMenuNavigationInfo.progressIndicator = true;
+		verifyRootPublicKeyMenuNavigationInfo.tuneId = TUNE_TAP_CASUAL;
+		verifyRootPublicKeyMenuNavigationInfo.navWithTap.quitText = "Cancel";
+		verifyRootPublicKeyMenuNavigationInfo.quitToken = REJECT_TOKEN;
+		
+		// Show public key confirmation
+		nbgl_pageDrawGenericContent(&verifyRootPublicKeyMenuChoiceCallback, &verifyRootPublicKeyMenuNavigationInfo, &verifyRootPublicKeyMenuContent);
+		nbgl_refresh();
+	}
+	
+	// Verify root public key menu choice callback
+	void verifyRootPublicKeyMenuChoiceCallback(const int token, __attribute__((unused)) const uint8_t index) {
+	
+		// Check if confirmed
+		if(token == CONFIRM_TOKEN) {
+		
+			// Check if processing user interaction was successful
+			if(processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, true, false)) {
+			
+				// Show status
+				nbgl_useCaseStatus("ROOT PUBLIC\nKEY VERIFIED", true, showMainMenu);
+			}
+			
+			// Otherwise
+			else {
+			
+				// Show status
+				nbgl_useCaseStatus("Verifying root public\nkey failed", false, showMainMenu);
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// Verify root public key menu reject callback
+			verifyRootPublicKeyMenuRejectCallback();
+		}
+	}
+	
+	// Verify root public key menu reject callback
+	void verifyRootPublicKeyMenuRejectCallback(void) {
+	
+		// Process user interaction
+		processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, false, false);
+		
+		// Show status
+		nbgl_useCaseStatus("Verifying root public\nkey canceled", false, showMainMenu);
+	}
 	
 	// Verify address menu continue callback
 	void verifyAddressMenuContinueCallback(void) {
 	
+		// Set verify address menu tag value pairs
+		verifyAddressMenuTagValuePairs[0].item = addressTypeLineBuffer;
+		verifyAddressMenuTagValuePairs[0].value = (char *)publicKeyOrAddressLineBuffer;
+		
+		// Set verify address menu content
+		verifyAddressMenuContent.type = TAG_VALUE_CONFIRM;
+		verifyAddressMenuContent.tagValueConfirm.detailsButtonIcon = &C_QRcode32px;
+		verifyAddressMenuContent.tagValueConfirm.detailsButtonText = "Show as QR";
+		verifyAddressMenuContent.tagValueConfirm.detailsButtonToken = SHOW_QR_TOKEN;
+		verifyAddressMenuContent.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
+		verifyAddressMenuContent.tagValueConfirm.tagValueList.nbPairs = ARRAYLEN(verifyAddressMenuTagValuePairs);
+		verifyAddressMenuContent.tagValueConfirm.tagValueList.pairs = verifyAddressMenuTagValuePairs;
+		verifyAddressMenuContent.tagValueConfirm.confirmationText = "Confirm";
+		verifyAddressMenuContent.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
+		
+		// Set verify address menu navigation info
+		verifyAddressMenuNavigationInfo.navType = NAV_WITH_TAP;
+		verifyAddressMenuNavigationInfo.progressIndicator = true;
+		verifyAddressMenuNavigationInfo.tuneId = TUNE_TAP_CASUAL;
+		verifyAddressMenuNavigationInfo.navWithTap.quitText = "Cancel";
+		verifyAddressMenuNavigationInfo.quitToken = REJECT_TOKEN;
+		
 		// Show address confirmation
-		nbgl_useCaseAddressConfirmation((char *)publicKeyOrAddressLineBuffer, verifyAddressMenuChoiceCallback);
+		nbgl_pageDrawGenericContent(&verifyAddressMenuChoiceCallback, &verifyAddressMenuNavigationInfo, &verifyAddressMenuContent);
+		nbgl_refresh();
 	}
 	
 	// Verify address menu choice callback
-	void verifyAddressMenuChoiceCallback(bool confirm) {
+	void verifyAddressMenuChoiceCallback(const int token, __attribute__((unused)) const uint8_t index) {
 	
 		// Check if confirmed
-		if(confirm) {
+		if(token == CONFIRM_TOKEN) {
 		
-			// Process user interaction
-			processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false);
+			// Check if processing user interaction was successful
+			if(processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false)) {
 			
-			// Show status
-			nbgl_useCaseStatus("ADDRESS\nVERIFIED", true, showMainMenu);
+				// Check if MQS address is being verified
+				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("MQS ADDRESS\nVERIFIED", true, showMainMenu);
+				}
+				
+				// Otherwise check if a Tor address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("TOR ADDRESS\nVERIFIED", true, showMainMenu);
+				}
+				
+				// Otherwise check if a Slatepack address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("SLATEPACK\nADDRESS VERIFIED", true, showMainMenu);
+				}
+			}
+			
+			// Otherwise
+			else {
+				
+				// Check if MQS address is being verified
+				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("Verifying MQS address\nfailed", false, showMainMenu);
+				}
+				
+				// Otherwise check if a Tor address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("Verifying Tor address\nfailed", false, showMainMenu);
+				}
+				
+				// Otherwise check if a Slatepack address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("Verifying Slatepack\naddress failed", false, showMainMenu);
+				}
+			}
+		}
+		
+		// Otherwise check if show QR
+		else if(token == SHOW_QR_TOKEN) {
+		
+			// Create layout description
+			nbgl_layoutDescription_t layoutDescription = {
+			
+				// Modal
+				.modal = true,
+				
+				// With left border
+				.withLeftBorder = true,
+				
+				// On action callback
+				.onActionCallback = &verifyAddressMenuModalExitCallback
+			};
+			
+			// Set verify address menu modal layout
+			verifyAddressMenuModalLayout = nbgl_layoutGet(&layoutDescription);
+			
+			// Create QR code
+			nbgl_layoutQRCode_t qrCode = {
+			
+				// URL
+				.url = (char *)publicKeyOrAddressLineBuffer,
+				
+				// Text 2
+				.text2 = (char *)publicKeyOrAddressLineBuffer
+			};
+			
+			// Add QR code to verify address menu modal layout
+			nbgl_layoutAddQRCode(verifyAddressMenuModalLayout, &qrCode);
+			
+			// Add bottom button to verify address menu modal layout
+			nbgl_layoutAddBottomButton(verifyAddressMenuModalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
+			
+			// Show verify address menu modal
+			nbgl_layoutDraw(verifyAddressMenuModalLayout);
+			nbgl_refresh();
 		}
 		
 		// Otherwise
@@ -1519,13 +1876,202 @@ void showProgressBar(const uint8_t percent) {
 		}
 	}
 	
+	// Verify address menu modal exit callback
+	void verifyAddressMenuModalExitCallback(__attribute__((unused)) const int token, __attribute__((unused)) const uint8_t index) {
+	
+		// Release verify address menu modal layout
+		nbgl_layoutRelease(verifyAddressMenuModalLayout);
+		
+		// Hide verify address menu modal
+		nbgl_screenRedraw();
+		nbgl_refresh();
+	}
+	
 	// Verify address menu reject callback
 	void verifyAddressMenuRejectCallback(void) {
 	
 		// Process user interaction
 		processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false, false);
 		
+		// Check if MQS address is being verified
+		if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+		
+			// Show status
+			nbgl_useCaseStatus("Verifying MQS address\ncanceled", false, showMainMenu);
+		}
+		
+		// Otherwise check if a Tor address is being verified
+		else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
+		
+			// Show status
+			nbgl_useCaseStatus("Verifying Tor address\ncanceled", false, showMainMenu);
+		}
+		
+		// Otherwise check if a Slatepack address is being verified
+		else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
+		
+			// Show status
+			nbgl_useCaseStatus("Verifying Slatepack\naddress canceled", false, showMainMenu);
+		}
+	}
+	
+	// Sign MQS timestamp menu continue callback
+	void signMqsTimestampMenuContinueCallback(void) {
+	
+		// Set sign MQS timestamp menu tag value pairs
+		signMqsTimestampMenuTagValuePairs[0].item = "Time And Date";
+		signMqsTimestampMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		
+		signMqsTimestampMenuTagValuePairs[1].item = "";
+		signMqsTimestampMenuTagValuePairs[1].value = "";
+		
+		signMqsTimestampMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
+		signMqsTimestampMenuTagValuePairs[2].value = "";
+		
+		// Set sign MQS timestamp menu tag value list
+		signMqsTimestampMenuTagValueList.nbPairs = ARRAYLEN(signMqsTimestampMenuTagValuePairs);
+		signMqsTimestampMenuTagValueList.pairs = signMqsTimestampMenuTagValuePairs;
+		
+		// Set sign MQS timestamp menu info long press
+		signMqsTimestampMenuInfoLongPress.icon = &currencyIconBuffer;
+		signMqsTimestampMenuInfoLongPress.text = "Sign MQS timestamp";
+		signMqsTimestampMenuInfoLongPress.longPressText = "Hold to sign";
+		
+		// Show static review
+		nbgl_useCaseStaticReview(&signMqsTimestampMenuTagValueList, &signMqsTimestampMenuInfoLongPress, "Deny", signMqsTimestampMenuChoiceCallback);
+	}
+	
+	// Sign MQS timestamp menu choice callback
+	void signMqsTimestampMenuChoiceCallback(const bool confirm) {
+	
+		// Check if confirmed
+		if(confirm) {
+		
+			// Check if processing user interaction was successful
+			if(processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true, true)) {
+			
+				// Show status
+				nbgl_useCaseStatus("MQS TIMESTAMP\nSIGNED", true, showMainMenu);
+			}
+			
+			// Otherwise
+			else {
+			
+				// Show status
+				nbgl_useCaseStatus("Signing MQS\ntimestamp failed", false, showMainMenu);
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// Sign MQS timestamp menu confirm reject callback
+			signMqsTimestampMenuConfirmRejectCallback();
+		}
+	}
+	
+	// Sign MQS timestamp menu confirm reject callback
+	void signMqsTimestampMenuConfirmRejectCallback(void) {
+	
+		// Show confirm
+		nbgl_useCaseConfirm("Deny signing MQS\ntimestamp?", NULL, "Yes, deny", "Go back", signMqsTimestampMenuRejectCallback);
+	}
+	
+	// Sign MQS timestamp menu reject callback
+	void signMqsTimestampMenuRejectCallback(void) {
+	
+		// Process user interaction
+		processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false, false);
+		
 		// Show status
-		nbgl_useCaseStatus("Verifying address\ncanceled", false, showMainMenu);
+		nbgl_useCaseStatus("Signing MQS\ntimestamp denied", false, showMainMenu);
+	}
+	
+	// Sign Tor certificate menu continue callback
+	void signTorCertificateMenuContinueCallback(void) {
+	
+		// Set sign Tor certificat menu tag value pairs
+		signTorCertificateMenuTagValuePairs[0].item = "Expires";
+		signTorCertificateMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		
+		signTorCertificateMenuTagValuePairs[1].item = addressTypeLineBuffer;
+		signTorCertificateMenuTagValuePairs[1].value = (char *)publicKeyOrAddressLineBuffer;
+		
+		signTorCertificateMenuTagValuePairs[2].item = "";
+		signTorCertificateMenuTagValuePairs[2].value = "";
+		
+		// Check if currency allows Tor addresses
+		if(currencyInformation->enableTorAddress) {
+		
+			// Set sign Tor certificat menu tag value pairs
+			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Tor\transactions";
+			signTorCertificateMenuTagValuePairs[3].value = "";
+		}
+		
+		// Otherwise if check currency allows Slatepack addresses
+		else if(currencyInformation->enableSlatepackAddress) {
+		
+			// Set sign Tor certificat menu tag value pairs
+			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
+			signTorCertificateMenuTagValuePairs[3].value = "";
+		}
+		
+		// Set sign Tor certificat menu tag value list
+		signTorCertificateMenuTagValueList.nbPairs = ARRAYLEN(signTorCertificateMenuTagValuePairs);
+		signTorCertificateMenuTagValueList.pairs = signTorCertificateMenuTagValuePairs;
+		
+		// Set sign Tor certificat menu info long press
+		signTorCertificateMenuInfoLongPress.icon = &currencyIconBuffer;
+		signTorCertificateMenuInfoLongPress.text = "Sign Tor certificate";
+		signTorCertificateMenuInfoLongPress.longPressText = "Hold to sign";
+		
+		// Show static review
+		nbgl_useCaseStaticReview(&signTorCertificateMenuTagValueList, &signTorCertificateMenuInfoLongPress, "Deny", signTorCertificateMenuChoiceCallback);
+	}
+	
+	// Sign Tor certificate menu choice callback
+	void signTorCertificateMenuChoiceCallback(const bool confirm) {
+	
+		// Check if confirmed
+		if(confirm) {
+		
+			// Check if processing user interaction was successful
+			if(processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true, true)) {
+			
+				// Show status
+				nbgl_useCaseStatus("TOR CERTIFICATE\nSIGNED", true, showMainMenu);
+			}
+			
+			// Otherwise
+			else {
+			
+				// Show status
+				nbgl_useCaseStatus("Signing Tor certificate\nfailed", false, showMainMenu);
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// Sign Tor certificat menu confirm reject callback
+			signTorCertificateMenuConfirmRejectCallback();
+		}
+	}
+	
+	// Sign Tor certificate menu confirm reject callback
+	void signTorCertificateMenuConfirmRejectCallback(void) {
+	
+		// Show confirm
+		nbgl_useCaseConfirm("Deny signing Tor\ncertificate?", NULL, "Yes, deny", "Go back", signTorCertificateMenuRejectCallback);
+	}
+	
+	// Sign Tor certificate menu reject callback
+	void signTorCertificateMenuRejectCallback(void) {
+	
+		// Process user interaction
+		processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false, false);
+		
+		// Show status
+		nbgl_useCaseStatus("Signing Tor certificate\ndenied", false, showMainMenu);
 	}
 #endif
