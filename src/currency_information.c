@@ -87,7 +87,7 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
 		
 		// Set current currency information's icon colors
-		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(CURRENCY_ICON_COLORS));
+		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
 		
 		// Set current currency information's icon bitmap
 		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(CURRENCY_ICON_BITMAP));

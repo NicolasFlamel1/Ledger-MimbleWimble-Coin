@@ -29,13 +29,13 @@
 	#define CURRENCY_INFORMATION_ICON_COLORS_SIZE 2
 
 	// Currency information icon bitmap size
-	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 32
+	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE sizeof(C_icon_mimblewimble_coin_bitmap)
 
 // Otherwise check if has NBGL
 #elif defined HAVE_NBGL
 
 	// Currency information icon bitmap size
-	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE 298
+	#define CURRENCY_INFORMATION_ICON_BITMAP_SIZE sizeof(C_icon_grin_big_bitmap)
 #endif
 
 // Currency information Slatepack address human-readable part size
