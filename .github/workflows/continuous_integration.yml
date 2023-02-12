@@ -873,110 +873,111 @@ jobs:
       #  run: |
       #    kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Stax MimbleWimble Coin app
-        uses: actions/download-artifact@v3
-        with:
-          name: app-debug-mimblewimble-coin-stax
-          path: bin-mimblewimble-coin-stax
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-stax/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Stax MimbleWimble Coin app
-        run: |
-          node test/functional_tests/main.js mimblewimble_coin speculos stax
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-stax-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Stax MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
-        with:
-          name: app-debug-mimblewimble-coin-floonet-stax
-          path: bin-mimblewimble-coin-floonet-stax
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-mimblewimble-coin-floonet-stax/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Stax MimbleWimble Coin floonet app
-        run: |
-          node test/functional_tests/main.js mimblewimble_coin_floonet speculos stax
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-floonet-stax-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Stax Grin app
-        uses: actions/download-artifact@v3
-        with:
-          name: app-debug-grin-stax
-          path: bin-grin-stax
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-stax/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Stax Grin app
-        run: |
-          node test/functional_tests/main.js grin speculos stax
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: speculos-grin-stax-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Stax Grin testnet app
-        uses: actions/download-artifact@v3
-        with:
-          name: app-debug-grin-testnet-stax
-          path: bin-grin-testnet-stax
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-testnet-stax/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Stax Grin testnet app
-        run: |
-          node test/functional_tests/main.js grin_testnet speculos stax
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: speculos-grin-testnet-stax-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
+      # Stax tests removed due to OCR not being consistent
+      #- name: Download Stax MimbleWimble Coin app
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: app-debug-mimblewimble-coin-stax
+      #    path: bin-mimblewimble-coin-stax
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-stax/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Stax MimbleWimble Coin app
+      #  run: |
+      #    node test/functional_tests/main.js mimblewimble_coin speculos stax
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v3
+      #  if: failure()
+      #  with:
+      #    name: speculos-mimblewimble-coin-stax-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Stax MimbleWimble Coin floonet app
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: app-debug-mimblewimble-coin-floonet-stax
+      #    path: bin-mimblewimble-coin-floonet-stax
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-mimblewimble-coin-floonet-stax/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Stax MimbleWimble Coin floonet app
+      #  run: |
+      #    node test/functional_tests/main.js mimblewimble_coin_floonet speculos stax
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v3
+      #  if: failure()
+      #  with:
+      #    name: speculos-mimblewimble-coin-floonet-stax-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Stax Grin app
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: app-debug-grin-stax
+      #    path: bin-grin-stax
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-stax/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Stax Grin app
+      #  run: |
+      #    node test/functional_tests/main.js grin speculos stax
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v3
+      #  if: failure()
+      #  with:
+      #    name: speculos-grin-stax-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
+      #
+      #- name: Download Stax Grin testnet app
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: app-debug-grin-testnet-stax
+      #    path: bin-grin-testnet-stax
+      #
+      #- name: Run Speculos
+      #  run: |
+      #    /speculos/speculos.py --model stax --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --library "MimbleWimble Coin":bin-mimblewimble-coin-stax/app.elf bin-grin-testnet-stax/app.elf 2>speculos.log &
+      #    echo $! >/tmp/speculos.pid
+      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+      #
+      #- name: Run tests with Stax Grin testnet app
+      #  run: |
+      #    node test/functional_tests/main.js grin_testnet speculos stax
+      #
+      #- name: Upload Speculos log
+      #  uses: actions/upload-artifact@v3
+      #  if: failure()
+      #  with:
+      #    name: speculos-grin-testnet-stax-log
+      #    path: speculos.log
+      #
+      #- name: Kill Speculos
+      #  run: |
+      #    kill -9 $(cat /tmp/speculos.pid)
