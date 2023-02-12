@@ -87,10 +87,10 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
 		
 		// Set current currency information's icon colors
-		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
+		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(CURRENCY_ICON_COLORS));
 		
 		// Set current currency information's icon bitmap
-		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
+		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(CURRENCY_ICON_BITMAP));
 	
 	// Otherwise check if has NBGL
 	#elif defined HAVE_NBGL
@@ -99,7 +99,7 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
 		
 		// Set current currency information's icon bitmap
-		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(currentCurrencyInformation->iconBitmap));
+		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(CURRENCY_ICON_BITMAP));
 	#endif
 	
 	// Check if Slatepack address human-readable part exists
