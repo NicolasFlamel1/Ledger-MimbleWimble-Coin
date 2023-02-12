@@ -694,6 +694,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"text": "Tap to continue",
 						"actions": [
 						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
 							// Touch
 							["finger", 200, 500, true],
 							["finger", 200, 500, false]
@@ -701,14 +704,27 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 					},
 					{
 						"text": "Deny",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
 						"actions": [
 						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
 							// Touch start
 							["finger", 200, 500, true]
 						]
 					},
 					{
 						"text": "ROOT PUBLIC",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
 						"actions": [
 						
 							// Touch end
@@ -2443,6 +2459,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							"text": "Tap to continue",
 							"actions": [
 							
+								// Clear confirmed
+								["setbool", "confirmed", false],
+								
 								// Touch
 								["finger", 200, 500, true],
 								["finger", 200, 500, false]
@@ -2450,14 +2469,27 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 						},
 						{
 							"text": "Deny",
+							"conditions": [
+							
+								// Not confirmed
+								["confirmed", false]
+							],
 							"actions": [
 							
+								// Set confirmed
+								["setbool", "confirmed", true],
+								
 								// Touch start
 								["finger", 200, 500, true]
 							]
 						},
 						{
 							"text": "TRANSACTION",
+							"conditions": [
+							
+								// Is confirmed
+								["confirmed", true]
+							],
 							"actions": [
 							
 								// Touch end
@@ -3148,6 +3180,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 						"text": "Tap to continue",
 						"actions": [
 						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
 							// Touch
 							["finger", 200, 500, true],
 							["finger", 200, 500, false]
@@ -3155,14 +3190,27 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 					},
 					{
 						"text": "Deny",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
 						"actions": [
 						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
 							// Touch start
 							["finger", 200, 500, true]
 						]
 					},
 					{
 						"text": "TRANSACTION",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
 						"actions": [
 						
 							// Touch end
@@ -3345,6 +3393,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 						"text": "Tap to continue",
 						"actions": [
 						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
 							// Touch
 							["finger", 200, 500, true],
 							["finger", 200, 500, false]
@@ -3352,14 +3403,27 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 					},
 					{
 						"text": "Deny",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
 						"actions": [
 						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
 							// Touch start
 							["finger", 200, 500, true]
 						]
 					},
 					{
 						"text": "MQS TIMESTAMP",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
 						"actions": [
 						
 							// Touch end
@@ -3609,6 +3673,9 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 							"text": "Tap to continue",
 							"actions": [
 							
+								// Clear confirmed
+								["setbool", "confirmed", false],
+								
 								// Touch
 								["finger", 200, 500, true],
 								["finger", 200, 500, false]
@@ -3616,14 +3683,27 @@ async function getTorCertificateSignatureTest(hardwareWallet, extendedPrivateKey
 						},
 						{
 							"text": "Deny",
+							"conditions": [
+							
+								// Not confirmed
+								["confirmed", false]
+							],
 							"actions": [
 							
+								// Set confirmed
+								["setbool", "confirmed", true],
+								
 								// Touch start
 								["finger", 200, 500, true]
 							]
 						},
 						{
 							"text": "TOR CERTIFICATE",
+							"conditions": [
+							
+								// Is confirmed
+								["confirmed", true]
+							],
 							"actions": [
 							
 								// Touch end
