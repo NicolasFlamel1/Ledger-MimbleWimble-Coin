@@ -82,7 +82,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_icon_details_t currencyIconBuffer;
 	
 	// Export root public key menu tag value pairs
-	static nbgl_layoutTagValue_t exportRootPublicKeyMenuTagValuePairs[3];
+	static nbgl_layoutTagValue_t exportRootPublicKeyMenuTagValuePairs[2];
 	
 	// Export root public key menu tag value list
 	static nbgl_layoutTagValueList_t exportRootPublicKeyMenuTagValueList;
@@ -112,7 +112,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_pageNavigationInfo_t verifyAddressMenuNavigationInfo;
 	
 	// Sign MQS timestamp menu tag value pairs
-	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[3];
+	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[2];
 	
 	// Sign MQS timestamp menu tag value list
 	static nbgl_layoutTagValueList_t signMqsTimestampMenuTagValueList;
@@ -121,13 +121,22 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_pageInfoLongPress_t signMqsTimestampMenuInfoLongPress;
 	
 	// Sign Tor certificate menu tag value pairs
-	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[4];
+	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[3];
 	
 	// Sign Tor certificate menu tag value list
 	static nbgl_layoutTagValueList_t signTorCertificateMenuTagValueList;
 	
 	// Sign Tor certificate menu info long press
 	static nbgl_pageInfoLongPress_t signTorCertificateMenuInfoLongPress;
+	
+	// Sign approve transaction menu tag value pairs
+	static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[5];
+	
+	// Sign approve transaction menu tag value list
+	static nbgl_layoutTagValueList_t approveTransactionMenuTagValueList;
+	
+	// Sign approve transaction menu info long press
+	static nbgl_pageInfoLongPress_t approveTransactionMenuInfoLongPress;
 #endif
 
 
@@ -1099,6 +1108,18 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	
 	// Sign Tor certificate menu reject callback
 	static void signTorCertificateMenuRejectCallback(void);
+	
+	// Sign approve transaction menu continue callback
+	static void approveTransactionMenuContinueCallback(void);
+	
+	// Sign approve transaction menu choice callback
+	static void approveTransactionMenuChoiceCallback(const bool confirm);
+	
+	// Sign approve transaction menu confirm reject callback
+	static void approveTransactionMenuConfirmRejectCallback(void);
+	
+	// Sign approve transaction menu reject callback
+	static void approveTransactionMenuRejectCallback(void);
 #endif
 
 
@@ -1457,7 +1478,7 @@ void showMenu(enum Menu menu) {
 			// Verify address menu
 			case VERIFY_ADDRESS_MENU:
 			
-				// Check if MQS address is being verified
+				// Check if an MQS address is being verified
 				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
 				
 					// Append text to verify address, approve transaction, or currency version line buffer
@@ -1505,7 +1526,19 @@ void showMenu(enum Menu menu) {
 			// Approve transaction menu
 			case APPROVE_TRANSACTION_MENU:
 			
-				// TODO
+				// Check if a transaction is being sent
+				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show approve transaction menu
+					nbgl_useCaseReviewStart(&currencyIconBuffer, "Send transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
+				}
+				
+				// Otherwise check if a transaction is being received
+				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show approve transaction menu
+					nbgl_useCaseReviewStart(&currencyIconBuffer, "Receive transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
+				}
 				
 				// Break
 				break;
@@ -1610,15 +1643,13 @@ void showMenu(enum Menu menu) {
 		exportRootPublicKeyMenuTagValuePairs[0].item = "Account Index";
 		exportRootPublicKeyMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		
-		exportRootPublicKeyMenuTagValuePairs[1].item = "" ;
+		exportRootPublicKeyMenuTagValuePairs[1].item = "*The host will be able to view\nthe account's transactions";
 		exportRootPublicKeyMenuTagValuePairs[1].value = "";
-		
-		exportRootPublicKeyMenuTagValuePairs[2].item = "*The host will be able to view\nthe account's transactions";
-		exportRootPublicKeyMenuTagValuePairs[2].value = "";
 		
 		// Set export root public key menu tag value list
 		exportRootPublicKeyMenuTagValueList.nbPairs = ARRAYLEN(exportRootPublicKeyMenuTagValuePairs);
 		exportRootPublicKeyMenuTagValueList.pairs = exportRootPublicKeyMenuTagValuePairs;
+		exportRootPublicKeyMenuTagValueList.wrapping = true;
 		
 		// Set export root public key menu info long press
 		exportRootPublicKeyMenuInfoLongPress.icon = &currencyIconBuffer;
@@ -1780,7 +1811,7 @@ void showMenu(enum Menu menu) {
 			// Check if processing user interaction was successful
 			if(processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false)) {
 			
-				// Check if MQS address is being verified
+				// Check if an MQS address is being verified
 				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
 				
 					// Show status
@@ -1805,7 +1836,7 @@ void showMenu(enum Menu menu) {
 			// Otherwise
 			else {
 				
-				// Check if MQS address is being verified
+				// Check if an MQS address is being verified
 				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
 				
 					// Show status
@@ -1893,7 +1924,7 @@ void showMenu(enum Menu menu) {
 		// Process user interaction
 		processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false, false);
 		
-		// Check if MQS address is being verified
+		// Check if an MQS address is being verified
 		if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
 		
 			// Show status
@@ -1922,15 +1953,13 @@ void showMenu(enum Menu menu) {
 		signMqsTimestampMenuTagValuePairs[0].item = "Time And Date";
 		signMqsTimestampMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
 		
-		signMqsTimestampMenuTagValuePairs[1].item = "";
+		signMqsTimestampMenuTagValuePairs[1].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
 		signMqsTimestampMenuTagValuePairs[1].value = "";
-		
-		signMqsTimestampMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
-		signMqsTimestampMenuTagValuePairs[2].value = "";
 		
 		// Set sign MQS timestamp menu tag value list
 		signMqsTimestampMenuTagValueList.nbPairs = ARRAYLEN(signMqsTimestampMenuTagValuePairs);
 		signMqsTimestampMenuTagValueList.pairs = signMqsTimestampMenuTagValuePairs;
+		signMqsTimestampMenuTagValueList.wrapping = true;
 		
 		// Set sign MQS timestamp menu info long press
 		signMqsTimestampMenuInfoLongPress.icon = &currencyIconBuffer;
@@ -1990,37 +2019,35 @@ void showMenu(enum Menu menu) {
 	// Sign Tor certificate menu continue callback
 	void signTorCertificateMenuContinueCallback(void) {
 	
-		// Set sign Tor certificat menu tag value pairs
+		// Set sign Tor certificate menu tag value pairs
 		signTorCertificateMenuTagValuePairs[0].item = "Expires";
 		signTorCertificateMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
 		
 		signTorCertificateMenuTagValuePairs[1].item = addressTypeLineBuffer;
 		signTorCertificateMenuTagValuePairs[1].value = (char *)publicKeyOrAddressLineBuffer;
 		
-		signTorCertificateMenuTagValuePairs[2].item = "";
-		signTorCertificateMenuTagValuePairs[2].value = "";
-		
 		// Check if currency allows Tor addresses
 		if(currencyInformation->enableTorAddress) {
 		
-			// Set sign Tor certificat menu tag value pairs
-			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Tor\transactions";
-			signTorCertificateMenuTagValuePairs[3].value = "";
+			// Set sign Tor certificate menu tag value pairs
+			signTorCertificateMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's Tor\ntransactions";
+			signTorCertificateMenuTagValuePairs[2].value = "";
 		}
 		
 		// Otherwise if check currency allows Slatepack addresses
 		else if(currencyInformation->enableSlatepackAddress) {
 		
-			// Set sign Tor certificat menu tag value pairs
-			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
-			signTorCertificateMenuTagValuePairs[3].value = "";
+			// Set sign Tor certificate menu tag value pairs
+			signTorCertificateMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
+			signTorCertificateMenuTagValuePairs[2].value = "";
 		}
 		
-		// Set sign Tor certificat menu tag value list
+		// Set sign Tor certificate menu tag value list
 		signTorCertificateMenuTagValueList.nbPairs = ARRAYLEN(signTorCertificateMenuTagValuePairs);
 		signTorCertificateMenuTagValueList.pairs = signTorCertificateMenuTagValuePairs;
+		signTorCertificateMenuTagValueList.wrapping = true;
 		
-		// Set sign Tor certificat menu info long press
+		// Set sign Tor certificate menu info long press
 		signTorCertificateMenuInfoLongPress.icon = &currencyIconBuffer;
 		signTorCertificateMenuInfoLongPress.text = "Sign Tor certificate";
 		signTorCertificateMenuInfoLongPress.longPressText = "Hold to sign";
@@ -2053,7 +2080,7 @@ void showMenu(enum Menu menu) {
 		// Otherwise
 		else {
 		
-			// Sign Tor certificat menu confirm reject callback
+			// Sign Tor certificate menu confirm reject callback
 			signTorCertificateMenuConfirmRejectCallback();
 		}
 	}
@@ -2073,5 +2100,163 @@ void showMenu(enum Menu menu) {
 		
 		// Show status
 		nbgl_useCaseStatus("Signing Tor certificate\ndenied", false, showMainMenu);
+	}
+	
+	// Sign approve transaction menu continue callback
+	void approveTransactionMenuContinueCallback(void) {
+	
+		// Set approve transaction menu tag value pairs
+		approveTransactionMenuTagValuePairs[0].item = "Amount";
+		approveTransactionMenuTagValuePairs[0].value = amountLineBuffer;
+		
+		approveTransactionMenuTagValuePairs[1].item = "Fee";
+		approveTransactionMenuTagValuePairs[1].value = feeLineBuffer;
+		
+		approveTransactionMenuTagValuePairs[2].item = "Kernel Features";
+		approveTransactionMenuTagValuePairs[2].value = kernelFeaturesOrTransactionTypeLineBuffer;
+		
+		// Initialize index
+		size_t index = 3;
+		
+		// Check if kernel features details title line buffer isn't empty
+		if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
+		
+			// Set approve transaction menu tag value pairs
+			approveTransactionMenuTagValuePairs[index].item = kernelFeaturesDetailsTitleLineBuffer;
+			approveTransactionMenuTagValuePairs[index++].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
+		}
+		
+		// Check if public key or address line buffer isn't empty
+		if(strlen((char *)publicKeyOrAddressLineBuffer)) {
+		
+			// Set approve transaction menu tag value pairs
+			approveTransactionMenuTagValuePairs[index].item = "Proof Address";
+			approveTransactionMenuTagValuePairs[index++].value = (char *)publicKeyOrAddressLineBuffer;
+		}
+		
+		// Otherwise
+		else {
+			
+			// Set approve transaction menu tag value pairs
+			approveTransactionMenuTagValuePairs[index].item = "*No payment proof";
+			approveTransactionMenuTagValuePairs[index++].value = "";
+		}
+		
+		// Set approve transaction menu tag value list
+		approveTransactionMenuTagValueList.nbPairs = index;
+		approveTransactionMenuTagValueList.pairs = approveTransactionMenuTagValuePairs;
+		approveTransactionMenuTagValueList.wrapping = true;
+		
+		// Set approve transaction menu info long press
+		approveTransactionMenuInfoLongPress.icon = &currencyIconBuffer;
+		
+		// Check if a transaction is being sent
+		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Set approve transaction menu info long press
+			approveTransactionMenuInfoLongPress.text = "Send transaction";
+			approveTransactionMenuInfoLongPress.longPressText = "Hold to send";
+		}
+		
+		// Otherwise check if a transaction is being received
+		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Set approve transaction menu info long press
+			approveTransactionMenuInfoLongPress.text = "Receive transaction";
+			approveTransactionMenuInfoLongPress.longPressText = "Hold to receive";
+		}
+		
+		// Show static review
+		nbgl_useCaseStaticReview(&approveTransactionMenuTagValueList, &approveTransactionMenuInfoLongPress, "Deny", approveTransactionMenuChoiceCallback);
+	}
+	
+	// Sign approve transaction menu choice callback
+	void approveTransactionMenuChoiceCallback(const bool confirm) {
+	
+		// Check if confirmed
+		if(confirm) {
+		
+			// Check if processing user interaction was successful
+			if(processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true)) {
+			
+				// Check if a transaction is being sent
+				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("TRANSACTION\nSENT", true, showMainMenu);
+				}
+				
+				// Otherwise check if a transaction is being received
+				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("TRANSACTION\nRECEIVED", true, showMainMenu);
+				}
+			}
+			
+			// Otherwise
+			else {
+			
+				// Check if a transaction is being sent
+				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("Sending transaction\nfailed", false, showMainMenu);
+				}
+				
+				// Otherwise check if a transaction is being received
+				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				
+					// Show status
+					nbgl_useCaseStatus("Receiving transaction\nfailed", false, showMainMenu);
+				}
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// approve transaction menu confirm reject callback
+			approveTransactionMenuConfirmRejectCallback();
+		}
+	}
+	
+	// Sign approve transaction menu confirm reject callback
+	void approveTransactionMenuConfirmRejectCallback(void) {
+	
+		// Check if a transaction is being sent
+		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Show confirm
+			nbgl_useCaseConfirm("Deny sending\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
+		}
+		
+		// Otherwise check if a transaction is being received
+		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Show confirm
+			nbgl_useCaseConfirm("Deny receiving\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
+		}
+	}
+	
+	// Sign approve transaction menu reject callback
+	void approveTransactionMenuRejectCallback(void) {
+	
+		// Process user interaction
+		processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false);
+		
+		// Check if a transaction is being sent
+		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Show status
+			nbgl_useCaseStatus("Sending transaction\ndenied", false, showMainMenu);
+		}
+		
+		// Otherwise check if a transaction is being received
+		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		
+			// Show status
+			nbgl_useCaseStatus("Receiving transaction\ndenied", false, showMainMenu);
+		}
 	}
 #endif
