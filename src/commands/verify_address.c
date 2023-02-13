@@ -64,9 +64,21 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address, approve transaction, or currency version line buffer
+			// Clear verify address, approve transaction, or currency version line buffer
 			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -93,9 +105,21 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		
-			// Set verify address, approve transaction, or currency version line buffer
+			// Clear verify address, approve transaction, or currency version line buffer
 			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -122,9 +146,21 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address, approve transaction, or currency version line buffer
+			// Clear verify address, approve transaction, or currency version line buffer
 			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or currency version line buffer
+				strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack\naddress", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));

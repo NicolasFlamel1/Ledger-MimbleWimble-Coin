@@ -18,6 +18,7 @@ APPVERSION_P = 2
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Check if target isn't the Stax
+# TODO Remove this check once Stax supports security review banner
 ifneq ($(TARGET_NAME),TARGET_STAX)
 
 	# Add security review banner. To be removed once Ledger security review is done.

@@ -1742,7 +1742,26 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 					// Show progress bar
 					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4));
 				}
+				
+				// Check if has NGBL
+				#ifdef HAVE_NBGL
+				
+					// Check if time to update display
+					// TODO Fine tune this number on a real Stax device
+					if(!(i % 1)) {
+				
+						// Process display events
+						os_io_seph_recv_and_process(0);
+					}
+				#endif
 			}
+			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
 			
 			// Update running commitment with the alpha generator and rho generator
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
@@ -1813,6 +1832,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
+			
 			// Create tau1 and tau2 from the private nonce
 			uint8_t *tau1 = (uint8_t *)alpha;
 			uint8_t *tau2 = (uint8_t *)rho;
@@ -1837,6 +1863,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
 
 			// Set t one to the result
 			memcpy((uint8_t *)&tOne[PUBLIC_KEY_PREFIX_SIZE], &tau1Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
@@ -1864,6 +1897,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				THROW(INTERNAL_ERROR_ERROR);
 			}
 			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
+			
 			// Get the product of tau2 and its generator
 			uint8_t *tau2Generator = (uint8_t *)aterm;
 			memcpy(&tau2Generator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_G, sizeof(GENERATOR_G));
@@ -1876,6 +1916,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
 			}
+			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
 			
 			// Set t two to the result
 			memcpy((uint8_t *)&tTwo[PUBLIC_KEY_PREFIX_SIZE], &tau2Generator[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE);
@@ -2254,7 +2301,26 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 					// Show progress bar
 					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4, MAXIMUM_PROGRESS_BAR_PERCENT));
 				}
+				
+				// Check if has NGBL
+				#ifdef HAVE_NBGL
+				
+					// Check if time to update display
+					// TODO Fine tune this number on a real Stax device
+					if(!(i % 4)) {
+				
+						// Process display events
+						os_io_seph_recv_and_process(0);
+					}
+				#endif
 			}
+			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
 		}
 		
 		// Finally

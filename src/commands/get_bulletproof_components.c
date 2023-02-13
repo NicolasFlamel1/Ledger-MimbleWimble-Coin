@@ -6,6 +6,13 @@
 #include "get_bulletproof_components.h"
 #include "../menus.h"
 
+// Check if has NBGL
+#ifdef HAVE_NBGL
+
+	// Header files
+	#include <nbgl_use_case.h>
+#endif
+
 
 // Definitions
 
@@ -68,9 +75,21 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Sending transaction message type
 		case SENDING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
+			// Clear time, processing menu, progress bar message, or currency name line buffer
 			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Break
 			break;
@@ -78,9 +97,21 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Receiving transaction message type
 		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
+			// Clear time, processing menu, progress bar message, or currency name line buffer
 			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Break
 			break;
@@ -88,9 +119,21 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Creating coinbase message type
 		case CREATING_COINBASE_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
+			// Clear time, processing menu, progress bar message, or currency name line buffer
 			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set time, processing menu, progress bar message, or currency name line buffer
+				strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating coinbase", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			#endif
 			
 			// Break
 			break;
@@ -187,6 +230,13 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	volatile uint8_t bulletproofTOne[COMPRESSED_PUBLIC_KEY_SIZE];
 	volatile uint8_t bulletproofTTwo[COMPRESSED_PUBLIC_KEY_SIZE];
 	
+	// Check if has NBGL
+	#ifdef HAVE_NBGL
+	
+		// Show processing menu
+		showMenu(PROCESSING_MENU);
+	#endif
+	
 	// Begin try
 	BEGIN_TRY {
 	
@@ -199,19 +249,101 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 			// Derive blinding factor
 			deriveBlindingFactor(blindingFactor, account, value, identifierPath, identifierDepth, switchType);
 			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
+			
 			// Commit value with the blinding factor
 			uint8_t commitment[UNCOMPRESSED_PUBLIC_KEY_SIZE];
 			commitValue(commitment, value, (uint8_t *)blindingFactor, false);
 			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
+			
 			// Get rewind nonce
 			getRewindNonce(rewindNonce, account, commitment);
+			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
 			
 			// Get private nonce
 			getPrivateNonce(privateNonce, account, commitment);
 			
+			// Check if has NGBL
+			#ifdef HAVE_NBGL
+			
+				// Process display events
+				os_io_seph_recv_and_process(0);
+			#endif
+			
 			// Calculate bulletproof components
 			calculateBulletproofComponents(bulletproofTauX, bulletproofTOne, bulletproofTTwo, value, (uint8_t *)blindingFactor, commitment, (uint8_t *)rewindNonce, (uint8_t *)privateNonce, proofMessage);
 		}
+		
+		// Check if has NBGL
+		#ifdef HAVE_NBGL
+
+			// Catch other errors
+			CATCH_OTHER(error) {
+			
+				// Clear the blinding factor
+				explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
+				
+				// Clear the rewind nonce
+				explicit_bzero((uint8_t *)rewindNonce, sizeof(rewindNonce));
+				
+				// Clear the private nonce
+				explicit_bzero((uint8_t *)privateNonce, sizeof(privateNonce));
+
+				// Check message type
+				switch(messageType) {
+				
+					// Sending transaction message type
+					case SENDING_TRANSACTION_MESSAGE_TYPE:
+			
+						// Show status
+						nbgl_useCaseStatus("Sending transaction\nfailed", false, showMainMenu);
+						
+						// Break
+						break;
+					
+					// Receiving transaction message type
+					case RECEIVING_TRANSACTION_MESSAGE_TYPE:
+					
+						// Show status
+						nbgl_useCaseStatus("Receiving transaction\nfailed", false, showMainMenu);
+						
+						// Break
+						break;
+					
+					// Creating coinbase message type
+					case CREATING_COINBASE_MESSAGE_TYPE:
+					
+						// Show status
+						nbgl_useCaseStatus("Creating coinbase\nfailed", false, showMainMenu);
+						
+						// Break
+						break;
+				}
+				
+				// Close try
+				CLOSE_TRY;
+				
+				// Throw error
+				THROW(error);
+			}
+		#endif
 		
 		// Finally
 		FINALLY {
@@ -239,6 +371,13 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	
 	// End try
 	END_TRY;
+	
+	// Check if has NBGL
+	#ifdef HAVE_NBGL
+	
+		// Show main menu
+		showMainMenu();
+	#endif
 	
 	// Check if response with the bulletproof tau x, t one, and t two will overflow
 	if(willResponseOverflow(*responseLength, sizeof(bulletproofTauX) + sizeof(bulletproofTOne) + sizeof(bulletproofTTwo))) {

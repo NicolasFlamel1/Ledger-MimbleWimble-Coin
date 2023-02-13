@@ -1425,7 +1425,7 @@ void showMenu(enum Menu menu) {
 	
 	// Otherwise check if has NBGL
 	#elif defined HAVE_NBGL
-	
+		
 		// Check menu
 		switch(menu) {
 		
@@ -1477,27 +1477,6 @@ void showMenu(enum Menu menu) {
 			
 			// Verify address menu
 			case VERIFY_ADDRESS_MENU:
-			
-				// Check if an MQS address is being verified
-				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Append text to verify address, approve transaction, or currency version line buffer
-					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, " address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
-				}
-				
-				// Otherwise check if a Tor address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Append text to verify address, approve transaction, or currency version line buffer
-					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, " address", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
-				}
-				
-				// Otherwise check if a Slatepack address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Append text to verify address, approve transaction, or currency version line buffer
-					strncat(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "\naddress", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - strlen(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
-				}
 			
 				// Show verify address menu
 				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
@@ -1560,16 +1539,6 @@ void showMenu(enum Menu menu) {
 
 	// Show progress bar
 	void showProgressBar(const uint8_t percent) {
-
-// Otherwise check if has NBGL
-#elif defined HAVE_NBGL
-
-	// Show progress bar
-	void showProgressBar(__attribute__((unused)) const uint8_t percent) {
-#endif
-
-	// Check if has BAGL
-	#ifdef HAVE_BAGL
 	
 		// Get percent width
 		const short percentWidth = (BAGL_WIDTH - ((PROGRESS_BAR_PADDING + 1) * 2)) * percent / MAXIMUM_PROGRESS_BAR_PERCENT;
@@ -1600,8 +1569,16 @@ void showMenu(enum Menu menu) {
 		
 		// Wait for display to update
 		UX_WAIT_DISPLAYED();
-	#endif
-}
+	}
+	
+// Otherwise check if has NBGL
+#elif defined HAVE_NBGL
+
+	// Show progress bar
+	void showProgressBar(__attribute__((unused)) const uint8_t percent) {
+	
+	}
+#endif
 
 // Check if has BAGL
 #ifdef HAVE_BAGL
