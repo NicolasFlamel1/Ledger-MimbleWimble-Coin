@@ -549,9 +549,6 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 		
 				// Show main menu
 				showMainMenu();
-				
-				// Wait for display to update
-				UX_WAIT_DISPLAYED();
 			#endif
 		}
 	}
