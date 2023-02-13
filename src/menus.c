@@ -1478,8 +1478,26 @@ void showMenu(enum Menu menu) {
 			// Verify address menu
 			case VERIFY_ADDRESS_MENU:
 			
-				// Show verify address menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
+				// Check if an MQS address is being verified
+				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show verify address menu
+					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify MQS address", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
+				}
+				
+				// Otherwise check if a Tor address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show verify address menu
+					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify Tor address", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
+				}
+				
+				// Otherwise check if a Slatepack address is being verified
+				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
+				
+					// Show verify address menu
+					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify Slatepack\naddress", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
+				}
 			
 				// Break
 				break;
