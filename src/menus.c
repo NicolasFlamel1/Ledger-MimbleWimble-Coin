@@ -1648,7 +1648,7 @@ void showMenu(enum Menu menu) {
 		
 		// Set export root public key menu info long press
 		exportRootPublicKeyMenuInfoLongPress.icon = &currencyIconBuffer;
-		exportRootPublicKeyMenuInfoLongPress.text = "Export root public key";
+		exportRootPublicKeyMenuInfoLongPress.text = "Export root public key?";
 		exportRootPublicKeyMenuInfoLongPress.longPressText = "Hold to export";
 		
 		// Show static review
@@ -1958,7 +1958,7 @@ void showMenu(enum Menu menu) {
 		
 		// Set sign MQS timestamp menu info long press
 		signMqsTimestampMenuInfoLongPress.icon = &currencyIconBuffer;
-		signMqsTimestampMenuInfoLongPress.text = "Sign MQS timestamp";
+		signMqsTimestampMenuInfoLongPress.text = "Sign MQS timestamp?";
 		signMqsTimestampMenuInfoLongPress.longPressText = "Hold to sign";
 		
 		// Show static review
@@ -2044,7 +2044,7 @@ void showMenu(enum Menu menu) {
 		
 		// Set sign Tor certificate menu info long press
 		signTorCertificateMenuInfoLongPress.icon = &currencyIconBuffer;
-		signTorCertificateMenuInfoLongPress.text = "Sign Tor certificate";
+		signTorCertificateMenuInfoLongPress.text = "Sign Tor certificate?";
 		signTorCertificateMenuInfoLongPress.longPressText = "Hold to sign";
 		
 		// Show static review
@@ -2149,7 +2149,7 @@ void showMenu(enum Menu menu) {
 		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
 		
 			// Set approve transaction menu info long press
-			approveTransactionMenuInfoLongPress.text = "Send transaction";
+			approveTransactionMenuInfoLongPress.text = "Send transaction?";
 			approveTransactionMenuInfoLongPress.longPressText = "Hold to send";
 		}
 		
@@ -2157,7 +2157,7 @@ void showMenu(enum Menu menu) {
 		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
 		
 			// Set approve transaction menu info long press
-			approveTransactionMenuInfoLongPress.text = "Receive transaction";
+			approveTransactionMenuInfoLongPress.text = "Receive transaction?";
 			approveTransactionMenuInfoLongPress.longPressText = "Hold to receive";
 		}
 		
