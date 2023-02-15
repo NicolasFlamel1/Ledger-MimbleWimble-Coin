@@ -112,7 +112,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_pageNavigationInfo_t verifyAddressMenuNavigationInfo;
 	
 	// Sign MQS timestamp menu tag value pairs
-	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[2];
+	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[3];
 	
 	// Sign MQS timestamp menu tag value list
 	static nbgl_layoutTagValueList_t signMqsTimestampMenuTagValueList;
@@ -121,7 +121,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_pageInfoLongPress_t signMqsTimestampMenuInfoLongPress;
 	
 	// Sign Tor certificate menu tag value pairs
-	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[3];
+	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[4];
 	
 	// Sign Tor certificate menu tag value list
 	static nbgl_layoutTagValueList_t signTorCertificateMenuTagValueList;
@@ -1945,11 +1945,14 @@ void showMenu(enum Menu menu) {
 	void signMqsTimestampMenuContinueCallback(void) {
 	
 		// Set sign MQS timestamp menu tag value pairs
-		signMqsTimestampMenuTagValuePairs[0].item = "Time And Date";
-		signMqsTimestampMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		signMqsTimestampMenuTagValuePairs[0].item = "Account Index";
+		signMqsTimestampMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		
-		signMqsTimestampMenuTagValuePairs[1].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
-		signMqsTimestampMenuTagValuePairs[1].value = "";
+		signMqsTimestampMenuTagValuePairs[1].item = "Time And Date";
+		signMqsTimestampMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		
+		signMqsTimestampMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
+		signMqsTimestampMenuTagValuePairs[2].value = "";
 		
 		// Set sign MQS timestamp menu tag value list
 		signMqsTimestampMenuTagValueList.nbPairs = ARRAYLEN(signMqsTimestampMenuTagValuePairs);
@@ -2015,26 +2018,29 @@ void showMenu(enum Menu menu) {
 	void signTorCertificateMenuContinueCallback(void) {
 	
 		// Set sign Tor certificate menu tag value pairs
-		signTorCertificateMenuTagValuePairs[0].item = "Expires";
-		signTorCertificateMenuTagValuePairs[0].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		signTorCertificateMenuTagValuePairs[0].item = "Account Index";
+		signTorCertificateMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		
-		signTorCertificateMenuTagValuePairs[1].item = addressTypeLineBuffer;
-		signTorCertificateMenuTagValuePairs[1].value = (char *)publicKeyOrAddressLineBuffer;
+		signTorCertificateMenuTagValuePairs[1].item = "Expires";
+		signTorCertificateMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		
+		signTorCertificateMenuTagValuePairs[2].item = addressTypeLineBuffer;
+		signTorCertificateMenuTagValuePairs[2].value = (char *)publicKeyOrAddressLineBuffer;
 		
 		// Check if currency allows Tor addresses
 		if(currencyInformation->enableTorAddress) {
 		
 			// Set sign Tor certificate menu tag value pairs
-			signTorCertificateMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's Tor\ntransactions";
-			signTorCertificateMenuTagValuePairs[2].value = "";
+			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Tor\ntransactions";
+			signTorCertificateMenuTagValuePairs[3].value = "";
 		}
 		
 		// Otherwise if check currency allows Slatepack addresses
 		else if(currencyInformation->enableSlatepackAddress) {
 		
 			// Set sign Tor certificate menu tag value pairs
-			signTorCertificateMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
-			signTorCertificateMenuTagValuePairs[2].value = "";
+			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
+			signTorCertificateMenuTagValuePairs[3].value = "";
 		}
 		
 		// Set sign Tor certificate menu tag value list
