@@ -17,8 +17,14 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	// Clear current currency information
 	explicit_bzero(currentCurrencyInformation, sizeof(*currentCurrencyInformation));
 
+	// Assert that currency BIP44 coin type is valid
+	_Static_assert(CURRENCY_BIP44_COIN_TYPE >= 0 && CURRENCY_BIP44_COIN_TYPE <= UINT32_MAX, "Invalid currency BIP44 coin type");
+	
 	// Set current currency information's BIP44 coin type
 	currentCurrencyInformation->bip44CoinType = CURRENCY_BIP44_COIN_TYPE;
+	
+	// Assert that currency fractional digits is valid
+	_Static_assert(CURRENCY_FRACTIONAL_DIGITS >= 0 && CURRENCY_FRACTIONAL_DIGITS <= UINT8_MAX, "Invalid currency fractional digits");
 	
 	// Set current currency information's fractional digits
 	currentCurrencyInformation->fractionalDigits = CURRENCY_FRACTIONAL_DIGITS;
@@ -47,6 +53,9 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	// Check if maximum fee exists
 	#ifdef CURRENCY_MAXIMUM_FEE
 	
+		// Assert that currency maximum fee is valid
+		_Static_assert(CCURRENCY_MAXIMUM_FEE >= 0 && CURRENCY_MAXIMUM_FEE <= UINT64_MAX, "Invalid currency maximum fee");
+	
 		// Set current currency information's maximum fee
 		currentCurrencyInformation->maximumFee = CURRENCY_MAXIMUM_FEE;
 	
@@ -57,14 +66,20 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->maximumFee = UINT64_MAX;
 	#endif
 	
+	// Assert that currency ID is valid
+	_Static_assert(CURRENCY_ID >= 0 && CURRENCY_ID < TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES, "Invalid currency ID");
+	
 	// Set current currency information's ID
 	currentCurrencyInformation->id = CURRENCY_ID;
 	
 	// Check if MQS version exists
 	#ifdef CURRENCY_MQS_VERSION
 	
+		// Assert that that currency MQS version is valid
+		_Static_assert(sizeof((uint8_t [])CURRENCY_MQS_VERSION) == sizeof(currentCurrencyInformation->mqsVersion), "Invalid currency MQS version");
+	
 		// Set current currency information's MQS version
-		memcpy(currentCurrencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof(currentCurrencyInformation->mqsVersion));
+		memcpy(currentCurrencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof((uint8_t [])CURRENCY_MQS_VERSION));
 	#endif
 	
 	// Set current currency information's name
@@ -75,6 +90,9 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 	// Set current currency information's version
 	strncpy(currentCurrencyInformation->version, CURRENCY_VERSION, sizeof(currentCurrencyInformation->version) - sizeof((char)'\0'));
+	
+	// Assert that that currency icon details is valid
+	_Static_assert(sizeof(CURRENCY_ICON_DETAILS) == sizeof(currentCurrencyInformation->iconDetails), "Invalid currency icon details");
 	
 	// Set current currency information's icon details
 	memcpy(&currentCurrencyInformation->iconDetails, &CURRENCY_ICON_DETAILS, sizeof(CURRENCY_ICON_DETAILS));
@@ -89,6 +107,9 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		// Set current currency information's icon colors
 		memcpy(&currentCurrencyInformation->iconColors, &CURRENCY_ICON_COLORS, sizeof(currentCurrencyInformation->iconColors));
 		
+		// Assert that that currency icon bitmap is valid
+		_Static_assert(sizeof(CURRENCY_ICON_BITMAP) <= sizeof(currentCurrencyInformation->iconBitmap), "Invalid currency icon bitmap");
+		
 		// Set current currency information's icon bitmap
 		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(CURRENCY_ICON_BITMAP));
 	
@@ -97,6 +118,9 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 		// Set current currency information's icon details
 		currentCurrencyInformation->iconDetails.bitmap = currentCurrencyInformation->iconBitmap;
+		
+		// Assert that that currency icon bitmap is valid
+		_Static_assert(sizeof(CURRENCY_ICON_BITMAP) <= sizeof(currentCurrencyInformation->iconBitmap), "Invalid currency icon bitmap");
 		
 		// Set current currency information's icon bitmap
 		memcpy(&currentCurrencyInformation->iconBitmap, &CURRENCY_ICON_BITMAP, sizeof(CURRENCY_ICON_BITMAP));

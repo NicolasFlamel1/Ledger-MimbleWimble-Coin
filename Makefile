@@ -157,7 +157,7 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	endif
 
 	# Defines library
-	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
@@ -222,7 +222,7 @@ else ifeq ($(CURRENCY),grin)
 	endif
 
 	# Defines library
-	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
@@ -287,7 +287,7 @@ else ifeq ($(CURRENCY),grin_testnet)
 	endif
 
 	# Defines library
-	DEFINES_LIB = USE_LIB_MIMBLEWIMBLE_COIN
+	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
 	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
@@ -335,7 +335,6 @@ endif
 all: default
 
 # Defines
-DEFINES += $(DEFINES_LIB)
 DEFINES += APPNAME=\"$(APPNAME)\"
 DEFINES += APPVERSION=\"$(APPVERSION)\"
 DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
