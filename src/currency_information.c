@@ -54,7 +54,7 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	#ifdef CURRENCY_MAXIMUM_FEE
 	
 		// Assert that currency maximum fee is valid
-		_Static_assert(CCURRENCY_MAXIMUM_FEE >= 0 && CURRENCY_MAXIMUM_FEE <= UINT64_MAX, "Invalid currency maximum fee");
+		_Static_assert(CURRENCY_MAXIMUM_FEE >= 0 && CURRENCY_MAXIMUM_FEE <= UINT64_MAX, "Invalid currency maximum fee");
 	
 		// Set current currency information's maximum fee
 		currentCurrencyInformation->maximumFee = CURRENCY_MAXIMUM_FEE;
