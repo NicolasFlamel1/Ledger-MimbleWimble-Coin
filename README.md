@@ -19,8 +19,25 @@ sudo apt install libc6-dev gcc-multilib g++-multilib
 Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, and/or Ledger Stax SDK:
 ```
 git clone https://github.com/LedgerHQ/nanos-secure-sdk.git
-git clone https://github.com/LedgerHQ/nanox-secure-sdk.git
-git clone https://github.com/LedgerHQ/nanosplus-secure-sdk.git
+
+git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
+mv ledger-secure-sdk nanox-secure-sdk
+cd nanox-secure-sdk
+git checkout nanox_2.1.0
+git checkout API_LEVEL_1
+git pull
+echo nanox > .target
+cd ..
+
+git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
+mv ledger-secure-sdk nanosplus-secure-sdk
+cd nanosplus-secure-sdk
+git checkout nanos+_1.1.0
+git checkout API_LEVEL_1
+git pull
+echo nanos2 > .target
+cd ..
+
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk stax-secure-sdk
 cd stax-secure-sdk
