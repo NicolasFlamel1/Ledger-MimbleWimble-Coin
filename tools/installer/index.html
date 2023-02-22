@@ -315,7 +315,7 @@
 					if(typeof error === "object" && error !== null && "statusCode" in error === true && (error["statusCode"] === 0x6A83 || error["statusCode"] === 0x6811)) {
 					
 						// Add alert
-						addAlert("One or more of the app's dependencies are not currently installed on the " + walletName + ". The MimbleWimble Coin app v" + APPS[app]["Version"] + " must be installed on the hardware wallet in order for this app to be installed.");
+						addAlert("One or more of the app's dependencies are not currently installed on the " + walletName + "." + (("Dependency" in APPS[app] === true) ? " The " + APPS[app]["Dependency"] + " app v" + APPS[app]["Version"] + " must be installed on the hardware wallet in order for this app to be installed." : ""));
 					}
 					
 					// Otherwise check if error is a storage requirement error

@@ -1668,6 +1668,9 @@ e00000000109`
 		// Version
 		"Version": "6.0.2",
 		
+		// Dependency
+		"Dependency": "MimbleWimble Coin",
+		
 		// Hash
 		"Hash": {
 		
@@ -1762,6 +1765,9 @@ e00000000109`
 		// Version
 		"Version": "6.0.2",
 		
+		// Dependency
+		"Dependency": "MimbleWimble Coin",
+		
 		// Hash
 		"Hash": {
 		
@@ -1855,6 +1861,9 @@ e00000000109`
 	
 		// Version
 		"Version": "6.0.2",
+		
+		// Dependency
+		"Dependency": "MimbleWimble Coin",
 		
 		// Hash
 		"Hash": {
