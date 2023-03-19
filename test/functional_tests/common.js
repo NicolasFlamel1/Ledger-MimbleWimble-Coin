@@ -3,7 +3,7 @@
 
 
 // Requires
-var BigNumber = require("./bignumber.js-9.0.2.js");
+const BigNumber = require("./bignumber.js-9.0.2.js");
 
 
 // Classes
@@ -192,7 +192,7 @@ class Common {
 				var arrayTwoValue = (i < arrayTwo["length"]) ? arrayTwo[i] : 0;
 				
 				// Update result to if current values are equal
-				result |= arrayOneValue ^ arrayTwoValue;
+				result |= (arrayOneValue === arrayTwoValue) ? 0 : 1;
 			}
 			
 			// Return if arrays are equal
@@ -1431,7 +1431,7 @@ class Common {
 // Set global object's common
 globalThis["Common"] = Common;
 
-// Export Common
+// Export common
 module["exports"] = Common;
 
 // Check if jQuery exists

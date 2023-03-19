@@ -591,6 +591,9 @@ class Crypto {
 								// Otherwise
 								else {
 								
+									// Securely clear secret key
+									secretKey.fill(0);
+									
 									// Reject error
 									reject("Secret key is not a valid secret key.");
 								}
@@ -932,9 +935,6 @@ class Crypto {
 									// Otherwise
 									else {
 									
-										// Securely clear updated secret key
-										updatedSecretKey.fill(0);
-										
 										// Check if using BIP39
 										if(useBip39 === true) {
 										
@@ -1143,5 +1143,5 @@ class Crypto {
 // Set global object's crypto
 globalThis["Crypto"] = Crypto;
 
-// Export seed
+// Export crypto
 module["exports"] = Crypto;

@@ -103,7 +103,7 @@ class NewProofBuilder extends ProofBuilder {
 			// Securely clear private hash
 			this.privateHash.fill(0);
 			
-			// Securley clear rewind hash
+			// Securely clear rewind hash
 			this.rewindHash.fill(0);
 		}
 	

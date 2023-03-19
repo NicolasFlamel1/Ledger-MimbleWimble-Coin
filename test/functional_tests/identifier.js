@@ -441,5 +441,5 @@ class Identifier {
 // Set global object's identifier
 globalThis["Identifier"] = Identifier;
 
-// Export seed
+// Export identifier
 module["exports"] = Identifier;

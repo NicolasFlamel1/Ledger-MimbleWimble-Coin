@@ -399,7 +399,7 @@ class Seed {
 														// Return creating extended private key
 														return createExtendedPrivateKey(extendedPrivateKey).then(function(newExtendedPrivateKey) {
 														
-															// Securley clear extended private key
+															// Securely clear extended private key
 															extendedPrivateKey.fill(0);
 															
 															// Resolve new extended private key
@@ -408,7 +408,7 @@ class Seed {
 														// Catch errors
 														}).catch(function(error) {
 														
-															// Securley clear extended private key
+															// Securely clear extended private key
 															extendedPrivateKey.fill(0);
 														
 															// Reject error
