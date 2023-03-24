@@ -3,7 +3,7 @@
 
 
 // Requires
-const BigNumber = require("./bignumber.js-9.0.2.js");
+const BigNumber = require("./bignumber.js-9.1.1.js");
 const Common = require("./common.js");
 const Crypto = require("./crypto.js");
 const Consensus = require("./consensus.js");

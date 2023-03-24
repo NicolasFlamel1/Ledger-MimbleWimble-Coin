@@ -3,7 +3,7 @@
 
 
 // Requires
-const BigNumber = require("./bignumber.js-9.0.2.js");
+const BigNumber = require("./bignumber.js-9.1.1.js");
 
 
 // Classes
