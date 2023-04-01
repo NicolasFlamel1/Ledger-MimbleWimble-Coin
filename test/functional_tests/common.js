@@ -781,21 +781,21 @@ class Common {
 			return Math.pow(2, Common.BITS_IN_A_BYTE) - 1;
 		}
 		
-		// Uint16 max vaue
+		// Uint16 max value
 		static get UINT16_MAX_VALUE() {
 		
 			// Return uint16 max value
 			return Math.pow(2, Common.BITS_IN_A_BYTE * Uint16Array["BYTES_PER_ELEMENT"]) - 1;
 		}
 		
-		// Uint32 max vaue
+		// Uint32 max value
 		static get UINT32_MAX_VALUE() {
 		
 			// Return uint32 max value
 			return Math.pow(2, Common.BITS_IN_A_BYTE * Uint32Array["BYTES_PER_ELEMENT"]) - 1;
 		}
 		
-		// Int32 max vaue
+		// Int32 max value
 		static get INT32_MAX_VALUE() {
 		
 			// Return int32 max value
@@ -975,6 +975,13 @@ class Common {
 		
 			// Return WebSocket secure protocol
 			return "wss:";
+		}
+		
+		// File protocol
+		static get FILE_PROTOCOL() {
+		
+			// Return file protocol
+			return "file:";
 		}
 		
 		// HTTP no response status

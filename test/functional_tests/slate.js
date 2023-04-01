@@ -2031,6 +2031,12 @@ class Slate {
 					// Return display kernel features
 					return "plain";
 				
+				// Coinbase features
+				case SlateKernel.COINBASE_FEATURES:
+				
+					// Return display kernel features
+					return "coinbase";
+				
 				// Height locked features
 				case SlateKernel.HEIGHT_LOCKED_FEATURES:
 				
