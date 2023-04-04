@@ -219,6 +219,9 @@
 						
 							// Reset state
 							resetState();
+							
+							// Fall through
+							__attribute__((fallthrough));
 						
 						// Higher application errors or success
 						case ERR_APP_RANGE_03:

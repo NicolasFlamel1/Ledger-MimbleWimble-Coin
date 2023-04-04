@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "../chacha20_poly1305.h"
 #include "../common.h"
@@ -38,22 +39,22 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 	}
 	
 	// Initialize encrypted data
-	uint8_t encryptedData[dataLength];
+	uint8_t *encryptedData = alloca(dataLength);
 	
 	// Encrypt ChaCha20 Poly1305 data
 	encryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, encryptedData, data, dataLength);
 	
 	// Check if response with the encrypted data will overflow
-	if(willResponseOverflow(*responseLength, sizeof(encryptedData))) {
+	if(willResponseOverflow(*responseLength, dataLength)) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 	
 	// Append encrypted data to response
-	memcpy(&G_io_apdu_buffer[*responseLength], encryptedData, sizeof(encryptedData));
+	memcpy(&G_io_apdu_buffer[*responseLength], encryptedData, dataLength);
 	
-	*responseLength += sizeof(encryptedData);
+	*responseLength += dataLength;
 	
 	// Check if at the last data
 	if(dataLength < CHACHA20_BLOCK_SIZE) {

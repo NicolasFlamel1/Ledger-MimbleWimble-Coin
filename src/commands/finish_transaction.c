@@ -318,12 +318,15 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 					break;
 			}
 			
+			// Get payment proof message length
+			const size_t paymentProofMessageLength = getPaymentProofMessageLength(transaction.send, addressLength);
+			
 			// Get payment proof message
-			uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.send, addressLength)];
+			uint8_t *paymentProofMessage = alloca(paymentProofMessageLength);
 			getPaymentProofMessage(paymentProofMessage, transaction.send, kernelCommitment, address, addressLength);
 			
 			// Check if verifying payment proof failed
-			if(!verifyPaymentProofMessage(paymentProofMessage, sizeof(paymentProofMessage), transaction.address, transaction.addressLength, signature, signatureLength)) {
+			if(!verifyPaymentProofMessage(paymentProofMessage, paymentProofMessageLength, transaction.address, transaction.addressLength, signature, signatureLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -687,8 +690,11 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 		// Get kernel commitment from data
 		const uint8_t *kernelCommitment = &data[COMPRESSED_PUBLIC_KEY_SIZE + COMPRESSED_PUBLIC_KEY_SIZE + kernelFeaturesLength];
 		
+		// Get payment proof message length
+		const size_t paymentProofMessageLength = getPaymentProofMessageLength(transaction.receive, transaction.addressLength);
+		
 		// Get payment proof message
-		uint8_t paymentProofMessage[getPaymentProofMessageLength(transaction.receive, transaction.addressLength)];
+		uint8_t *paymentProofMessage = alloca(paymentProofMessageLength);
 		
 		getPaymentProofMessage(paymentProofMessage, transaction.receive, kernelCommitment, transaction.address, transaction.addressLength);
 		
@@ -716,7 +722,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 							cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
 							
 							// Check if the address public key is in the payment proof message
-							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, addressPublicKey.W_len)) {
+							if(memmem(paymentProofMessage, paymentProofMessageLength, addressPublicKey.W, addressPublicKey.W_len)) {
 							
 								// Throw internal error error
 								THROW(INTERNAL_ERROR_ERROR);
@@ -726,7 +732,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 							addressPublicKey.W[0] = (addressPublicKey.W[addressPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 							
 							// Check if the compressed address public key is in the payment proof message
-							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), addressPublicKey.W, COMPRESSED_PUBLIC_KEY_SIZE)) {
+							if(memmem(paymentProofMessage, paymentProofMessageLength, addressPublicKey.W, COMPRESSED_PUBLIC_KEY_SIZE)) {
 							
 								// Throw internal error error
 								THROW(INTERNAL_ERROR_ERROR);
@@ -741,7 +747,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						
 						// Get hash of the payment proof message
 						uint8_t hash[CX_SHA256_SIZE];
-						cx_hash_sha256(paymentProofMessage, sizeof(paymentProofMessage), hash, sizeof(hash));
+						cx_hash_sha256(paymentProofMessage, paymentProofMessageLength, hash, sizeof(hash));
 				
 						// Get signature of the hash
 						paymentProofLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)paymentProof, paymentProofLength, NULL);
@@ -765,7 +771,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 							cx_edwards_compress_point(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len);
 							
 							// Check if the address public key is in the payment proof message
-							if(memmem(paymentProofMessage, sizeof(paymentProofMessage), &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
+							if(memmem(paymentProofMessage, paymentProofMessageLength, &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
 							
 								// Throw internal error error
 								THROW(INTERNAL_ERROR_ERROR);
@@ -779,7 +785,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						paymentProof = alloca(paymentProofLength);
 					
 						// Get signature of the payment proof message
-						cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, paymentProofMessage, sizeof(paymentProofMessage), NULL, 0, (uint8_t *)paymentProof, paymentProofLength, NULL);
+						cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, paymentProofMessage, paymentProofMessageLength, NULL, 0, (uint8_t *)paymentProof, paymentProofLength, NULL);
 					
 						// Break
 						break;

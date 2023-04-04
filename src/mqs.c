@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "base58.h"
 #include "common.h"
@@ -91,7 +92,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 	}
 	
 	// Check if decoding MQS address failed
-	uint8_t decodedMqsAddress[decodedMqsAddressLength];
+	uint8_t *decodedMqsAddress = alloca(decodedMqsAddressLength);
 	if(!base58DecodeWithChecksum(decodedMqsAddress, mqsAddress, length)) {
 	
 		// Return false

@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "base58.h"
 #include "common.h"
@@ -120,8 +121,8 @@ size_t base58EncodeGetLength(char *result, const uint8_t *data, const size_t len
 	const size_t bufferSize = (length - numberOfLeadingZeros) * SIZE_PERCENT_INCREASE / 100 + 1;
 	
 	// Create buffer
-	uint8_t buffer[bufferSize];
-	explicit_bzero(buffer, sizeof(buffer));
+	uint8_t *buffer = alloca(bufferSize);
+	explicit_bzero(buffer, bufferSize);
 	
 	// Go through all bytes in the byte array after the leading zeros
 	size_t currentLength = 0;
@@ -202,8 +203,8 @@ size_t base58DecodeGetLength(uint8_t *result, const char *data, const size_t len
 	const size_t bufferSize = (length - numberOfLeadingZeros) * SIZE_PERCENT_DECREASE / 1000 + 1;
 	
 	// Create buffer
-	uint8_t buffer[bufferSize];
-	explicit_bzero(buffer, sizeof(buffer));
+	uint8_t *buffer = alloca(bufferSize);
+	explicit_bzero(buffer, bufferSize);
 	
 	// Go through all characters in the string after the leading zeros in base58
 	size_t currentLength = 0;

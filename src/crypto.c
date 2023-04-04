@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <os.h>
 #include <os_io_seproxyhal.h>
 #include <string.h>
@@ -812,8 +813,11 @@ size_t getEncryptedDataLength(const size_t dataLength) {
 // Encrypt data
 void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dataLength, const uint8_t *key, const size_t keyLength) {
 
+	// Get padded data length
+	const size_t paddedDataLength = getEncryptedDataLength(dataLength);
+	
 	// Initialize padded data
-	volatile uint8_t paddedData[getEncryptedDataLength(dataLength)];
+	volatile uint8_t *paddedData = alloca(paddedDataLength);
 	
 	// Initialize encryption key
 	volatile cx_aes_key_t encryptionKey;
@@ -826,13 +830,13 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dat
 		
 			// Pad the data
 			memcpy((uint8_t *)paddedData, data, dataLength);
-			memset((uint8_t *)&paddedData[dataLength], sizeof(paddedData) - dataLength, sizeof(paddedData) - dataLength);
+			memset((uint8_t *)&paddedData[dataLength], paddedDataLength - dataLength, paddedDataLength - dataLength);
 		
 			// Initialize the encryption key with the key
 			cx_aes_init_key(key, keyLength, (cx_aes_key_t *)&encryptionKey);
 			
 			// Encrypt the padded data with the encryption key
-			cx_aes((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, (uint8_t *)paddedData, sizeof(paddedData), (uint8_t *)result, sizeof(paddedData));
+			cx_aes((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, (uint8_t *)paddedData, paddedDataLength, (uint8_t *)result, paddedDataLength);
 		}
 		
 		// Finally
@@ -842,7 +846,7 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dat
 			explicit_bzero((cx_aes_key_t *)&encryptionKey, sizeof(encryptionKey));
 			
 			// Clear the padded data
-			explicit_bzero((uint8_t *)paddedData, sizeof(paddedData));
+			explicit_bzero((uint8_t *)paddedData, paddedDataLength);
 		}
 	}
 	
@@ -2485,8 +2489,8 @@ end:
 		error = MAX(cx_ecpoint_destroy(&resultPoint), error);
 	}
 	
-	// Unlock big number processor and throw error if it fails
-	CX_THROW(cx_bn_unlock());
+	// Unlock big number processor and set error to if it fails
+	error = MAX(cx_bn_unlock(), error);
 	
 	// Check if error occurred
 	if(error) {

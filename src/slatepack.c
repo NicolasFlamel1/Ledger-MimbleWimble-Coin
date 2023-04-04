@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "bech32.h"
 #include "common.h"
@@ -144,7 +145,7 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 	}
 	
 	// Decode Slatepack address
-	uint8_t decodedSlatepackAddress[decodedSlatepackAddressLength];
+	uint8_t *decodedSlatepackAddress = alloca(decodedSlatepackAddressLength);
 	bech32Decode(decodedSlatepackAddress, slatepackAddress, length);
 	
 	// Check if the decoded Slatepack address isn't a valid Ed25519 public key

@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "../age.h"
 #include "../common.h"
@@ -149,7 +150,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 	}
 	
 	// Initialize shared private key
-	volatile uint8_t sharedPrivateKey[sharedPrivateKeyLength];
+	volatile uint8_t *sharedPrivateKey = alloca(sharedPrivateKeyLength);
 	
 	// Begin try
 	BEGIN_TRY {
@@ -196,7 +197,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		FINALLY {
 			
 			// Clear the shared private key
-			explicit_bzero((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
+			explicit_bzero((uint8_t *)sharedPrivateKey, sharedPrivateKeyLength);
 		}
 	}
 	

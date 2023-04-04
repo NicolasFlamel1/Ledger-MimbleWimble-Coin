@@ -500,6 +500,9 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 				
 					// Set error to internal error error
 					error = INTERNAL_ERROR_ERROR;
+					
+					// Fall through
+					__attribute__((fallthrough));
 				
 				// Lower application errors
 				case ERR_APP_RANGE_01:
@@ -510,6 +513,9 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 					
 					// Set operation failed
 					operationFailed = true;
+					
+					// Fall through
+					__attribute__((fallthrough));
 				
 				// Success
 				case SWO_SUCCESS:

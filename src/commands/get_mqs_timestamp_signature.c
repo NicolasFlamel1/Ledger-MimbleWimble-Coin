@@ -131,8 +131,11 @@ void processGetMqsTimestampSignatureUserInteraction(unsigned short *responseLeng
 	uint64_t timestamp;
 	memcpy(&timestamp, &data[sizeof(account) + sizeof(index)], sizeof(timestamp));
 	
+	// Get timestamp string length
+	const size_t timestampStringLength = getStringLength(timestamp);
+	
 	// Get timestamp as a string
-	char timestampString[getStringLength(timestamp)];
+	char *timestampString = alloca(timestampStringLength);
 	toString(timestampString, timestamp, 0);
 	
 	// Initialize address private key
@@ -155,7 +158,7 @@ void processGetMqsTimestampSignatureUserInteraction(unsigned short *responseLeng
 			
 			// Get hash of the timestamp
 			uint8_t hash[CX_SHA256_SIZE];
-			cx_hash_sha256((uint8_t *)timestampString, sizeof(timestampString), hash, sizeof(hash));
+			cx_hash_sha256((uint8_t *)timestampString, timestampStringLength, hash, sizeof(hash));
 			
 			// Get signature of the hash
 			signatureLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)signature, sizeof(signature), NULL);

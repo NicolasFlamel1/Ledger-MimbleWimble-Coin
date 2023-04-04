@@ -239,13 +239,16 @@ void processGetTorCertificateSignatureRequest(__attribute__((unused)) const unsi
 	// Otherwise if check currency allows Slatepack addresses
 	else if(currencyInformation->enableSlatepackAddress) {
 	
+		// Get Slatepack address length
+		const size_t slatepackAddressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart);
+	
 		// Get Slatepack address from the signed public key
-		char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
+		char *slatepackAddress = alloca(slatepackAddressLength);
 		getSlatepackAddressFromPublicKey(slatepackAddress, signedPublicKey);
 		
 		// Copy Slatepack address into the public key or address line buffer
-		memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-		publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+		memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, slatepackAddressLength);
+		publicKeyOrAddressLineBuffer[slatepackAddressLength] = '\0';
 		
 		// Set address type line buffer
 		explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));

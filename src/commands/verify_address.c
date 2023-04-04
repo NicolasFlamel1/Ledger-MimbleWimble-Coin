@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "../common.h"
 #include "../currency_information.h"
@@ -131,13 +132,16 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 			strncpy(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			{
+				// Get Slatepack address length
+				const size_t slatepackAddressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart);
+				
 				// Get Slatepack address
-				char slatepackAddress[SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)];
+				char *slatepackAddress = alloca(slatepackAddressLength);
 				getSlatepackAddress(slatepackAddress, account, index);
 				
 				// Copy Slatepack address into the public key or address line buffer
-				memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, sizeof(slatepackAddress));
-				publicKeyOrAddressLineBuffer[sizeof(slatepackAddress)] = '\0';
+				memcpy((char *)publicKeyOrAddressLineBuffer, slatepackAddress, slatepackAddressLength);
+				publicKeyOrAddressLineBuffer[slatepackAddressLength] = '\0';
 			}
 			
 			// Break

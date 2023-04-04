@@ -1,4 +1,5 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "../chacha20_poly1305.h"
 #include "../common.h"
@@ -39,10 +40,13 @@ void processContinueDecryptingSlateRequest(unsigned short *responseLength, __att
 	}
 	
 	// Initialize decrypted data
-	volatile uint8_t decryptedData[dataLength];
+	volatile uint8_t *decryptedData = alloca(dataLength);
+	
+	// Get encrypted data length
+	const size_t encryptedDataLength = getEncryptedDataLength(dataLength);
 	
 	// Initialize encrypted data
-	volatile uint8_t encryptedData[getEncryptedDataLength(sizeof(decryptedData))];
+	volatile uint8_t *encryptedData = alloca(encryptedDataLength);
 	
 	// Begin try
 	BEGIN_TRY {
@@ -54,14 +58,14 @@ void processContinueDecryptingSlateRequest(unsigned short *responseLength, __att
 			decryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, decryptedData, data, dataLength);
 			
 			// Encrypt the decrypted data
-			encryptData(encryptedData, (uint8_t *)decryptedData, sizeof(decryptedData), slate.sessionKey, sizeof(slate.sessionKey));
+			encryptData(encryptedData, (uint8_t *)decryptedData, dataLength, slate.sessionKey, sizeof(slate.sessionKey));
 		}
 		
 		// Finally
 		FINALLY {
 		
 			// Clear the decrypted data
-			explicit_bzero((uint8_t *)decryptedData, sizeof(decryptedData));
+			explicit_bzero((uint8_t *)decryptedData, dataLength);
 		}
 	}
 	
@@ -69,16 +73,16 @@ void processContinueDecryptingSlateRequest(unsigned short *responseLength, __att
 	END_TRY;
 	
 	// Check if response with the encrypted data will overflow
-	if(willResponseOverflow(*responseLength, sizeof(encryptedData))) {
+	if(willResponseOverflow(*responseLength, encryptedDataLength)) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
 	
 	// Append encrypted data to response
-	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)encryptedData, sizeof(encryptedData));
+	memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)encryptedData, encryptedDataLength);
 	
-	*responseLength += sizeof(encryptedData);
+	*responseLength += encryptedDataLength;
 	
 	// Check if at the last data
 	if(dataLength < CHACHA20_BLOCK_SIZE) {

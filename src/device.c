@@ -116,6 +116,9 @@ unsigned char io_event(__attribute__((unused)) const unsigned char channel) {
 				// Throw IO reset error
 				THROW(EXCEPTION_IO_RESET);
 			}
+			
+			// Fall through
+			__attribute__((fallthrough));
 		
 		// Display processed event
 		case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:

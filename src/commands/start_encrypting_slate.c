@@ -124,7 +124,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	cx_rng(nonce, sizeof(nonce));
 	
 	// Initialize shared private key
-	volatile uint8_t sharedPrivateKey[sharedPrivateKeyLength];
+	volatile uint8_t *sharedPrivateKey = alloca(sharedPrivateKeyLength);
 	
 	// Begin try
 	BEGIN_TRY {
@@ -162,7 +162,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		FINALLY {
 			
 			// Clear the shared private key
-			explicit_bzero((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
+			explicit_bzero((uint8_t *)sharedPrivateKey, sharedPrivateKeyLength);
 		}
 	}
 	
