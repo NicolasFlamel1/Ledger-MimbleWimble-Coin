@@ -56,6 +56,9 @@ void processGetMqsTimestampSignatureRequest(__attribute__((unused)) const unsign
 	uint64_t timestamp;
 	memcpy(&timestamp, &data[sizeof(account) + sizeof(uint32_t)], sizeof(timestamp));
 	
+	// Convert timestamp from milliseconds to seconds
+	timestamp /= MILLISECONDS_IN_A_SECOND;
+	
 	// Check if timestamp is invalid
 	if(timestamp > MAXIMUM_EPOCH) {
 	

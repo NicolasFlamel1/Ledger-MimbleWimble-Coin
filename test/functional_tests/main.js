@@ -3268,13 +3268,13 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	const TIMESTAMP = new BigNumber(Math.round(Math.random() * Common.UINT32_MAX_VALUE));
 	
 	// Log timestamp
-	console.log("Using timestamp: " + TIMESTAMP.toFixed());
+	console.log("Using timestamp: " + TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toFixed());
 	
 	// Get MQS private key from the extended private key
 	const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
 	
 	// Get timestamp hash
-	const timestampHash = new Uint8Array(sha256.arrayBuffer((new TextEncoder()).encode(TIMESTAMP.toFixed())));
+	const timestampHash = new Uint8Array(sha256.arrayBuffer((new TextEncoder()).encode(TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toFixed())));
 	
 	// Set expected MQS timestamp signature as the timestamp hash signed by the MQS private key
 	const expectedMqsTimestampSignature = Secp256k1Zkp.createMessageHashSignature(timestampHash, mqsPrivateKey);
@@ -3445,7 +3445,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 		Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
 		
 		// Timestamp
-		Buffer.from(TIMESTAMP.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+		Buffer.from(TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
 		// Time zone offset
 		Buffer.from(new Uint8Array(timeZoneOffsetBuffer))

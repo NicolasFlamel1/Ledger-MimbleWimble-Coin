@@ -9,6 +9,9 @@
 
 // Definitions
 
+// Milliseconds in a second
+#define MILLISECONDS_IN_A_SECOND 1000
+
 // Seconds in a minute
 #define SECONDS_IN_A_MINUTE 60
 

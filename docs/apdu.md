@@ -807,7 +807,7 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 |--------|--------------------|-------------|
 | 4      | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
 | 4      | `index`            | Index number (little endian) |
-| 8      | `timestamp`        | Timestamp epoch to sign (little endian, max 0xE0FFFFFF1F0) |
+| 8      | `timestamp`        | Timestamp epoch in milliseconds to sign (little endian, max 0x36EE7FFFC91567) |
 | 2      | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
 
 **Output Data**

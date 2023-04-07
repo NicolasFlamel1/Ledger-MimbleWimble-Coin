@@ -20,7 +20,7 @@
 #define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("Testnet GRIN")
 
 // Currency information version size
-#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("6.0.2")
+#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("6.0.3")
 
 // Check if has BAGL
 #ifdef HAVE_BAGL
