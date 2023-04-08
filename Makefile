@@ -17,14 +17,9 @@ APPVERSION_N = 0
 APPVERSION_P = 3
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
-# Check if target isn't the Stax
-# TODO Remove this check once Stax supports security review banner
-ifneq ($(TARGET_NAME),TARGET_STAX)
-
-	# Add security review banner. To be removed once Ledger security review is done.
-	APP_LOAD_PARAMS += --tlvraw 9F:01
-	DEFINES += HAVE_PENDING_REVIEW_SCREEN
-endif
+# Add security review banner. To be removed once Ledger security review is done.
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
 # Emulator flags
 EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
