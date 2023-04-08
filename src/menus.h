@@ -61,9 +61,6 @@ enum Menu {
 	// Sign MQS timestamp menu,
 	SIGN_MQS_TIMESTAMP_MENU,
 	
-	// Sign Tor certificate menu
-	SIGN_TOR_CERTIFICATE_MENU,
-	
 	// Approve transaction menu
 	APPROVE_TRANSACTION_MENU,
 	

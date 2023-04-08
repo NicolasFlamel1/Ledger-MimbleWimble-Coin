@@ -26,7 +26,6 @@ This app supports the following commands.
 | 0xC7  | 0x13        | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE` | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
 | 0xC7  | 0x14        | `FINISH_TRANSACTION`                         | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
 | 0xC7  | 0x15        | `GET_MQS_TIMESTAMP_SIGNATURE`                | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
-| 0xC7  | 0x16        | `GET_TOR_CERTIFICATE_SIGNATURE`              | Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index |
 
 ## Response Codes
 
@@ -815,42 +814,6 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 | Length        | Name        | Description |
 |---------------|-------------|-------------|
 | > 0 and <= 72 | `signature` | DER signature of the timestamp |
-
-### GET_TOR_CERTIFICATE_SIGNATURE
-
-#### Description
-
-Returns the signature for a provided Tor certificate signed with an account's Tor private key at a provided index after obtaining user's approval.
-
-#### Encoding
-
-**Command**
-
-| Class | Instruction |
-|-------|-------------|
-| 0xC7  | 0x16        |
-
-**Parameters**
-
-| Parameter | Name | Description |
-|-----------|------|-------------|
-| P1        | N/A  | Unused (must be zero) |
-| P2        | N/A  | Unused (must be zero) |
-
-**Input Data**
-
-| Length  | Name               | Description |
-|---------|--------------------|-------------|
-| 4       | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
-| 4       | `index`            | Index number (little endian) |
-| Varying | `tor_certificate`  | Ed25519_signing_cert without header and signature to sign |
-| 2       | `time_zone_offset` | Time zone offset in minutes used when displaying the Tor certificate's expiration timestamp (little endian, signed, min -780, max 900) |
-
-**Output Data**
-
-| Length | Name        | Description |
-|--------|-------------|-------------|
-| 64     | `signature` | Ed25519 signature of the Tor certificate |
 
 ## Notes
 * The app will reset its internal slate and/or transaction state when unrelated commands are requested. For example, performing a `START_TRANSACTION` command followed by a `GET_COMMITMENT` command will reset the app's internal transaction state thus requiring another `START_TRANSACTION` command to be performed before a `CONTINUE_TRANSACTION_INCLUDE_OUTPUT` command can be successfully performed.

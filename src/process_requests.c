@@ -20,7 +20,6 @@
 #include "commands/get_mqs_timestamp_signature.h"
 #include "commands/get_root_public_key.h"
 #include "commands/get_seed_cookie.h"
-#include "commands/get_tor_certificate_signature.h"
 #include "menus.h"
 #include "process_requests.h"
 #include "commands/start_decrypting_slate.h"
@@ -271,15 +270,6 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 				
 					// break
 					break;
-				
-				// Get Tor certificate signature instruction
-				case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
-				
-					// Process get Tor certificate signature request
-					processGetTorCertificateSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
-				
-					// break
-					break;
 
 				// Default
 				default:
@@ -435,15 +425,6 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 					
 						// Process get MQS timestamp signature user interaction
 						processGetMqsTimestampSignatureUserInteraction((unsigned short *)&responseLength);
-					
-						// break
-						break;
-					
-					// Get Tor certificate signature instruction
-					case GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION:
-					
-						// Process get Tor certificate signature user interaction
-						processGetTorCertificateSignatureUserInteraction((unsigned short *)&responseLength);
 					
 						// break
 						break;

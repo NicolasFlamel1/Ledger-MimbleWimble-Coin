@@ -120,15 +120,6 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	// Sign MQS timestamp menu info long press
 	static nbgl_pageInfoLongPress_t signMqsTimestampMenuInfoLongPress;
 	
-	// Sign Tor certificate menu tag value pairs
-	static nbgl_layoutTagValue_t signTorCertificateMenuTagValuePairs[4];
-	
-	// Sign Tor certificate menu tag value list
-	static nbgl_layoutTagValueList_t signTorCertificateMenuTagValueList;
-	
-	// Sign Tor certificate menu info long press
-	static nbgl_pageInfoLongPress_t signTorCertificateMenuInfoLongPress;
-	
 	// Sign approve transaction menu tag value pairs
 	static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[5];
 	
@@ -635,130 +626,6 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&signMqsTimestampMenuDenyScreen
 	);
 
-	// Sign Tor certificate menu notify screen
-	static UX_STEP_NOCB(signTorCertificateMenuNotifyScreen, pnn, {
-
-		// Picture
-		&C_icon_view,
-
-		// First line
-		"Sign Tor",
-		
-		// Second line
-		"certificate?"
-	});
-
-	// Sign Tor certificate menu account index screen
-	#define signTorCertificateMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
-
-	// Sign Tor certificate menu expiration screen
-	static UX_STEP_NOCB(signTorCertificateMenuExpirationScreen,
-
-		// Check if device has low height
-		#if BAGL_HEIGHT < 64
-		
-			// Layout
-			nb_paging,
-		
-		// Otherwise
-		#else
-		
-			// Layout
-			bnnn_paging,
-		#endif
-	{
-
-		// Title
-		.title = "Expires",
-		
-		// Text
-		.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
-	});
-
-	// Sign Tor certificate menu address screen
-	static UX_STEP_NOCB(signTorCertificateMenuAddressScreen,
-
-		// Check if device has low height
-		#if BAGL_HEIGHT < 64
-		
-			// Layout
-			nb_paging,
-		
-		// Otherwise
-		#else
-		
-			// Layout
-			bnnn_paging,
-		#endif
-	{
-
-		// Title
-		.title = addressTypeLineBuffer,
-		
-		// Text
-		.text = (char *)publicKeyOrAddressLineBuffer
-	});
-
-	// Sign Tor certificate menu warning screen one
-	#define signTorCertificateMenuWarningScreenOne signMqsTimestampMenuWarningScreenOne
-
-	// Sign Tor certificate menu warning screen two
-	#define signTorCertificateMenuWarningScreenTwo signMqsTimestampMenuWarningScreenTwo
-
-	// Sign Tor certificate menu warning screen three
-	#define signTorCertificateMenuWarningScreenThree signMqsTimestampMenuWarningScreenThree
-
-	// Sign Tor certificate menu approve screen
-	static UX_STEP_CB(signTorCertificateMenuApproveScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true, true), {
-
-		// Picture
-		&C_icon_approve,
-		
-		// Bold line
-		"Approve"
-	});
-
-	// Sign Tor certificate menu deny screen
-	static UX_STEP_CB(signTorCertificateMenuDenyScreen, pb, processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false, false), {
-
-		// Picture
-		&C_icon_reject,
-		
-		// Bold line
-		"Deny"
-	});
-
-	// Sign Tor certificate menu
-	static UX_FLOW(signTorCertificateMenu,
-
-		// Sign Tor certificate menu notify screen
-		&signTorCertificateMenuNotifyScreen,
-		
-		// Sign Tor certificate menu account index screen
-		&signTorCertificateMenuAccountIndexScreen,
-		
-		// Sign Tor certificate menu expiration screen
-		&signTorCertificateMenuExpirationScreen,
-		
-		// Sign Tor certificate menu address screen
-		&signTorCertificateMenuAddressScreen,
-		
-		// Sign Tor certificate menu warning screen one
-		&signTorCertificateMenuWarningScreenOne,
-		
-		// Sign Tor certificate menu warning screen two
-		&signTorCertificateMenuWarningScreenTwo,
-		
-		// Sign Tor certificate menu warning screen three
-		&signTorCertificateMenuWarningScreenThree,
-
-		// Sign Tor certificate menu approve screen
-		&signTorCertificateMenuApproveScreen,
-		
-		// Sign Tor certificate menu deny screen
-		&signTorCertificateMenuDenyScreen
-	);
-
 	// Approve transaction menu notify screen
 	static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {
 
@@ -1097,18 +964,6 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	// Sign MQS timestamp menu reject callback
 	static void signMqsTimestampMenuRejectCallback(void);
 	
-	// Sign Tor certificate menu continue callback
-	static void signTorCertificateMenuContinueCallback(void);
-	
-	// Sign Tor certificate menu choice callback
-	static void signTorCertificateMenuChoiceCallback(const bool confirm);
-	
-	// Sign Tor certificate menu confirm reject callback
-	static void signTorCertificateMenuConfirmRejectCallback(void);
-	
-	// Sign Tor certificate menu reject callback
-	static void signTorCertificateMenuRejectCallback(void);
-	
 	// Sign approve transaction menu continue callback
 	static void approveTransactionMenuContinueCallback(void);
 	
@@ -1298,15 +1153,6 @@ void showMenu(enum Menu menu) {
 			
 				// Set menu steps to sign MQS timestamp menu
 				menuSteps = signMqsTimestampMenu;
-				
-				// Break
-				break;
-			
-			// Sign Tor certificate menu
-			case SIGN_TOR_CERTIFICATE_MENU:
-			
-				// Set menu steps to sign Tor certificate menu
-				menuSteps = signTorCertificateMenu;
 				
 				// Break
 				break;
@@ -1507,15 +1353,6 @@ void showMenu(enum Menu menu) {
 			
 				// Show sign MQS timestamp menu
 				nbgl_useCaseReviewStart(&currencyIconBuffer, "Sign MQS timestamp?", NULL, "Deny", signMqsTimestampMenuContinueCallback, signMqsTimestampMenuConfirmRejectCallback);
-				
-				// Break
-				break;
-			
-			// Sign Tor certificate menu
-			case SIGN_TOR_CERTIFICATE_MENU:
-			
-				// Show sign Tor certificate menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Sign Tor certificate?", NULL, "Deny", signTorCertificateMenuContinueCallback, signTorCertificateMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -2012,95 +1849,6 @@ void showMenu(enum Menu menu) {
 		
 		// Show status
 		nbgl_useCaseStatus("Signing MQS\ntimestamp denied", false, showMainMenu);
-	}
-	
-	// Sign Tor certificate menu continue callback
-	void signTorCertificateMenuContinueCallback(void) {
-	
-		// Set sign Tor certificate menu tag value pairs
-		signTorCertificateMenuTagValuePairs[0].item = "Account Index";
-		signTorCertificateMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
-		
-		signTorCertificateMenuTagValuePairs[1].item = "Expires";
-		signTorCertificateMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
-		
-		signTorCertificateMenuTagValuePairs[2].item = addressTypeLineBuffer;
-		signTorCertificateMenuTagValuePairs[2].value = (char *)publicKeyOrAddressLineBuffer;
-		
-		// Check if currency allows Tor addresses
-		if(currencyInformation->enableTorAddress) {
-		
-			// Set sign Tor certificate menu tag value pairs
-			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Tor\ntransactions";
-			signTorCertificateMenuTagValuePairs[3].value = "";
-		}
-		
-		// Otherwise if check currency allows Slatepack addresses
-		else if(currencyInformation->enableSlatepackAddress) {
-		
-			// Set sign Tor certificate menu tag value pairs
-			signTorCertificateMenuTagValuePairs[3].item = "*The host will be able to listen\nfor the account's Slatepack\ntransactions";
-			signTorCertificateMenuTagValuePairs[3].value = "";
-		}
-		
-		// Set sign Tor certificate menu tag value list
-		signTorCertificateMenuTagValueList.nbPairs = ARRAYLEN(signTorCertificateMenuTagValuePairs);
-		signTorCertificateMenuTagValueList.pairs = signTorCertificateMenuTagValuePairs;
-		signTorCertificateMenuTagValueList.wrapping = true;
-		
-		// Set sign Tor certificate menu info long press
-		signTorCertificateMenuInfoLongPress.icon = &currencyIconBuffer;
-		signTorCertificateMenuInfoLongPress.text = "Sign Tor certificate?";
-		signTorCertificateMenuInfoLongPress.longPressText = "Hold to sign";
-		
-		// Show static review
-		nbgl_useCaseStaticReview(&signTorCertificateMenuTagValueList, &signTorCertificateMenuInfoLongPress, "Deny", signTorCertificateMenuChoiceCallback);
-	}
-	
-	// Sign Tor certificate menu choice callback
-	void signTorCertificateMenuChoiceCallback(const bool confirm) {
-	
-		// Check if confirmed
-		if(confirm) {
-		
-			// Check if processing user interaction was successful
-			if(processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, true, true)) {
-			
-				// Show status
-				nbgl_useCaseStatus("TOR CERTIFICATE\nSIGNED", true, showMainMenu);
-			}
-			
-			// Otherwise
-			else {
-			
-				// Show status
-				nbgl_useCaseStatus("Signing Tor certificate\nfailed", false, showMainMenu);
-			}
-		}
-		
-		// Otherwise
-		else {
-		
-			// Sign Tor certificate menu confirm reject callback
-			signTorCertificateMenuConfirmRejectCallback();
-		}
-	}
-	
-	// Sign Tor certificate menu confirm reject callback
-	void signTorCertificateMenuConfirmRejectCallback(void) {
-	
-		// Show confirm
-		nbgl_useCaseConfirm("Deny signing Tor\ncertificate?", NULL, "Yes, deny", "Go back", signTorCertificateMenuRejectCallback);
-	}
-	
-	// Sign Tor certificate menu reject callback
-	void signTorCertificateMenuRejectCallback(void) {
-	
-		// Process user interaction
-		processUserInteraction(GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION, false, false);
-		
-		// Show status
-		nbgl_useCaseStatus("Signing Tor certificate\ndenied", false, showMainMenu);
 	}
 	
 	// Sign approve transaction menu continue callback

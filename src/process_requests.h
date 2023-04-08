@@ -77,10 +77,7 @@ enum Instruction {
 	FINISH_TRANSACTION_INSTRUCTION,
 	
 	// Get MQS timestamp signature instruction
-	GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION,
-	
-	// Get Tor certificate signature instruction
-	GET_TOR_CERTIFICATE_SIGNATURE_INSTRUCTION
+	GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION
 };
 
 
