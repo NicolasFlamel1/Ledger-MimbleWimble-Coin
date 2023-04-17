@@ -19,6 +19,24 @@
 #define MQS_SHARED_PRIVATE_KEY_SIZE 32
 
 
+// Constants
+
+// MQS message part one
+static const char MQS_MESSAGE_PART_ONE[] = {'{', '"', 'd', 'e', 's', 't', 'i', 'n', 'a', 't', 'i', 'o', 'n', '"', ':', '{', '"', 'p', 'u', 'b', 'l', 'i', 'c', '_', 'k', 'e', 'y', '"', ':', '"'};
+
+// MQS message part two
+static const char MQS_MESSAGE_PART_TWO[] = {'"', ',', '"', 'd', 'o', 'm', 'a', 'i', 'n', '"', ':', '"', '"', ',', '"', 'p', 'o', 'r', 't', '"', ':', 'n', 'u', 'l', 'l', '}', ',', '"', 'n', 'o', 'n', 'c', 'e', '"', ':', '"'};
+
+// MQS message part three
+static const char MQS_MESSAGE_PART_THREE[] = {'"', ',', '"', 's', 'a', 'l', 't', '"', ':', '"'};
+
+// MQS message part four
+static const char MQS_MESSAGE_PART_FOUR[] = {'"', ',', '"', 'e', 'n', 'c', 'r', 'y', 'p', 't', 'e', 'd', '_', 'm', 'e', 's', 's', 'a', 'g', 'e', '"', ':', '"'};
+
+// MQS message part five
+static const char MQS_MESSAGE_PART_FIVE[] = {'"', '}'};
+
+
 // Function prototypes
 
 // Create MQS shared private key

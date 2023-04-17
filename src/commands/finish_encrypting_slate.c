@@ -1,8 +1,11 @@
 // Header files
+#include <alloca.h>
 #include <string.h>
 #include "../chacha20_poly1305.h"
 #include "../common.h"
+#include "../crypto.h"
 #include "finish_encrypting_slate.h"
+#include "../mqs.h"
 #include "../slate.h"
 
 
@@ -38,8 +41,56 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 	uint8_t tag[POLY1305_TAG_SIZE];
 	getChaCha20Poly1305Tag((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, tag);
 	
-	// Check if response with the tag will overflow
-	if(willResponseOverflow(*responseLength, sizeof(tag))) {
+	// Initialize signature
+	volatile uint8_t signature[MAXIMUM_DER_SIGNATURE_SIZE];
+	
+	// Initialize signature length
+	volatile size_t signatureLength = 0;
+	
+	// Check if creating message hash
+	if(slate.messageHashState.header.info) {
+	
+		// Get tag as a string
+		char tagString[sizeof(tag) * HEXADECIMAL_CHARACTER_SIZE];
+		toHexString(tagString, tag, sizeof(tag));
+		
+		// Add tag string to the message hash state
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)tagString, sizeof(tagString), NULL, 0);
+	
+		// Add MQS message part five to the message hash and get the message hash
+		uint8_t messageHash[CX_SHA256_SIZE];
+		cx_hash((cx_hash_t *)&slate.messageHashState, CX_LAST, (uint8_t *)MQS_MESSAGE_PART_FIVE, sizeof(MQS_MESSAGE_PART_FIVE), messageHash, sizeof(messageHash));
+		
+		// Initialize address private key
+		volatile cx_ecfp_private_key_t addressPrivateKey;
+		
+		// Begin try
+		BEGIN_TRY {
+		
+			// Try
+			TRY {
+			
+				// Get address private key
+				getAddressPrivateKey(&addressPrivateKey, slate.account, slate.index, CX_CURVE_SECP256K1);
+				
+				// Get signature of the message hash
+				signatureLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, messageHash, sizeof(messageHash), (uint8_t *)signature, sizeof(signature), NULL);
+			}
+			
+			// Finally
+			FINALLY {
+			
+				// Clear the address private key
+				explicit_bzero((cx_ecfp_private_key_t *)&addressPrivateKey, sizeof(addressPrivateKey));
+			}
+		}
+		
+		// End try
+		END_TRY;
+	}
+	
+	// Check if response with the tag and signature will overflow
+	if(willResponseOverflow(*responseLength, sizeof(tag) + signatureLength)) {
 	
 		// Throw length error
 		THROW(ERR_APD_LEN);
@@ -49,6 +100,15 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 	memcpy(&G_io_apdu_buffer[*responseLength], tag, sizeof(tag));
 	
 	*responseLength += sizeof(tag);
+	
+	// Check if signature exists
+	if(signatureLength) {
+	
+		// Append signature to response
+		memcpy(&G_io_apdu_buffer[*responseLength], (uint8_t *)signature, signatureLength);
+		
+		*responseLength += signatureLength;
+	}
 	
 	// Reset the slate
 	resetSlate();

@@ -5,6 +5,7 @@
 
 // Header files
 #include "chacha20_poly1305.h"
+#include "common.h"
 
 
 // Definitions
@@ -37,6 +38,12 @@ enum SlateState {
 // Slate
 struct Slate {
 
+	// Account
+	uint32_t account;
+	
+	// Index
+	uint32_t index;
+	
 	// Encrypting state
 	enum SlateState encryptingState;
 	
@@ -45,6 +52,9 @@ struct Slate {
 
 	// Session key
 	uint8_t sessionKey[SLATE_SESSION_KEY_SIZE];
+	
+	// Message hash state
+	cx_sha256_t messageHashState;
 	
 	// ChaCha20 Poly1305 state
 	volatile struct ChaCha20Poly1305State chaCha20Poly1305State;

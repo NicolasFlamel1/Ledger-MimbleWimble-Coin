@@ -2109,7 +2109,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 // Bulletproof update commitment
 void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *leftPart, const uint8_t *rightPart) {
 
-	// Initialzie the hash
+	// Initialize the hash
 	volatile cx_sha256_t hash;
 	
 	// Begin try
@@ -2118,7 +2118,7 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 		// Try
 		TRY {
 		
-			// Initialzie hash
+			// Initialize hash
 			cx_sha256_init((cx_sha256_t *)&hash);
 			
 			// Add commitment to the hash

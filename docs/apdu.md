@@ -13,7 +13,7 @@ This app supports the following commands.
 | 0xC7  | 0x06        | `VERIFY_ADDRESS`                             | Returns if the user verifies that an account's address at a provided index is valid |
 | 0xC7  | 0x07        | `START_ENCRYPTING_SLATE`                     | Return a random nonce and optional salt that will be used to encrypt data that will be provided later for an account at a provided index |
 | 0xC7  | 0x08        | `CONTINUE_ENCRYPTING_SLATE`                  | Returns the encrypted version of the provided data |
-| 0xC7  | 0x09        | `FINISH_ENCRYPTING_SLATE`                    | Returns the tag of the data that was encrypted |
+| 0xC7  | 0x09        | `FINISH_ENCRYPTING_SLATE`                    | Returns the tag of the data that was encrypted and an optional signature for the message |
 | 0xC7  | 0x0A        | `START_DECRYPTING_SLATE`                     | Prepares to start decrypted data that will be provided later with a provided nonce and optional salt for an account at a provided index |
 | 0xC7  | 0x0B        | `CONTINUE_DECRYPTING_SLATE`                  | Returns the decrypted version of the provided data that has then been encrypted with a random AES key |
 | 0xC7  | 0x0C        | `FINISH_DECRYPTING_SLATE`                    | Returns the random AES key used to decrypted the data that was previously returned if a valid tag is provided |
@@ -386,9 +386,10 @@ Returns the tag for all the data that was encrypted.
 
 **Output Data**
 
-| Length | Name  | Description |
-|--------|-------|-------------|
-| 16     | `tag` | Tag for all the data that was encrypted |
+| Length        | Name        | Description |
+|---------------|-------------|-------------|
+| 16            | `tag`       | Tag for all the data that was encrypted |
+| > 0 and <= 72 | `signature` | Optional DER signature of the message if the data was encrypted for MQS transport |
 
 ### START_DECRYPTING_SLATE
 

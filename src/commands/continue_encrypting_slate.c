@@ -44,6 +44,18 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 	// Encrypt ChaCha20 Poly1305 data
 	encryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, encryptedData, data, dataLength);
 	
+	// Check if creating message hash
+	if(slate.messageHashState.header.info) {
+	
+		// Get encrypted data as a string
+		const size_t encryptedDataStringLength = dataLength * HEXADECIMAL_CHARACTER_SIZE;
+		char *encryptedDataString = alloca(encryptedDataStringLength);
+		toHexString(encryptedDataString, encryptedData, dataLength);
+		
+		// Add encrypted data string to the message hash state
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)encryptedDataString, encryptedDataStringLength, NULL, 0);
+	}
+	
 	// Check if response with the encrypted data will overflow
 	if(willResponseOverflow(*responseLength, dataLength)) {
 	

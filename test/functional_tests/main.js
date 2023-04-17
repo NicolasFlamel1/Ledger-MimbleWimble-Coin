@@ -1399,26 +1399,6 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 				
 				// Break
 				break;
-			
-			// Slatepack address type
-			case SLATEPACK_ADDRESS_TYPE:
-			
-				// Log message
-				console.log("Using encryption type: Slatepack");
-				
-				{
-					// Get Slatepack private key from the random private key
-					var otherSlatepackPrivateKey = await Crypto.addressKey(Common.mergeArrays([privateKey, crypto.getRandomValues(new Uint8Array(Crypto.CHAIN_CODE_LENGTH))]), INDEX.toNumber());
-					
-					// Get Slatepack public key from the Slatepack private key
-					const publicKey = Ed25519.publicKeyFromSecretKey(otherSlatepackPrivateKey);
-					
-					// Get address from the public key
-					var address = Slatepack.publicKeyToSlatepackAddress(publicKey);
-				}
-				
-				// Break
-				break;
 		}
 		
 		// Start encrypting slate on the hardware wallet
@@ -1476,8 +1456,60 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 		// Remove response code from response
 		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
 		
-		// Append tag to encrypted data
-		encryptedData = Common.mergeArrays([encryptedData, response]);
+		// Check if using MQS encryption type
+		if(addressType === MQS_ADDRESS_TYPE) {
+		
+			// Get tag from response
+			const tag = response.subarray(0, Mqs.TAG_LENGTH);
+		
+			// Get message signature from response
+			const messageSignature = response.subarray(Mqs.TAG_LENGTH);
+			
+			// Append tag to encrypted data
+			encryptedData = Common.mergeArrays([encryptedData, tag]);
+			
+			// Create message
+			const message = JSON.stringify({
+				"destination": {
+					"public_key": address,
+					"domain": "",
+					"port": null
+				},
+				"nonce": Common.toHexString(nonce),
+				"salt": Common.toHexString(salt),
+				"encrypted_message": Common.toHexString(encryptedData)	
+			});
+			
+			// Get message hash
+			const messageHash = new Uint8Array(sha256.arrayBuffer(message));
+			
+			// Get MQS private key from the extended private key
+			const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Set expected message signature as the message hash signed by the MQS private key
+			const expectedMessageSignature = Secp256k1Zkp.createMessageHashSignature(messageHash, mqsPrivateKey);
+			
+			// Log message signature
+			console.log("Message signature: " + Common.toHexString(messageSignature));
+		
+			// Check if message signature is invalid
+			if(Common.arraysAreEqual(messageSignature, expectedMessageSignature) === false) {
+			
+				// Log message
+				console.log("Invalid message signature");
+				
+				// Throw error
+				throw "Failed running encrypt slate test";
+			}
+			
+		}
+		
+		// Otherwise
+		else {
+		
+			// Append tag to encrypted data
+			encryptedData = Common.mergeArrays([encryptedData, response]);
+		}
 		
 		// Log encrypted slate
 		console.log("Encrypted slate: " + Common.toHexString(encryptedData));
@@ -1511,21 +1543,6 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 				
 				// Decrypt the encrypted data
 				var decryptedData = await Slatepack.decrypt(otherTorPrivateKey, torPublicKey, encryptedData, nonce);
-				
-				// Break
-				break;
-			
-			// Slatepack address type
-			case SLATEPACK_ADDRESS_TYPE:
-		
-				// Get Slatepack private key from the extended private key
-				const slatepackPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Get Slatepack public key from the Slatepack private key
-				const slatepackPublicKey = Ed25519.publicKeyFromSecretKey(slatepackPrivateKey);
-				
-				// Decrypt the encrypted data
-				var decryptedData = await Slatepack.decrypt(otherSlatepackPrivateKey, slatepackPublicKey, encryptedData, nonce);
 				
 				// Break
 				break;
