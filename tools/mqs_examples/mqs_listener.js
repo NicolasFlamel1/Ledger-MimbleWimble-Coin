@@ -104,16 +104,16 @@ const INDEX = new BigNumber(0);
 	]));
 	
 	// Remove response code from the response
-	const signature = Common.toHexString(response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH));
+	const signature = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
 	
 	// Display message
-	console.log("Timestamp signature is " + signature);
+	console.log("Timestamp signature is " + Common.toHexString(signature));
 	
 	// Display message
 	console.log("Waiting for messages from server");
 	
 	// Get messages from the server
-	const messages = await sendGetRequest(MQS_SERVER  + "/listener?address=" + mqsAddress + "&signature=" + signature + "&time_now=" + timestamp + "&delTo=nil");
+	const messages = await sendGetRequest(MQS_SERVER  + "/listener?address=" + mqsAddress + "&signature=" + Common.toHexString(signature) + "&time_now=" + timestamp + "&delTo=nil&first=true");
 	
 	// Display message
 	console.log("Messages received");
