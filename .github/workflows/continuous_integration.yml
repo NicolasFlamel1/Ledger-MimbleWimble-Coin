@@ -267,7 +267,7 @@ jobs:
 
       - name: Build Nano S MimbleWimble Coin app with Clang Static Analyzer
         run: |
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default CURRENCY=mimblewimble_coin # --status-bugs removed due to issues detected in the Ledger Nano S SDK
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -282,7 +282,7 @@ jobs:
 
       - name: Build Nano S MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin_floonet
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default CURRENCY=mimblewimble_coin_floonet # --status-bugs removed due to issues detected in the Ledger Nano S SDK
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -297,7 +297,7 @@ jobs:
 
       - name: Build Nano S Grin app with Clang Static Analyzer
         run: |
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default CURRENCY=grin # --status-bugs removed due to issues detected in the Ledger Nano S SDK
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -312,7 +312,7 @@ jobs:
 
       - name: Build Nano S Grin testnet app with Clang Static Analyzer
         run: |
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=grin_testnet
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build make default CURRENCY=grin_testnet # --status-bugs removed due to issues detected in the Ledger Nano S SDK
 
       - uses: actions/upload-artifact@v3
         if: failure()
