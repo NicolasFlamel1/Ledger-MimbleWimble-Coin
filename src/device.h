@@ -22,6 +22,8 @@
 	#define FINALLY
 	#undef END_TRY
 	#define END_TRY
+	#undef CATCH_OTHER
+	#define CATCH_OTHER(e) exception_t e;
 
 // Otherwise
 #else
