@@ -358,9 +358,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
-		// Set verify address, approve transaction, or currency version line buffer
-		explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-		strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+		// Set verify address or approve transaction line buffer
+		explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+		strncpy(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 	
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
@@ -409,9 +409,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
-		// Set verify address, approve transaction, or currency version line buffer
-		explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-		strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+		// Set verify address or approve transaction line buffer
+		explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+		strncpy(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 		
 		// Copy transaction's output into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));

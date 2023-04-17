@@ -65,9 +65,9 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address, approve transaction, or currency version line buffer
-			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify MQS", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			// Set verify address or approve transaction line buffer
+			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify MQS", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -94,9 +94,9 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		
-			// Set verify address, approve transaction, or currency version line buffer
-			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Tor", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			// Set verify address or approve transaction line buffer
+			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Tor", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -123,9 +123,9 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address, approve transaction, or currency version line buffer
-			explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
-			strncpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Verify Slatepack", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer) - sizeof((char)'\0'));
+			// Set verify address or approve transaction line buffer
+			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Slatepack", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 			
 			// Set address type line buffer
 			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));

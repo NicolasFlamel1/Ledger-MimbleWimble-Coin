@@ -88,9 +88,6 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	// Set current currency information's abbreviation
 	strncpy(currentCurrencyInformation->abbreviation, CURRENCY_ABBREVIATION, sizeof(currentCurrencyInformation->abbreviation) - sizeof((char)'\0'));
 	
-	// Set current currency information's version
-	strncpy(currentCurrencyInformation->version, CURRENCY_VERSION, sizeof(currentCurrencyInformation->version) - sizeof((char)'\0'));
-	
 	// Assert that that currency icon details is valid
 	_Static_assert(sizeof(CURRENCY_ICON_DETAILS) == sizeof(currentCurrencyInformation->iconDetails), "Invalid currency icon details");
 	

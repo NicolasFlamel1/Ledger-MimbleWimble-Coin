@@ -19,9 +19,6 @@
 // Currency information abbreviation size
 #define CURRENCY_INFORMATION_ABBREVIATION_SIZE sizeof("Testnet GRIN")
 
-// Currency information version size
-#define CURRENCY_INFORMATION_VERSION_SIZE sizeof("6.0.3")
-
 // Check if has BAGL
 #ifdef HAVE_BAGL
 
@@ -76,9 +73,6 @@ struct CurrencyInformation {
 	
 	// Abbreviation
 	char abbreviation[CURRENCY_INFORMATION_ABBREVIATION_SIZE];
-	
-	// Version
-	char version[CURRENCY_INFORMATION_VERSION_SIZE];
 	
 	// Check if has BAGL
 	#ifdef HAVE_BAGL

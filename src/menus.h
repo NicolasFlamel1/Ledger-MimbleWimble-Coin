@@ -16,8 +16,8 @@
 // Public key or address line buffer size
 #define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
-// Verify address, approve transaction, or currency version line buffer size
-#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+// Verify address or approve transaction line buffer size
+#define VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
 
 // Address type line buffer size
 #define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Slatepack Address")
@@ -77,8 +77,8 @@ extern volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBu
 // Public key or address line buffer
 extern volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Verify address, approve transaction, or currency version line buffer
-extern char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
+// Verify address or approve transaction line buffer
+extern char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 extern char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];

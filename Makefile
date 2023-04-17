@@ -75,7 +75,6 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_MQS_VERSION=\{1,69\}
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
-	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	
 	# Check if target is the Stax
 	ifeq ($(TARGET_NAME),TARGET_STAX)
@@ -133,7 +132,6 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_MQS_VERSION=\{1,121\}
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
-	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	
 	# Check if target is the Stax
 	ifeq ($(TARGET_NAME),TARGET_STAX)
@@ -198,7 +196,6 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
-	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	
 	# Check if target is the Stax
 	ifeq ($(TARGET_NAME),TARGET_STAX)
@@ -263,7 +260,6 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
-	DEFINES += CURRENCY_VERSION=\"$(APPVERSION)\"
 	
 	# Check if target is the Stax
 	ifeq ($(TARGET_NAME),TARGET_STAX)

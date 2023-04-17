@@ -1622,12 +1622,10 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 	// Initialize aterm
 	volatile uint8_t aterm[UNCOMPRESSED_PUBLIC_KEY_SIZE] = {UNCOMPRESSED_PUBLIC_KEY_PREFIX};
 	
-	// Initialize y and z
-	volatile uint8_t y[sizeof(runningCommitment)];
+	// Initialize z
 	volatile uint8_t z[sizeof(runningCommitment)];
 	
-	// Initialize t0, t1, and t2
-	volatile uint8_t t0[SCALAR_SIZE] = {0};
+	// Initialize t1 and t2
 	volatile uint8_t t1[SCALAR_SIZE] = {0};
 	volatile uint8_t t2[SCALAR_SIZE] = {0};
 	
@@ -1641,12 +1639,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, &commitment[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_H);
 
 			// Set value in value bytes
-			uint8_t valueBytes[SCALAR_SIZE] = {0};
-			U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint32_t), value);
-			U4BE_ENCODE(valueBytes, sizeof(valueBytes) - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
+			uint8_t *valueBytes = (uint8_t *)z;
+			explicit_bzero(valueBytes, SCALAR_SIZE - sizeof(value));
+			U4BE_ENCODE(valueBytes, SCALAR_SIZE - sizeof(uint32_t), value);
+			U4BE_ENCODE(valueBytes, SCALAR_SIZE - sizeof(uint64_t), value >> (sizeof(uint32_t) * BITS_IN_A_BYTE));
 
 			// Set proof message in value bytes
-			memcpy(&valueBytes[sizeof(valueBytes) - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
+			memcpy(&valueBytes[SCALAR_SIZE - sizeof(value) - PROOF_MESSAGE_SIZE], proofMessage, PROOF_MESSAGE_SIZE);
 
 			// Create alpha and rho from the rewind nonce
 			createScalarsFromChaCha20(alpha, rho, rewindNonce, 0);
@@ -1778,7 +1777,8 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			}
 
 			// Get y from running commitment
-			memcpy((uint8_t *)y, (uint8_t *)runningCommitment, sizeof(y));
+			uint8_t *y = (uint8_t *)alpha;
+			memcpy(y, (uint8_t *)runningCommitment, sizeof(runningCommitment));
 
 			// Update running commitment with the alpha generator and rho generator
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
@@ -1794,7 +1794,9 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			memcpy((uint8_t *)z, (uint8_t *)runningCommitment, sizeof(z));
 			
 			// Create t0, t1, and t2 with an LR generator
-			useLrGenerator(t0, t1, t2, (uint8_t *)y, (uint8_t *)z, rewindNonce, value);
+			uint8_t *t0 = (uint8_t *)rho;
+			explicit_bzero(t0, SCALAR_SIZE);
+			useLrGenerator(t0, t1, t2, y, (uint8_t *)z, rewindNonce, value);
 			
 			// Show progress bar
 			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
@@ -1803,15 +1805,16 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			cx_math_subm((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1));
 			
 			// Divide the difference by two
-			uint8_t twoInverse[SCALAR_SIZE] = {
-				[SCALAR_SIZE - 1] = 2
-			};
-			cx_math_invprimem(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, sizeof(twoInverse));
+			uint8_t *twoInverse = (uint8_t *)alpha;
+			explicit_bzero(twoInverse, SCALAR_SIZE - 1);
+			twoInverse[SCALAR_SIZE - 1] = 2;
+			
+			cx_math_invprimem(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
 			
 			cx_math_multm((uint8_t *)t1, (uint8_t *)t1, twoInverse, SECP256K1_CURVE_ORDER, sizeof(t1));
 			
 			// Get the difference of t2 and t0
-			cx_math_subm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t0, SECP256K1_CURVE_ORDER, sizeof(t2));
+			cx_math_subm((uint8_t *)t2, (uint8_t *)t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2));
 			
 			// Add t1 to the difference
 			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2));
@@ -1980,13 +1983,11 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 		// Finally
 		FINALLY {
 		
-			// Clear t0, t1, and t2
-			explicit_bzero((uint8_t *)t0, sizeof(t0));
+			// Clear t1 and t2
 			explicit_bzero((uint8_t *)t1, sizeof(t1));
 			explicit_bzero((uint8_t *)t2, sizeof(t2));
 			
-			// Clear y, and z
-			explicit_bzero((uint8_t *)y, sizeof(y));
+			// Clear z
 			explicit_bzero((uint8_t *)z, sizeof(z));
 			
 			// Clear aterm

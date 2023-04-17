@@ -48,8 +48,8 @@ volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TI
 // Public key or address line buffer
 volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Verify address, approve transaction, or currency version line buffer
-char verifyAddressApproveTransactionOrCurrencyVersionLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_CURRENCY_VERSION_LINE_BUFFER_SIZE];
+// Verify address or approve transaction line buffer
+char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
 
 // Address type line buffer
 char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
@@ -196,7 +196,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 			"Version",
 			
 			// Second line
-			verifyAddressApproveTransactionOrCurrencyVersionLineBuffer
+			APPVERSION
 		});
 	#endif
 
@@ -221,7 +221,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Version",
 		
 		// Text
-		.text = verifyAddressApproveTransactionOrCurrencyVersionLineBuffer
+		.text = APPVERSION
 	});
 
 	// Main menu exit screen
@@ -433,7 +433,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressApproveTransactionOrCurrencyVersionLineBuffer,
+		verifyAddressOrApproveTransactionLineBuffer,
 		
 		// Second line
 		"address"
@@ -633,7 +633,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressApproveTransactionOrCurrencyVersionLineBuffer,
+		verifyAddressOrApproveTransactionLineBuffer,
 		
 		// Second line
 		"transaction?"
@@ -885,7 +885,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static const char *const ABOUT_MENU_INFO_TYPES[] = {"Version"};
 	
 	// About menu info contents
-	static const char *const ABOUT_MENU_INFO_CONTENTS[] = {verifyAddressApproveTransactionOrCurrencyVersionLineBuffer};
+	static const char *const ABOUT_MENU_INFO_CONTENTS[] = {APPVERSION};
 	
 	// Result tokens
 	enum ResultTokens {
@@ -989,8 +989,8 @@ void clearMenuBuffers(void) {
 	// Clear the public key or address line buffer
 	explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
-	// Clear the verify address, approve transaction, or currency version line buffer
-	explicit_bzero(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer));
+	// Clear the verify address or approve transaction line buffer
+	explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
 	
 	// Clear the address type line buffer
 	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
@@ -1012,7 +1012,6 @@ void clearMenuBuffers(void) {
 	
 	// Copy currency information to buffers
 	memcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
-	memcpy(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, currencyInformation->version, sizeof(currencyInformation->version));
 	memcpy(&currencyIconBuffer, &currencyInformation->iconDetails, sizeof(currencyInformation->iconDetails));
 }
 
@@ -1092,7 +1091,7 @@ void showMenu(enum Menu menu) {
 					#if BAGL_HEIGHT >= 64
 					
 						// Check if currency information version can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->version, strlen(currencyInformation->version), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, APPVERSION, sizeof(APPVERSION) - sizeof((char)'\0'), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 						
 							// Set main menu to use version single line screen
 							mainMenu[index++] = &mainMenuVersionSingleLineScreen;
@@ -1361,14 +1360,14 @@ void showMenu(enum Menu menu) {
 			case APPROVE_TRANSACTION_MENU:
 			
 				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show approve transaction menu
 					nbgl_useCaseReviewStart(&currencyIconBuffer, "Send transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
 				}
 				
 				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show approve transaction menu
 					nbgl_useCaseReviewStart(&currencyIconBuffer, "Receive transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
@@ -1900,7 +1899,7 @@ void showMenu(enum Menu menu) {
 		approveTransactionMenuInfoLongPress.icon = &currencyIconBuffer;
 		
 		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Set approve transaction menu info long press
 			approveTransactionMenuInfoLongPress.text = "Send transaction?";
@@ -1908,7 +1907,7 @@ void showMenu(enum Menu menu) {
 		}
 		
 		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Set approve transaction menu info long press
 			approveTransactionMenuInfoLongPress.text = "Receive transaction?";
@@ -1929,14 +1928,14 @@ void showMenu(enum Menu menu) {
 			if(processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true)) {
 			
 				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show status
 					nbgl_useCaseStatus("TRANSACTION\nSENT", true, showMainMenu);
 				}
 				
 				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show status
 					nbgl_useCaseStatus("TRANSACTION\nRECEIVED", true, showMainMenu);
@@ -1947,14 +1946,14 @@ void showMenu(enum Menu menu) {
 			else {
 			
 				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show status
 					nbgl_useCaseStatus("Sending transaction\nfailed", false, showMainMenu);
 				}
 				
 				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 				
 					// Show status
 					nbgl_useCaseStatus("Receiving transaction\nfailed", false, showMainMenu);
@@ -1974,14 +1973,14 @@ void showMenu(enum Menu menu) {
 	void approveTransactionMenuConfirmRejectCallback(void) {
 	
 		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Show confirm
 			nbgl_useCaseConfirm("Deny sending\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
 		}
 		
 		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Show confirm
 			nbgl_useCaseConfirm("Deny receiving\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
@@ -1995,14 +1994,14 @@ void showMenu(enum Menu menu) {
 		processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false);
 		
 		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Show status
 			nbgl_useCaseStatus("Sending transaction\ndenied", false, showMainMenu);
 		}
 		
 		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrCurrencyVersionLineBuffer))) {
+		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
 		
 			// Show status
 			nbgl_useCaseStatus("Receiving transaction\ndenied", false, showMainMenu);
