@@ -531,65 +531,79 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 		// Try
 		TRY {
 		
-			// Check if currency allows MQS addresses or Tor addresses
-			if(currencyInformation->enableMqsAddress || currencyInformation->enableTorAddress) {
-		
-				// Derive blinding factor from the address private key blinding factor value and the root path
-				deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
+			// Check currency ID
+			switch(currencyInformation->id) {
+			
+				// MimbleWimble Coin or MimbleWimble Coin floonet
+				case MIMBLEWIMBLE_COIN:
+				case MIMBLEWIMBLE_COIN_FLOONET:
 				
-				// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
-				cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
+					// Derive blinding factor from the address private key blinding factor value and the root path
+					deriveBlindingFactor(blindingFactor, account, ADDRESS_PRIVATE_KEY_BLINDING_FACTOR_VALUE, NULL, 0, REGULAR_SWITCH_TYPE);
+					
+					// Get the node as the HMAC-SHA512 of the blinding factor with the addres private key hash key as the key
+					cx_hmac_sha512((uint8_t *)ADDRESS_PRIVATE_KEY_HASH_KEY, sizeof(ADDRESS_PRIVATE_KEY_HASH_KEY), (uint8_t *)blindingFactor, sizeof(blindingFactor), (uint8_t *)node, sizeof(node));
+					
+					// Check if node isn't a valid private key
+					if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey.d))) {
+					
+						// Throw internal error error
+						THROW(INTERNAL_ERROR_ERROR);
+					}
+					
+					// Get private key from node
+					cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
+					
+					// Get chain code from the node
+					uint8_t *chainCode = (uint8_t *)&node[sizeof(privateKey.d)];
+					
+					// Derive child key from the private key and chain code at the index
+					deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
+					
+					// Break
+					break;
 				
-				// Check if node isn't a valid private key
-				if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey.d))) {
+				// Grin or Grin testnet
+				case GRIN:
+				case GRIN_TESTNET:
+				
+					{
+						// Initialize child path
+						const uint32_t childPath[] = {
+							0,
+							1,
+							index
+						};
+						
+						// Derive blinding factor from the child path
+						deriveBlindingFactor(blindingFactor, account, 0, childPath, ARRAYLEN(childPath), NO_SWITCH_TYPE);
+					}
+					
+					// Get hash from the blinding factor
+					uint8_t *hash = (uint8_t *)node;
+					getBlake2b(hash, SECP256K1_PRIVATE_KEY_SIZE, (uint8_t *)blindingFactor, sizeof(blindingFactor), NULL, 0);
+					
+					// Check if hash isn't a valid private key
+					if(!isValidSecp256k1PrivateKey(hash, SECP256K1_PRIVATE_KEY_SIZE)) {
+					
+						// Throw internal error error
+						THROW(INTERNAL_ERROR_ERROR);
+					}
+					
+					// Get private key from hash
+					cx_ecfp_init_private_key(CX_CURVE_SECP256K1, hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
+					
+					// Break
+					break;
+				
+				// Default
+				default:
 				
 					// Throw internal error error
 					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Get private key from node
-				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
-				
-				// Get chain code from the node
-				uint8_t *chainCode = (uint8_t *)&node[sizeof(privateKey.d)];
-				
-				// Derive child key from the private key and chain code at the index
-				deriveChildKey(&privateKey, chainCode, account, &index, 1, true);
-			}
-			
-			// Otherwise check if currency allows Slatepack addresses
-			else if(currencyInformation->enableSlatepackAddress) {
-			
-				// Initialize child path
-				const uint32_t childPath[] = {
-					0,
-					1,
-					index
-				};
-				
-				// Derive blinding factor from the child path
-				deriveBlindingFactor(blindingFactor, account, 0, childPath, ARRAYLEN(childPath), NO_SWITCH_TYPE);
-				
-				// Get hash from the blinding factor
-				uint8_t *hash = (uint8_t *)node;
-				getBlake2b(hash, SECP256K1_PRIVATE_KEY_SIZE, (uint8_t *)blindingFactor, sizeof(blindingFactor), NULL, 0);
-				
-				// Check if hash isn't a valid private key
-				if(!isValidSecp256k1PrivateKey(hash, SECP256K1_PRIVATE_KEY_SIZE)) {
-				
-					// Throw internal error error
-					THROW(INTERNAL_ERROR_ERROR);
-				}
-				
-				// Get private key from hash
-				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
-			}
-			
-			// Otherwise
-			else {
-			
-				// Throw internal error error
-				THROW(INTERNAL_ERROR_ERROR);
+					
+					// Break
+					break;
 			}
 			
 			// Check curve
