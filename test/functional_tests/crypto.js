@@ -908,7 +908,7 @@ class Crypto {
 								var newSecretKey = extendedPrivateKey.subarray(0, Crypto.SECP256K1_SECRET_KEY_LENGTH);
 								
 								// Check if new secret key is a valid secret key or using BIP39 and new secret key is zero
-								if(Secp256k1Zkp.isValidSecretKey(newSecretKey) === true || (useBip39 === true && Common.arraysAreEqual(newSecretKey, Crypto.ZERO_SECRET_KEY) === true)) {
+								if(Secp256k1Zkp.isValidSecretKey(newSecretKey) === true || (useBip39 === true && Common.arraysAreEqualTimingSafe(newSecretKey, Crypto.ZERO_SECRET_KEY) === true)) {
 								
 									// Check if adding old secret key to the new secret key was successful
 									var updatedSecretKey = Secp256k1Zkp.secretKeyTweakAdd(newSecretKey, secretKey);

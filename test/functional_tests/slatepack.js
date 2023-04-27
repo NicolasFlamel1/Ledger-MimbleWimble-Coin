@@ -1184,7 +1184,7 @@ class Slatepack {
 					x25519SecretKey.fill(0);
 					
 					// Check if shared secret key isn't zero
-					if(Common.arraysAreEqual(sharedSecretKey, (new Uint8Array(sharedSecretKey["length"])).fill(0)) === false) {
+					if(Common.arraysAreEqualTimingSafe(sharedSecretKey, (new Uint8Array(sharedSecretKey["length"])).fill(0)) === false) {
 				
 						// Check if data is valid
 						if(data["length"] !== 0) {
@@ -1333,7 +1333,7 @@ class Slatepack {
 					x25519SecretKey.fill(0);
 					
 					// Check if shared secret key isn't zero
-					if(Common.arraysAreEqual(sharedSecretKey, (new Uint8Array(sharedSecretKey["length"])).fill(0)) === false) {
+					if(Common.arraysAreEqualTimingSafe(sharedSecretKey, (new Uint8Array(sharedSecretKey["length"])).fill(0)) === false) {
 				
 						// Check if encrypted data is valid
 						if(encryptedData["length"] > Slatepack.TAG_LENGTH) {

@@ -83,7 +83,7 @@ class Age {
 					}
 					
 					// Check if shared secret key is invalid
-					if(Common.arraysAreEqual(sharedSecretKey, (new Uint8Array(Crypto.X25519_SECRET_KEY_LENGTH)).fill(0))) {
+					if(Common.arraysAreEqualTimingSafe(sharedSecretKey, (new Uint8Array(Crypto.X25519_SECRET_KEY_LENGTH)).fill(0))) {
 					
 						// Continue
 						continue;

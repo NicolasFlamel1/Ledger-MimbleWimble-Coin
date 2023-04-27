@@ -75,6 +75,9 @@ class Tor {
 		// Get Tor address from URL
 		static getTorAddressFromUrl(url) {
 		
+			// Trim url
+			url = url.trim();
+		
 			// Try
 			try {
 			

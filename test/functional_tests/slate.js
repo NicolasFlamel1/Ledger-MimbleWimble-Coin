@@ -1887,6 +1887,16 @@ class Slate {
 					return false;
 			}
 			
+			// Otherwise
+			else {
+			
+				// Check if offsets are equal
+				if(Common.arraysAreEqual(this.getOffset(), slate.getOffset()) === true)
+				
+					// Return false
+					return false;
+			}
+			
 			// Check if block header versions aren't equal
 			if(this.getBlockHeaderVersion().isEqualTo(slate.getBlockHeaderVersion()) === false)
 			
@@ -2029,25 +2039,25 @@ class Slate {
 				case SlateKernel.PLAIN_FEATURES:
 				
 					// Return display kernel features
-					return "plain";
+					return Language.getDefaultTranslation('plain');
 				
 				// Coinbase features
 				case SlateKernel.COINBASE_FEATURES:
 				
 					// Return display kernel features
-					return "coinbase";
+					return Language.getDefaultTranslation('coinbase');
 				
 				// Height locked features
 				case SlateKernel.HEIGHT_LOCKED_FEATURES:
 				
 					// Return display kernel features
-					return "height locked";
+					return Language.getDefaultTranslation('height locked');
 				
 				// No recent duplicate features
 				case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
 				
 					// Return display kernel features
-					return "no recent duplicate";
+					return Language.getDefaultTranslation('no recent duplicate');
 			}
 		}
 		
@@ -3729,6 +3739,13 @@ class Slate {
 							
 							// Check if serialized slate contains a proof signature
 							if(bitReader.getBits(Slate.COMPACT_BOOLEAN_LENGTH) === Slate.COMPACT_BOOLEAN_TRUE) {
+							
+								// Check if doesn't have a payment proof
+								if(this.hasPaymentProof() === false) {
+								
+									// Throw error
+									throw "Unsupported slate.";
+								}
 							
 								// Get serialized slate's receiver signature length
 								var receiverSignatureLength = bitReader.getBits(Slate.COMPACT_PROOF_SIGNATURE_LENGTH_LENGTH) + Crypto.ED25519_SIGNATURE_LENGTH;

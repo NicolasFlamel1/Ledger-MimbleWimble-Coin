@@ -353,8 +353,8 @@ class Common {
 			// Try
 			try {
 		
-				// Parse HTTP server address as a URL
-				var parsedHttpServerUrl = new URL(HTTP_SERVER_ADDRESS);
+				// Parse HTTPS server address as a URL
+				var parsedHttpsServerUrl = new URL(HTTPS_SERVER_ADDRESS);
 				
 				// Parse Tor server address as a URL
 				var parsedTorServerUrl = new URL(TOR_SERVER_ADDRESS);
@@ -370,21 +370,21 @@ class Common {
 				return url;
 			}
 				
-			// Check if URL's protocol is HTTP, the HTTP server address's protocol is HTTPS, and the URL is the same site as the HTTP server address
-			if(parsedUrl["protocol"] === Common.HTTP_PROTOCOL && parsedHttpServerUrl["protocol"] === Common.HTTPS_PROTOCOL && parsedUrl["hostname"] === parsedHttpServerUrl["hostname"]) {
+			// Check if URL's protocol is HTTP, the HTTPS server address's protocol is HTTPS, and the URL is the same site as the HTTPS server address
+			if(parsedUrl["protocol"] === Common.HTTP_PROTOCOL && parsedHttpsServerUrl["protocol"] === Common.HTTPS_PROTOCOL && parsedUrl["hostname"] === parsedHttpsServerUrl["hostname"]) {
 			
 				// Create an HTTPS URL from the URL
-				var httpsUrl = Common.HTTPS_PROTOCOL + url.substring(Common.HTTP_PROTOCOL["length"]);
+				var httpsUrl = Common.HTTPS_PROTOCOL + Common.ltrim(url).substring(Common.HTTP_PROTOCOL["length"]);
 				
 				// Return HTTPS URL
 				return httpsUrl;
 			}
 			
-			// Otherwise check if URL's protocol is WebSocket, the HTTP server address's protocol is HTTPS, and the URL is the same site as the HTTP server address
-			else if(parsedUrl["protocol"] === Common.WEBSOCKET_PROTOCOL && parsedHttpServerUrl["protocol"] === Common.HTTPS_PROTOCOL && parsedUrl["hostname"] === parsedHttpServerUrl["hostname"]) {
+			// Otherwise check if URL's protocol is WebSocket, the HTTPS server address's protocol is HTTPS, and the URL is the same site as the HTTPS server address
+			else if(parsedUrl["protocol"] === Common.WEBSOCKET_PROTOCOL && parsedHttpsServerUrl["protocol"] === Common.HTTPS_PROTOCOL && parsedUrl["hostname"] === parsedHttpsServerUrl["hostname"]) {
 			
 				// Create an WebSocket secure URL from the URL
-				var wssUrl = Common.WEBSOCKET_SECURE_PROTOCOL + url.substring(Common.WEBSOCKET_PROTOCOL["length"]);
+				var wssUrl = Common.WEBSOCKET_SECURE_PROTOCOL + Common.ltrim(url).substring(Common.WEBSOCKET_PROTOCOL["length"]);
 				
 				// Return WebSocket secure URL
 				return wssUrl;
@@ -394,7 +394,7 @@ class Common {
 			else if(parsedUrl["protocol"] === Common.HTTPS_PROTOCOL && parsedTorServerUrl["protocol"] === Common.HTTP_PROTOCOL && parsedUrl["hostname"] === parsedTorServerUrl["hostname"]) {
 			
 				// Create an HTTP URL from the URL
-				var httpUrl = Common.HTTP_PROTOCOL + url.substring(Common.HTTPS_PROTOCOL["length"]);
+				var httpUrl = Common.HTTP_PROTOCOL + Common.ltrim(url).substring(Common.HTTPS_PROTOCOL["length"]);
 				
 				// Return HTTP URL
 				return httpUrl;
@@ -404,7 +404,7 @@ class Common {
 			else if(parsedUrl["protocol"] === Common.WEBSOCKET_SECURE_PROTOCOL && parsedTorServerUrl["protocol"] === Common.HTTP_PROTOCOL && parsedUrl["hostname"] === parsedTorServerUrl["hostname"]) {
 			
 				// Create an WebSocket URL from the URL
-				var wsUrl = Common.WEBSOCKET_PROTOCOL + url.substring(Common.WEBSOCKET_SECURE_PROTOCOL["length"]);
+				var wsUrl = Common.WEBSOCKET_PROTOCOL + Common.ltrim(url).substring(Common.WEBSOCKET_SECURE_PROTOCOL["length"]);
 				
 				// Return WebSocket URL
 				return wsUrl;
@@ -488,7 +488,7 @@ class Common {
 		static removeTrailingSlashes(text) {
 		
 			// Return text with its trailing slashes removed
-			return text.replace(Common.TRAILING_SLASHES_PATTERN, "");
+			return Common.rtrim(text).replace(Common.TRAILING_SLASHES_PATTERN, "");
 		}
 		
 		// Remove duplicate slashes
@@ -523,16 +523,30 @@ class Common {
 				// Otherwise
 				else {
 				
-					// Append last part to result
-					result.push(text.slice(lastSeparatorEnd));
+					// Get last part
+					var lastPart = text.slice(lastSeparatorEnd);
+				
+					// Check if last part exists and isn't a separator
+					if(lastPart["length"] !== 0 && separator.test(lastPart) === false) {
+				
+						// Append last part to result
+						result.push(lastPart);
+					}
 				
 					// Return result
 					return result;
 				}
 			}
 			
-			// Append last part to result
-			result.push(text.slice(separator["lastIndex"]));
+			// Get last part
+			var lastPart = text.slice(separator["lastIndex"]);
+			
+			// Check if last part exists and isn't a separator
+			if(lastPart["length"] !== 0 && separator.test(lastPart) === false) {
+			
+				// Append last part to result
+				result.push(lastPart);
+			}
 			
 			// Return result
 			return result;
@@ -730,6 +744,48 @@ class Common {
 				// Return serialized object's value
 				return serializedObject["Value"];
 			}
+		}
+		
+		// Request animation frame or timeout
+		static requestAnimationFrameOrTimeout(callback) {
+		
+			// Initialize animation frame
+			var animationFrame;
+			
+			// Set timeout
+			var timeout = setTimeout(function() {
+			
+				// Cancel animation frame
+				cancelAnimationFrame(animationFrame);
+				
+				// Run callback
+				callback(event);
+				
+			}, Common.REQUEST_ANIMATION_FRAME_TIMEOUT_MILLISECONDS);
+			
+			// Set animation frame
+			animationFrame = requestAnimationFrame(function(event) {
+			
+				// Clear timeout
+				clearTimeout(timeout);
+				
+				// Run callback
+				callback(event);
+			});
+		}
+		
+		// Ltrim
+		static ltrim(text) {
+		
+			// Return text with leading whitespace removed
+			return text.replace(Common.LEADING_WHITESPACE_PATTERN, "");
+		}
+		
+		// Rtrim
+		static rtrim(text) {
+		
+			// Return text with trailing whitespace removed
+			return text.replace(Common.TRAILING_WHITESPACE_PATTERN, "");
 		}
 		
 		// Milliseconds in a second
@@ -1365,7 +1421,7 @@ class Common {
 		static get URL_TOP_LEVEL_DOMAIN_PATTERN() {
 		
 			// Return URL top-level domain pattern
-			return /[^\.]+\.[^\/?:#]+(?:[\/?:#]|$)/u;
+			return /[^\.]+\.[^\/?:#\s]+(?:[\/?:#\s]|$)/u;
 		}
 		
 		// URL domain name pattern
@@ -1429,6 +1485,27 @@ class Common {
 		
 			// Return object type pattern
 			return /^\[object\s*(.*)\]$/u;
+		}
+		
+		// Request animation frame timeout milliseconds
+		static get REQUEST_ANIMATION_FRAME_TIMEOUT_MILLISECONDS() {
+		
+			// Return request animation frame timeout milliseconds
+			return 50;
+		}
+		
+		// Leading whitespace pattern
+		static get LEADING_WHITESPACE_PATTERN() {
+		
+			// Return leading whitespace pattern
+			return /^\s+/u;
+		}
+		
+		// Trailing whitespace pattern
+		static get TRAILING_WHITESPACE_PATTERN() {
+		
+			// Return leading whitespace pattern
+			return /\s+$/u;
 		}
 }
 
@@ -1519,15 +1596,89 @@ if(typeof jQuery === "function") {
 			// Set self
 			var self = $(this);
 			
-			// Self scroll event
-			self.on("scroll", function(event) {
+			// Get index
+			var index = (typeof self.data("scrollStoppedIndex") === "undefined") ? 0 : self.data("scrollStoppedIndex");
 			
-				// Clear scroll timeout
-				clearTimeout(self.data("scrollTimeout"));
+			// Self scroll scroll stopped index event
+			self.on("scroll.scrollStopped" + index.toFixed(), function(event) {
+			
+				// Clear scroll stopped timeout index
+				clearTimeout(self.data("scrollStoppedTimeout" + index.toFixed()));
 				
-				// Set scroll timeout
-				self.data("scrollTimeout", setTimeout(callback.bind(self), SCROLL_IDLE_DURATION_MILLISECONDS, event));
+				// Set scroll stopped timeout index
+				self.data("scrollStoppedTimeout" + index.toFixed(), setTimeout(callback.bind(self), SCROLL_IDLE_DURATION_MILLISECONDS, event));
 			});
+			
+			// Increment index
+			self.data("scrollStoppedIndex", (index === Number.MAX_SAFE_INTEGER) ? 0 : index + 1);
+		});
+		
+		// Return elements
+		return this;
+	};
+	
+	// Transition end timeout milliseconds
+	var TRANSITION_END_TIMEOUT_MILLISECONDS = 50;
+	
+	// Transition end or timeout
+	$["fn"].transitionEndOrTimeout = function(callback, property) {
+	
+		// Go through each element
+		this.each(function() {
+		
+			// Set self
+			var self = $(this);
+			
+			// Set timeout
+			var timeout = TRANSITION_END_TIMEOUT_MILLISECONDS;
+			
+			// Go through all of the element's transition properties
+			var properties = self.css("transition-property").split(",");
+			for(var i = 0; i < properties["length"]; ++i) {
+			
+				// Check if property was found
+				if(properties[i].trim() === property) {
+				
+					// Get transition's duration
+					var duration = self.css("transition-duration").split(",")[i].trim();
+					
+					// Get transition's delay
+					var delay = self.css("transition-delay").split(",")[i].trim();
+					
+					// Set timeout to the duration
+					timeout = parseFloat(duration) * ((duration.indexOf("ms") !== Common.INDEX_NOT_FOUND) ? 1 : Common.MILLISECONDS_IN_A_SECOND) + parseFloat(delay) * ((delay.indexOf("ms") !== Common.INDEX_NOT_FOUND) ? 1 : Common.MILLISECONDS_IN_A_SECOND) + TRANSITION_END_TIMEOUT_MILLISECONDS;
+					
+					// Break
+					break;
+				}
+			}
+			
+			// Get index
+			var index = (typeof self.data("transitionEndOrTimeoutIndex") === "undefined") ? 0 : self.data("transitionEndOrTimeoutIndex");
+			
+			// Set transition end or timeout timeout index
+			self.data("transitionEndOrTimeoutTimeout" + index.toFixed(), setTimeout(function() {
+			
+				// Turn off transition end transition end or timeout index event
+				self.off("transitionend.transitionEndOrTimeout" + index.toFixed());
+				
+				// Run callback
+				callback.bind(self)();
+				
+			}, timeout));
+			
+			// Self transition end transition end or timeout index event
+			self.one("transitionend.transitionEndOrTimeout" + index.toFixed(), function(event) {
+			
+				// Clear transition end or timeout timeout index
+				clearTimeout(self.data("transitionEndOrTimeoutTimeout" + index.toFixed()));
+				
+				// Run callback
+				callback.bind(self)(event);
+			});
+			
+			// Increment index
+			self.data("transitionEndOrTimeoutIndex", (index === Number.MAX_SAFE_INTEGER) ? 0 : index + 1);
 		});
 		
 		// Return elements

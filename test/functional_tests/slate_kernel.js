@@ -856,7 +856,7 @@ class SlateKernel {
 					}
 					
 					// Check if serialized slate kernel's excess signature isn't supported
-					if("excess_sig" in serializedSlateKernel === false || Common.isHexString(serializedSlateKernel["excess_sig"]) === false) {
+					if("excess_sig" in serializedSlateKernel === false || Common.isHexString(serializedSlateKernel["excess_sig"]) === false || Secp256k1Zkp.isValidSingleSignerSignature(Common.fromHexString(serializedSlateKernel["excess_sig"])) !== true) {
 					
 						// Throw error
 						throw "Unsupported kernel.";
@@ -873,7 +873,7 @@ class SlateKernel {
 					}
 					
 					// Check if serialized slate kernel's excess isn't supported
-					if("excess" in serializedSlateKernel === false || Common.isHexString(serializedSlateKernel["excess"]) === false || Common.hexStringLength(serializedSlateKernel["excess"]) !== Crypto.COMMIT_LENGTH) {
+					if("excess" in serializedSlateKernel === false || Common.isHexString(serializedSlateKernel["excess"]) === false || Common.hexStringLength(serializedSlateKernel["excess"]) !== Crypto.COMMIT_LENGTH || (Common.arraysAreEqual(Common.fromHexString(serializedSlateKernel["excess"]), SlateKernel.ZERO_EXCESS) === false && Secp256k1Zkp.isValidCommit(Common.fromHexString(serializedSlateKernel["excess"])) !== true)) {
 					
 						// Throw error
 						throw "Unsupported kernel.";
@@ -907,8 +907,23 @@ class SlateKernel {
 						// Set excess to serialized slate kernel's excess
 						this.excess = bitReader.getBytes(Crypto.COMMIT_LENGTH);
 						
+						// Check if excess is invalid
+						if(Common.arraysAreEqual(this.excess, SlateKernel.ZERO_EXCESS) === false && Secp256k1Zkp.isValidCommit(this.excess) !== true) {
+						
+							// Throw error
+							throw "Unsupported kernel.";
+						}
+						
+						// Check if serialized slate kernel's excess signature is invalid
+						var excessSignature = bitReader.getBytes(Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH);
+						if(Secp256k1Zkp.isValidSingleSignerSignature(excessSignature) !== true) {
+						
+							// Throw error
+							throw "Unsupported kernel.";
+						}
+						
 						// Set excess signature to serialized slate kernel's excess signature
-						this.excessSignature = Secp256k1Zkp.singleSignerSignatureFromData(bitReader.getBytes(Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH));
+						this.excessSignature = Secp256k1Zkp.singleSignerSignatureFromData(excessSignature);
 						
 						// Check if excess signature isn't a valid signature
 						if(this.getExcessSignature() === Secp256k1Zkp.OPERATION_FAILED) {

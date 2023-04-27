@@ -3510,7 +3510,7 @@ class Wallet {
 		getHttpAddress() {
 		
 			// Return HTTP address
-			return HTTP_SERVER_ADDRESS + "/wallet/" + this.getAddressSuffix();
+			return HTTPS_SERVER_ADDRESS + "/wallet/" + this.getAddressSuffix();
 		}
 		
 		// Get Tor address
