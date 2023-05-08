@@ -32,9 +32,6 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 	// Initialize X25519 private key
 	volatile cx_ecfp_private_key_t x25519PrivateKey;
 	
-	// Initialize shared private key
-	volatile uint8_t sharedPrivateKey[SHARED_PRIVATE_KEY_SIZE];
-	
 	// Initialize pseudorandom key
 	volatile uint8_t pseudorandomKey[CX_SHA256_SIZE];
 	
@@ -79,13 +76,14 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey));
 			
 			// Create a shared private key from the X25519 private key and uncompressed ephemeral X25519 public key
-			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey), (uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
+			uint8_t *sharedPrivateKey = (uint8_t *)ed25519PrivateKey.d;
+			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey), sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE);
 			
 			// Swap shared private key's endianness
-			swapEndianness((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
+			swapEndianness(sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE);
 			
 			// Check if shared private key is zero
-			if(isZeroArraySecure((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey))) {
+			if(isZeroArraySecure(sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE)) {
 			
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -97,7 +95,7 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			memcpy(&salt[X25519_PUBLIC_KEY_SIZE], x25519PublicKey, sizeof(x25519PublicKey));
 			
 			// Create wrap key from shared private key and salt
-			cx_hkdf_extract(CX_SHA256, (uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey), salt, sizeof(salt), (uint8_t *)pseudorandomKey);
+			cx_hkdf_extract(CX_SHA256, sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE, salt, sizeof(salt), (uint8_t *)pseudorandomKey);
 			cx_hkdf_expand(CX_SHA256, (uint8_t *)pseudorandomKey, sizeof(pseudorandomKey), (uint8_t *)WRAP_KEY_INFO, sizeof(WRAP_KEY_INFO), (uint8_t *)wrapKey, sizeof(wrapKey));
 			
 			// Decrypt file key with the wrap key
@@ -133,9 +131,6 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			
 			// Clear the X25519 private key
 			explicit_bzero((cx_ecfp_private_key_t *)&x25519PrivateKey, sizeof(x25519PrivateKey));
-			
-			// Clear the shared private key
-			explicit_bzero((uint8_t *)sharedPrivateKey, sizeof(sharedPrivateKey));
 			
 			// Clear the pseudorandom key
 			explicit_bzero((uint8_t *)pseudorandomKey, sizeof(pseudorandomKey));

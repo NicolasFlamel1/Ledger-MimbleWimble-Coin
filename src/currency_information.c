@@ -50,6 +50,13 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 		currentCurrencyInformation->enableSlatepackAddress = true;
 	#endif
 	
+	// Check if enable no recent duplicate kernels
+	#ifdef CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS
+	
+		// Set current currency information's enable no recent duplicate kernels
+		currentCurrencyInformation->enableNoRecentDuplicateKernels = true;
+	#endif
+	
 	// Check if maximum fee exists
 	#ifdef CURRENCY_MAXIMUM_FEE
 	
@@ -80,6 +87,37 @@ void getCurrencyInformation(struct CurrencyInformation *currentCurrencyInformati
 	
 		// Set current currency information's MQS version
 		memcpy(currentCurrencyInformation->mqsVersion, (uint8_t [])CURRENCY_MQS_VERSION, sizeof((uint8_t [])CURRENCY_MQS_VERSION));
+	#endif
+	
+	// Assert that currency address derivation type is valid
+	_Static_assert(CURRENCY_ADDRESS_DERIVATION_TYPE >= MWC_ADDRESS_DERIVATION && CURRENCY_ADDRESS_DERIVATION_TYPE <= GRIN_ADDRESS_DERIVATION, "Invalid currency address derivation type");
+	
+	// Set current currency information's address derivation type
+	currentCurrencyInformation->addressDerivationType = CURRENCY_ADDRESS_DERIVATION_TYPE;
+	
+	// Assert that currency payment proof message type is valid
+	_Static_assert(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE >= ASCII_PAYMENT_PROOF_MESSAGE && CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE <= BINARY_PAYMENT_PROOF_MESSAGE, "Invalid currency payment proof message type");
+	
+	// Set current currency information's payment proof message type
+	currentCurrencyInformation->paymentProofMessageType = CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE;
+	
+	// Assert that currency supported payment proof address types is valid
+	_Static_assert(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES >= 0 && CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES <= UINT8_MAX, "Invalid currency supported payment proof address types");
+	
+	// Set current currency information's supported payment proof address types
+	currentCurrencyInformation->supportedPaymentProofAddressTypes = CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES;
+	
+	// Assert that currency supported slate encryption types is valid
+	_Static_assert(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES >= 0 && CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES <= UINT8_MAX, "Invalid currency supported slate encryption types");
+	
+	// Set current currency information's supported slate encryption types
+	currentCurrencyInformation->supportedSlateEncryptionTypes = CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES;
+	
+	// Check if MQS name exists
+	#ifdef CURRENCY_MQS_NAME
+	
+		// Set current currency information's MQS name
+		strncpy(currentCurrencyInformation->mqsName, CURRENCY_MQS_NAME, sizeof(currentCurrencyInformation->mqsName) - sizeof((char)'\0'));
 	#endif
 	
 	// Set current currency information's name

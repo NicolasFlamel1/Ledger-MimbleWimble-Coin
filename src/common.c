@@ -13,6 +13,15 @@
 static const char HEXADECIMAL_CHARACTERS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 
+// Function prototypes
+
+// Is digit
+bool isDigit(const char character);
+
+// Is alphanumeric
+bool isAalphanumeric(const char character);
+
+
 // Supporting function implementation
 
 // Exit application
@@ -256,4 +265,94 @@ bool isZeroArraySecure(const uint8_t *value, const size_t length) {
 	
 	// Return if result is zero
 	return !result;
+}
+
+// Upper case text
+void upperCaseText(char *text, const size_t length) {
+
+	// Go through all the characters in the string
+	for(size_t i = 0; i < length; ++i) {
+	
+		// Check if character is lower case
+		if(text[i] >= 'a' && text[i] <= 'z') {
+		
+			// Upper case character
+			text[i] -= 'a' - 'A';
+		}
+	}
+}
+
+// Is valid address
+bool isValidAddress(const char *address, const size_t length) {
+	
+	// Check if address is empty
+	if(!length) {
+	
+		// Return false
+		return false;
+	}
+	
+	// Go through all characters in the address
+	for(size_t i = 0; i < length; ++i) {
+	
+		// Check if character isn't alphanumeric or a period not as the first or last character
+		if(!isAalphanumeric(address[i]) && (address[i] != '.' || i == 0 || i == length - 1)) {
+		
+			// Check if at the address's port, not at the first or last character, and not following a period
+			if(address[i] == ':' && i != 0 && i != length - 1 && address[i - 1] != '.') {
+			
+				// Set port to zero
+				unsigned int port = 0;
+				
+				// Go through the remaining characters in the address
+				for(size_t j = i + 1; j < length; ++j) {
+				
+					// Check if character isn't a digit or a zero at the first character
+					if(!isDigit(address[j]) || (address[j] == '0' && j == i + 1)) {
+					
+						// Return false;
+						return false;
+					}
+					
+					// Update port with character
+					port *= 10;
+					port += address[j] - '0';
+					
+					// Check if port is invalid
+					if(port > UINT16_MAX) {
+					
+						// Return false
+						return false;
+					}
+				}
+				
+				// Break
+				break;
+			}
+			
+			// Otherwise
+			else {
+			
+				// Return false;
+				return false;
+			}
+		}
+	}
+	
+	// Return true
+	return true;
+}
+
+// Is digit
+bool isDigit(const char character) {
+
+	// Return if character is a digit
+	return character >= '0' && character <= '9';
+}
+
+// Is alphanumeric
+bool isAalphanumeric(const char character) {
+
+	// Return if character is alphanumeric
+	return (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z') || isDigit(character);
 }

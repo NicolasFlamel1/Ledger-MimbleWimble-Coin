@@ -17,7 +17,7 @@
 #include "commands/get_address.h"
 #include "commands/get_commitment.h"
 #include "commands/get_bulletproof_components.h"
-#include "commands/get_mqs_timestamp_signature.h"
+#include "commands/get_mqs_challenge_signature.h"
 #include "commands/get_root_public_key.h"
 #include "commands/get_seed_cookie.h"
 #include "menus.h"
@@ -262,11 +262,11 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 					// Break
 					break;
 				
-				// Get MQS timestamp signature instruction
-				case GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION:
+				// Get MQS challenge signature instruction
+				case GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION:
 				
-					// Process get MQS timestamp signature request
-					processGetMqsTimestampSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+					// Process get MQS challenge signature request
+					processGetMqsChallengeSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
 				
 					// break
 					break;
@@ -420,11 +420,11 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 						// Break
 						break;
 					
-					// Get MQS timestamp signature instruction
-					case GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION:
+					// Get MQS challenge signature instruction
+					case GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION:
 					
-						// Process get MQS timestamp signature user interaction
-						processGetMqsTimestampSignatureUserInteraction((unsigned short *)&responseLength);
+						// Process get MQS challenge signature user interaction
+						processGetMqsChallengeSignatureUserInteraction((unsigned short *)&responseLength);
 					
 						// break
 						break;

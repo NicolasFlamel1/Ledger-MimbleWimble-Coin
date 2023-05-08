@@ -430,7 +430,7 @@ class Common {
 				// Get URL parameters from URL query string
 				var urlParameters = URL_QUERY_STRING.substring(Common.URL_QUERY_STRING_SEPARATOR["length"]).split(Common.URL_QUERY_STRING_PARAMETER_SEPARATOR);
 				
-				// Go through all URL paramaters
+				// Go through all URL parameters
 				for(var i = 0; i < urlParameters["length"]; ++i) {
 				
 					// Get URL parameter
@@ -439,7 +439,7 @@ class Common {
 					// Check if URL parameter is valid
 					if(urlParameter["length"] === 2) {
 					
-						// Get URL paramater's key
+						// Get URL parameter's key
 						var key = decodeURIComponent(urlParameter[0].replace(/\+/ug, "%20"));
 						
 						// Check if key isn't already in the rersult

@@ -45,6 +45,18 @@ static const uint8_t ZERO_ARRAY[] = {0, 0, 0, 0, 0};
 // Not zero array
 static const uint8_t NOT_ZERO_ARRAY[] = {0, 0, 0, 1, 0};
 
+// Lower case text
+static const uint8_t LOWER_CASE_TEXT[] = "test";
+
+// Upper case text
+static const uint8_t UPPER_CASE_TEXT[] = "TEST";
+
+// Valid address
+static const char VALID_ADDRESS[] = "example.com:80";
+
+// Inalid address
+static const char INVALID_ADDRESS[] = "example.:80";
+
 
 // Function prototypes
 
@@ -63,8 +75,14 @@ static void testIsValidUtf8String(void **state);
 // Test map
 static void testMap(void **state);
 
-// test is zero array secure
+// Test is zero array secure
 static void testIsZeroArraySecure(void **state);
+
+// Test upper case text
+static void testUpperCaseText(void **state);
+
+// Test is valid address
+static void testIsValidAddress(void **state);
 
 
 // Main function
@@ -89,7 +107,13 @@ int main(void) {
 		cmocka_unit_test(testMap),
 		
 		// Test is zero array secure
-		cmocka_unit_test(testIsZeroArraySecure)
+		cmocka_unit_test(testIsZeroArraySecure),
+		
+		// Test upper case text
+		cmocka_unit_test(testUpperCaseText),
+		
+		// Test is valid address
+		cmocka_unit_test(testIsValidAddress)
 	};
 	
 	// Return performing tests
@@ -181,4 +205,34 @@ void testIsZeroArraySecure(void **state) {
 	
 	// Assert is not zero is correct
 	assert_false(isNotZero);
+}
+
+// Test upper case text
+void testUpperCaseText(void **state) {
+
+	// Get text
+	char text[sizeof(LOWER_CASE_TEXT)];
+	strcpy(text, LOWER_CASE_TEXT);
+	
+	// Upper case text
+	upperCaseText(text, sizeof(text));
+	
+	// Assert text is correct
+	assert_string_equal(text, UPPER_CASE_TEXT);
+}
+
+// Test is valid address
+void testIsValidAddress(void **state) {
+
+	// Get valid by checking if valid address is valid
+	const bool valid = isValidAddress(VALID_ADDRESS, sizeof(VALID_ADDRESS) - sizeof((char)'\0'));
+	
+	// Assert valid is correct
+	assert_true(valid);
+	
+	// Get invalid by checking if invalid address is valid
+	const bool invalid = isValidAddress(INVALID_ADDRESS, sizeof(INVALID_ADDRESS) - sizeof((char)'\0'));
+	
+	// Assert invalid is correct
+	assert_false(invalid);
 }

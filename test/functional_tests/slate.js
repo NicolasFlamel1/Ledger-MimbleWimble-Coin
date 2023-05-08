@@ -324,25 +324,55 @@ class Slate {
 						// Set serialized slate's time to live cut off height
 						serializedSlate["ttl_cutoff_height"] = (this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT) ? this.getTimeToLiveCutOffHeight().toFixed() : Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT;
 						
-						// Set serialized slate's payment proof
-						serializedSlate["payment_proof"] = (this.hasPaymentProof() === true) ? {
+						// Check wallet type
+						switch(Consensus.getWalletType()) {
 						
-							// Receiver address
-							"receiver_address": this.getReceiverAddress(),
+							// MWC wallet
+							case Consensus.MWC_WALLET_TYPE:
 							
-							// Receiver signature
-							"receiver_signature": (this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) ? Common.toHexString(this.getReceiverSignature()) : null,
+								// Set serialized slate's payment proof
+								serializedSlate["payment_proof"] = (this.hasPaymentProof() === true) ? {
+								
+									// Receiver address
+									"receiver_address": this.getReceiverAddress(),
+									
+									// Receiver signature
+									"receiver_signature": (this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) ? Common.toHexString(this.getReceiverSignature()) : null,
+									
+									// Sender address
+									"sender_address": this.getSenderAddress()
+								
+								} : Slate.NO_PAYMENT_PROOF;
+						
+								// Set serialized slate's coin type
+								serializedSlate["coin_type"] = Slate.COIN_TYPE;
+								
+								// Set serialized slate's network type
+								serializedSlate["network_type"] = Slate.getNetworkType(isMainnet);
+								
+								// Break
+								break;
 							
-							// Sender address
-							"sender_address": this.getSenderAddress()
+							// EPIC wallet
+							case Consensus.EPIC_WALLET_TYPE:
+							
+								// Set serialized slate's payment proof
+								serializedSlate["payment_proof"] = (this.hasPaymentProof() === true) ? {
+								
+									// Receiver address
+									"receiver_address": Common.toHexString(Tor.torAddressToPublicKey(this.getReceiverAddress())),
+									
+									// Receiver signature
+									"receiver_signature": (this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) ? Common.toHexString(this.getReceiverSignature()) : null,
+									
+									// Sender address
+									"sender_address": Common.toHexString(Tor.torAddressToPublicKey(this.getSenderAddress()))
+								
+								} : Slate.NO_PAYMENT_PROOF;
 						
-						} : Slate.NO_PAYMENT_PROOF;
-						
-						// Set serialized slate's coin type
-						serializedSlate["coin_type"] = Slate.COIN_TYPE;
-						
-						// Set serialized slate's network type
-						serializedSlate["network_type"] = Slate.getNetworkType(isMainnet);
+								// Break
+								break;
+						}
 					}
 					
 					// Return serialized slate
@@ -2088,6 +2118,22 @@ class Slate {
 						// Sender address
 						Slatepack.slatepackAddressToPublicKey(senderAddress)
 					]);
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+		
+					// Return creating message from amount, commit, and sender address
+					return Common.mergeArrays([
+					
+						// Amount
+						amount.toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64),
+						
+						// Commit
+						commit,
+						
+						// Sender address
+						Tor.torAddressToPublicKey(senderAddress)
+					]);
 			}
 		}
 		
@@ -2125,6 +2171,19 @@ class Slate {
 						// Version four
 						"V" + Slate.VERSION_FOUR.toFixed()
 					];
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+		
+					// Return supported versions
+					return [
+					
+						// Version three
+						"V" + Slate.VERSION_THREE.toFixed(),
+											
+						// Version two
+						"V" + Slate.VERSION_TWO.toFixed()
+					];
 			}
 		}
 		
@@ -2134,8 +2193,9 @@ class Slate {
 			// Check wallet type
 			switch(Consensus.getWalletType()) {
 			
-				// MWC wallet
+				// MWC or EPIC wallet
 				case Consensus.MWC_WALLET_TYPE:
+				case Consensus.EPIC_WALLET_TYPE:
 				
 					// Get body weight from the number of inputs, outputs, and kernels
 					var bodyWeight = new BigNumber(numberOfOutputs).multipliedBy(Slate.BODY_WEIGHT_OUTPUT_FACTOR).plus(Math.max(numberOfKernels, 1)).minus(numberOfInputs);
@@ -2568,6 +2628,12 @@ class Slate {
 				
 					// Return newest version
 					return Slate.VERSION_FOUR;
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+				
+					// Return newest version
+					return Slate.VERSION_THREE;
 			}
 		}
 		
@@ -2598,8 +2664,9 @@ class Slate {
 			// Check wallet type
 			switch(Consensus.getWalletType()) {
 			
-				// MWC wallet
+				// MWC or EPIC wallet
 				case Consensus.MWC_WALLET_TYPE:
+				case Consensus.EPIC_WALLET_TYPE:
 		
 					// Return maximum fee
 					return Number.POSITIVE_INFINITY;
@@ -2856,8 +2923,8 @@ class Slate {
 			// Detect slate's version
 			var detectedVersion = Slate.detectVersion(serializedSlate, isMainnet);
 			
-			// Check if version is unknown
-			if(detectedVersion === Slate.UNKNOWN_VERSION) {
+			// Check if version is unknown or not supported
+			if(detectedVersion === Slate.UNKNOWN_VERSION || Slate.SUPPORTED_VERSIONS.indexOf((detectedVersion instanceof BigNumber === true) ? "V" + detectedVersion.toFixed() : detectedVersion) === Common.INDEX_NOT_FOUND) {
 			
 				// Throw error
 				throw "Unsupported slate.";
@@ -2978,7 +3045,7 @@ class Slate {
 						}
 						
 						// Check if payment proof's receiver address isn't supported
-						if(serializedSlate["payment_proof"] !== null && ("receiver_address" in serializedSlate["payment_proof"] === false || typeof serializedSlate["payment_proof"]["receiver_address"] !== "string" || (serializedSlate["payment_proof"]["receiver_address"]["length"] !== Mqs.ADDRESS_LENGTH && serializedSlate["payment_proof"]["receiver_address"]["length"] !== Tor.ADDRESS_LENGTH))) {
+						if(serializedSlate["payment_proof"] !== null && ("receiver_address" in serializedSlate["payment_proof"] === false || typeof serializedSlate["payment_proof"]["receiver_address"] !== "string")) {
 						
 							// Throw error
 							throw "Unsupported slate.";
@@ -2987,52 +3054,95 @@ class Slate {
 						// Check if serialized slate provided a payment proof
 						if(serializedSlate["payment_proof"] !== null) {
 						
-							// Check receiver address's length
-							switch(serializedSlate["payment_proof"]["receiver_address"]["length"]) {
+							// Check wallet type
+							switch(Consensus.getWalletType()) {
 							
-								// MQS address length
-								case Mqs.ADDRESS_LENGTH:
-								
-									// Try
-									try {
+								// MWC wallet
+								case Consensus.MWC_WALLET_TYPE:
+						
+									// Check receiver address's length
+									switch(serializedSlate["payment_proof"]["receiver_address"]["length"]) {
 									
-										// Get public key from receiver's MQS address
-										Mqs.mqsAddressToPublicKey(serializedSlate["payment_proof"]["receiver_address"], isMainnet);
+										// MQS address length
+										case Mqs.ADDRESS_LENGTH:
+										
+											// Try
+											try {
+											
+												// Get public key from receiver's MQS address
+												Mqs.mqsAddressToPublicKey(serializedSlate["payment_proof"]["receiver_address"], isMainnet);
+											}
+											
+											// Catch errors
+											catch(error) {
+											
+												// Throw error
+												throw "Unsupported slate.";
+											}
+											
+											// Break
+											break;
+										
+										// Tor address length
+										case Tor.ADDRESS_LENGTH:
+										
+											// Try
+											try {
+											
+												// Get public key from receiver's Tor address
+												Tor.torAddressToPublicKey(serializedSlate["payment_proof"]["receiver_address"]);
+											}
+											
+											// Catch errors
+											catch(error) {
+											
+												// Throw error
+												throw "Unsupported slate.";
+											}
+										
+											// Break
+											break;
+										
+										// Default
+										default:
+										
+											// Throw error
+											throw "Unsupported slate.";
 									}
 									
-									// Catch errors
-									catch(error) {
-									
-										// Throw error
-										throw "Unsupported slate.";
-									}
+									// Set receiver address to serialized slate's receiver address
+									this.receiverAddress = serializedSlate["payment_proof"]["receiver_address"];
 									
 									// Break
 									break;
 								
-								// Tor address length
-								case Tor.ADDRESS_LENGTH:
-								
+								// EPIC wallet
+								case Consensus.EPIC_WALLET_TYPE:
+						
+									// Check if payment proof's receiver address isn't supported
+									if(Common.isHexString(serializedSlate["payment_proof"]["receiver_address"]) === false || Common.hexStringLength(serializedSlate["payment_proof"]["receiver_address"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
 									// Try
 									try {
 									
-										// Get public key from receiver's Tor address
-										Tor.torAddressToPublicKey(serializedSlate["payment_proof"]["receiver_address"]);
+										// Set receiver address to the Tor address created from the receiver's public key
+										this.receiverAddress = Tor.publicKeyToTorAddress(Common.fromHexString(serializedSlate["payment_proof"]["receiver_address"]));
 									}
-									
+										
 									// Catch errors
 									catch(error) {
 									
 										// Throw error
 										throw "Unsupported slate.";
 									}
-								
+									
 									// Break
 									break;
 							}
-							
-							// Set receiver address to serialized slate's receiver address
-							this.receiverAddress = serializedSlate["payment_proof"]["receiver_address"];
 						}
 						
 						// Otherwise
@@ -3043,17 +3153,51 @@ class Slate {
 						}
 						
 						// Check if payment proof's receiver signature isn't supported
-						if(serializedSlate["payment_proof"] !== null && ("receiver_signature" in serializedSlate["payment_proof"] === false || (serializedSlate["payment_proof"]["receiver_signature"] !== null && (Common.isHexString(serializedSlate["payment_proof"]["receiver_signature"]) === false || (Common.hexStringLength(serializedSlate["payment_proof"]["receiver_signature"]) > Crypto.MAXIMUM_MESSAGE_HASH_SIGNATURE_LENGTH && Common.hexStringLength(serializedSlate["payment_proof"]["receiver_signature"]) !== Crypto.ED25519_SIGNATURE_LENGTH))))) {
+						if(serializedSlate["payment_proof"] !== null && ("receiver_signature" in serializedSlate["payment_proof"] === false || (serializedSlate["payment_proof"]["receiver_signature"] !== null && Common.isHexString(serializedSlate["payment_proof"]["receiver_signature"]) === false))) {
 						
 							// Throw error
 							throw "Unsupported slate.";
+						}
+						
+						// Check if serialized slate provided a payment proof and a serialized signature
+						if(serializedSlate["payment_proof"] !== null && serializedSlate["payment_proof"]["receiver_signature"] !== null) {
+						
+							// Check wallet type
+							switch(Consensus.getWalletType()) {
+							
+								// MWC wallet
+								case Consensus.MWC_WALLET_TYPE:
+								
+									// Check if payment proof's receiver signature isn't supported
+									if(Common.hexStringLength(serializedSlate["payment_proof"]["receiver_signature"]) > Crypto.MAXIMUM_MESSAGE_HASH_SIGNATURE_LENGTH && Common.hexStringLength(serializedSlate["payment_proof"]["receiver_signature"]) !== Crypto.ED25519_SIGNATURE_LENGTH) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
+									// Break
+									break;
+								
+								// EPIC wallet
+								case Consensus.EPIC_WALLET_TYPE:
+								
+									// Check if payment proof's receiver signature isn't supported
+									if(Common.hexStringLength(serializedSlate["payment_proof"]["receiver_signature"]) !== Crypto.ED25519_SIGNATURE_LENGTH) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
+									// Break
+									break;
+							}
 						}
 						
 						// Set receiver signature to serialized slate's receiver signature
 						this.receiverSignature = (serializedSlate["payment_proof"] !== null && serializedSlate["payment_proof"]["receiver_signature"] !== null) ? Common.fromHexString(serializedSlate["payment_proof"]["receiver_signature"]) : Slate.NO_RECEIVER_SIGNATURE;
 						
 						// Check if payment proof's sender address isn't supported
-						if(serializedSlate["payment_proof"] !== null && ("sender_address" in serializedSlate["payment_proof"] === false || typeof serializedSlate["payment_proof"]["sender_address"] !== "string" || (serializedSlate["payment_proof"]["sender_address"]["length"] !== Mqs.ADDRESS_LENGTH && serializedSlate["payment_proof"]["sender_address"]["length"] !== Tor.ADDRESS_LENGTH))) {
+						if(serializedSlate["payment_proof"] !== null && ("sender_address" in serializedSlate["payment_proof"] === false || typeof serializedSlate["payment_proof"]["sender_address"] !== "string")) {
 						
 							// Throw error
 							throw "Unsupported slate.";
@@ -3062,52 +3206,95 @@ class Slate {
 						// Check if serialized slate provided a payment proof
 						if(serializedSlate["payment_proof"] !== null) {
 						
-							// Check sender address's length
-							switch(serializedSlate["payment_proof"]["sender_address"]["length"]) {
+							// Check wallet type
+							switch(Consensus.getWalletType()) {
 							
-								// MQS address length
-								case Mqs.ADDRESS_LENGTH:
-								
-									// Try
-									try {
+								// MWC wallet
+								case Consensus.MWC_WALLET_TYPE:
+						
+									// Check sender address's length
+									switch(serializedSlate["payment_proof"]["sender_address"]["length"]) {
 									
-										// Get public key from sender's MQS address
-										Mqs.mqsAddressToPublicKey(serializedSlate["payment_proof"]["sender_address"], isMainnet);
+										// MQS address length
+										case Mqs.ADDRESS_LENGTH:
+										
+											// Try
+											try {
+											
+												// Get public key from sender's MQS address
+												Mqs.mqsAddressToPublicKey(serializedSlate["payment_proof"]["sender_address"], isMainnet);
+											}
+											
+											// Catch errors
+											catch(error) {
+											
+												// Throw error
+												throw "Unsupported slate.";
+											}
+											
+											// Break
+											break;
+										
+										// Tor address length
+										case Tor.ADDRESS_LENGTH:
+										
+											// Try
+											try {
+											
+												// Get public key from sender's Tor address
+												Tor.torAddressToPublicKey(serializedSlate["payment_proof"]["sender_address"]);
+											}
+											
+											// Catch errors
+											catch(error) {
+											
+												// Throw error
+												throw "Unsupported slate.";
+											}
+										
+											// Break
+											break;
+										
+										// Default
+										default:
+										
+											// Throw error
+											throw "Unsupported slate.";
 									}
 									
-									// Catch errors
-									catch(error) {
-									
-										// Throw error
-										throw "Unsupported slate.";
-									}
+									// Set sender address to serialized slate's sender address
+									this.senderAddress = serializedSlate["payment_proof"]["sender_address"];
 									
 									// Break
 									break;
 								
-								// Tor address length
-								case Tor.ADDRESS_LENGTH:
-								
+								// EPIC wallet
+								case Consensus.EPIC_WALLET_TYPE:
+						
+									// Check if payment proof's sender address isn't supported
+									if(Common.isHexString(serializedSlate["payment_proof"]["sender_address"]) === false || Common.hexStringLength(serializedSlate["payment_proof"]["sender_address"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
 									// Try
 									try {
 									
-										// Get public key from sender's Tor address
-										Tor.torAddressToPublicKey(serializedSlate["payment_proof"]["sender_address"]);
+										// Set sender address to the Tor address created from the sender's public key
+										this.senderAddress = Tor.publicKeyToTorAddress(Common.fromHexString(serializedSlate["payment_proof"]["sender_address"]));
 									}
-									
+										
 									// Catch errors
 									catch(error) {
 									
 										// Throw error
 										throw "Unsupported slate.";
 									}
-								
+									
 									// Break
 									break;
 							}
-							
-							// Set sender address to serialized slate's sender address
-							this.senderAddress = serializedSlate["payment_proof"]["sender_address"];
 						}
 						
 						// Otherwise
@@ -4320,12 +4507,46 @@ class Slate {
 							return Slate.VERSION_TWO;
 						}
 					}
+					
+					// Break
+					break;
 				
 				// GRIN wallet
 				case Consensus.GRIN_WALLET_TYPE:
 				
 					// Return version four
 					return Slate.VERSION_FOUR;
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+		
+					// Check if time to live cut off height or payment proof is used
+					if(this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT || this.hasPaymentProof() === true) {
+					
+						// Return version three
+						return Slate.VERSION_THREE;
+					}
+					
+					// Otherwise
+					else {
+					
+						// Check if version two isn't preferred
+						if(preferredVersions.indexOf("V" + Slate.VERSION_TWO.toFixed()) === Common.INDEX_NOT_FOUND) {
+						
+							// Return version three
+							return Slate.VERSION_THREE;
+						}
+						
+						// Otherwise
+						else {
+					
+							// Return version two
+							return Slate.VERSION_TWO;
+						}
+					}
+					
+					// Break
+					break;
 			}
 		}
 		
@@ -4481,6 +4702,32 @@ class Slate {
 								
 									// Get receiver address's public key
 									var receiverAddressPublicKey = Slatepack.slatepackAddressToPublicKey(this.getReceiverAddress());
+								
+									// Check if receiver signature doesn't verify the message
+									if(Ed25519.verify(message, this.getReceiverSignature(), receiverAddressPublicKey) !== true) {
+									
+										// Return false
+										return false;
+									}
+									
+									// Break
+									break;
+							}
+							
+							// Break
+							break;
+						
+						// EPIC wallet
+						case Consensus.EPIC_WALLET_TYPE:
+					
+							// Check receiver address's length
+							switch(this.getReceiverAddress()["length"]) {
+							
+								// Tor address length
+								case Tor.ADDRESS_LENGTH:
+									
+									// Get receiver address's public key
+									var receiverAddressPublicKey = Tor.torAddressToPublicKey(this.getReceiverAddress());
 								
 									// Check if receiver signature doesn't verify the message
 									if(Ed25519.verify(message, this.getReceiverSignature(), receiverAddressPublicKey) !== true) {
@@ -5506,6 +5753,9 @@ class Slate {
 							return Slate.UNKNOWN_VERSION;
 						}
 					}
+					
+					// Break
+					break;
 				
 				// GRIN wallet
 				case Consensus.GRIN_WALLET_TYPE:
@@ -5523,6 +5773,36 @@ class Slate {
 						// Return unknown version
 						return Slate.UNKNOWN_VERSION;
 					}
+					
+					// Break
+					break;
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+		
+					// Check if serialized slate contains a version info structure
+					if("version_info" in serializedSlate === true && Object.isObject(serializedSlate["version_info"]) === true && "version" in serializedSlate["version_info"] === true && (Common.isNumberString(serializedSlate["version_info"]["version"]) === true || serializedSlate["version_info"]["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version_info"]["version"])).isInteger() === true) {
+					
+						// Return version info structure's version
+						return new BigNumber(serializedSlate["version_info"]["version"]);
+					}
+					
+					// Otherwise check if serialized slate contains a version
+					else if("version" in serializedSlate === true && (Common.isNumberString(serializedSlate["version"]) === true || serializedSlate["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version"])).isInteger() === true) {
+					
+						// Return version one
+						return Slate.VERSION_ONE;
+					}
+					
+					// Otherwise
+					else {
+					
+						// Return unknown version
+						return Slate.UNKNOWN_VERSION;
+					}
+					
+					// Break
+					break;
 			}
 		}
 		

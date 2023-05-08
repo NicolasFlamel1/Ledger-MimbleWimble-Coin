@@ -73,8 +73,8 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// MQS address type
 		case MQS_ADDRESS_TYPE:
 		
-			// Check if currency doesn't allow MQS addresses
-			if(!currencyInformation->enableMqsAddress) {
+			// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
+			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -86,8 +86,8 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// Tor address type
 		case TOR_ADDRESS_TYPE:
 		
-			// Check if currency doesn't allow Tor addresses
-			if(!currencyInformation->enableTorAddress) {
+			// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
+			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -99,8 +99,8 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		// Slatepack address type
 		case SLATEPACK_ADDRESS_TYPE:
 		
-			// Check if currency doesn't allow Slatepack addresses
-			if(!currencyInformation->enableSlatepackAddress) {
+			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+			if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -178,6 +178,13 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Check if a transaction address exists
+			if(transaction.addressLength) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t);
@@ -196,6 +203,13 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 		
 		// No recent duplicate features
 		case NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Check if currency doesn't allow no recent duplicate kernels
+			if(!currencyInformation->enableNoRecentDuplicateKernels) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
 		
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint16_t);
@@ -358,13 +372,44 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
-		// Set verify address or approve transaction line buffer
-		explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
-		strncpy(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
-	
-		// Copy transaction's input into the amount line buffer
-		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.send, currencyInformation->fractionalDigits);
+		// Check if has BAGL
+		#ifdef HAVE_BAGL
+		
+			// Set verify address, approve transaction, or sign challenge line buffer
+			explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Send", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+		
+		// Otherwise check if has NBGL
+		#elif defined HAVE_NBGL
+		
+			// Set verify address, approve transaction, or sign challenge line buffer
+			explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Send transaction?", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+			
+			// Set succeeded line buffer
+			explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+			strncpy(succeededLineBuffer, "TRANSACTION\nSENT", sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+			
+			// Set failed line buffer
+			explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+			strncpy(failedLineBuffer, "Sending transaction\nfailed", sizeof(failedLineBuffer) - sizeof((char)'\0'));
+			
+			// Set canceled line buffer
+			explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+			strncpy(canceledLineBuffer, "Sending transaction\ndenied", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
+			
+			// Set cancel prompt line buffer
+			explicit_bzero(cancelPromptLineBuffer, sizeof(cancelPromptLineBuffer));
+			strncpy(cancelPromptLineBuffer, "Deny sending\ntransaction?", sizeof(cancelPromptLineBuffer) - sizeof((char)'\0'));
+			
+			// Set approve button line buffer
+			explicit_bzero(approveButtonLineBuffer, sizeof(approveButtonLineBuffer));
+			strncpy(approveButtonLineBuffer, "Hold to send", sizeof(approveButtonLineBuffer) - sizeof((char)'\0'));
+		#endif
+		
+		// Copy transaction's input into the amount or address type line buffer
+		explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+		toString(amountOrAddressTypeLineBuffer, transaction.send, currencyInformation->fractionalDigits);
 	}
 	
 	// Otherwise
@@ -409,18 +454,49 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 		}
 		
-		// Set verify address or approve transaction line buffer
-		explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
-		strncpy(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
+		// Check if has BAGL
+		#ifdef HAVE_BAGL
 		
-		// Copy transaction's output into the amount line buffer
-		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.receive, currencyInformation->fractionalDigits);
+			// Set verify address, approve transaction, or sign challenge line buffer
+			explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Receive", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+		
+		// Otherwise check if has NBGL
+		#elif defined HAVE_NBGL
+		
+			// Set verify address, approve transaction, or sign challenge line buffer
+			explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+			strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Receive transaction?", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+			
+			// Set succeeded line buffer
+			explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+			strncpy(succeededLineBuffer, "TRANSACTION\nRECEIVED", sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+			
+			// Set failed line buffer
+			explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+			strncpy(failedLineBuffer, "Receiving transaction\nfailed", sizeof(failedLineBuffer) - sizeof((char)'\0'));
+			
+			// Set canceled line buffer
+			explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+			strncpy(canceledLineBuffer, "Receiving transaction\ndenied", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
+			
+			// Set cancel prompt line buffer
+			explicit_bzero(cancelPromptLineBuffer, sizeof(cancelPromptLineBuffer));
+			strncpy(cancelPromptLineBuffer, "Deny receiving\ntransaction?", sizeof(cancelPromptLineBuffer) - sizeof((char)'\0'));
+			
+			// Set approve button line buffer
+			explicit_bzero(approveButtonLineBuffer, sizeof(approveButtonLineBuffer));
+			strncpy(approveButtonLineBuffer, "Hold to receive", sizeof(approveButtonLineBuffer) - sizeof((char)'\0'));
+		#endif
+		
+		// Copy transaction's output into the amount or address type line buffer
+		explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+		toString(amountOrAddressTypeLineBuffer, transaction.receive, currencyInformation->fractionalDigits);
 	}
 	
-	// Append currency abbreviation to amount line buffer
-	strncat(amountLineBuffer, " ", sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
-	strncat(amountLineBuffer, currencyInformation->abbreviation, sizeof(amountLineBuffer) - strlen(amountLineBuffer) - sizeof((char)'\0'));
+	// Append currency abbreviation to amount or address type line buffer
+	strncat(amountOrAddressTypeLineBuffer, " ", sizeof(amountOrAddressTypeLineBuffer) - strlen(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
+	strncat(amountOrAddressTypeLineBuffer, currencyInformation->abbreviation, sizeof(amountOrAddressTypeLineBuffer) - strlen(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
 	
 	// Copy transaction's fee into the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
@@ -439,8 +515,8 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Plain", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
-			// Clear the kernel features details title line buffer
-			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+			// Clear the kernel features details title or sign type line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
 		
 			// Break
 			break;
@@ -452,8 +528,8 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Coinbase", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
-			// Clear the kernel features details title line buffer
-			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+			// Clear the kernel features details title or sign type line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
 		
 			// Break
 			break;
@@ -465,9 +541,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "Height Locked", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
-			// Set kernel features details title line buffer
-			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
-			strncpy(kernelFeaturesDetailsTitleLineBuffer, "Lock Height", sizeof(kernelFeaturesDetailsTitleLineBuffer) - sizeof((char)'\0'));
+			// Set kernel features details title or sign type line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
+			strncpy(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, "Lock Height", sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get lock height from data
 			uint64_t lockHeight;
@@ -488,9 +564,9 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 			explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 			strncpy(kernelFeaturesOrTransactionTypeLineBuffer, "No Recent Duplicate", sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
 			
-			// Set kernel features details title line buffer
-			explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
-			strncpy(kernelFeaturesDetailsTitleLineBuffer, "Relative Height", sizeof(kernelFeaturesDetailsTitleLineBuffer) - sizeof((char)'\0'));
+			// Set kernel features details title or sign type line buffer
+			explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
+			strncpy(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, "Relative Height", sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get relative height from data
 			uint16_t relativeHeight;

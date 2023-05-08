@@ -25,16 +25,28 @@
 static const char MQS_MESSAGE_PART_ONE[] = {'{', '"', 'd', 'e', 's', 't', 'i', 'n', 'a', 't', 'i', 'o', 'n', '"', ':', '{', '"', 'p', 'u', 'b', 'l', 'i', 'c', '_', 'k', 'e', 'y', '"', ':', '"'};
 
 // MQS message part two
-static const char MQS_MESSAGE_PART_TWO[] = {'"', ',', '"', 'd', 'o', 'm', 'a', 'i', 'n', '"', ':', '"', '"', ',', '"', 'p', 'o', 'r', 't', '"', ':', 'n', 'u', 'l', 'l', '}', ',', '"', 'n', 'o', 'n', 'c', 'e', '"', ':', '"'};
+static const char MQS_MESSAGE_PART_TWO[] = {'"', ',', '"', 'd', 'o', 'm', 'a', 'i', 'n', '"', ':', '"'};
 
 // MQS message part three
-static const char MQS_MESSAGE_PART_THREE[] = {'"', ',', '"', 's', 'a', 'l', 't', '"', ':', '"'};
+static const char MQS_MESSAGE_PART_THREE[] = {'"', ',', '"', 'p', 'o', 'r', 't', '"', ':'};
 
 // MQS message part four
-static const char MQS_MESSAGE_PART_FOUR[] = {'"', ',', '"', 'e', 'n', 'c', 'r', 'y', 'p', 't', 'e', 'd', '_', 'm', 'e', 's', 's', 'a', 'g', 'e', '"', ':', '"'};
+static const char MQS_MESSAGE_PART_FOUR[] = {'}', ',', '"', 'n', 'o', 'n', 'c', 'e', '"', ':', '"'};
 
 // MQS message part five
-static const char MQS_MESSAGE_PART_FIVE[] = {'"', '}'};
+static const char MQS_MESSAGE_PART_FIVE[] = {'"', ',', '"', 's', 'a', 'l', 't', '"', ':', '"'};
+
+// MQS message part six
+static const char MQS_MESSAGE_PART_SIX[] = {'"', ',', '"', 'e', 'n', 'c', 'r', 'y', 'p', 't', 'e', 'd', '_', 'm', 'e', 's', 's', 'a', 'g', 'e', '"', ':', '"'};
+
+// MQS message part seven
+static const char MQS_MESSAGE_PART_SEVEN[] = {'"', '}'};
+
+// MQS message no port
+static const char MQS_MESSAGE_NO_PORT[] = {'n', 'u', 'l', 'l'};
+
+// Default MQS challenge
+static const char DEFAULT_MQS_CHALLENGE[] = "7WUDtkSaKyGRUnQ22rE3QUXChV8DmA6NnunDYP4vheTpc";
 
 
 // Function prototypes

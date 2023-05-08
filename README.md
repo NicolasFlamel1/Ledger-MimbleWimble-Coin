@@ -1,11 +1,11 @@
-# MimbleWimble Coin (MWC) and Grin (GRIN) Ledger hardware wallet apps
+# MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) Ledger hardware wallet apps
 
 ### Description
-MimbleWimble Coin (MWC) and Grin (GRIN) apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
+MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
 
 These apps can be installed onto Ledger Nano S and Ledger Nano S Plus hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
-Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) and Grin (GRIN) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
+Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
 [These video tutorials](https://youtube.com/playlist?list=PLb1nuT3sFYbD_sydCVCngbvATsm9RwWyF) go over how to start using Grin with Ledger Live Desktop/Mobile and how to send Grin to and receive Grin from popular wallets and exchanges with it.
 
@@ -41,8 +41,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk stax-secure-sdk
 cd stax-secure-sdk
-git checkout stax_1.0.0
-git checkout API_LEVEL_8
+git checkout stax_1.1.0-rc1
+git checkout API_LEVEL_9
 git pull
 echo stax > .target
 cd ..
@@ -71,11 +71,13 @@ The apps can then be built with the following commands:
 ```
 make CURRENCY=mimblewimble_coin
 make CURRENCY=grin
+make CURRENCY=epic_cash
 ```
 The apps can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets with the following commands:
 ```
 make load CURRENCY=mimblewimble_coin
 make load CURRENCY=grin
+make load CURRENCY=epic_cash
 ```
 
 ### Testing
@@ -84,6 +86,7 @@ Functional tests for the apps can be ran with the following commands:
 npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
 make functional_tests CURRENCY=mimblewimble_coin
 make functional_tests CURRENCY=grin
+make functional_tests CURRENCY=epic_cash
 ```
 Unit tests can be ran with the following commands:
 ```

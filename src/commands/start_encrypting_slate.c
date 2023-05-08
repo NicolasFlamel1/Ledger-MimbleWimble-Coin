@@ -60,20 +60,34 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	// Get address length
 	const size_t addressLength = dataLength - (sizeof(account) + sizeof(index));
 	
+	// Get address domain
+	const char *addressDomain = memchr(address, '@', addressLength);
+	
 	// Check address length
 	size_t sharedPrivateKeyLength;
 	size_t saltLength = 0;
 	uint8_t *salt;
-	switch(addressLength) {
+	switch(addressDomain ? addressDomain - address : addressLength) {
 	
 		// MQS address size
 		case MQS_ADDRESS_SIZE:
 		
-			// Check if currency doesn't allow MQS addresses
-			if(!currencyInformation->enableMqsAddress) {
+			// Check if currency doesn't allow MQS addresses or doesn't support MQS slate encryption
+			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedSlateEncryptionTypes & MQS_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Check if address has a domain
+			if(addressDomain) {
+			
+				// Check if domain is invalid
+				if(!isValidAddress(&addressDomain[sizeof((char)'@')], addressLength - (addressDomain - address + sizeof((char)'@')))) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
 			}
 			
 			// Set shared private key length
@@ -94,8 +108,15 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check if currency doesn't allow Tor addresses
-			if(!currencyInformation->enableTorAddress) {
+			// Check if currency doesn't allow Tor addresses or doesn't support Tor slate encryption
+			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedSlateEncryptionTypes & TOR_SLATE_ENCRYPTION)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Check if address has a domain
+			if(addressDomain) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -133,7 +154,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		TRY {
 	
 			// Check address length
-			switch(addressLength) {
+			switch(addressDomain ? addressDomain - address : addressLength) {
 			
 				// MQS address size
 				case MQS_ADDRESS_SIZE:
@@ -170,7 +191,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	END_TRY;
 	
 	// Check if encrypting for MQS
-	if(addressLength == MQS_ADDRESS_SIZE) {
+	if((addressDomain ? addressDomain - address : addressLength) == MQS_ADDRESS_SIZE) {
 	
 		// Initialize message hash state
 		cx_sha256_init(&slate.messageHashState);
@@ -179,10 +200,56 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_ONE, sizeof(MQS_MESSAGE_PART_ONE), NULL, 0);
 		
 		// Add address to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)address, addressLength, NULL, 0);
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)address, addressDomain ? addressDomain - address : addressLength, NULL, 0);
 		
 		// Add MQS message part two to the message hash state
 		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_TWO, sizeof(MQS_MESSAGE_PART_TWO), NULL, 0);
+		
+		// Check if address has a domain
+		if(addressDomain) {
+		
+			// Get address port
+			const char *addressPort = memchr(addressDomain, ':', addressLength - (addressDomain - address));
+			
+			// Check if address has a port
+			if(addressPort) {
+			
+				// Add address domain to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressPort - addressDomain - sizeof((char)'@'), NULL, 0);
+				
+				// Add MQS message part three to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+				
+				// Add address port to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressPort[sizeof((char)':')], addressLength - (addressPort - address + sizeof((char)':')), NULL, 0);
+			}
+			
+			// Otherwise
+			else {
+			
+				// Add address domain to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressLength - (addressDomain - address + sizeof((char)'@')), NULL, 0);
+				
+				// Add MQS message part three to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+				
+				// Add MQS message no port to the message hash state
+				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0);
+			}
+		}
+		
+		// Otherwise
+		else {
+		
+			// Add MQS message part three to the message hash state
+			cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+			
+			// Add MQS message no port to the message hash state
+			cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0);
+		}
+		
+		// Add MQS message part four to the message hash state
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FOUR, sizeof(MQS_MESSAGE_PART_FOUR), NULL, 0);
 		
 		// Get nonce as a string
 		char nonceString[sizeof(nonce) * HEXADECIMAL_CHARACTER_SIZE];
@@ -191,8 +258,8 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		// Add nonce string to the message hash state
 		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)nonceString, sizeof(nonceString), NULL, 0);
 		
-		// Add MQS message part three to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+		// Add MQS message part five to the message hash state
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FIVE, sizeof(MQS_MESSAGE_PART_FIVE), NULL, 0);
 		
 		// Get salt as a string
 		const size_t saltStringLength = saltLength * HEXADECIMAL_CHARACTER_SIZE;
@@ -202,8 +269,8 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		// Add salt string to the message hash state
 		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)saltString, saltStringLength, NULL, 0);
 		
-		// Add MQS message part four to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FOUR, sizeof(MQS_MESSAGE_PART_FOUR), NULL, 0);
+		// Add MQS message part six to the message hash state
+		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_SIX, sizeof(MQS_MESSAGE_PART_SIX), NULL, 0);
 	}
 	
 	// Check if response with the nonce and salt will overflow

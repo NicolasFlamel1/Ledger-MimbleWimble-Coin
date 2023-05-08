@@ -65,13 +65,47 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address or approve transaction line buffer
-			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
-			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify MQS", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
 			
-			// Set address type line buffer
-			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
-			strncpy(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify ", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				strncat(verifyAddressApproveTransactionOrSignChallengeLineBuffer, currencyInformation->mqsName, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - strlen(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify ", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				strncat(verifyAddressApproveTransactionOrSignChallengeLineBuffer, currencyInformation->mqsName, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - strlen(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				strncat(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "\naddress", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - strlen(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				
+				// Set succeeded line buffer
+				explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+				strncpy(succeededLineBuffer, currencyInformation->mqsName, sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+				strncat(succeededLineBuffer, " ADDRESS\nVERIFIED", sizeof(succeededLineBuffer) - strlen(succeededLineBuffer) - sizeof((char)'\0'));
+				
+				upperCaseText(succeededLineBuffer, strlen(succeededLineBuffer));
+				
+				// Set failed line buffer
+				explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+				strncpy(failedLineBuffer, "Verifying ", sizeof(failedLineBuffer) - sizeof((char)'\0'));
+				strncat(failedLineBuffer, currencyInformation->mqsName, sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
+				strncat(failedLineBuffer, "\naddress failed", sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
+				
+				// Set canceled line buffer
+				explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+				strncpy(canceledLineBuffer, "Verifying ", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
+				strncat(canceledLineBuffer, currencyInformation->mqsName, sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
+				strncat(canceledLineBuffer, "\naddress canceled", sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
+			#endif
+			
+			// Set amount or address type line buffer
+			explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+			strncpy(amountOrAddressTypeLineBuffer, currencyInformation->mqsName, sizeof(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
+			strncat(amountOrAddressTypeLineBuffer, " Address", sizeof(amountOrAddressTypeLineBuffer) - strlen(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get MQS address
 			char mqsAddress[MQS_ADDRESS_SIZE];
@@ -93,14 +127,37 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
-		
-			// Set verify address or approve transaction line buffer
-			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
-			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Tor", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
 			
-			// Set address type line buffer
-			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
-			strncpy(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
+		
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify Tor", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify Tor\naddress", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				
+				// Set succeeded line buffer
+				explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+				strncpy(succeededLineBuffer, "TOR ADDRESS\nVERIFIED", sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+				
+				// Set failed line buffer
+				explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+				strncpy(failedLineBuffer, "Verifying Tor address\nfailed", sizeof(failedLineBuffer) - sizeof((char)'\0'));
+				
+				// Set canceled line buffer
+				explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+				strncpy(canceledLineBuffer, "Verifying Tor address\ncanceled", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
+			#endif
+			
+			// Set amount or address type line buffer
+			explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+			strncpy(amountOrAddressTypeLineBuffer, "Tor Address", sizeof(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			// Get Tor address
 			char torAddress[TOR_ADDRESS_SIZE];
@@ -123,13 +180,36 @@ void processVerifyAddressRequest(__attribute__((unused)) const unsigned short *r
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
-			// Set verify address or approve transaction line buffer
-			explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
-			strncpy(verifyAddressOrApproveTransactionLineBuffer, "Verify Slatepack", sizeof(verifyAddressOrApproveTransactionLineBuffer) - sizeof((char)'\0'));
+			// Check if has BAGL
+			#ifdef HAVE_BAGL
 			
-			// Set address type line buffer
-			explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
-			strncpy(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer) - sizeof((char)'\0'));
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify Slatepack", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+			
+			// Otherwise check if has NBGL
+			#elif defined HAVE_NBGL
+			
+				// Set verify address, approve transaction, or sign challenge line buffer
+				explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+				strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Verify Slatepack\naddress", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+				
+				// Set succeeded line buffer
+				explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+				strncpy(succeededLineBuffer, "SLATEPACK\nADDRESS VERIFIED", sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+				
+				// Set failed line buffer
+				explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+				strncpy(failedLineBuffer, "Verifying Slatepack\naddress failed", sizeof(failedLineBuffer) - sizeof((char)'\0'));
+				
+				// Set canceled line buffer
+				explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+				strncpy(canceledLineBuffer, "Verifying Slatepack\naddress canceled", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
+			#endif
+			
+			// Set amount or address type line buffer
+			explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+			strncpy(amountOrAddressTypeLineBuffer, "Slatepack Address", sizeof(amountOrAddressTypeLineBuffer) - sizeof((char)'\0'));
 			
 			{
 				// Get Slatepack address length

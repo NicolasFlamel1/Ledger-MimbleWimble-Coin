@@ -56,10 +56,10 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 		
 		// Add tag string to the message hash state
 		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)tagString, sizeof(tagString), NULL, 0);
-	
-		// Add MQS message part five to the message hash and get the message hash
+		
+		// Add MQS message part seven to the message hash and get the message hash
 		uint8_t messageHash[CX_SHA256_SIZE];
-		cx_hash((cx_hash_t *)&slate.messageHashState, CX_LAST, (uint8_t *)MQS_MESSAGE_PART_FIVE, sizeof(MQS_MESSAGE_PART_FIVE), messageHash, sizeof(messageHash));
+		cx_hash((cx_hash_t *)&slate.messageHashState, CX_LAST, (uint8_t *)MQS_MESSAGE_PART_SEVEN, sizeof(MQS_MESSAGE_PART_SEVEN), messageHash, sizeof(messageHash));
 		
 		// Initialize address private key
 		volatile cx_ecfp_private_key_t addressPrivateKey;

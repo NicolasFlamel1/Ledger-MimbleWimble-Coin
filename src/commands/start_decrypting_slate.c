@@ -75,8 +75,8 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// MQS address size
 		case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
 		
-			// Check if currency doesn't allow MQS addresses
-			if(!currencyInformation->enableMqsAddress) {
+			// Check if currency doesn't allow MQS addresses or doesn't support MQS slate encryption
+			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedSlateEncryptionTypes & MQS_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -94,8 +94,8 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 		
-			// Check if currency doesn't allow Tor addresses
-			if(!currencyInformation->enableTorAddress) {
+			// Check if currency doesn't allow Tor addresses or doesn't support Tor slate encryption
+			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedSlateEncryptionTypes & TOR_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -110,8 +110,8 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// Slatepack address size
 		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 		
-			// Check if currency doesn't allow Slatepack addresses
-			if(!currencyInformation->enableSlatepackAddress) {
+			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack slate encryption
+			if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedSlateEncryptionTypes & SLATEPACK_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

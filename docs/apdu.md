@@ -25,7 +25,7 @@ This app supports the following commands.
 | 0xC7  | 0x12        | `CONTINUE_TRANSACTION_GET_PUBLIC_NONCE`      | Returns the transaction's public nonce |
 | 0xC7  | 0x13        | `CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE` | Returns the signature for a provided message and public key signed with the transaction's blinding factor |
 | 0xC7  | 0x14        | `FINISH_TRANSACTION`                         | Returns the signature for the provided kernel information signed with the transaction's blinding factor |
-| 0xC7  | 0x15        | `GET_MQS_TIMESTAMP_SIGNATURE`                | Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index |
+| 0xC7  | 0x15        | `GET_MQS_CHALLENGE_SIGNATURE`                | Returns the signature for a provided challenge signed with an account's MQS private key at a provided index |
 
 ## Response Codes
 
@@ -292,7 +292,7 @@ Displays the account's MQS, Tor, or Slatepack address at a provided index on the
 
 #### Description
 
-Prepares the app's internal slate state to be able to encrypt data that will be provided later as an account at a provided index that can be decrypted by a provided address.
+Prepares the app's internal slate state to be able to encrypt data that will be provided later as an account at a provided index that can be decrypted by a provided address. An MQS recipient address can include an optional domain and port.
 
 #### Encoding
 
@@ -311,11 +311,11 @@ Prepares the app's internal slate state to be able to encrypt data that will be 
 
 **Input Data**
 
-| Length                   | Name                | Description |
-|--------------------------|---------------------|-------------|
-| 4                        | `account`           | Account number (little endian, max 0x7FFFFFFF)) |
-| 4                        | `index`             | Index number (little endian) |
-| 52 for MQS or 56 for Tor | `recipient_address` | Address that will be able to decrypt the data |
+| Length                      | Name                | Description |
+|-----------------------------|---------------------|-------------|
+| 4                           | `account`           | Account number (little endian, max 0x7FFFFFFF)) |
+| 4                           | `index`             | Index number (little endian) |
+| >= 52 for MQS or 56 for Tor | `recipient_address` | Address that will be able to decrypt the data |
 
 **Output Data**
 
@@ -740,11 +740,11 @@ Returns the signature for a provided UTF-8 message signed with the app's interna
 
 #### Description
 
-Returns the signature for the provided kernel information signed with the apps' internal transaction state's blinding factor after obtaining user's approval.
+Returns the signature for the provided kernel information signed with the app's internal transaction state's blinding factor after obtaining user's approval.
 
-A payment proof will be returned as well if the payment is receiving, a `kernel_commitment` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the sender's address and the `address_type` will be treated as the desired receiver's address type.
+A payment proof signature will be returned if receiving a payment, a `kernel_commitment` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the sender's address and the `address_type` will be treated as the desired receiver's address type.
 
-A payment proof will be displayed if a `kernel_commitment` is provided, a `payment_proof` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending and the sender's address if receiving. The `address_type` will be treated as the desired sender's address type if sending.
+A payment proof address will be displayed if a `kernel_commitment` is provided, a `payment_proof_signature` is provided if sending a payment, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending a payment or the sender's address if receiving a payment. The `address_type` will be treated as the desired sender's address type if sending a payment or the desired receiver's address type if receiving a payment. The payment proof address displayed will be the recipient's payment proof address if sending a payment or the sender's payment proof address if receiving a payment.
 
 If a sent transaction needs to be finalized at a later time, then the app's internal slate state can be restored by starting a transaction, including the same inputs and outputs, applying the same offset, and using the secret nonce index that was previously obtained with a `CONTINUE_TRANSACTION_APPLY_OFFSET` command.
 
@@ -760,31 +760,31 @@ If a sent transaction needs to be finalized at a later time, then the app's inte
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | Optional 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address that will be used if creating a payment proof |
+| P1        | `address_type` | Optional 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address that will be used if verifying or creating a payment proof |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
-| Length                                                          | Name                 | Description |
-|-----------------------------------------------------------------|----------------------|-------------|
-| 33                                                              | `public_nonce`       | Public nonce |
-| 33                                                              | `public_key`         | Public key |
-| 1, 3, or 9                                                      | `kernel_information` | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
-| 0 or 33                                                         | `kernel_commitment`  | Optional kernel commitment that will be used for creating or displaying a payment proof |
-| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`      | Optional receiver's payment proof signature that will be used when displaying a payment proof
+| Length                                                          | Name                      | Description |
+|-----------------------------------------------------------------|---------------------------|-------------|
+| 33                                                              | `public_nonce`            | Public nonce |
+| 33                                                              | `public_key`              | Public key |
+| 1, 3, or 9                                                      | `kernel_information`      | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
+| 0 or 33                                                         | `kernel_commitment`       | Optional kernel commitment that will be used for creating or verifying a payment proof |
+| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof_signature` | Optional receiver's payment proof signature that will be used when verifying a payment proof
 
 **Output Data**
 
-| Length                                                         | Name            | Description |
-|----------------------------------------------------------------|-----------------|-------------|
-| 64                                                             | `signature`     | Single-signer signature for the transaction and kernel information |
-| 0, > 0 and <= 72 for MQS or 64 for Tor and Slatepack signature | `payment_proof` | Optional receiver's payment proof signature |
+| Length                                                         | Name                      | Description |
+|----------------------------------------------------------------|---------------------------|-------------|
+| 64                                                             | `signature`               | Single-signer signature for the transaction and kernel information |
+| 0, > 0 and <= 72 for MQS or 64 for Tor and Slatepack signature | `payment_proof_signature` | Optional receiver's payment proof signature |
 
-### GET_MQS_TIMESTAMP_SIGNATURE
+### GET_MQS_CHALLENGE_SIGNATURE
 
 #### Description
 
-Returns the signature for a provided timestamp signed with an account's MQS private key at a provided index after obtaining user's approval.
+Returns the signature for a provided timestamp or hardcoded challenge signed with an account's MQS private key at a provided index after obtaining user's approval. The default challenge, 7WUDtkSaKyGRUnQ22rE3QUXChV8DmA6NnunDYP4vheTpc, will be signed if no timestamp is provided.
 
 #### Encoding
 
@@ -807,14 +807,14 @@ Returns the signature for a provided timestamp signed with an account's MQS priv
 |--------|--------------------|-------------|
 | 4      | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
 | 4      | `index`            | Index number (little endian) |
-| 8      | `timestamp`        | Timestamp epoch in milliseconds to sign (little endian, max 0x36EE7FFFC91567) |
-| 2      | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
+| 0 or 8 | `timestamp`        | Optional timestamp epoch in milliseconds to sign (little endian, max 0x36EE7FFFC91567) |
+| 0 or 2 | `time_zone_offset` | Optional time zone offset in minutes used when displaying the timestamp (little endian, signed, min -780, max 900) |
 
 **Output Data**
 
 | Length        | Name        | Description |
 |---------------|-------------|-------------|
-| > 0 and <= 72 | `signature` | DER signature of the timestamp |
+| > 0 and <= 72 | `signature` | DER signature of the challenge |
 
 ## Notes
 * The app will reset its internal slate and/or transaction state when unrelated commands are requested. For example, performing a `START_TRANSACTION` command followed by a `GET_COMMITMENT` command will reset the app's internal transaction state thus requiring another `START_TRANSACTION` command to be performed before a `CONTINUE_TRANSACTION_INCLUDE_OUTPUT` command can be successfully performed.

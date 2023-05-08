@@ -5,6 +5,7 @@
 #include "common.h"
 #include "currency_information.h"
 #include "menus.h"
+#include "mqs.h"
 #include "process_requests.h"
 
 // Check if has NBGL
@@ -29,8 +30,8 @@
 	// Start of text next to picture
 	#define START_OF_TEXT_NEXT_TO_PICTURE 41
 	
-	// Largest character width
-	#define LARGEST_CHARACTER_WIDTH 10
+	// Average character width
+	#define AVERAGE_CHARACTER_WIDTH 8
 
 // Otherwise
 #else
@@ -48,14 +49,11 @@ volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TI
 // Public key or address line buffer
 volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
 
-// Verify address or approve transaction line buffer
-char verifyAddressOrApproveTransactionLineBuffer[VERIFY_ADDRESS_OR_APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
+// Verify address, approve transaction, or sign challenge line buffer
+char verifyAddressApproveTransactionOrSignChallengeLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_SIGN_CHALLENGE_LINE_BUFFER_SIZE];
 
-// Address type line buffer
-char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
-
-// Amount line buffer
-char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
+// Amount or address type line buffer
+char amountOrAddressTypeLineBuffer[AMOUNT_OR_ADDRESS_TYPE_LINE_BUFFER_SIZE];
 
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
@@ -63,11 +61,33 @@ char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 // Kernel features or transaction type line buffer
 char kernelFeaturesOrTransactionTypeLineBuffer[KERNEL_FEATURES_OR_TRANSACTION_TYPE_LINE_BUFFER_SIZE];
 
-// Kernel features details title line buffer
-char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
+// Kernel features details title or sign type line buffer
+char kernelFeaturesDetailsTitleOrSignTypeLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_OR_SIGN_TYPE_LINE_BUFFER_SIZE];
 
 // Kernel features details text or account index line buffer
 char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
+
+// Check if has NBGL
+#ifdef HAVE_NBGL
+
+	// Succeeded line buffer
+	char succeededLineBuffer[SUCCEEDED_LINE_BUFFER_SIZE];
+	
+	// Failed line buffer
+	char failedLineBuffer[FAILED_LINE_BUFFER_SIZE];
+	
+	// Canceled line buffer
+	char canceledLineBuffer[CANCELED_LINE_BUFFER_SIZE];
+	
+	// Cancel prompt line buffer
+	char cancelPromptLineBuffer[CANCEL_PROMPT_LINE_BUFFER_SIZE];
+	
+	// Approve button line buffer
+	char approveButtonLineBuffer[APPROVE_BUTTON_LINE_BUFFER_SIZE];
+	
+	// Warning line buffer
+	char warningLineBuffer[WARNING_LINE_BUFFER];
+#endif
 
 // Check if has BAGL
 #ifdef HAVE_BAGL
@@ -111,14 +131,14 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	// Verify address navigation info
 	static nbgl_pageNavigationInfo_t verifyAddressMenuNavigationInfo;
 	
-	// Sign MQS timestamp menu tag value pairs
-	static nbgl_layoutTagValue_t signMqsTimestampMenuTagValuePairs[3];
+	// Sign MQS challenge menu tag value pairs
+	static nbgl_layoutTagValue_t signMqsChallengeMenuTagValuePairs[3];
 	
-	// Sign MQS timestamp menu tag value list
-	static nbgl_layoutTagValueList_t signMqsTimestampMenuTagValueList;
+	// Sign MQS challenge menu tag value list
+	static nbgl_layoutTagValueList_t signMqsChallengeMenuTagValueList;
 	
-	// Sign MQS timestamp menu info long press
-	static nbgl_pageInfoLongPress_t signMqsTimestampMenuInfoLongPress;
+	// Sign MQS challenge menu info long press
+	static nbgl_pageInfoLongPress_t signMqsChallengeMenuInfoLongPress;
 	
 	// Sign approve transaction menu tag value pairs
 	static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[5];
@@ -433,7 +453,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressOrApproveTransactionLineBuffer,
+		verifyAddressApproveTransactionOrSignChallengeLineBuffer,
 		
 		// Second line
 		"address"
@@ -457,7 +477,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	{
 
 		// Title
-		.title = addressTypeLineBuffer,
+		.title = amountOrAddressTypeLineBuffer,
 		
 		// Text
 		.text = (char *)publicKeyOrAddressLineBuffer
@@ -489,7 +509,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		// Verify address menu notify screen
 		&verifyAddressMenuNotifyScreen,
 		
-		// Verify address menu public key screen
+		// Verify address menu address screen
 		&verifyAddressMenuAddressScreen,
 
 		// Verify address menu approve screen
@@ -499,24 +519,24 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&verifyAddressMenuInvalidScreen
 	);
 
-	// Sign MQS timestamp menu notify screen
-	static UX_STEP_NOCB(signMqsTimestampMenuNotifyScreen, pnn, {
+	// Sign MQS challenge menu notify screen
+	static UX_STEP_NOCB(signMqsChallengeMenuNotifyScreen, pnn, {
 
 		// Picture
 		&C_icon_view,
 
 		// First line
-		"Sign MQS",
+		kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
 		
 		// Second line
-		"timestamp?"
+		"challenge?"
 	});
 
-	// Sign MQS timestamp menu account index screen
-	#define signMqsTimestampMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
+	// Sign MQS challenge menu account index screen
+	#define signMqsChallengeMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
 
-	// Sign MQS timestamp menu time and date screen
-	static UX_STEP_NOCB(signMqsTimestampMenuTimeAndDateScreen,
+	// Sign MQS challenge menu time and date screen
+	static UX_STEP_NOCB(signMqsChallengeMenuTimeAndDateScreen,
 
 		// Check if device has low height
 		#if BAGL_HEIGHT < 64
@@ -538,9 +558,33 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		// Text
 		.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
 	});
+	
+	// Sign MQS challenge menu default challenge screen
+	static UX_STEP_NOCB(signMqsChallengeMenuDefaultChallengeScreen,
 
-	// Sign MQS timestamp menu warning screen one
-	static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenOne, pnn, {
+		// Check if device has low height
+		#if BAGL_HEIGHT < 64
+		
+			// Layout
+			nb_paging,
+		
+		// Otherwise
+		#else
+		
+			// Layout
+			bnnn_paging,
+		#endif
+	{
+
+		// Title
+		.title = "Default Challenge",
+		
+		// Text
+		.text = DEFAULT_MQS_CHALLENGE
+	});
+
+	// Sign MQS challenge menu warning screen one
+	static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenOne, pnn, {
 
 		// Picture
 		&C_icon_warning,
@@ -552,8 +596,8 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		"be able to"
 	});
 
-	// Sign MQS timestamp menu warning screen two
-	static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenTwo, pnn, {
+	// Sign MQS challenge menu warning screen two
+	static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenTwo, pnn, {
 
 		// Picture
 		&C_icon_warning,
@@ -565,8 +609,8 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		"account's"
 	});
 
-	// Sign MQS timestamp menu warning screen three
-	static UX_STEP_NOCB(signMqsTimestampMenuWarningScreenThree, pnn, {
+	// Sign MQS challenge menu warning screen three
+	static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenThree, pnn, {
 
 		// Picture
 		&C_icon_warning,
@@ -578,8 +622,8 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		"transactions"
 	});
 
-	// Sign MQS timestamp menu approve screen
-	static UX_STEP_CB(signMqsTimestampMenuApproveScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true, true), {
+	// Sign MQS challenge menu approve screen
+	static UX_STEP_CB(signMqsChallengeMenuApproveScreen, pb, processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, true, true), {
 
 		// Picture
 		&C_icon_approve,
@@ -588,8 +632,8 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		"Approve"
 	});
 
-	// Sign MQS timestamp menu deny screen
-	static UX_STEP_CB(signMqsTimestampMenuDenyScreen, pb, processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false, false), {
+	// Sign MQS challenge menu deny screen
+	static UX_STEP_CB(signMqsChallengeMenuDenyScreen, pb, processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, false, false), {
 
 		// Picture
 		&C_icon_reject,
@@ -597,34 +641,9 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		// Bold line
 		"Deny"
 	});
-
-	// Sign MQS timestamp menu
-	static UX_FLOW(signMqsTimestampMenu,
-
-		// Sign MQS timestamp menu notify screen
-		&signMqsTimestampMenuNotifyScreen,
-		
-		// Sign MQS timestamp menu account index screen
-		&signMqsTimestampMenuAccountIndexScreen,
-		
-		// Sign MQS timestamp menu time and date screen
-		&signMqsTimestampMenuTimeAndDateScreen,
-		
-		// Sign MQS timestamp menu warning screen one
-		&signMqsTimestampMenuWarningScreenOne,
-		
-		// Sign MQS timestamp menu warning screen two
-		&signMqsTimestampMenuWarningScreenTwo,
-		
-		// Sign MQS timestamp menu warning screen three
-		&signMqsTimestampMenuWarningScreenThree,
-		
-		// Sign MQS timestamp menu approve screen
-		&signMqsTimestampMenuApproveScreen,
-		
-		// Sign MQS timestamp menu deny screen
-		&signMqsTimestampMenuDenyScreen
-	);
+	
+	// Sign MQS challenge menu
+	static const ux_flow_step_t *signMqsChallengeMenu[9];
 
 	// Approve transaction menu notify screen
 	static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {
@@ -633,7 +652,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressOrApproveTransactionLineBuffer,
+		verifyAddressApproveTransactionOrSignChallengeLineBuffer,
 		
 		// Second line
 		"transaction?"
@@ -649,7 +668,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 			"Amount",
 			
 			// Second line
-			amountLineBuffer
+			amountOrAddressTypeLineBuffer
 		});
 	#endif
 
@@ -674,7 +693,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Amount",
 		
 		// Text
-		.text = amountLineBuffer
+		.text = amountOrAddressTypeLineBuffer
 	});
 
 	// Check if device doesn't have low height
@@ -757,7 +776,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesDetailsSingleLineScreen, bn, {
 				
 			// Bold first line
-			kernelFeaturesDetailsTitleLineBuffer,
+			kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
 			
 			// Second line
 			kernelFeaturesDetailsTextOrAccountIndexLineBuffer
@@ -782,7 +801,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	{
 
 		// Title
-		.title = kernelFeaturesDetailsTitleLineBuffer,
+		.title = kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
 		
 		// Text
 		.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
@@ -952,17 +971,17 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	// Verify address menu reject callback
 	static void verifyAddressMenuRejectCallback(void);
 	
-	// Sign MQS timestamp menu continue callback
-	static void signMqsTimestampMenuContinueCallback(void);
+	// Sign MQS challenge menu continue callback
+	static void signMqsChallengeMenuContinueCallback(void);
 	
-	// Sign MQS timestamp menu choice callback
-	static void signMqsTimestampMenuChoiceCallback(const bool confirm);
+	// Sign MQS challenge menu choice callback
+	static void signMqsChallengeMenuChoiceCallback(const bool confirm);
 	
-	// Sign MQS timestamp menu confirm reject callback
-	static void signMqsTimestampMenuConfirmRejectCallback(void);
+	// Sign MQS challenge menu confirm reject callback
+	static void signMqsChallengeMenuConfirmRejectCallback(void);
 	
-	// Sign MQS timestamp menu reject callback
-	static void signMqsTimestampMenuRejectCallback(void);
+	// Sign MQS challenge menu reject callback
+	static void signMqsChallengeMenuRejectCallback(void);
 	
 	// Sign approve transaction menu continue callback
 	static void approveTransactionMenuContinueCallback(void);
@@ -989,14 +1008,11 @@ void clearMenuBuffers(void) {
 	// Clear the public key or address line buffer
 	explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
 	
-	// Clear the verify address or approve transaction line buffer
-	explicit_bzero(verifyAddressOrApproveTransactionLineBuffer, sizeof(verifyAddressOrApproveTransactionLineBuffer));
+	// Clear the verify address, approve transaction, or sign challenge line buffer
+	explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
 	
-	// Clear the address type line buffer
-	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
-	
-	// Clear the amount line buffer
-	explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
+	// Clear the amount or address type line buffer
+	explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
 	
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
@@ -1004,11 +1020,33 @@ void clearMenuBuffers(void) {
 	// Clear the kernel features or transaction type line buffer
 	explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
 	
-	// Clear the kernel features details title line buffer
-	explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
+	// Clear the kernel features details title or sign type line buffer
+	explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
 	
 	// Clear the kernel features details text or account index line buffer
 	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	
+	// Check if has NBGL
+	#ifdef HAVE_NBGL
+	
+		// Clear the succeeded line buffer
+		explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
+		
+		// Clear the failed line buffer
+		explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
+		
+		// Clear the canceled line buffer
+		explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
+		
+		// Clear the cancel prompt line buffer
+		explicit_bzero(cancelPromptLineBuffer, sizeof(cancelPromptLineBuffer));
+		
+		// Clear the approve button line buffer
+		explicit_bzero(approveButtonLineBuffer, sizeof(approveButtonLineBuffer));
+		
+		// Clear the warning line buffer
+		explicit_bzero(warningLineBuffer, sizeof(warningLineBuffer));
+	#endif
 	
 	// Copy currency information to buffers
 	memcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
@@ -1071,7 +1109,7 @@ void showMenu(enum Menu menu) {
 					#else
 					
 						// Check if currency information name can fit
-						if(strlen(currencyInformation->name) <= (BAGL_WIDTH - START_OF_TEXT_NEXT_TO_PICTURE) / LARGEST_CHARACTER_WIDTH) {
+						if(strlen(currencyInformation->name) <= (BAGL_WIDTH - START_OF_TEXT_NEXT_TO_PICTURE) / AVERAGE_CHARACTER_WIDTH) {
 						
 							// Set main menu to use currency name ready screen
 							mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
@@ -1147,11 +1185,52 @@ void showMenu(enum Menu menu) {
 				// Break
 				break;
 			
-			// Sign MQS timestamp menu
-			case SIGN_MQS_TIMESTAMP_MENU:
+			// Sign MQS challenge menu
+			case SIGN_MQS_CHALLENGE_MENU:
 			
-				// Set menu steps to sign MQS timestamp menu
-				menuSteps = signMqsTimestampMenu;
+				{
+				
+					// Set sign MQS challenge menu to use notify screen
+					signMqsChallengeMenu[0] = &signMqsChallengeMenuNotifyScreen;
+					
+					// Set sign MQS challenge menu to use account index screen
+					signMqsChallengeMenu[1] = &signMqsChallengeMenuAccountIndexScreen;
+					
+					// Check if time, processing message, progress bar message, or currency name line buffer isn't empty
+					if(strlen((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer)) {
+					
+						// Set sign MQS challenge menu to use time and date screen
+						signMqsChallengeMenu[2] = &signMqsChallengeMenuTimeAndDateScreen;
+					}
+					
+					// Otherwise
+					else {
+					
+						// Set sign MQS challenge menu to use default challenge screen
+						signMqsChallengeMenu[2] = &signMqsChallengeMenuDefaultChallengeScreen;
+					}
+					
+					// Set sign MQS challenge menu to use warning screen one
+					signMqsChallengeMenu[3] = &signMqsChallengeMenuWarningScreenOne;
+					
+					// Set sign MQS challenge menu to use warning screen two
+					signMqsChallengeMenu[4] = &signMqsChallengeMenuWarningScreenTwo;
+					
+					// Set sign MQS challenge menu to use warning screen three
+					signMqsChallengeMenu[5] = &signMqsChallengeMenuWarningScreenThree;
+					
+					// Set sign MQS challenge menu to use warning approve screen
+					signMqsChallengeMenu[6] = &signMqsChallengeMenuApproveScreen;
+					
+					// Set sign MQS challenge menu to use warning deny screen
+					signMqsChallengeMenu[7] = &signMqsChallengeMenuDenyScreen;
+					
+					// End sign MQS challenge menu
+					signMqsChallengeMenu[8] = FLOW_END_STEP;
+					
+					// Set menu steps to sign MQS challenge menu
+					menuSteps = signMqsChallengeMenu;
+				}
 				
 				// Break
 				break;
@@ -1171,7 +1250,7 @@ void showMenu(enum Menu menu) {
 					#if BAGL_HEIGHT >= 64
 					
 						// Check if amount can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountLineBuffer, strlen(amountLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountOrAddressTypeLineBuffer, strlen(amountOrAddressTypeLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 						
 							// Set approve transaction menu to use amount single line screen
 							approveTransactionMenu[index++] = &approveTransactionMenuAmountSingleLineScreen;
@@ -1204,8 +1283,8 @@ void showMenu(enum Menu menu) {
 					// Set approve transaction menu to use kernel features screen
 					approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesScreen;
 					
-					// Check if kernel features details title line buffer isn't empty
-					if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
+					// Check if kernel features details title or sign type line buffer isn't empty
+					if(strlen(kernelFeaturesDetailsTitleOrSignTypeLineBuffer)) {
 					
 						// Check if device doesn't have low height
 						#if BAGL_HEIGHT >= 64
@@ -1306,7 +1385,7 @@ void showMenu(enum Menu menu) {
 			case EXPORT_ROOT_PUBLIC_KEY_MENU:
 			
 				// Show export root public key menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Export root public key?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuConfirmRejectCallback);
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Export root public\nkey?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1315,7 +1394,7 @@ void showMenu(enum Menu menu) {
 			case VERIFY_ROOT_PUBLIC_KEY_MENU:
 			
 				// Show verify root public key menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify root public key", NULL, "Cancel", verifyRootPublicKeyMenuContinueCallback, verifyRootPublicKeyMenuRejectCallback);
+				nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify root public\nkey", NULL, "Cancel", verifyRootPublicKeyMenuContinueCallback, verifyRootPublicKeyMenuRejectCallback);
 			
 				// Break
 				break;
@@ -1323,35 +1402,17 @@ void showMenu(enum Menu menu) {
 			// Verify address menu
 			case VERIFY_ADDRESS_MENU:
 			
-				// Check if an MQS address is being verified
-				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
+				// Show verify address menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
 				
-					// Show verify address menu
-					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify MQS address", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
-				}
-				
-				// Otherwise check if a Tor address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show verify address menu
-					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify Tor address", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
-				}
-				
-				// Otherwise check if a Slatepack address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show verify address menu
-					nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify Slatepack\naddress", NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
-				}
-			
 				// Break
 				break;
 			
-			// Sign MQS timestamp menu
-			case SIGN_MQS_TIMESTAMP_MENU:
+			// Sign MQS challenge menu
+			case SIGN_MQS_CHALLENGE_MENU:
 			
-				// Show sign MQS timestamp menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Sign MQS timestamp?", NULL, "Deny", signMqsTimestampMenuContinueCallback, signMqsTimestampMenuConfirmRejectCallback);
+				// Show sign MQS challenge menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Deny", signMqsChallengeMenuContinueCallback, signMqsChallengeMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1359,19 +1420,8 @@ void showMenu(enum Menu menu) {
 			// Approve transaction menu
 			case APPROVE_TRANSACTION_MENU:
 			
-				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show approve transaction menu
-					nbgl_useCaseReviewStart(&currencyIconBuffer, "Send transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
-				}
-				
-				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show approve transaction menu
-					nbgl_useCaseReviewStart(&currencyIconBuffer, "Receive transaction?", NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
-				}
+				// Show approve transaction menu
+				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1484,7 +1534,7 @@ void showMenu(enum Menu menu) {
 		
 		// Set export root public key menu info long press
 		exportRootPublicKeyMenuInfoLongPress.icon = &currencyIconBuffer;
-		exportRootPublicKeyMenuInfoLongPress.text = "Export root public key?";
+		exportRootPublicKeyMenuInfoLongPress.text = "Export root public\nkey?";
 		exportRootPublicKeyMenuInfoLongPress.longPressText = "Hold to export";
 		
 		// Show static review
@@ -1607,7 +1657,7 @@ void showMenu(enum Menu menu) {
 	void verifyAddressMenuContinueCallback(void) {
 	
 		// Set verify address menu tag value pairs
-		verifyAddressMenuTagValuePairs[0].item = addressTypeLineBuffer;
+		verifyAddressMenuTagValuePairs[0].item = amountOrAddressTypeLineBuffer;
 		verifyAddressMenuTagValuePairs[0].value = (char *)publicKeyOrAddressLineBuffer;
 		
 		// Set verify address menu content
@@ -1642,51 +1692,15 @@ void showMenu(enum Menu menu) {
 			// Check if processing user interaction was successful
 			if(processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false)) {
 			
-				// Check if an MQS address is being verified
-				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("MQS ADDRESS\nVERIFIED", true, showMainMenu);
-				}
-				
-				// Otherwise check if a Tor address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("TOR ADDRESS\nVERIFIED", true, showMainMenu);
-				}
-				
-				// Otherwise check if a Slatepack address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("SLATEPACK\nADDRESS VERIFIED", true, showMainMenu);
-				}
+				// Show status
+				nbgl_useCaseStatus(succeededLineBuffer, true, showMainMenu);
 			}
 			
 			// Otherwise
 			else {
 				
-				// Check if an MQS address is being verified
-				if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("Verifying MQS address\nfailed", false, showMainMenu);
-				}
-				
-				// Otherwise check if a Tor address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("Verifying Tor address\nfailed", false, showMainMenu);
-				}
-				
-				// Otherwise check if a Slatepack address is being verified
-				else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("Verifying Slatepack\naddress failed", false, showMainMenu);
-				}
+				// Show status
+				nbgl_useCaseStatus(failedLineBuffer, false, showMainMenu);
 			}
 		}
 		
@@ -1755,99 +1769,95 @@ void showMenu(enum Menu menu) {
 		// Process user interaction
 		processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false, false);
 		
-		// Check if an MQS address is being verified
-		if(!strncmp(addressTypeLineBuffer, "MQS Address", sizeof(addressTypeLineBuffer))) {
-		
-			// Show status
-			nbgl_useCaseStatus("Verifying MQS address\ncanceled", false, showMainMenu);
-		}
-		
-		// Otherwise check if a Tor address is being verified
-		else if(!strncmp(addressTypeLineBuffer, "Tor Address", sizeof(addressTypeLineBuffer))) {
-		
-			// Show status
-			nbgl_useCaseStatus("Verifying Tor address\ncanceled", false, showMainMenu);
-		}
-		
-		// Otherwise check if a Slatepack address is being verified
-		else if(!strncmp(addressTypeLineBuffer, "Slatepack Address", sizeof(addressTypeLineBuffer))) {
-		
-			// Show status
-			nbgl_useCaseStatus("Verifying Slatepack\naddress canceled", false, showMainMenu);
-		}
+		// Show status
+		nbgl_useCaseStatus(canceledLineBuffer, false, showMainMenu);
 	}
 	
-	// Sign MQS timestamp menu continue callback
-	void signMqsTimestampMenuContinueCallback(void) {
+	// Sign MQS challenge menu continue callback
+	void signMqsChallengeMenuContinueCallback(void) {
 	
-		// Set sign MQS timestamp menu tag value pairs
-		signMqsTimestampMenuTagValuePairs[0].item = "Account Index";
-		signMqsTimestampMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
+		// Set sign MQS challenge menu tag value pairs
+		signMqsChallengeMenuTagValuePairs[0].item = "Account Index";
+		signMqsChallengeMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		
-		signMqsTimestampMenuTagValuePairs[1].item = "Time And Date";
-		signMqsTimestampMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		// Check if time, processing message, progress bar message, or currency name line buffer isn't empty
+		if(strlen((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer)) {
 		
-		signMqsTimestampMenuTagValuePairs[2].item = "*The host will be able to listen\nfor the account's MQS\ntransactions";
-		signMqsTimestampMenuTagValuePairs[2].value = "";
+			// Set sign MQS challenge menu tag value pairs
+			signMqsChallengeMenuTagValuePairs[1].item = "Time And Date";
+			signMqsChallengeMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+		}
 		
-		// Set sign MQS timestamp menu tag value list
-		signMqsTimestampMenuTagValueList.nbPairs = ARRAYLEN(signMqsTimestampMenuTagValuePairs);
-		signMqsTimestampMenuTagValueList.pairs = signMqsTimestampMenuTagValuePairs;
-		signMqsTimestampMenuTagValueList.wrapping = true;
+		// Otherwise
+		else {
 		
-		// Set sign MQS timestamp menu info long press
-		signMqsTimestampMenuInfoLongPress.icon = &currencyIconBuffer;
-		signMqsTimestampMenuInfoLongPress.text = "Sign MQS timestamp?";
-		signMqsTimestampMenuInfoLongPress.longPressText = "Hold to sign";
+			// Set sign MQS challenge menu tag value pairs
+			signMqsChallengeMenuTagValuePairs[1].item = "Default Challenge";
+			signMqsChallengeMenuTagValuePairs[1].value = DEFAULT_MQS_CHALLENGE;
+		}
+		
+		// Set sign MQS challenge menu tag value pairs
+		signMqsChallengeMenuTagValuePairs[2].item = warningLineBuffer;
+		signMqsChallengeMenuTagValuePairs[2].value = "";
+		
+		// Set sign MQS challenge menu tag value list
+		signMqsChallengeMenuTagValueList.nbPairs = ARRAYLEN(signMqsChallengeMenuTagValuePairs);
+		signMqsChallengeMenuTagValueList.pairs = signMqsChallengeMenuTagValuePairs;
+		signMqsChallengeMenuTagValueList.wrapping = true;
+		
+		// Set sign MQS challenge menu info long press
+		signMqsChallengeMenuInfoLongPress.icon = &currencyIconBuffer;
+		signMqsChallengeMenuInfoLongPress.text = verifyAddressApproveTransactionOrSignChallengeLineBuffer;
+		signMqsChallengeMenuInfoLongPress.longPressText = "Hold to sign";
 		
 		// Show static review
-		nbgl_useCaseStaticReview(&signMqsTimestampMenuTagValueList, &signMqsTimestampMenuInfoLongPress, "Deny", signMqsTimestampMenuChoiceCallback);
+		nbgl_useCaseStaticReview(&signMqsChallengeMenuTagValueList, &signMqsChallengeMenuInfoLongPress, "Deny", signMqsChallengeMenuChoiceCallback);
 	}
 	
-	// Sign MQS timestamp menu choice callback
-	void signMqsTimestampMenuChoiceCallback(const bool confirm) {
+	// Sign MQS challenge menu choice callback
+	void signMqsChallengeMenuChoiceCallback(const bool confirm) {
 	
 		// Check if confirmed
 		if(confirm) {
 		
 			// Check if processing user interaction was successful
-			if(processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, true, true)) {
+			if(processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, true, true)) {
 			
 				// Show status
-				nbgl_useCaseStatus("MQS TIMESTAMP\nSIGNED", true, showMainMenu);
+				nbgl_useCaseStatus(succeededLineBuffer, true, showMainMenu);
 			}
 			
 			// Otherwise
 			else {
 			
 				// Show status
-				nbgl_useCaseStatus("Signing MQS\ntimestamp failed", false, showMainMenu);
+				nbgl_useCaseStatus(failedLineBuffer, false, showMainMenu);
 			}
 		}
 		
 		// Otherwise
 		else {
 		
-			// Sign MQS timestamp menu confirm reject callback
-			signMqsTimestampMenuConfirmRejectCallback();
+			// Sign MQS challenge menu confirm reject callback
+			signMqsChallengeMenuConfirmRejectCallback();
 		}
 	}
 	
-	// Sign MQS timestamp menu confirm reject callback
-	void signMqsTimestampMenuConfirmRejectCallback(void) {
+	// Sign MQS challenge menu confirm reject callback
+	void signMqsChallengeMenuConfirmRejectCallback(void) {
 	
 		// Show confirm
-		nbgl_useCaseConfirm("Deny signing MQS\ntimestamp?", NULL, "Yes, deny", "Go back", signMqsTimestampMenuRejectCallback);
+		nbgl_useCaseConfirm(cancelPromptLineBuffer, NULL, "Yes, deny", "Go back", signMqsChallengeMenuRejectCallback);
 	}
 	
-	// Sign MQS timestamp menu reject callback
-	void signMqsTimestampMenuRejectCallback(void) {
+	// Sign MQS challenge menu reject callback
+	void signMqsChallengeMenuRejectCallback(void) {
 	
 		// Process user interaction
-		processUserInteraction(GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION, false, false);
+		processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, false, false);
 		
 		// Show status
-		nbgl_useCaseStatus("Signing MQS\ntimestamp denied", false, showMainMenu);
+		nbgl_useCaseStatus(canceledLineBuffer, false, showMainMenu);
 	}
 	
 	// Sign approve transaction menu continue callback
@@ -1855,7 +1865,7 @@ void showMenu(enum Menu menu) {
 	
 		// Set approve transaction menu tag value pairs
 		approveTransactionMenuTagValuePairs[0].item = "Amount";
-		approveTransactionMenuTagValuePairs[0].value = amountLineBuffer;
+		approveTransactionMenuTagValuePairs[0].value = amountOrAddressTypeLineBuffer;
 		
 		approveTransactionMenuTagValuePairs[1].item = "Fee";
 		approveTransactionMenuTagValuePairs[1].value = feeLineBuffer;
@@ -1866,11 +1876,11 @@ void showMenu(enum Menu menu) {
 		// Initialize index
 		size_t index = 3;
 		
-		// Check if kernel features details title line buffer isn't empty
-		if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
+		// Check if kernel features details title or sign type line buffer isn't empty
+		if(strlen(kernelFeaturesDetailsTitleOrSignTypeLineBuffer)) {
 		
 			// Set approve transaction menu tag value pairs
-			approveTransactionMenuTagValuePairs[index].item = kernelFeaturesDetailsTitleLineBuffer;
+			approveTransactionMenuTagValuePairs[index].item = kernelFeaturesDetailsTitleOrSignTypeLineBuffer;
 			approveTransactionMenuTagValuePairs[index++].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
 		}
 		
@@ -1897,22 +1907,8 @@ void showMenu(enum Menu menu) {
 		
 		// Set approve transaction menu info long press
 		approveTransactionMenuInfoLongPress.icon = &currencyIconBuffer;
-		
-		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Set approve transaction menu info long press
-			approveTransactionMenuInfoLongPress.text = "Send transaction?";
-			approveTransactionMenuInfoLongPress.longPressText = "Hold to send";
-		}
-		
-		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Set approve transaction menu info long press
-			approveTransactionMenuInfoLongPress.text = "Receive transaction?";
-			approveTransactionMenuInfoLongPress.longPressText = "Hold to receive";
-		}
+		approveTransactionMenuInfoLongPress.text = verifyAddressApproveTransactionOrSignChallengeLineBuffer;
+		approveTransactionMenuInfoLongPress.longPressText = approveButtonLineBuffer;
 		
 		// Show static review
 		nbgl_useCaseStaticReview(&approveTransactionMenuTagValueList, &approveTransactionMenuInfoLongPress, "Deny", approveTransactionMenuChoiceCallback);
@@ -1927,37 +1923,15 @@ void showMenu(enum Menu menu) {
 			// Check if processing user interaction was successful
 			if(processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true)) {
 			
-				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("TRANSACTION\nSENT", true, showMainMenu);
-				}
-				
-				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("TRANSACTION\nRECEIVED", true, showMainMenu);
-				}
+				// Show status
+				nbgl_useCaseStatus(succeededLineBuffer, true, showMainMenu);
 			}
 			
 			// Otherwise
 			else {
 			
-				// Check if a transaction is being sent
-				if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("Sending transaction\nfailed", false, showMainMenu);
-				}
-				
-				// Otherwise check if a transaction is being received
-				else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-				
-					// Show status
-					nbgl_useCaseStatus("Receiving transaction\nfailed", false, showMainMenu);
-				}
+				// Show status
+				nbgl_useCaseStatus(failedLineBuffer, false, showMainMenu);
 			}
 		}
 		
@@ -1972,19 +1946,8 @@ void showMenu(enum Menu menu) {
 	// Sign approve transaction menu confirm reject callback
 	void approveTransactionMenuConfirmRejectCallback(void) {
 	
-		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Show confirm
-			nbgl_useCaseConfirm("Deny sending\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
-		}
-		
-		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Show confirm
-			nbgl_useCaseConfirm("Deny receiving\ntransaction?", NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
-		}
+		// Show confirm
+		nbgl_useCaseConfirm(cancelPromptLineBuffer, NULL, "Yes, deny", "Go back", approveTransactionMenuRejectCallback);
 	}
 	
 	// Sign approve transaction menu reject callback
@@ -1993,18 +1956,7 @@ void showMenu(enum Menu menu) {
 		// Process user interaction
 		processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false);
 		
-		// Check if a transaction is being sent
-		if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Send", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Show status
-			nbgl_useCaseStatus("Sending transaction\ndenied", false, showMainMenu);
-		}
-		
-		// Otherwise check if a transaction is being received
-		else if(!strncmp(verifyAddressOrApproveTransactionLineBuffer, "Receive", sizeof(verifyAddressOrApproveTransactionLineBuffer))) {
-		
-			// Show status
-			nbgl_useCaseStatus("Receiving transaction\ndenied", false, showMainMenu);
-		}
+		// Show status
+		nbgl_useCaseStatus(canceledLineBuffer, false, showMainMenu);
 	}
 #endif

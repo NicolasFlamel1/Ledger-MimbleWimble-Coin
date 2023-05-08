@@ -84,8 +84,8 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			// MQS address size
 			case MQS_ADDRESS_SIZE:
 			
-				// Check if currency doesn't allow MQS addresses
-				if(!currencyInformation->enableMqsAddress) {
+				// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
+				if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -104,8 +104,8 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			// Tor address size
 			case TOR_ADDRESS_SIZE:
 			
-				// Check if currency doesn't allow Tor addresses
-				if(!currencyInformation->enableTorAddress) {
+				// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
+				if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -127,8 +127,8 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 				// Check if address length is a Slatepack address's length
 				if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
 			
-					// Check if currency doesn't allow Slatepack addresses
-					if(!currencyInformation->enableSlatepackAddress) {
+					// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+					if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
 					
 						// Throw invalid parameters error
 						THROW(INVALID_PARAMETERS_ERROR);

@@ -562,8 +562,9 @@ class Crypto {
 							reject(error);
 						});
 					
-					// GRIN wallet
+					// GRIN or EPIC wallet
 					case Consensus.GRIN_WALLET_TYPE:
+					case Consensus.EPIC_WALLET_TYPE:
 					
 						// Create child identifier
 						var childIdentifier = new Identifier().getChild();

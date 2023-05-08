@@ -76,8 +76,8 @@ enum Instruction {
 	// Finish transaction instruction
 	FINISH_TRANSACTION_INSTRUCTION,
 	
-	// Get MQS timestamp signature instruction
-	GET_MQS_TIMESTAMP_SIGNATURE_INSTRUCTION
+	// Get MQS challenge signature instruction
+	GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION
 };
 
 

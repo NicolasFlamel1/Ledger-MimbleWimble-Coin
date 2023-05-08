@@ -160,6 +160,5 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Support
 
-* Discord: [https://discord.gg/n5dZaty](https://discord.gg/n5dZaty)
 * MimbleWimble Coin Forum: [https://forum.mwc.mw](https://forum.mwc.mw)
-* Github: [https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues](https://github.com/NicolasFlamel1/ledger-mimblewimble-coin/issues)
+* Github: [https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues](https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues)

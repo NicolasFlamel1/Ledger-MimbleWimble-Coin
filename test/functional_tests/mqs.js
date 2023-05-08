@@ -503,6 +503,13 @@ class Mqs {
 			return Mqs.ENCRYPTED_DATA_NONCE_INDEX + 1;
 		}
 		
+		// Default challenge
+		static get DEFAULT_CHALLENGE() {
+		
+			// Return default challenge
+			return "7WUDtkSaKyGRUnQ22rE3QUXChV8DmA6NnunDYP4vheTpc";
+		}
+		
 	// Private
 	
 		// Get address version
@@ -526,6 +533,26 @@ class Mqs {
 					
 						// Return address version
 						return new Uint8Array([1, 121]);
+					}
+					
+					// Break
+					break;
+				
+				// EPIC wallet
+				case Consensus.EPIC_WALLET_TYPE:
+		
+					// Check if mainnet
+					if(isMainnet === true) {
+					
+						// Return address version
+						return new Uint8Array([1, 0]);
+					}
+					
+					// Otherwise
+					else {
+					
+						// Return address version
+						return new Uint8Array([1, 136]);
 					}
 					
 					// Break
