@@ -3,7 +3,7 @@
 ### Description
 MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
 
-These apps can be installed onto Ledger Nano S and Ledger Nano S Plus hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+These apps can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
