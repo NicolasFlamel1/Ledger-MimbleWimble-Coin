@@ -788,6 +788,24 @@ class Common {
 			return text.replace(Common.TRAILING_WHITESPACE_PATTERN, "");
 		}
 		
+		// Get preserved URL parameters
+		static getPreservedUrlParameters() {
+		
+			// Check if is popup
+			if(Common.isPopup() === true) {
+			
+				// Return preserved URL parameters
+				return Common.URL_QUERY_STRING_PARAMETER_SEPARATOR + encodeURIComponent("Is Popup").replace(/%20/ug, "+") + Common.URL_QUERY_STRING_PARAMETER_VALUE_SEPARATOR + encodeURIComponent("True").replace(/%20/ug, "+");
+			}
+			
+			// Otherwise
+			else {
+			
+				// Return nothing
+				return "";
+			}
+		}
+		
 		// Milliseconds in a second
 		static get MILLISECONDS_IN_A_SECOND() {
 		

@@ -105,7 +105,7 @@ void processContinueTransactionGetMessageSignatureRequest(unsigned short *respon
 				// Create secret nonce and public nonce
 				createSingleSignerNonces((uint8_t *)secretNonce, publicNonce);
 			
-			} while(!memcmp((uint8_t *)secretNonce, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce)));
+			} while(!os_secure_memcmp((uint8_t *)secretNonce, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce)));
 			
 			// Create single-signer signature from the hash, transaction's blinding factor, secret nonce, public nonce, and public key
 			createSingleSignerSignature(signature, hash, (uint8_t *)transaction.blindingFactor, (uint8_t *)secretNonce, publicNonce, publicKey);

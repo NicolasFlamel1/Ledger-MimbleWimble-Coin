@@ -131,7 +131,7 @@ class Slate {
 					Slate.INITIALIZE_REQUEST_TYPE,
 					
 					// URL query string
-					URL_QUERY_STRING
+					Common.URL_QUERY_STRING_SEPARATOR + encodeURIComponent(Consensus.OVERRIDE_WALLET_TYPE_URL_PARAMETER_NAME).replace(/%20/ug, "+") + Common.URL_QUERY_STRING_PARAMETER_VALUE_SEPARATOR + encodeURIComponent(Consensus.walletTypeToText(Consensus.getWalletType())).replace(/%20/ug, "+") + Common.URL_QUERY_STRING_PARAMETER_SEPARATOR + encodeURIComponent(Consensus.OVERRIDE_NETWORK_TYPE_URL_PARAMETER_NAME).replace(/%20/ug, "+") + Common.URL_QUERY_STRING_PARAMETER_VALUE_SEPARATOR + encodeURIComponent(Consensus.networkTypeToText(Consensus.getNetworkType())).replace(/%20/ug, "+")
 				]);
 			});
 		}
