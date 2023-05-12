@@ -16,6 +16,9 @@
 // Bits in a byte
 #define BITS_IN_A_BYTE 8
 
+// Uint32 buffer size
+#define UINT32_BUFFER_SIZE (sizeof("4294967295") - sizeof((char)'\0'))
+
 // Uint64 buffer size
 #define UINT64_BUFFER_SIZE (sizeof("18446744073709551615") - sizeof((char)'\0'))
 

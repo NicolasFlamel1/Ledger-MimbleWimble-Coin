@@ -1,5 +1,4 @@
 // Header files
-#include <alloca.h>
 #include <string.h>
 #include "../chacha20_poly1305.h"
 #include "../common.h"

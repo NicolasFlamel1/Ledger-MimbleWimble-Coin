@@ -1,10 +1,9 @@
 // Header files
-#include <alloca.h>
 #include <string.h>
 #include "base58.h"
 #include "common.h"
+#include "currency.h"
 #include "crypto.h"
-#include "currency_information.h"
 #include "mqs.h"
 
 
@@ -85,14 +84,14 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 	const size_t decodedMqsAddressLength = getBase58DecodedLengthWithChecksum(mqsAddress, length);
 	
 	// Check if decoded MQS address length is invalid
-	if(decodedMqsAddressLength != sizeof(currencyInformation->mqsVersion) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE) {
+	if(decodedMqsAddressLength != sizeof((uint8_t [])CURRENCY_MQS_VERSION) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE) {
 	
 		// Return false
 		return false;
 	}
 	
 	// Check if decoding MQS address failed
-	uint8_t *decodedMqsAddress = alloca(decodedMqsAddressLength);
+	uint8_t decodedMqsAddress[sizeof((uint8_t [])CURRENCY_MQS_VERSION) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
 	if(!base58DecodeWithChecksum(decodedMqsAddress, mqsAddress, length)) {
 	
 		// Return false
@@ -100,14 +99,14 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 	}
 	
 	// Check if decoded MQS address's version is invalid
-	if(memcmp(currencyInformation->mqsVersion, decodedMqsAddress, sizeof(currencyInformation->mqsVersion))) {
+	if(memcmp((uint8_t [])CURRENCY_MQS_VERSION, decodedMqsAddress, sizeof((uint8_t [])CURRENCY_MQS_VERSION))) {
 	
 		// Return false
 		return false;
 	}
 	
 	// Check if the decoded MQS address isn't a valid secp256k1 public key
-	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[sizeof(currencyInformation->mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE)) {
+	if(!isValidSecp256k1PublicKey(&decodedMqsAddress[sizeof((uint8_t [])CURRENCY_MQS_VERSION)], COMPRESSED_PUBLIC_KEY_SIZE)) {
 	
 		// Return false
 		return false;
@@ -118,7 +117,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 	
 		// Uncompress the decoded MQS address to an secp256k1 public key
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
-		memcpy(uncompressedPublicKey, &decodedMqsAddress[sizeof(currencyInformation->mqsVersion)], COMPRESSED_PUBLIC_KEY_SIZE);
+		memcpy(uncompressedPublicKey, &decodedMqsAddress[sizeof((uint8_t [])CURRENCY_MQS_VERSION)], COMPRESSED_PUBLIC_KEY_SIZE);
 		uncompressSecp256k1PublicKey(uncompressedPublicKey);
 		
 		// Initialize the public key with the uncompressed public key
@@ -133,9 +132,9 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 void getMqsAddressFromPublicKey(char *mqsAddress, const uint8_t *publicKey) {
 
 	// Get address data from version and the public key
-	uint8_t addressData[sizeof(currencyInformation->mqsVersion) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
-	memcpy(addressData, currencyInformation->mqsVersion, sizeof(currencyInformation->mqsVersion));
-	memcpy(&addressData[sizeof(currencyInformation->mqsVersion)], publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
+	uint8_t addressData[sizeof((uint8_t [])CURRENCY_MQS_VERSION) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE];
+	memcpy(addressData, (uint8_t [])CURRENCY_MQS_VERSION, sizeof((uint8_t [])CURRENCY_MQS_VERSION));
+	memcpy(&addressData[sizeof((uint8_t [])CURRENCY_MQS_VERSION)], publicKey, COMPRESSED_PUBLIC_KEY_SIZE);
 	
 	// Encode the address data to get the MQS address
 	base58EncodeWithChecksum(mqsAddress, addressData, sizeof(addressData));

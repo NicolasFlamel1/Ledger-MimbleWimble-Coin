@@ -5,44 +5,70 @@
 
 // Header files
 #include "crypto.h"
-#include "currency_information.h"
+#include "mqs.h"
+#include "tor.h"
+#include "slatepack.h"
 
 
 // Definitions
 
-// Time, processing message, progress bar message, or currency name line buffer size
-#define TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
+// Time line buffer size
+#define TIME_LINE_BUFFER_SIZE sizeof("HH:MM:SS on YYYYYY-mm-dd UTC+00:00")
 
-// Public key or address line buffer size
-#define PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+// Progress bar message line buffer size
+#define PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE sizeof("Receiving Transaction")
+
+// Public key line buffer size
+#define PUBLIC_KEY_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
+
+// Address line buffer size
+#define ADDRESS_LINE_BUFFER_SIZE (SLATEPACK_ADDRESS_SIZE + sizeof((char)'\0'))
 
 // Check if has NBGL
 #ifdef HAVE_NBGL
 
-	// Verify address, approve transaction, or sign challenge line buffer size
-	#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_SIGN_CHALLENGE_LINE_BUFFER_SIZE sizeof("Verify Slatepack\naddress")
+	// Verify address line buffer size
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE MAX(sizeof("Verify Slatepack\naddress"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress") - sizeof((char)'\0'))
+	
+	// Approve transaction line buffer size
+	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive transaction?")
+	
+	// Sign challenge line buffer size
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\nchallenge?") - sizeof((char)'\0'))
 
 // Otherwise
 #else
 
-	// Verify address, approve transaction, or sign challenge line buffer size
-	#define VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_SIGN_CHALLENGE_LINE_BUFFER_SIZE sizeof("Verify Slatepack")
+	// Verify address line buffer size
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE MAX(sizeof("Verify Slatepack"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
+	
+	// Approve transaction line buffer size
+	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive")
+	
+	// Sign challenge line buffer size
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
 #endif
 
-// Amount or address type line buffer size
-#define AMOUNT_OR_ADDRESS_TYPE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+// Amount line buffer size
+#define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + sizeof(CURRENCY_ABBREVIATION))
+
+// Address type line buffer size
+#define ADDRESS_TYPE_LINE_BUFFER_SIZE MAX(sizeof("Slatepack Address"), sizeof(CURRENCY_MQS_NAME) + sizeof(" Address") - sizeof((char)'\0'))
 
 // Fee line buffer size
-#define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + CURRENCY_INFORMATION_ABBREVIATION_SIZE)
+#define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + sizeof(CURRENCY_ABBREVIATION))
 
-// Kernel features or transaction type line buffer size
-#define KERNEL_FEATURES_OR_TRANSACTION_TYPE_LINE_BUFFER_SIZE sizeof("No Recent Duplicate")
+// Kernel features line buffer size
+#define KERNEL_FEATURES_LINE_BUFFER_SIZE sizeof("No Recent Duplicate")
 
-// Kernel features details title or sign type line buffer size
-#define KERNEL_FEATURES_DETAILS_TITLE_OR_SIGN_TYPE_LINE_BUFFER_SIZE sizeof("Relative Height")
+// Kernel features details title line buffer size
+#define KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE sizeof("Relative Height")
 
-// Kernel features details text or account index line buffer size
-#define KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
+// Kernel features details text line buffer size
+#define KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'\0'))
+
+// Account index line buffer size
+#define ACCOUNT_INDEX_LINE_BUFFER_SIZE (UINT32_BUFFER_SIZE + sizeof((char)'\0'))
 
 // Maximum progress bar percent
 #define MAXIMUM_PROGRESS_BAR_PERCENT UINT8_MAX
@@ -51,22 +77,22 @@
 #ifdef HAVE_NBGL
 
 	// Succeeded line buffer size
-	#define SUCCEEDED_LINE_BUFFER_SIZE sizeof("SLATEPACK\nADDRESS VERIFIED")
+	#define SUCCEEDED_LINE_BUFFER_SIZE MAX(sizeof("SLATEPACK\nADDRESS VERIFIED"), sizeof(CURRENCY_MQS_NAME) + sizeof(" ADDRESS\nVERIFIED") - sizeof((char)'\0'))
 	
 	// Failed line buffer size
-	#define FAILED_LINE_BUFFER_SIZE sizeof("Verifying Slatepack\naddress failed")
+	#define FAILED_LINE_BUFFER_SIZE MAX(sizeof("Verifying Slatepack\naddress failed"), sizeof("Verifying ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress failed") - sizeof((char)'\0'))
 	
 	// Canceled line buffer size
-	#define CANCELED_LINE_BUFFER_SIZE sizeof("Verifying Slatepack\naddress canceled")
+	#define CANCELED_LINE_BUFFER_SIZE MAX(sizeof("Verifying Slatepack\naddress canceled"), sizeof("Verifying ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress canceled") - sizeof((char)'\0'))
 	
 	// Cancel prompt line buffer size
-	#define CANCEL_PROMPT_LINE_BUFFER_SIZE sizeof("Deny signing\nEpicbox challenge?")
+	#define CANCEL_PROMPT_LINE_BUFFER_SIZE MAX(sizeof("Deny receiving\ntransaction?"), sizeof("Deny signing\n") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof(" challenge?") - sizeof((char)'\0'))
 	
 	// Approve button line buffer
 	#define APPROVE_BUTTON_LINE_BUFFER_SIZE sizeof("Hold to receive")
 	
 	// Warning line buffer
-	#define WARNING_LINE_BUFFER sizeof("*The host will be able to listen\nfor the account's Epicbox\ntransactions")
+	#define WARNING_LINE_BUFFER (sizeof("*The host will be able to listen\nfor the account's ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\ntransactions") - sizeof((char)'\0'))
 #endif
 
 
@@ -100,29 +126,47 @@ enum Menu {
 
 // Global variables
 
-// Time, processing message, progress bar message, or currency name line buffer
-extern volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
+// Time line buffer
+extern char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
-// Public key or address line buffer
-extern volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+// Progress bar message line buffer
+extern char progressBarMessageLineBuffer[PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE];
 
-// Verify address, approve transaction, or sign challenge line buffer
-extern char verifyAddressApproveTransactionOrSignChallengeLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_SIGN_CHALLENGE_LINE_BUFFER_SIZE];
+// Public key line buffer
+extern volatile char publicKeyLineBuffer[PUBLIC_KEY_LINE_BUFFER_SIZE];
 
-// Amount or address type line buffer
-extern char amountOrAddressTypeLineBuffer[AMOUNT_OR_ADDRESS_TYPE_LINE_BUFFER_SIZE];
+// Address line buffer
+extern char addressLineBuffer[ADDRESS_LINE_BUFFER_SIZE];
+
+// Verify address line buffer
+extern char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
+
+// Approve transaction line buffer
+extern char approveTransactionLineBuffer[APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
+
+// Sign challenge line buffer
+extern char signChallengeLineBuffer[SIGN_CHALLENGE_LINE_BUFFER_SIZE];
+
+// Amount line buffer
+extern char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
+
+// Address type line buffer
+extern char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
 
 // Fee line buffer
 extern char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
-// Kernel features or transaction type line buffer
-extern char kernelFeaturesOrTransactionTypeLineBuffer[KERNEL_FEATURES_OR_TRANSACTION_TYPE_LINE_BUFFER_SIZE];
+// Kernel features line buffer
+extern char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
 
-// Kernel features details title or sign type line buffer
-extern char kernelFeaturesDetailsTitleOrSignTypeLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_OR_SIGN_TYPE_LINE_BUFFER_SIZE];
+// Kernel features details title line buffer
+extern char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
 
-// Kernel features details text or account index line buffer
-extern char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
+// Kernel features details text line buffer
+extern char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
+
+// Account index line buffer
+extern char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
 // Check if has NBGL
 #ifdef HAVE_NBGL

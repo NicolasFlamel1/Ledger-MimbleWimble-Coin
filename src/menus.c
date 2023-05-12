@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ux.h>
 #include "common.h"
-#include "currency_information.h"
 #include "menus.h"
 #include "mqs.h"
 #include "process_requests.h"
@@ -43,29 +42,47 @@
 
 // Global variables
 
-// Time, processing message, progress bar message, or currency name line buffer
-volatile char timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer[TIME_PROCESSING_MESSAGE_PROGRESS_BAR_MESSAGE_OR_CURRENCY_NAME_LINE_BUFFER_SIZE];
+// Time line buffer
+char timeLineBuffer[TIME_LINE_BUFFER_SIZE];
 
-// Public key or address line buffer
-volatile char publicKeyOrAddressLineBuffer[PUBLIC_KEY_OR_ADDRESS_LINE_BUFFER_SIZE];
+// Progress bar message line buffer
+char progressBarMessageLineBuffer[PROGRESS_BAR_MESSAGE_LINE_BUFFER_SIZE];
 
-// Verify address, approve transaction, or sign challenge line buffer
-char verifyAddressApproveTransactionOrSignChallengeLineBuffer[VERIFY_ADDRESS_APPROVE_TRANSACTION_OR_SIGN_CHALLENGE_LINE_BUFFER_SIZE];
+// Public key line buffer
+volatile char publicKeyLineBuffer[PUBLIC_KEY_LINE_BUFFER_SIZE];
 
-// Amount or address type line buffer
-char amountOrAddressTypeLineBuffer[AMOUNT_OR_ADDRESS_TYPE_LINE_BUFFER_SIZE];
+// Address line buffer
+char addressLineBuffer[ADDRESS_LINE_BUFFER_SIZE];
+
+// Verify address line buffer
+char verifyAddressLineBuffer[VERIFY_ADDRESS_LINE_BUFFER_SIZE];
+
+// Approve transaction line buffer
+char approveTransactionLineBuffer[APPROVE_TRANSACTION_LINE_BUFFER_SIZE];
+
+// Sign challenge line buffer
+char signChallengeLineBuffer[SIGN_CHALLENGE_LINE_BUFFER_SIZE];
+
+// Amount line buffer
+char amountLineBuffer[AMOUNT_LINE_BUFFER_SIZE];
+
+// Address type line buffer
+char addressTypeLineBuffer[ADDRESS_TYPE_LINE_BUFFER_SIZE];
 
 // Fee line buffer
 char feeLineBuffer[FEE_LINE_BUFFER_SIZE];
 
-// Kernel features or transaction type line buffer
-char kernelFeaturesOrTransactionTypeLineBuffer[KERNEL_FEATURES_OR_TRANSACTION_TYPE_LINE_BUFFER_SIZE];
+// Kernel features line buffer
+char kernelFeaturesLineBuffer[KERNEL_FEATURES_LINE_BUFFER_SIZE];
 
-// Kernel features details title or sign type line buffer
-char kernelFeaturesDetailsTitleOrSignTypeLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_OR_SIGN_TYPE_LINE_BUFFER_SIZE];
+// Kernel features details title line buffer
+char kernelFeaturesDetailsTitleLineBuffer[KERNEL_FEATURES_DETAILS_TITLE_LINE_BUFFER_SIZE];
 
-// Kernel features details text or account index line buffer
-char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_OR_ACCOUNT_INDEX_LINE_BUFFER_SIZE];
+// Kernel features details text line buffer
+char kernelFeaturesDetailsTextLineBuffer[KERNEL_FEATURES_DETAILS_TEXT_LINE_BUFFER_SIZE];
+
+// Account index line buffer
+char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 
 // Check if has NBGL
 #ifdef HAVE_NBGL
@@ -87,19 +104,6 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	
 	// Warning line buffer
 	char warningLineBuffer[WARNING_LINE_BUFFER];
-#endif
-
-// Check if has BAGL
-#ifdef HAVE_BAGL
-
-	// Currency icon buffer
-	static bagl_icon_details_t currencyIconBuffer;
-
-// Otherwise check if has NBGL
-#elif defined HAVE_NBGL
-
-	// Currency icon buffer
-	static nbgl_icon_details_t currencyIconBuffer;
 	
 	// Export root public key menu tag value pairs
 	static nbgl_layoutTagValue_t exportRootPublicKeyMenuTagValuePairs[2];
@@ -141,7 +145,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static nbgl_pageInfoLongPress_t signMqsChallengeMenuInfoLongPress;
 	
 	// Sign approve transaction menu tag value pairs
-	static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[5];
+	static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[6];
 	
 	// Sign approve transaction menu tag value list
 	static nbgl_layoutTagValueList_t approveTransactionMenuTagValueList;
@@ -160,10 +164,10 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static UX_STEP_NOCB(mainMenuCurrencyNameReadyScreen, pnn, {
 			
 		// Picture
-		&currencyIconBuffer,
+		&CURRENCY_ICON_DETAILS,
 		
 		// First line
-		(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer,
+		CURRENCY_NAME,
 		
 		// Second line
 		"is ready"
@@ -173,7 +177,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	static UX_STEP_NOCB(mainMenuReadyScreen, pnn, {
 
 		// Picture
-		&currencyIconBuffer,
+		&CURRENCY_ICON_DETAILS,
 		
 		// First line
 		"Application",
@@ -203,7 +207,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Currency",
 		
 		// Text
-		.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+		.text = CURRENCY_NAME
 	});
 
 	// Check if device doesn't have low height
@@ -285,7 +289,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 				.title = "Account Index",
 				
 				// Text
-				.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+				.text = accountIndexLineBuffer
 			}
 		
 		// Otherwise
@@ -300,7 +304,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 				"Account Index",
 				
 				// Second line
-				kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+				accountIndexLineBuffer
 			}
 		#endif
 	);
@@ -407,7 +411,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Root Public Key",
 		
 		// Text
-		.text = (char *)publicKeyOrAddressLineBuffer
+		.text = (char *)publicKeyLineBuffer
 	});
 
 	// Verify root public key menu valid screen
@@ -453,7 +457,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressApproveTransactionOrSignChallengeLineBuffer,
+		verifyAddressLineBuffer,
 		
 		// Second line
 		"address"
@@ -477,10 +481,10 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	{
 
 		// Title
-		.title = amountOrAddressTypeLineBuffer,
+		.title = addressTypeLineBuffer,
 		
 		// Text
-		.text = (char *)publicKeyOrAddressLineBuffer
+		.text = addressLineBuffer
 	});
 
 	// Verify address menu valid screen
@@ -526,7 +530,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
+		signChallengeLineBuffer,
 		
 		// Second line
 		"challenge?"
@@ -556,7 +560,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Time And Date",
 		
 		// Text
-		.text = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+		.text = timeLineBuffer
 	});
 	
 	// Sign MQS challenge menu default challenge screen
@@ -616,7 +620,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_warning,
 		
 		// First line
-		kernelFeaturesOrTransactionTypeLineBuffer,
+		CURRENCY_MQS_NAME,
 		
 		// Second line
 		"transactions"
@@ -652,11 +656,14 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_view,
 
 		// First line
-		verifyAddressApproveTransactionOrSignChallengeLineBuffer,
+		approveTransactionLineBuffer,
 		
 		// Second line
 		"transaction?"
 	});
+	
+	// Approve transaction menu account index screen
+	#define approveTransactionMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
 
 	// Check if device doesn't have low height
 	#if BAGL_HEIGHT >= 64
@@ -668,7 +675,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 			"Amount",
 			
 			// Second line
-			amountOrAddressTypeLineBuffer
+			amountLineBuffer
 		});
 	#endif
 
@@ -693,7 +700,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Amount",
 		
 		// Text
-		.text = amountOrAddressTypeLineBuffer
+		.text = amountLineBuffer
 	});
 
 	// Check if device doesn't have low height
@@ -749,7 +756,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 				.title = "Kernel Features",
 				
 				// Text
-				.text = kernelFeaturesOrTransactionTypeLineBuffer
+				.text = kernelFeaturesLineBuffer
 			}
 		
 		// Otherwise
@@ -764,7 +771,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 				"Kernel Features",
 				
 				// Second line
-				kernelFeaturesOrTransactionTypeLineBuffer
+				kernelFeaturesLineBuffer
 			}
 		#endif
 	);
@@ -776,10 +783,10 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		static UX_STEP_NOCB(approveTransactionMenuKernelFeaturesDetailsSingleLineScreen, bn, {
 				
 			// Bold first line
-			kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
+			kernelFeaturesDetailsTitleLineBuffer,
 			
 			// Second line
-			kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+			kernelFeaturesDetailsTextLineBuffer
 		});
 	#endif
 
@@ -801,10 +808,10 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	{
 
 		// Title
-		.title = kernelFeaturesDetailsTitleOrSignTypeLineBuffer,
+		.title = kernelFeaturesDetailsTitleLineBuffer,
 		
 		// Text
-		.text = kernelFeaturesDetailsTextOrAccountIndexLineBuffer
+		.text = kernelFeaturesDetailsTextLineBuffer
 	});
 
 	// Approve transaction menu proof address screen
@@ -828,7 +835,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		.title = "Proof Address",
 		
 		// Text
-		.text = (char *)publicKeyOrAddressLineBuffer
+		.text = addressLineBuffer
 	});
 
 	// Approve transaction menu no payment proof screen
@@ -865,7 +872,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 	});
 
 	// Approve transaction menu
-	static const ux_flow_step_t *approveTransactionMenu[9];
+	static const ux_flow_step_t *approveTransactionMenu[10];
 
 	// Processing menu message screen
 	static UX_STEP_NOCB(processingMenuMessageScreen, pb, {
@@ -874,7 +881,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		&C_icon_processing,
 		
 		// Bold line
-		(char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer
+		"Processing"
 	});
 
 	// Processing menu
@@ -891,7 +898,7 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 		{{BAGL_RECTANGLE, 0x00, 0, 0, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 		
 		// Text
-		{{BAGL_LABELINE, 0x0, 0, (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer},
+		{{BAGL_LABELINE, 0x0, 0, (BAGL_HEIGHT / 2) - 3, BAGL_WIDTH, BAGL_HEIGHT, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0}, progressBarMessageLineBuffer},
 		
 		// Outline
 		{{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING, (BAGL_HEIGHT / 2) + 5, BAGL_WIDTH - (PROGRESS_BAR_PADDING * 2), PROGRESS_BAR_HEIGHT, 1, 3, BAGL_OUTLINE, 0xFFFFFF, 0x000000, 0, 0}, NULL}
@@ -1002,29 +1009,47 @@ char kernelFeaturesDetailsTextOrAccountIndexLineBuffer[KERNEL_FEATURES_DETAILS_T
 // Clear menu buffers
 void clearMenuBuffers(void) {
 	
-	// Clear the time, processing message, progress bar message, or currency name line buffer
-	explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+	// Clear the time line buffer
+	explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
 	
-	// Clear the public key or address line buffer
-	explicit_bzero((char *)publicKeyOrAddressLineBuffer, sizeof(publicKeyOrAddressLineBuffer));
+	// Clear the progress bar message line buffer
+	explicit_bzero(progressBarMessageLineBuffer, sizeof(progressBarMessageLineBuffer));
 	
-	// Clear the verify address, approve transaction, or sign challenge line buffer
-	explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
+	// Clear the public key line buffer
+	explicit_bzero((char *)publicKeyLineBuffer, sizeof(publicKeyLineBuffer));
 	
-	// Clear the amount or address type line buffer
-	explicit_bzero(amountOrAddressTypeLineBuffer, sizeof(amountOrAddressTypeLineBuffer));
+	// Clear the address line buffer
+	explicit_bzero(addressLineBuffer, sizeof(addressLineBuffer));
+	
+	// Clear the verify address line buffer
+	explicit_bzero(verifyAddressLineBuffer, sizeof(verifyAddressLineBuffer));
+	
+	// Clear the approve transaction line buffer
+	explicit_bzero(approveTransactionLineBuffer, sizeof(approveTransactionLineBuffer));
+	
+	// Clear the sign challenge line buffer
+	explicit_bzero(signChallengeLineBuffer, sizeof(signChallengeLineBuffer));
+	
+	// Clear the amount line buffer
+	explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
+	
+	// Clear the address type line buffer
+	explicit_bzero(addressTypeLineBuffer, sizeof(addressTypeLineBuffer));
 	
 	// Clear the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
 	
-	// Clear the kernel features or transaction type line buffer
-	explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
+	// Clear the kernel features line buffer
+	explicit_bzero(kernelFeaturesLineBuffer, sizeof(kernelFeaturesLineBuffer));
 	
-	// Clear the kernel features details title or sign type line buffer
-	explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
+	// Clear the kernel features details title line buffer
+	explicit_bzero(kernelFeaturesDetailsTitleLineBuffer, sizeof(kernelFeaturesDetailsTitleLineBuffer));
 	
-	// Clear the kernel features details text or account index line buffer
-	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
+	// Clear the kernel features details text line buffer
+	explicit_bzero(kernelFeaturesDetailsTextLineBuffer, sizeof(kernelFeaturesDetailsTextLineBuffer));
+	
+	// Clear the account index line buffer
+	explicit_bzero(accountIndexLineBuffer, sizeof(accountIndexLineBuffer));
 	
 	// Check if has NBGL
 	#ifdef HAVE_NBGL
@@ -1047,10 +1072,6 @@ void clearMenuBuffers(void) {
 		// Clear the warning line buffer
 		explicit_bzero(warningLineBuffer, sizeof(warningLineBuffer));
 	#endif
-	
-	// Copy currency information to buffers
-	memcpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, currencyInformation->name, sizeof(currencyInformation->name));
-	memcpy(&currencyIconBuffer, &currencyInformation->iconDetails, sizeof(currencyInformation->iconDetails));
 }
 
 // Show main menu
@@ -1098,7 +1119,7 @@ void showMenu(enum Menu menu) {
 					#if BAGL_HEIGHT >= 64
 					
 						// Check if currency information name can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, currencyInformation->name, strlen(currencyInformation->name), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, CURRENCY_NAME, sizeof(CURRENCY_NAME) - sizeof((char)'\0'), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 						
 							// Set main menu to use currency name ready screen
 							mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
@@ -1109,7 +1130,7 @@ void showMenu(enum Menu menu) {
 					#else
 					
 						// Check if currency information name can fit
-						if(strlen(currencyInformation->name) <= (BAGL_WIDTH - START_OF_TEXT_NEXT_TO_PICTURE) / AVERAGE_CHARACTER_WIDTH) {
+						if(sizeof(CURRENCY_NAME) - sizeof((char)'\0') <= (BAGL_WIDTH - START_OF_TEXT_NEXT_TO_PICTURE) / AVERAGE_CHARACTER_WIDTH) {
 						
 							// Set main menu to use currency name ready screen
 							mainMenu[index++] = &mainMenuCurrencyNameReadyScreen;
@@ -1196,8 +1217,8 @@ void showMenu(enum Menu menu) {
 					// Set sign MQS challenge menu to use account index screen
 					signMqsChallengeMenu[1] = &signMqsChallengeMenuAccountIndexScreen;
 					
-					// Check if time, processing message, progress bar message, or currency name line buffer isn't empty
-					if(strlen((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer)) {
+					// Check if time is provided
+					if(strlen(timeLineBuffer)) {
 					
 						// Set sign MQS challenge menu to use time and date screen
 						signMqsChallengeMenu[2] = &signMqsChallengeMenuTimeAndDateScreen;
@@ -1246,11 +1267,14 @@ void showMenu(enum Menu menu) {
 					// Set approve transaction menu to use notify screen
 					approveTransactionMenu[index++] = &approveTransactionMenuNotifyScreen;
 					
+					// Set approve transaction menu to use account index screen
+					approveTransactionMenu[index++] = &approveTransactionMenuAccountIndexScreen;
+					
 					// Check if device doesn't have low height
 					#if BAGL_HEIGHT >= 64
 					
 						// Check if amount can fit on one line
-						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountOrAddressTypeLineBuffer, strlen(amountOrAddressTypeLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+						if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, amountLineBuffer, strlen(amountLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 						
 							// Set approve transaction menu to use amount single line screen
 							approveTransactionMenu[index++] = &approveTransactionMenuAmountSingleLineScreen;
@@ -1283,14 +1307,14 @@ void showMenu(enum Menu menu) {
 					// Set approve transaction menu to use kernel features screen
 					approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesScreen;
 					
-					// Check if kernel features details title or sign type line buffer isn't empty
-					if(strlen(kernelFeaturesDetailsTitleOrSignTypeLineBuffer)) {
+					// Check if kernel features details are provided
+					if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
 					
 						// Check if device doesn't have low height
 						#if BAGL_HEIGHT >= 64
 						
 							// Check if kernel features details text can fit on one line
-							if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, kernelFeaturesDetailsTextOrAccountIndexLineBuffer, strlen(kernelFeaturesDetailsTextOrAccountIndexLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+							if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, kernelFeaturesDetailsTextLineBuffer, strlen(kernelFeaturesDetailsTextLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
 							
 								// Set approve transaction menu to use kernel features details single line screen
 								approveTransactionMenu[index++] = &approveTransactionMenuKernelFeaturesDetailsSingleLineScreen;
@@ -1304,8 +1328,8 @@ void showMenu(enum Menu menu) {
 						}
 					}
 					
-					// Check if public key or address line buffer isn't empty
-					if(strlen((char *)publicKeyOrAddressLineBuffer)) {
+					// Check if address is provided
+					if(strlen(addressLineBuffer)) {
 					
 						// Set approve transaction menu to use proof address screen
 						approveTransactionMenu[index++] = &approveTransactionMenuProofAddressScreen;
@@ -1356,28 +1380,9 @@ void showMenu(enum Menu menu) {
 			// Main menu
 			case MAIN_MENU:
 			
-				// Check currency ID
-				switch(currencyInformation->id) {
+				// Show main menu
+				nbgl_useCaseHome(CURRENCY_NAME, &CURRENCY_ICON_DETAILS, "Application is ready", false, showAboutMenu, exitApplication);
 				
-					// MimbleWimble Coin floonet
-					case MIMBLEWIMBLE_COIN_FLOONET:
-					
-						// Show main menu
-						nbgl_useCaseHome("MimbleWimble Coin\nFloonet", &currencyIconBuffer, "Application is ready", false, showAboutMenu, exitApplication);
-						
-						// Break
-						break;
-				
-					// Default
-					default:
-					
-						// Show main menu
-						nbgl_useCaseHome((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, &currencyIconBuffer, "Application is ready", false, showAboutMenu, exitApplication);
-						
-						// Break
-						break;
-				}
-			
 				// Break
 				break;
 			
@@ -1385,7 +1390,7 @@ void showMenu(enum Menu menu) {
 			case EXPORT_ROOT_PUBLIC_KEY_MENU:
 			
 				// Show export root public key menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Export root public\nkey?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuConfirmRejectCallback);
+				nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, "Export root public\nkey?", NULL, "Deny", exportRootPublicKeyMenuContinueCallback, exportRootPublicKeyMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1394,7 +1399,7 @@ void showMenu(enum Menu menu) {
 			case VERIFY_ROOT_PUBLIC_KEY_MENU:
 			
 				// Show verify root public key menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, "Verify root public\nkey", NULL, "Cancel", verifyRootPublicKeyMenuContinueCallback, verifyRootPublicKeyMenuRejectCallback);
+				nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, "Verify root public\nkey", NULL, "Cancel", verifyRootPublicKeyMenuContinueCallback, verifyRootPublicKeyMenuRejectCallback);
 			
 				// Break
 				break;
@@ -1403,7 +1408,7 @@ void showMenu(enum Menu menu) {
 			case VERIFY_ADDRESS_MENU:
 			
 				// Show verify address menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
+				nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, verifyAddressLineBuffer, NULL, "Cancel", verifyAddressMenuContinueCallback, verifyAddressMenuRejectCallback);
 				
 				// Break
 				break;
@@ -1412,7 +1417,7 @@ void showMenu(enum Menu menu) {
 			case SIGN_MQS_CHALLENGE_MENU:
 			
 				// Show sign MQS challenge menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Deny", signMqsChallengeMenuContinueCallback, signMqsChallengeMenuConfirmRejectCallback);
+				nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, signChallengeLineBuffer, NULL, "Deny", signMqsChallengeMenuContinueCallback, signMqsChallengeMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1421,7 +1426,7 @@ void showMenu(enum Menu menu) {
 			case APPROVE_TRANSACTION_MENU:
 			
 				// Show approve transaction menu
-				nbgl_useCaseReviewStart(&currencyIconBuffer, verifyAddressApproveTransactionOrSignChallengeLineBuffer, NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
+				nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, approveTransactionLineBuffer, NULL, "Deny", approveTransactionMenuContinueCallback, approveTransactionMenuConfirmRejectCallback);
 				
 				// Break
 				break;
@@ -1430,7 +1435,7 @@ void showMenu(enum Menu menu) {
 			case PROCESSING_MENU:
 			
 				// Show processing
-				nbgl_useCaseSpinner((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer);
+				nbgl_useCaseSpinner("Processing");
 				
 				// Break
 				break;
@@ -1501,7 +1506,7 @@ void showMenu(enum Menu menu) {
 	void showAboutMenu(void) {
 	
 		// Show about menu
-		nbgl_useCaseSettings((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, 0, 1, false, showMainMenu, aboutMenuDisplayCallback, NULL);
+		nbgl_useCaseSettings(CURRENCY_NAME, 0, 1, false, showMainMenu, aboutMenuDisplayCallback, NULL);
 	}
 	
 	// About menu display callback
@@ -1522,7 +1527,7 @@ void showMenu(enum Menu menu) {
 	
 		// Set export root public key menu tag value pairs
 		exportRootPublicKeyMenuTagValuePairs[0].item = "Account Index";
-		exportRootPublicKeyMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
+		exportRootPublicKeyMenuTagValuePairs[0].value = accountIndexLineBuffer;
 		
 		exportRootPublicKeyMenuTagValuePairs[1].item = "*The host will be able to view\nthe account's transactions";
 		exportRootPublicKeyMenuTagValuePairs[1].value = "";
@@ -1533,7 +1538,7 @@ void showMenu(enum Menu menu) {
 		exportRootPublicKeyMenuTagValueList.wrapping = true;
 		
 		// Set export root public key menu info long press
-		exportRootPublicKeyMenuInfoLongPress.icon = &currencyIconBuffer;
+		exportRootPublicKeyMenuInfoLongPress.icon = &CURRENCY_ICON_DETAILS;
 		exportRootPublicKeyMenuInfoLongPress.text = "Export root public\nkey?";
 		exportRootPublicKeyMenuInfoLongPress.longPressText = "Hold to export";
 		
@@ -1592,7 +1597,7 @@ void showMenu(enum Menu menu) {
 	
 		// Set verify root public key menu tag value pairs
 		verifyRootPublicKeyMenuTagValuePairs[0].item = "Root Public Key";
-		verifyRootPublicKeyMenuTagValuePairs[0].value = (char *)publicKeyOrAddressLineBuffer;
+		verifyRootPublicKeyMenuTagValuePairs[0].value = (char *)publicKeyLineBuffer;
 		
 		// Set verify root public key menu content
 		verifyRootPublicKeyMenuContent.type = TAG_VALUE_CONFIRM;
@@ -1657,8 +1662,8 @@ void showMenu(enum Menu menu) {
 	void verifyAddressMenuContinueCallback(void) {
 	
 		// Set verify address menu tag value pairs
-		verifyAddressMenuTagValuePairs[0].item = amountOrAddressTypeLineBuffer;
-		verifyAddressMenuTagValuePairs[0].value = (char *)publicKeyOrAddressLineBuffer;
+		verifyAddressMenuTagValuePairs[0].item = addressTypeLineBuffer;
+		verifyAddressMenuTagValuePairs[0].value = addressLineBuffer;
 		
 		// Set verify address menu content
 		verifyAddressMenuContent.type = TAG_VALUE_CONFIRM;
@@ -1727,10 +1732,10 @@ void showMenu(enum Menu menu) {
 			nbgl_layoutQRCode_t qrCode = {
 			
 				// URL
-				.url = (char *)publicKeyOrAddressLineBuffer,
+				.url = addressLineBuffer,
 				
 				// Text 2
-				.text2 = (char *)publicKeyOrAddressLineBuffer
+				.text2 = addressLineBuffer
 			};
 			
 			// Add QR code to verify address menu modal layout
@@ -1778,14 +1783,14 @@ void showMenu(enum Menu menu) {
 	
 		// Set sign MQS challenge menu tag value pairs
 		signMqsChallengeMenuTagValuePairs[0].item = "Account Index";
-		signMqsChallengeMenuTagValuePairs[0].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
+		signMqsChallengeMenuTagValuePairs[0].value = accountIndexLineBuffer;
 		
-		// Check if time, processing message, progress bar message, or currency name line buffer isn't empty
-		if(strlen((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer)) {
+		// Check if time is provided
+		if(strlen(timeLineBuffer)) {
 		
 			// Set sign MQS challenge menu tag value pairs
 			signMqsChallengeMenuTagValuePairs[1].item = "Time And Date";
-			signMqsChallengeMenuTagValuePairs[1].value = (char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer;
+			signMqsChallengeMenuTagValuePairs[1].value = timeLineBuffer;
 		}
 		
 		// Otherwise
@@ -1806,8 +1811,8 @@ void showMenu(enum Menu menu) {
 		signMqsChallengeMenuTagValueList.wrapping = true;
 		
 		// Set sign MQS challenge menu info long press
-		signMqsChallengeMenuInfoLongPress.icon = &currencyIconBuffer;
-		signMqsChallengeMenuInfoLongPress.text = verifyAddressApproveTransactionOrSignChallengeLineBuffer;
+		signMqsChallengeMenuInfoLongPress.icon = &CURRENCY_ICON_DETAILS;
+		signMqsChallengeMenuInfoLongPress.text = signChallengeLineBuffer;
 		signMqsChallengeMenuInfoLongPress.longPressText = "Hold to sign";
 		
 		// Show static review
@@ -1864,32 +1869,35 @@ void showMenu(enum Menu menu) {
 	void approveTransactionMenuContinueCallback(void) {
 	
 		// Set approve transaction menu tag value pairs
-		approveTransactionMenuTagValuePairs[0].item = "Amount";
-		approveTransactionMenuTagValuePairs[0].value = amountOrAddressTypeLineBuffer;
+		approveTransactionMenuTagValuePairs[0].item = "Account Index";
+		approveTransactionMenuTagValuePairs[0].value = accountIndexLineBuffer;
 		
-		approveTransactionMenuTagValuePairs[1].item = "Fee";
-		approveTransactionMenuTagValuePairs[1].value = feeLineBuffer;
+		approveTransactionMenuTagValuePairs[1].item = "Amount";
+		approveTransactionMenuTagValuePairs[1].value = amountLineBuffer;
 		
-		approveTransactionMenuTagValuePairs[2].item = "Kernel Features";
-		approveTransactionMenuTagValuePairs[2].value = kernelFeaturesOrTransactionTypeLineBuffer;
+		approveTransactionMenuTagValuePairs[2].item = "Fee";
+		approveTransactionMenuTagValuePairs[2].value = feeLineBuffer;
+		
+		approveTransactionMenuTagValuePairs[3].item = "Kernel Features";
+		approveTransactionMenuTagValuePairs[3].value = kernelFeaturesLineBuffer;
 		
 		// Initialize index
-		size_t index = 3;
+		size_t index = 4;
 		
-		// Check if kernel features details title or sign type line buffer isn't empty
-		if(strlen(kernelFeaturesDetailsTitleOrSignTypeLineBuffer)) {
+		// Check if kernel features details are provided
+		if(strlen(kernelFeaturesDetailsTitleLineBuffer)) {
 		
 			// Set approve transaction menu tag value pairs
-			approveTransactionMenuTagValuePairs[index].item = kernelFeaturesDetailsTitleOrSignTypeLineBuffer;
-			approveTransactionMenuTagValuePairs[index++].value = kernelFeaturesDetailsTextOrAccountIndexLineBuffer;
+			approveTransactionMenuTagValuePairs[index].item = kernelFeaturesDetailsTitleLineBuffer;
+			approveTransactionMenuTagValuePairs[index++].value = kernelFeaturesDetailsTextLineBuffer;
 		}
 		
-		// Check if public key or address line buffer isn't empty
-		if(strlen((char *)publicKeyOrAddressLineBuffer)) {
+		// Check if address is provided
+		if(strlen(addressLineBuffer)) {
 		
 			// Set approve transaction menu tag value pairs
 			approveTransactionMenuTagValuePairs[index].item = "Proof Address";
-			approveTransactionMenuTagValuePairs[index++].value = (char *)publicKeyOrAddressLineBuffer;
+			approveTransactionMenuTagValuePairs[index++].value = addressLineBuffer;
 		}
 		
 		// Otherwise
@@ -1906,8 +1914,8 @@ void showMenu(enum Menu menu) {
 		approveTransactionMenuTagValueList.wrapping = true;
 		
 		// Set approve transaction menu info long press
-		approveTransactionMenuInfoLongPress.icon = &currencyIconBuffer;
-		approveTransactionMenuInfoLongPress.text = verifyAddressApproveTransactionOrSignChallengeLineBuffer;
+		approveTransactionMenuInfoLongPress.icon = &CURRENCY_ICON_DETAILS;
+		approveTransactionMenuInfoLongPress.text = approveTransactionLineBuffer;
 		approveTransactionMenuInfoLongPress.longPressText = approveButtonLineBuffer;
 		
 		// Show static review

@@ -3,7 +3,6 @@
 #include <string.h>
 #include "../common.h"
 #include "../crypto.h"
-#include "../currency_information.h"
 #include "get_address.h"
 #include "../mqs.h"
 #include "../slatepack.h"
@@ -61,7 +60,7 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case MQS_ADDRESS_TYPE:
 		
 			// Check if currency doesn't allow MQS addresses
-			if(!currencyInformation->enableMqsAddress) {
+			if(!CURRENCY_ENABLE_MQS_ADDRESS) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -83,7 +82,7 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case TOR_ADDRESS_TYPE:
 		
 			// Check if currency doesn't allow Tor addresses
-			if(!currencyInformation->enableTorAddress) {
+			if(!CURRENCY_ENABLE_TOR_ADDRESS) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -105,14 +104,14 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 		case SLATEPACK_ADDRESS_TYPE:
 		
 			// Check if currency doesn't allow Slatepack addresses
-			if(!currencyInformation->enableSlatepackAddress) {
+			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Set address length
-			addressLength = SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart);
+			addressLength = SLATEPACK_ADDRESS_SIZE;
 			
 			// Allocate memory for address
 			address = alloca(addressLength);

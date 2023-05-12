@@ -47,32 +47,12 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	# 44'/593' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/593'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0xA00
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_LIBRARY and APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0xA00
-
-	# Otherwise
-	else
-
-		# APPLICATION_FLAG_LIBRARY application flags
-		APP_LOAD_PARAMS += --appFlags 0x800
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=0
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS
+	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,69\}
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=MWC_ADDRESS_DERIVATION
 	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=ASCII_PAYMENT_PROOF_MESSAGE
@@ -87,15 +67,12 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
 	endif
 
 	# Icon
@@ -110,32 +87,12 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	# 44'/1' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise
-	else
-
-		# No application flags
-		APP_LOAD_PARAMS += --appFlags 0x000
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=1
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS
+	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,121\}
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=MWC_ADDRESS_DERIVATION
 	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=ASCII_PAYMENT_PROOF_MESSAGE
@@ -150,26 +107,16 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_mimblewimble_coin_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_mimblewimble_coin_bitmap
 	endif
-
-	# Defines library
-	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
 	ICON = MimbleWimble Coin
-
-	# Emulator flags
-	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise check if currency is Grin
 else ifeq ($(CURRENCY),grin)
@@ -180,31 +127,11 @@ else ifeq ($(CURRENCY),grin)
 	# 44'/592' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/592'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise
-	else
-
-		# No application flags
-		APP_LOAD_PARAMS += --appFlags 0x000
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=2
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS
+	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"grin\"
 	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
@@ -219,26 +146,16 @@ else ifeq ($(CURRENCY),grin)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
 	endif
-
-	# Defines library
-	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
 	ICON = Grin
-
-	# Emulator flags
-	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise check if currency is Grin testnet
 else ifeq ($(CURRENCY),grin_testnet)
@@ -249,31 +166,11 @@ else ifeq ($(CURRENCY),grin_testnet)
 	# 44'/1' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise
-	else
-
-		# No application flags
-		APP_LOAD_PARAMS += --appFlags 0x000
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=3
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS
+	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"tgrin\"
 	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
@@ -288,26 +185,16 @@ else ifeq ($(CURRENCY),grin_testnet)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_grin_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_grin_bitmap
 	endif
-
-	# Defines library
-	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
 	ICON = Grin
-
-	# Emulator flags
-	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise check if currency is Epic Cash
 else ifeq ($(CURRENCY),epic_cash)
@@ -318,31 +205,11 @@ else ifeq ($(CURRENCY),epic_cash)
 	# 44'/23000' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/23000'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise
-	else
-
-		# No application flags
-		APP_LOAD_PARAMS += --appFlags 0x000
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=4
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=23000
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=8
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS
+	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,0\}
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
 	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
@@ -357,26 +224,16 @@ else ifeq ($(CURRENCY),epic_cash)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_epic_cash_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_epic_cash_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_epic_cash_bitmap
 	endif
-
-	# Defines library
-	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
 	ICON = Epic Cash
-
-	# Emulator flags
-	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise check if currency is Epic Cash floonet
 else ifeq ($(CURRENCY),epic_cash_floonet)
@@ -387,31 +244,11 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	# 44'/1' path on secp256k1 curve
 	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
 
-	# Check if target is the Nano X
-	ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise check if target is the Stax
-	else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-		# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-		APP_LOAD_PARAMS += --appFlags 0x200
-
-	# Otherwise
-	else
-
-		# No application flags
-		APP_LOAD_PARAMS += --appFlags 0x000
-	endif
-
 	# Defines
-	DEFINES += CURRENCY_ID=5
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
 	DEFINES += CURRENCY_FRACTIONAL_DIGITS=8
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS
+	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
+	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,136\}
 	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
 	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
@@ -426,26 +263,16 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_epic_cash_big_bitmap
 	
 	# Otherwise
 	else
 	
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
-		DEFINES += CURRENCY_ICON_COLORS=C_icon_epic_cash_colors
-		DEFINES += CURRENCY_ICON_BITMAP=C_icon_epic_cash_bitmap
 	endif
-
-	# Defines library
-	DEFINES += USE_LIB_MIMBLEWIMBLE_COIN
-	APP_LOAD_PARAMS += --dep "MimbleWimble Coin":$(APPVERSION)
 
 	# Icon
 	ICON = Epic Cash
-
-	# Emulator flags
-	EMULATOR_FLAGS += --library "MimbleWimble Coin":"mimblewimble coin.elf"
 
 # Otherwise
 else
@@ -454,8 +281,24 @@ else
 $(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, grin_testnet, epic_cash, or epic_cash_floonet)
 endif
 
-# Define total number of supported currencies
-DEFINES += TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES=6
+# Check if target is the Nano X
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+
+	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+	APP_LOAD_PARAMS += --appFlags 0x200
+
+# Otherwise check if target is the Stax
+else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+	APP_LOAD_PARAMS += --appFlags 0x200
+
+# Otherwise
+else
+
+	# No application flags
+	APP_LOAD_PARAMS += --appFlags 0x000
+endif
 
 # Check if target is the Nano S
 ifeq ($(TARGET_NAME),TARGET_NANOS)

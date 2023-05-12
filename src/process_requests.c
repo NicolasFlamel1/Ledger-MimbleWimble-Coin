@@ -369,10 +369,6 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 					// Check if has BAGL
 					#ifdef HAVE_BAGL
 					
-						// Set time, processing menu, progress bar message, or currency name line buffer
-						explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-						strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Processing", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
-				
 						// Show processing menu
 						showMenu(PROCESSING_MENU);
 						

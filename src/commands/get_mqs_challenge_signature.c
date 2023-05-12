@@ -16,7 +16,7 @@
 void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
 	// Check if currency doesn't allow MQS addresses
-	if(!currencyInformation->enableMqsAddress) {
+	if(!CURRENCY_ENABLE_MQS_ADDRESS) {
 	
 		// Throw unknown instruction error
 		THROW(UNKNOWN_INSTRUCTION_ERROR);
@@ -94,49 +94,48 @@ void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsign
 		// Check if device has low height
 		#if BAGL_HEIGHT < 64
 		
-			// Copy time into the time, processing message, progress bar message, or currency name line buffer
-			snprintf((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer), "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+			// Copy time into the time line buffer
+			snprintf(timeLineBuffer, sizeof(timeLineBuffer), "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 		
 		// Otherwise
 		#else
 		
-			// Copy time into the time, processing message, progress bar message, or currency name line buffer
-			snprintf((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer), "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
+			// Copy time into the time line buffer
+			snprintf(timeLineBuffer, sizeof(timeLineBuffer), "%02d:%02d:%02d on\n%d-%02d-%02d\nUTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
 		#endif
 	}
 	
 	// Otherwise
 	else {
 	
-		// Clear the time, processing message, progress bar message, or currency name line buffer
-		explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
+		// Clear the time line buffer
+		explicit_bzero(timeLineBuffer, sizeof(timeLineBuffer));
 	}
 	
-	// Copy account into the kernel features details text or account index line buffer
-	explicit_bzero(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, sizeof(kernelFeaturesDetailsTextOrAccountIndexLineBuffer));
-	toString(kernelFeaturesDetailsTextOrAccountIndexLineBuffer, account, 0);
+	// Copy account into account the index line buffer
+	explicit_bzero(accountIndexLineBuffer, sizeof(accountIndexLineBuffer));
+	toString(accountIndexLineBuffer, account, 0);
 	
-	// Set kernel features or transaction type line buffer
-	explicit_bzero(kernelFeaturesOrTransactionTypeLineBuffer, sizeof(kernelFeaturesOrTransactionTypeLineBuffer));
-	strncpy(kernelFeaturesOrTransactionTypeLineBuffer, currencyInformation->mqsName, sizeof(kernelFeaturesOrTransactionTypeLineBuffer) - sizeof((char)'\0'));
+	// Check if has BAGL
+	#ifdef HAVE_BAGL
 	
-	// Set kernel features details title or sign type line buffer
-	explicit_bzero(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer));
-	strncpy(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, "Sign ", sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer) - sizeof((char)'\0'));
-	strncat(kernelFeaturesDetailsTitleOrSignTypeLineBuffer, currencyInformation->mqsName, sizeof(kernelFeaturesDetailsTitleOrSignTypeLineBuffer) - strlen(kernelFeaturesDetailsTitleOrSignTypeLineBuffer) - sizeof((char)'\0'));
+		// Set sign challenge line buffer
+		explicit_bzero(signChallengeLineBuffer, sizeof(signChallengeLineBuffer));
+		strncpy(signChallengeLineBuffer, "Sign ", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
+		strncat(signChallengeLineBuffer, CURRENCY_MQS_NAME, sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
 	
-	// Check if has NBGL
-	#ifdef HAVE_NBGL
+	// Otherwise check if has NBGL
+	#elif defined HAVE_NBGL
 	
-		// Set verify address, approve transaction, or sign challenge line buffer
-		explicit_bzero(verifyAddressApproveTransactionOrSignChallengeLineBuffer, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer));
-		strncpy(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "Sign ", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
-		strncat(verifyAddressApproveTransactionOrSignChallengeLineBuffer, currencyInformation->mqsName, sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - strlen(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
-		strncat(verifyAddressApproveTransactionOrSignChallengeLineBuffer, "\nchallenge?", sizeof(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - strlen(verifyAddressApproveTransactionOrSignChallengeLineBuffer) - sizeof((char)'\0'));
+		// Set sign challenge line buffer
+		explicit_bzero(signChallengeLineBuffer, sizeof(signChallengeLineBuffer));
+		strncpy(signChallengeLineBuffer, "Sign ", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
+		strncat(signChallengeLineBuffer, CURRENCY_MQS_NAME, sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
+		strncat(signChallengeLineBuffer, "\nchallenge?", sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
 		
 		// Set succeeded line buffer
 		explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
-		strncpy(succeededLineBuffer, currencyInformation->mqsName, sizeof(succeededLineBuffer) - sizeof((char)'\0'));
+		strncpy(succeededLineBuffer, CURRENCY_MQS_NAME, sizeof(succeededLineBuffer) - sizeof((char)'\0'));
 		strncat(succeededLineBuffer, " CHALLENGE\nSIGNED", sizeof(succeededLineBuffer) - strlen(succeededLineBuffer) - sizeof((char)'\0'));
 		
 		upperCaseText(succeededLineBuffer, strlen(succeededLineBuffer));
@@ -144,25 +143,25 @@ void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsign
 		// Set failed line buffer
 		explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
 		strncpy(failedLineBuffer, "Signing ", sizeof(failedLineBuffer) - sizeof((char)'\0'));
-		strncat(failedLineBuffer, currencyInformation->mqsName, sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
+		strncat(failedLineBuffer, CURRENCY_MQS_NAME, sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
 		strncat(failedLineBuffer, "\nchallenge failed", sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
 		
 		// Set canceled line buffer
 		explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
 		strncpy(canceledLineBuffer, "Signing ", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
-		strncat(canceledLineBuffer, currencyInformation->mqsName, sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
+		strncat(canceledLineBuffer, CURRENCY_MQS_NAME, sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
 		strncat(canceledLineBuffer, "\nchallenge denied", sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
 		
 		// Set cancel prompt line buffer
 		explicit_bzero(cancelPromptLineBuffer, sizeof(cancelPromptLineBuffer));
 		strncpy(cancelPromptLineBuffer, "Deny signing\n", sizeof(cancelPromptLineBuffer) - sizeof((char)'\0'));
-		strncat(cancelPromptLineBuffer, currencyInformation->mqsName, sizeof(cancelPromptLineBuffer) - strlen(cancelPromptLineBuffer) - sizeof((char)'\0'));
+		strncat(cancelPromptLineBuffer, CURRENCY_MQS_NAME, sizeof(cancelPromptLineBuffer) - strlen(cancelPromptLineBuffer) - sizeof((char)'\0'));
 		strncat(cancelPromptLineBuffer, " challenge?", sizeof(cancelPromptLineBuffer) - strlen(cancelPromptLineBuffer) - sizeof((char)'\0'));
 		
 		// Set warning line buffer
 		explicit_bzero(warningLineBuffer, sizeof(warningLineBuffer));
 		strncpy(warningLineBuffer, "*The host will be able to listen\nfor the account's ", sizeof(warningLineBuffer) - sizeof((char)'\0'));
-		strncat(warningLineBuffer, currencyInformation->mqsName, sizeof(warningLineBuffer) - strlen(warningLineBuffer) - sizeof((char)'\0'));
+		strncat(warningLineBuffer, CURRENCY_MQS_NAME, sizeof(warningLineBuffer) - strlen(warningLineBuffer) - sizeof((char)'\0'));
 		strncat(warningLineBuffer, "\ntransactions", sizeof(warningLineBuffer) - strlen(warningLineBuffer) - sizeof((char)'\0'));
 	#endif
 	

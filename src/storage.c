@@ -6,7 +6,7 @@
 // Constants
 
 // Persistent storage
-const struct PersistentStorage N_PERSISTENTSTORAGE[TOTAL_NUMBER_OF_SUPPORTED_CURRENCIES];
+const struct PersistentStorage N_PERSISTENTSTORAGE;
 
 
 // Supporting function implementation

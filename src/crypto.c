@@ -7,7 +7,6 @@
 #include "chacha20_poly1305.h"
 #include "common.h"
 #include "crypto.h"
-#include "currency_information.h"
 #include "generators.h"
 #include "menus.h"
 #include "mqs.h"
@@ -132,7 +131,7 @@ static void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint
 static void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *secondScalar, const uint8_t *seed, const uint64_t index);
 
 // Use LR generator
-static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value, volatile uint8_t *scratchSpace);
+static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value);
 
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
@@ -151,7 +150,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 	memcpy(bip44Path, BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT, sizeof(BIP44_PATH_WITHOUT_COIN_TYPE_AND_ACCOUNT));
 	
 	// Set BIP44 path's coin type
-	bip44Path[BIP44_PATH_COIN_TYPE_INDEX] |= currencyInformation->bip44CoinType;
+	bip44Path[BIP44_PATH_COIN_TYPE_INDEX] |= CURRENCY_BIP44_COIN_TYPE;
 	
 	// Set BIP44 path's account
 	bip44Path[BIP44_PATH_ACCOUNT_INDEX] |= account;
@@ -532,7 +531,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 		TRY {
 		
 			// Check currency address derivation type
-			switch(currencyInformation->addressDerivationType) {
+			switch(CURRENCY_ADDRESS_DERIVATION_TYPE) {
 			
 				// MWC address derivation
 				case MWC_ADDRESS_DERIVATION:
@@ -1029,14 +1028,14 @@ size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAdd
 		case MQS_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Check currency payment proof message type
-			switch(currencyInformation->paymentProofMessageType) {
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
 			
 				// ASCII payment proof message
 				case ASCII_PAYMENT_PROOF_MESSAGE:
@@ -1073,14 +1072,58 @@ size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAdd
 		case TOR_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Check currency payment proof message type
-			switch(currencyInformation->paymentProofMessageType) {
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
+			
+				// ASCII payment proof message
+				case ASCII_PAYMENT_PROOF_MESSAGE:
+				
+					// Return payment proof message length
+					return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
+				
+					// Break
+					break;
+				
+				// Binary payment proof message
+				case BINARY_PAYMENT_PROOF_MESSAGE:
+				
+					// Return payment proof message length
+					return sizeof(value) + COMMITMENT_SIZE + ED25519_PUBLIC_KEY_SIZE;
+					
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+					
+					// Break
+					break;
+			}
+			
+			// Break
+			break;
+		
+		// Slatepack address size
+		case SLATEPACK_ADDRESS_SIZE:
+		
+			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			// Check currency payment proof message type
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
 			
 				// ASCII payment proof message
 				case ASCII_PAYMENT_PROOF_MESSAGE:
@@ -1116,54 +1159,8 @@ size_t getPaymentProofMessageLength(const uint64_t value, const size_t senderAdd
 		// Default
 		default:
 		
-			// Check if sender address length is a Slatepack address's length
-			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
-		
-				// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-				if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
-				// Check currency payment proof message type
-				switch(currencyInformation->paymentProofMessageType) {
-				
-					// ASCII payment proof message
-					case ASCII_PAYMENT_PROOF_MESSAGE:
-					
-						// Return payment proof message length
-						return COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength + getStringLength(value);
-					
-						// Break
-						break;
-					
-					// Binary payment proof message
-					case BINARY_PAYMENT_PROOF_MESSAGE:
-					
-						// Return payment proof message length
-						return sizeof(value) + COMMITMENT_SIZE + ED25519_PUBLIC_KEY_SIZE;
-						
-						// Break
-						break;
-					
-					// Default
-					default:
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-						
-						// Break
-						break;
-				}
-			}
-			
-			// Otherwise
-			else {
-		
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 			
 			// Break
 			break;
@@ -1180,14 +1177,14 @@ void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_
 		case MQS_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Check currency payment proof message type
-			switch(currencyInformation->paymentProofMessageType) {
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
 			
 				// ASCII payment proof message
 				case ASCII_PAYMENT_PROOF_MESSAGE:
@@ -1258,14 +1255,14 @@ void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_
 		case TOR_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 			
 			// Check currency payment proof message type
-			switch(currencyInformation->paymentProofMessageType) {
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
 			
 				// ASCII payment proof message
 				case ASCII_PAYMENT_PROOF_MESSAGE:
@@ -1333,92 +1330,90 @@ void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_
 			// Break
 			break;
 		
-		// Default
-		default:
+		// Slatepack address size
+		case SLATEPACK_ADDRESS_SIZE:
 		
-			// Check if sender address length is a Slatepack address's length
-			if(senderAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
-			
-				// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-				if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
-				// Check currency payment proof message type
-				switch(currencyInformation->paymentProofMessageType) {
-				
-					// ASCII payment proof message
-					case ASCII_PAYMENT_PROOF_MESSAGE:
-					
-						// Check if sender address isn't a valid Tor address
-						if(!getPublicKeyFromSlatepackAddress(NULL, senderAddress, senderAddressLength)) {
-						
-							// Throw invalid parameters error
-							THROW(INVALID_PARAMETERS_ERROR);
-						}
-			
-						// Append kernel commitment as a hex string to the message
-						toHexString((char *)message, kernelCommitment, COMMITMENT_SIZE);
-						
-						// Append sender address to the message
-						memcpy(&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE], senderAddress, senderAddressLength);
-						
-						// Append value as a string to the message
-						toString((char *)&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength], value, 0);
-					
-						// Break
-						break;
-					
-					// Binary payment proof message
-					case BINARY_PAYMENT_PROOF_MESSAGE:
-					
-						{
-							// Check if getting sender public key from sender address failed
-							cx_ecfp_public_key_t senderPublicKey;
-							if(!getPublicKeyFromSlatepackAddress(&senderPublicKey, senderAddress, senderAddressLength)) {
-							
-								// Throw invalid parameters error
-								THROW(INVALID_PARAMETERS_ERROR);
-							}
-							
-							// Compress the sender public key
-							cx_edwards_compress_point(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len);
-							
-							// Convert value to big endian
-							swapEndianness((uint8_t *)&value, sizeof(value));
-							
-							// Append value to the message
-							memcpy(message, &value, sizeof(value));
-							
-							// Append kernel commitment to the message
-							memcpy(&message[sizeof(value)], kernelCommitment, COMMITMENT_SIZE);
-							
-							// Append sender address to the message
-							memcpy(&message[sizeof(value) + COMMITMENT_SIZE], &senderPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
-						}
-						
-						// Break
-						break;
-					
-					// Default
-					default:
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-						
-						// Break
-						break;
-				}
-			}
-			
-			// Otherwise
-			else {
+			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Check currency payment proof message type
+			switch(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE) {
+			
+				// ASCII payment proof message
+				case ASCII_PAYMENT_PROOF_MESSAGE:
+				
+					// Check if sender address isn't a valid Tor address
+					if(!getPublicKeyFromSlatepackAddress(NULL, senderAddress, senderAddressLength)) {
+					
+						// Throw invalid parameters error
+						THROW(INVALID_PARAMETERS_ERROR);
+					}
+		
+					// Append kernel commitment as a hex string to the message
+					toHexString((char *)message, kernelCommitment, COMMITMENT_SIZE);
+					
+					// Append sender address to the message
+					memcpy(&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE], senderAddress, senderAddressLength);
+					
+					// Append value as a string to the message
+					toString((char *)&message[COMMITMENT_SIZE * HEXADECIMAL_CHARACTER_SIZE + senderAddressLength], value, 0);
+				
+					// Break
+					break;
+				
+				// Binary payment proof message
+				case BINARY_PAYMENT_PROOF_MESSAGE:
+				
+					{
+						// Check if getting sender public key from sender address failed
+						cx_ecfp_public_key_t senderPublicKey;
+						if(!getPublicKeyFromSlatepackAddress(&senderPublicKey, senderAddress, senderAddressLength)) {
+						
+							// Throw invalid parameters error
+							THROW(INVALID_PARAMETERS_ERROR);
+						}
+						
+						// Compress the sender public key
+						cx_edwards_compress_point(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len);
+						
+						// Convert value to big endian
+						swapEndianness((uint8_t *)&value, sizeof(value));
+						
+						// Append value to the message
+						memcpy(message, &value, sizeof(value));
+						
+						// Append kernel commitment to the message
+						memcpy(&message[sizeof(value)], kernelCommitment, COMMITMENT_SIZE);
+						
+						// Append sender address to the message
+						memcpy(&message[sizeof(value) + COMMITMENT_SIZE], &senderPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE);
+					}
+					
+					// Break
+					break;
+				
+				// Default
+				default:
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+					
+					// Break
+					break;
+			}
+			
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 			
 			// Break
 			break;
@@ -1435,7 +1430,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLengt
 		case MQS_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1476,7 +1471,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLengt
 		case TOR_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
+			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -1509,26 +1504,24 @@ bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLengt
 			// Break
 			break;
 		
-		// Default
-		default:
+		// Slatepack address size
+		case SLATEPACK_ADDRESS_SIZE:
 		
-			// Check if receiver address length is a Slatepack address's length
-			if(receiverAddressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
-		
-				// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-				if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
+			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
 			
-				// Check if signature length is invalid
-				if(signatureLength != ED25519_SIGNATURE_SIZE) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-				
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+		
+			// Check if signature length is invalid
+			if(signatureLength != ED25519_SIGNATURE_SIZE) {
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
+			}
+			
+			{
 				// Check if getting receiver public key from receiver's Slatepack address failed
 				cx_ecfp_public_key_t receiverPublicKey;
 				if(!getPublicKeyFromSlatepackAddress(&receiverPublicKey, receiverAddress, receiverAddressLength)) {
@@ -1545,12 +1538,14 @@ bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLengt
 				}
 			}
 			
-			// Otherwise
-			else {
-			
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
+			// Break
+			break;
+		
+		// Default
+		default:
+		
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 			
 			// Break
 			break;
@@ -2034,7 +2029,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			// Create t0, t1, and t2 with an LR generator
 			uint8_t *t0 = (uint8_t *)rho;
 			explicit_bzero(t0, SCALAR_SIZE);
-			useLrGenerator(t0, t1, t2, y, (uint8_t *)z, rewindNonce, value, &aterm[PUBLIC_KEY_PREFIX_SIZE]);
+			useLrGenerator(t0, t1, t2, y, (uint8_t *)z, rewindNonce, value);
 			
 			// Show progress bar
 			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
@@ -2442,7 +2437,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 }
 
 // Use LR generator
-void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value, volatile uint8_t *scratchSpace) {
+void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t *t2, const uint8_t *y, const uint8_t *z, const uint8_t *nonce, const uint64_t value) {
 
 	// Initialize yn
 	volatile uint8_t yn[SCALAR_SIZE] = {
@@ -2459,10 +2454,10 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 	volatile uint8_t rout[SCALAR_SIZE];
 	
 	// Initialize sr
-	volatile uint8_t *sr = scratchSpace;
+	volatile uint8_t sr[SCALAR_SIZE];
 	
 	// Initialize sl
-	volatile uint8_t *sl = &scratchSpace[SCALAR_SIZE];
+	volatile uint8_t sl[SCALAR_SIZE];
 	
 	// Temp rout, lout, sl, and sr
 	volatile uint8_t tempLout[SCALAR_SIZE];
@@ -2576,6 +2571,12 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			explicit_bzero((uint8_t *)tempSl, sizeof(tempSl));
 			explicit_bzero((uint8_t *)tempRout, sizeof(tempRout));
 			explicit_bzero((uint8_t *)tempLout, sizeof(tempLout));
+			
+			// Clear sl
+			explicit_bzero((uint8_t *)sl, sizeof(sl));
+			
+			// Clear sr
+			explicit_bzero((uint8_t *)sr, sizeof(sr));
 			
 			// Clear rout
 			explicit_bzero((uint8_t *)rout, sizeof(rout));

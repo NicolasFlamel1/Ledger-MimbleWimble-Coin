@@ -58,9 +58,9 @@ void processVerifyRootPublicKeyRequest(__attribute__((unused)) const unsigned sh
 			// Get root public key from the private key
 			getPublicKeyFromPrivateKey(rootPublicKey, (cx_ecfp_private_key_t *)&privateKey);
 			
-			// Copy root public key into the public key or address line buffer
-			toHexString((char *)publicKeyOrAddressLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
-			publicKeyOrAddressLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
+			// Copy root public key into the public key line buffer
+			toHexString((char *)publicKeyLineBuffer, (uint8_t *)rootPublicKey, sizeof(rootPublicKey));
+			publicKeyLineBuffer[sizeof(rootPublicKey) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
 		}
 		
 		// Finally

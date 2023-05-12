@@ -1285,8 +1285,19 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 			// Check if not using Speculos
 			if(hardwareWallet instanceof SpeculosTransport === false) {
 			
-				// Log message
-				console.log("Verify that the MQS address on the device is: " + address);
+				// Check if using MimbleWimble Coin
+				if(Consensus.getWalletType() === Consensus.MWC_WALLET_TYPE) {
+			
+					// Log message
+					console.log("Verify that the MQS address on the device is: " + address);
+				}
+				
+				// Otherwise check if using Epic Cash
+				else if(Consensus.getWalletType() === Consensus.EPIC_WALLET_TYPE) {
+				
+					// Log message
+					console.log("Verify that the Epicbox address on the device is: " + address);
+				}
 			}
 			
 			// Break
@@ -2483,6 +2494,15 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							]
 						},
 						{
+							"regexp": "^Account.*$",
+							"actions": [
+							
+								// Push right
+								["button", 2, true],
+								["button", 2, false]
+							]
+						},
+						{
 							"regexp": "^Amount.*$",
 							"actions": [
 							
@@ -3196,6 +3216,15 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 				"rules": [
 					{
 						"regexp": "^.*end$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Account.*$",
 						"actions": [
 						
 							// Push right

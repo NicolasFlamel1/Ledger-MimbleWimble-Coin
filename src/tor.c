@@ -1,5 +1,4 @@
 // Header files
-#include <alloca.h>
 #include <string.h>
 #include "base32.h"
 #include "common.h"
@@ -55,7 +54,7 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const char *tor
 	}
 	
 	// Decode Tor address
-	uint8_t *decodedTorAddress = alloca(decodedTorAddressLength);
+	uint8_t decodedTorAddress[ED25519_PUBLIC_KEY_SIZE + ADDRESS_CHECKSUM_SIZE + ADDRESS_VERSION_SIZE];
 	base32Decode(decodedTorAddress, torAddress, length);
 	
 	// Check if decoded Tor address's version is invalid

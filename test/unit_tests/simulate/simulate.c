@@ -3,22 +3,7 @@
 #include <openssl/evp.h>
 #include <libcxng.h>
 #include <cmocka.h>
-#include "currency_information.h"
-
-
-// Global variables
-
-// Currency information
-struct CurrencyInformation CURRENCY_INFORMATION = {
-
-	// MQS version
-	.mqsVersion = {1, 69},
-	
-	// Slatepack human-readable part
-	.slatepackAddressHumanReadablePart = "grin"
-};
-
-struct CurrencyInformation *currencyInformation = &CURRENCY_INFORMATION;
+#include <os_task.h>
 
 
 // Supporting function implementation

@@ -6,12 +6,13 @@
 // Header files
 #include <os.h>
 #include <stdint.h>
+#include "currency.h"
 
 
 // Definitions
 
-// Slatepack address without human-readable part size
-#define SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE 59
+// Slatepack address size
+#define SLATEPACK_ADDRESS_SIZE (59 + sizeof(CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART) - sizeof((char)'\0'))
 
 // Slatepack shared private key size
 #define SLATEPACK_SHARED_PRIVATE_KEY_SIZE 32

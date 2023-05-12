@@ -57,7 +57,7 @@ struct Transaction {
 	uint8_t secretNonceIndex;
 	
 	// Address
-	char address[sizeof("tgrin") - sizeof((char)'\0') + SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE];
+	char address[SLATEPACK_ADDRESS_SIZE];
 };
 
 

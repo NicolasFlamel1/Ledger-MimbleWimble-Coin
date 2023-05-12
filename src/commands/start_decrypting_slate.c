@@ -4,7 +4,6 @@
 #include "../age.h"
 #include "../common.h"
 #include "../crypto.h"
-#include "../currency_information.h"
 #include "../mqs.h"
 #include "../slate.h"
 #include "../slatepack.h"
@@ -76,7 +75,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
 		
 			// Check if currency doesn't allow MQS addresses or doesn't support MQS slate encryption
-			if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedSlateEncryptionTypes & MQS_SLATE_ENCRYPTION)) {
+			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & MQS_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -95,7 +94,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		case TOR_ADDRESS_SIZE:
 		
 			// Check if currency doesn't allow Tor addresses or doesn't support Tor slate encryption
-			if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedSlateEncryptionTypes & TOR_SLATE_ENCRYPTION)) {
+			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & TOR_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
@@ -111,7 +110,7 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
 		
 			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack slate encryption
-			if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedSlateEncryptionTypes & SLATEPACK_SLATE_ENCRYPTION)) {
+			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & SLATEPACK_SLATE_ENCRYPTION)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);

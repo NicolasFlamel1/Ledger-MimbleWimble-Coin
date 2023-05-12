@@ -1,9 +1,7 @@
 // Header files
-#include <alloca.h>
 #include <string.h>
 #include "bech32.h"
 #include "common.h"
-#include "currency_information.h"
 #include "crypto.h"
 #include "slatepack.h"
 #include "tor.h"
@@ -31,26 +29,24 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const u
 			// Break
 			break;
 		
-		// Default
-		default:
+		// Slatepack address size
+		case SLATEPACK_ADDRESS_SIZE:
 		
-			// Check if address length is a Slatepack address length
-			if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
-			
-				// Check if getting public key from address failed
-				if(!getPublicKeyFromSlatepackAddress(&publicKey, address, addressLength)) {
-				
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-			}
-			
-			// Otherwise
-			else {
+			// Check if getting public key from address failed
+			if(!getPublicKeyFromSlatepackAddress(&publicKey, address, addressLength)) {
 			
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
+			
+			// Break
+			break;
+		
+		// Default
+		default:
+			
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
 		
 			// Break
 			break;
@@ -121,14 +117,14 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const u
 bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const char *slatepackAddress, const size_t length) {
 
 	// Check if length is invalid
-	if(length != SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
+	if(length != SLATEPACK_ADDRESS_SIZE) {
 	
 		// Return false
 		return false;
 	}
 	
 	// Check if Slatepack address's human-readable part is invalid
-	if(memcmp(slatepackAddress, currencyInformation->slatepackAddressHumanReadablePart, strlen(currencyInformation->slatepackAddressHumanReadablePart))) {
+	if(memcmp(slatepackAddress, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART, sizeof(CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART) - sizeof((char)'\0'))) {
 	
 		// Return false
 		return false;
@@ -145,11 +141,11 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 	}
 	
 	// Decode Slatepack address
-	uint8_t *decodedSlatepackAddress = alloca(decodedSlatepackAddressLength);
+	uint8_t decodedSlatepackAddress[ED25519_PUBLIC_KEY_SIZE];
 	bech32Decode(decodedSlatepackAddress, slatepackAddress, length);
 	
 	// Check if the decoded Slatepack address isn't a valid Ed25519 public key
-	if(!isValidEd25519PublicKey(decodedSlatepackAddress, ED25519_PUBLIC_KEY_SIZE)) {
+	if(!isValidEd25519PublicKey(decodedSlatepackAddress, sizeof(decodedSlatepackAddress))) {
 	
 		// Return false
 		return false;
@@ -161,7 +157,7 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 		// Uncompress the decoded Slatepack address to an Ed25519 public key
 		uint8_t uncompressedPublicKey[UNCOMPRESSED_PUBLIC_KEY_SIZE];
 		uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
-		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedSlatepackAddress, ED25519_PUBLIC_KEY_SIZE);
+		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedSlatepackAddress, sizeof(decodedSlatepackAddress));
 		
 		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
 		
@@ -177,7 +173,7 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 void getSlatepackAddressFromPublicKey(char *slatepackAddress, const uint8_t *publicKey) {
 
 	// Encode the public key to get the Slatepack address
-	bech32Encode(slatepackAddress, publicKey, ED25519_PUBLIC_KEY_SIZE, currencyInformation->slatepackAddressHumanReadablePart);
+	bech32Encode(slatepackAddress, publicKey, ED25519_PUBLIC_KEY_SIZE, CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART);
 }
 
 // Get Slatepack address

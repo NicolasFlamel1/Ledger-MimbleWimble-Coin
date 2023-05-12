@@ -1,6 +1,7 @@
 // Header files
 #include <string.h>
 #include <os_io_seproxyhal.h>
+#include <ux.h>
 #include "../common.h"
 #include "../crypto.h"
 #include "get_bulletproof_components.h"
@@ -75,9 +76,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Sending transaction message type
 		case SENDING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
-			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Sending Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			// Set progress bar message line buffer
+			explicit_bzero(progressBarMessageLineBuffer, sizeof(progressBarMessageLineBuffer));
+			strncpy(progressBarMessageLineBuffer, "Sending Transaction", sizeof(progressBarMessageLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;
@@ -85,9 +86,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Receiving transaction message type
 		case RECEIVING_TRANSACTION_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
-			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Receiving Transaction", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			// Set progress bar message line buffer
+			explicit_bzero(progressBarMessageLineBuffer, sizeof(progressBarMessageLineBuffer));
+			strncpy(progressBarMessageLineBuffer, "Receiving Transaction", sizeof(progressBarMessageLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;
@@ -95,9 +96,9 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 		// Creating coinbase message type
 		case CREATING_COINBASE_MESSAGE_TYPE:
 		
-			// Set time, processing menu, progress bar message, or currency name line buffer
-			explicit_bzero((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer));
-			strncpy((char *)timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer, "Creating Coinbase", sizeof(timeProcessingMessageProgressBarMessageOrCurrencyNameLineBuffer) - sizeof((char)'\0'));
+			// Set progress bar message line buffer
+			explicit_bzero(progressBarMessageLineBuffer, sizeof(progressBarMessageLineBuffer));
+			strncpy(progressBarMessageLineBuffer, "Creating Coinbase", sizeof(progressBarMessageLineBuffer) - sizeof((char)'\0'));
 			
 			// Break
 			break;

@@ -1,7 +1,6 @@
 // Header files
 #include <string.h>
 #include "../common.h"
-#include "../currency_information.h"
 #include "../mqs.h"
 #include "start_transaction.h"
 #include "../tor.h"
@@ -85,7 +84,7 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			case MQS_ADDRESS_SIZE:
 			
 				// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-				if(!currencyInformation->enableMqsAddress || !(currencyInformation->supportedPaymentProofAddressTypes & MQS_PAYMENT_PROOF_ADDRESS)) {
+				if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -105,7 +104,7 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			case TOR_ADDRESS_SIZE:
 			
 				// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-				if(!currencyInformation->enableTorAddress || !(currencyInformation->supportedPaymentProofAddressTypes & TOR_PAYMENT_PROOF_ADDRESS)) {
+				if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -121,33 +120,31 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 				// Break
 				break;
 			
-			// Default
-			default:
+			// Slatepack address size
+			case SLATEPACK_ADDRESS_SIZE:
 			
-				// Check if address length is a Slatepack address's length
-				if(addressLength == SLATEPACK_ADDRESS_WITHOUT_HUMAN_READABLE_PART_SIZE + strlen(currencyInformation->slatepackAddressHumanReadablePart)) {
-			
-					// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-					if(!currencyInformation->enableSlatepackAddress || !(currencyInformation->supportedPaymentProofAddressTypes & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-				
-					// Check if address isn't a valid Slatepack address
-					if(!getPublicKeyFromSlatepackAddress(NULL, address, addressLength)) {
-					
-						// Throw invalid parameters error
-						THROW(INVALID_PARAMETERS_ERROR);
-					}
-				}
-				
-				// Otherwise
-				else {
+				// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
+				if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
 				
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
 				}
+			
+				// Check if address isn't a valid Slatepack address
+				if(!getPublicKeyFromSlatepackAddress(NULL, address, addressLength)) {
+				
+					// Throw invalid parameters error
+					THROW(INVALID_PARAMETERS_ERROR);
+				}
+				
+				// Break
+				break;
+			
+			// Default
+			default:
+			
+				// Throw invalid parameters error
+				THROW(INVALID_PARAMETERS_ERROR);
 			
 				// Break
 				break;
@@ -165,7 +162,7 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 		}
 	
 		// Check if fee is invalid or will overflow
-		if(!fee || fee > currencyInformation->maximumFee || UINT64_MAX - input < fee) {
+		if(!fee || fee > CURRENCY_MAXIMUM_FEE || UINT64_MAX - input < fee) {
 		
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
