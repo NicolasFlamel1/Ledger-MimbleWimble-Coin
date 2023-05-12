@@ -252,7 +252,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_VALID(mainMenuExitScreen, pb, exitApplication(), {
 
 		// Picture
-		&C_icon_back,
+		&C_icon_back_x,
 		
 		// Bold line
 		"Back to dashboard"
@@ -265,7 +265,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_NOCB(exportRootPublicKeyMenuNotifyScreen, pnn, {
 
 		// Picture
-		&C_icon_view,
+		&C_icon_eye,
 
 		// First line
 		"Export root",
@@ -339,7 +339,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(exportRootPublicKeyMenuApproveScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, true, true), {
 
 		// Picture
-		&C_icon_approve,
+		&C_icon_validate_14,
 		
 		// Bold line
 		"Approve"
@@ -349,7 +349,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(exportRootPublicKeyMenuDenyScreen, pb, processUserInteraction(GET_ROOT_PUBLIC_KEY_INSTRUCTION, false, false), {
 
 		// Picture
-		&C_icon_reject,
+		&C_icon_crossmark,
 		
 		// Bold line
 		"Deny"
@@ -381,7 +381,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_NOCB(verifyRootPublicKeyMenuNotifyScreen, pnn, {
 
 		// Picture
-		&C_icon_view,
+		&C_icon_eye,
 
 		// First line
 		"Verify root",
@@ -418,7 +418,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(verifyRootPublicKeyMenuValidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, true, false), {
 
 		// Picture
-		&C_icon_approve,
+		&C_icon_validate_14,
 		
 		// Bold line
 		"Valid"
@@ -428,7 +428,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(verifyRootPublicKeyMenuInvalidScreen, pb, processUserInteraction(VERIFY_ROOT_PUBLIC_KEY_INSTRUCTION, false, false), {
 
 		// Picture
-		&C_icon_reject,
+		&C_icon_crossmark,
 		
 		// Bold line
 		"Invalid"
@@ -454,7 +454,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_NOCB(verifyAddressMenuNotifyScreen, pnn, {
 
 		// Picture
-		&C_icon_view,
+		&C_icon_eye,
 
 		// First line
 		verifyAddressLineBuffer,
@@ -491,7 +491,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(verifyAddressMenuValidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, true, false), {
 
 		// Picture
-		&C_icon_approve,
+		&C_icon_validate_14,
 		
 		// Bold line
 		"Valid"
@@ -501,7 +501,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(verifyAddressMenuInvalidScreen, pb, processUserInteraction(VERIFY_ADDRESS_INSTRUCTION, false, false), {
 
 		// Picture
-		&C_icon_reject,
+		&C_icon_crossmark,
 		
 		// Bold line
 		"Invalid"
@@ -527,7 +527,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_NOCB(signMqsChallengeMenuNotifyScreen, pnn, {
 
 		// Picture
-		&C_icon_view,
+		&C_icon_eye,
 
 		// First line
 		signChallengeLineBuffer,
@@ -630,7 +630,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(signMqsChallengeMenuApproveScreen, pb, processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, true, true), {
 
 		// Picture
-		&C_icon_approve,
+		&C_icon_validate_14,
 		
 		// Bold line
 		"Approve"
@@ -640,7 +640,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(signMqsChallengeMenuDenyScreen, pb, processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, false, false), {
 
 		// Picture
-		&C_icon_reject,
+		&C_icon_crossmark,
 		
 		// Bold line
 		"Deny"
@@ -653,7 +653,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {
 
 		// Picture
-		&C_icon_view,
+		&C_icon_eye,
 
 		// First line
 		approveTransactionLineBuffer,
@@ -855,7 +855,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(approveTransactionMenuApproveScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, true, true), {
 
 		// Picture
-		&C_icon_approve,
+		&C_icon_validate_14,
 		
 		// Bold line
 		"Approve"
@@ -865,7 +865,7 @@ char accountIndexLineBuffer[ACCOUNT_INDEX_LINE_BUFFER_SIZE];
 	static UX_STEP_CB(approveTransactionMenuDenyScreen, pb, processUserInteraction(FINISH_TRANSACTION_INSTRUCTION, false, false), {
 
 		// Picture
-		&C_icon_reject,
+		&C_icon_crossmark,
 		
 		// Bold line
 		"Deny"

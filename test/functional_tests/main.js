@@ -2354,6 +2354,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 			throw "Failed running receive transaction test";
 		}
 		
+		// Log message
+		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+		
 		// Check features
 		switch(features) {
 		
@@ -3086,6 +3089,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 		// Throw error
 		throw "Failed running send transaction test";
 	}
+	
+	// Log message
+	console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
 	
 	// Check features
 	switch(features) {
