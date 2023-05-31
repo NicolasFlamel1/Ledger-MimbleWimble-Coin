@@ -671,7 +671,7 @@ async function getApplicationInformationTest(hardwareWallet) {
 	const applicationNameLength = response[1];
 	
 	// Get application name from the response
-	const applicationName = (new TextDecoder()).decode(response.subarray(2, 2 + applicationNameLength));
+	const applicationName = (new TextDecoder("utf-8", {"fatal": true})).decode(response.subarray(2, 2 + applicationNameLength));
 	
 	// Log application name
 	console.log("Application name: " + applicationName);
@@ -680,7 +680,7 @@ async function getApplicationInformationTest(hardwareWallet) {
 	const applicationVersionLength = response[2 + applicationNameLength];
 	
 	// Get application version from the response
-	const applicationVersion = (new TextDecoder()).decode(response.subarray(2 + applicationNameLength + 1, 2 + applicationNameLength + 1 + applicationVersionLength));
+	const applicationVersion = (new TextDecoder("utf-8", {"fatal": true})).decode(response.subarray(2 + applicationNameLength + 1, 2 + applicationNameLength + 1 + applicationVersionLength));
 							
 	// Log application version
 	console.log("Application version: " + applicationVersion);
@@ -917,7 +917,7 @@ async function getAddressTest(hardwareWallet, extendedPrivateKey, addressType) {
 	]));
 	
 	// Remove response code from response
-	response = (new TextDecoder()).decode(response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH));
+	response = (new TextDecoder("utf-8", {"fatal": true})).decode(response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH));
 	
 	// Log address
 	console.log("Address: " + response);
