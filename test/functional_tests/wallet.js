@@ -235,6 +235,13 @@ class Wallet {
 			// Set use BIP39
 			this.setUseBip39(useBip39);
 			
+			// Check if hardware wallet exists
+			if(hardwareWallet !== Wallet.NO_HARDWARE_WALLET) {
+			
+				// Set hardware wallet's wallet key path
+				hardwareWallet.setWalletKeyPath(Wallet.NO_KEY_PATH);
+			}
+			
 			// Set self
 			var self = this;
 			
@@ -813,8 +820,19 @@ class Wallet {
 						// Check if BIP39 salt exists
 						if(self.bip39Salt !== Wallet.NO_BIP39_SALT) {
 						
-							// Resolve mnemonic with BIP39 salt
-							resolve(mnemonic + " " + (new TextDecoder()).decode(self.bip39Salt));
+							// Try
+							try {
+						
+								// Resolve mnemonic with BIP39 salt
+								resolve(mnemonic + " " + (new TextDecoder("utf-8", {"fatal": true})).decode(self.bip39Salt));
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Reject error
+								reject(Language.getDefaultTranslation('Invalid wallet.'));
+							}
 						}
 						
 						// Otherwise
@@ -2868,6 +2886,13 @@ class Wallet {
 		
 			// Set keyPath
 			this.keyPath = keyPath;
+			
+			// Check if hardware wallet exists
+			if(this.getHardwareWallet() !== Wallet.NO_HARDWARE_WALLET) {
+			
+				// Set hardware wallet's wallet key path
+				this.getHardwareWallet().setWalletKeyPath(keyPath);
+			}
 		}
 		
 		// Get starting sync height
@@ -3091,6 +3116,9 @@ class Wallet {
 									
 										// Set hardware wallet to the hardware wallet
 										self.hardwareWallet = hardwareWallet;
+										
+										// Set hardware wallet's wallet key path
+										hardwareWallet.setWalletKeyPath(self.getKeyPath());
 										
 										// Break
 										break;

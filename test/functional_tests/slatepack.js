@@ -22,6 +22,13 @@ class Slatepack {
 		// Public key to Slatepack address
 		static publicKeyToSlatepackAddress(publicKey) {
 		
+			// Check it public key isn't the correct length
+			if(publicKey["length"] !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+			
+				// Throw error
+				throw "Invalid public key.";
+			}
+		
 			// Return getting Slatepack address from address public key and human-readable part
 			return bech32.encode(Consensus.SLATEPACK_ADDRESS_HUMAN_READABLE_PART, bech32.toWords(publicKey));
 		}
@@ -29,6 +36,13 @@ class Slatepack {
 		// Slatepack address to public key
 		static slatepackAddressToPublicKey(slatepackAddress) {
 		
+			// Check it Slatepack address isn't the correct length
+			if(slatepackAddress["length"] !== Slatepack.ADDRESS_WITHOUT_HUMAN_READABLE_PART_LENGTH + Consensus.SLATEPACK_ADDRESS_HUMAN_READABLE_PART["length"]) {
+			
+				// Throw error
+				throw "Invalid Slatepack address.";
+			}
+			
 			// Try
 			try {
 			

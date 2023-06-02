@@ -4494,7 +4494,7 @@ class Slate {
 					else {
 					
 						// Check if version two isn't preferred
-						if(preferredVersions.indexOf("V" + Slate.VERSION_TWO.toFixed()) === Common.INDEX_NOT_FOUND) {
+						if(preferredVersions["length"] !== 0 && preferredVersions.indexOf("V" + Slate.VERSION_TWO.toFixed()) === Common.INDEX_NOT_FOUND) {
 						
 							// Return version three
 							return Slate.VERSION_THREE;
@@ -4531,7 +4531,7 @@ class Slate {
 					else {
 					
 						// Check if version two isn't preferred
-						if(preferredVersions.indexOf("V" + Slate.VERSION_TWO.toFixed()) === Common.INDEX_NOT_FOUND) {
+						if(preferredVersions["length"] !== 0 && preferredVersions.indexOf("V" + Slate.VERSION_TWO.toFixed()) === Common.INDEX_NOT_FOUND) {
 						
 							// Return version three
 							return Slate.VERSION_THREE;
@@ -5715,8 +5715,8 @@ class Slate {
 						return Slate.VERSION_SLATEPACK;
 					}
 					
-					// Otherwise
-					else {
+					// Otherwise check if serialized slate is an object
+					else if(Object.isObject(serializedSlate) === true) {
 					
 						// Check if serialized slate contains an invalid coin type
 						if("coin_type" in serializedSlate === true && serializedSlate["coin_type"] !== Slate.COIN_TYPE) {
@@ -5733,14 +5733,14 @@ class Slate {
 						}
 					
 						// Otherwise check if serialized slate contains a version info structure
-						else if("version_info" in serializedSlate === true && Object.isObject(serializedSlate["version_info"]) === true && "version" in serializedSlate["version_info"] === true && (Common.isNumberString(serializedSlate["version_info"]["version"]) === true || serializedSlate["version_info"]["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version_info"]["version"])).isInteger() === true) {
+						else if("version_info" in serializedSlate === true && Object.isObject(serializedSlate["version_info"]) === true && "version" in serializedSlate["version_info"] === true && (Common.isNumberString(serializedSlate["version_info"]["version"]) === true || serializedSlate["version_info"]["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version_info"]["version"])).isInteger() === true && (new BigNumber(serializedSlate["version_info"]["version"])).isPositive() === true) {
 						
 							// Return version info structure's version
 							return new BigNumber(serializedSlate["version_info"]["version"]);
 						}
 						
 						// Otherwise check if serialized slate contains a version
-						else if("version" in serializedSlate === true && (Common.isNumberString(serializedSlate["version"]) === true || serializedSlate["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version"])).isInteger() === true) {
+						else if("version" in serializedSlate === true && (Common.isNumberString(serializedSlate["version"]) === true || serializedSlate["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version"])).isInteger() === true && (new BigNumber(serializedSlate["version"])).isPositive() === true) {
 						
 							// Return version one
 							return Slate.VERSION_ONE;
@@ -5754,17 +5754,35 @@ class Slate {
 						}
 					}
 					
+					// Otherwise
+					else {
+					
+						// Return unknown version
+						return Slate.UNKNOWN_VERSION;
+					}
+					
 					// Break
 					break;
 				
 				// GRIN wallet
 				case Consensus.GRIN_WALLET_TYPE:
 				
-					// Check if serialized slate contains a version
-					if("ver" in serializedSlate === true && typeof serializedSlate["ver"] === "string" && Slate.VERSION_PATTERN.test(serializedSlate["ver"]) === true) {
-					
-						// Return serialized slate's version
-						return new BigNumber(serializedSlate["ver"].split(Slate.VERSION_SEPARATOR)[0]);
+					// Check if serialized slate is an object
+					if(Object.isObject(serializedSlate) === true) {
+				
+						// Check if serialized slate contains a version
+						if("ver" in serializedSlate === true && typeof serializedSlate["ver"] === "string" && Slate.VERSION_PATTERN.test(serializedSlate["ver"]) === true) {
+						
+							// Return serialized slate's version
+							return new BigNumber(serializedSlate["ver"].split(Slate.VERSION_SEPARATOR)[0]);
+						}
+							
+						// Otherwise
+						else {
+						
+							// Return unknown version
+							return Slate.UNKNOWN_VERSION;
+						}
 					}
 						
 					// Otherwise
@@ -5779,21 +5797,32 @@ class Slate {
 				
 				// EPIC wallet
 				case Consensus.EPIC_WALLET_TYPE:
+				
+					// Check if serialized slate is an object
+					if(Object.isObject(serializedSlate) === true) {
 		
-					// Check if serialized slate contains a version info structure
-					if("version_info" in serializedSlate === true && Object.isObject(serializedSlate["version_info"]) === true && "version" in serializedSlate["version_info"] === true && (Common.isNumberString(serializedSlate["version_info"]["version"]) === true || serializedSlate["version_info"]["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version_info"]["version"])).isInteger() === true) {
-					
-						// Return version info structure's version
-						return new BigNumber(serializedSlate["version_info"]["version"]);
+						// Check if serialized slate contains a version info structure
+						if("version_info" in serializedSlate === true && Object.isObject(serializedSlate["version_info"]) === true && "version" in serializedSlate["version_info"] === true && (Common.isNumberString(serializedSlate["version_info"]["version"]) === true || serializedSlate["version_info"]["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version_info"]["version"])).isInteger() === true && (new BigNumber(serializedSlate["version_info"]["version"])).isPositive() === true) {
+						
+							// Return version info structure's version
+							return new BigNumber(serializedSlate["version_info"]["version"]);
+						}
+						
+						// Otherwise check if serialized slate contains a version
+						else if("version" in serializedSlate === true && (Common.isNumberString(serializedSlate["version"]) === true || serializedSlate["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version"])).isInteger() === true && (new BigNumber(serializedSlate["version"])).isPositive() === true) {
+						
+							// Return version one
+							return Slate.VERSION_ONE;
+						}
+						
+						// Otherwise
+						else {
+						
+							// Return unknown version
+							return Slate.UNKNOWN_VERSION;
+						}
 					}
-					
-					// Otherwise check if serialized slate contains a version
-					else if("version" in serializedSlate === true && (Common.isNumberString(serializedSlate["version"]) === true || serializedSlate["version"] instanceof BigNumber === true) && (new BigNumber(serializedSlate["version"])).isInteger() === true) {
-					
-						// Return version one
-						return Slate.VERSION_ONE;
-					}
-					
+						
 					// Otherwise
 					else {
 					
@@ -6183,7 +6212,7 @@ class Slate {
 		static get VERSION_PATTERN() {
 		
 			// Return version pattern
-			return /^\d+:\d+$/u;
+			return /^(?:0|[1-9]\d*):(?:0|[1-9]\d*)$/u;
 		}
 		
 		// Version separator

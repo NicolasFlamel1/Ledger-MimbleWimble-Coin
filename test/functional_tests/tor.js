@@ -137,6 +137,13 @@ class Tor {
 		// Public key to Tor address
 		static publicKeyToTorAddress(publicKey) {
 		
+			// Check it public key isn't the correct length
+			if(publicKey["length"] !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+			
+				// Throw error
+				throw "Invalid public key.";
+			}
+		
 			// Get checksum of seed, address public key, and version
 			var checksum = new Uint8Array(sha3_256.arrayBuffer(Common.mergeArrays([
 						
@@ -171,6 +178,13 @@ class Tor {
 		// Tor address to public key
 		static torAddressToPublicKey(torAddress) {
 		
+			// Check it Tor address isn't the correct length
+			if(torAddress["length"] !== Tor.ADDRESS_LENGTH) {
+			
+				// Throw error
+				throw "Invalid Tor address.";
+			}
+			
 			// Check it Tor address isn't lower case
 			if(Common.isLowercaseString(torAddress) === false) {
 			

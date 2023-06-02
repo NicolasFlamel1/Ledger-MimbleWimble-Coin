@@ -27,7 +27,7 @@ class Consensus {
 			// Check if consensus's wallet type doesn't exist
 			if(typeof Consensus.walletType === "undefined") {
 			
-				// Check if not not a web worker
+				// Check if not not a web worker and local storage is usable
 				if((typeof self === "undefined" || typeof WorkerGlobalScope === "undefined" || self instanceof WorkerGlobalScope === false) && typeof localStorage !== "undefined") {
 		
 					// Get the saved wallet type
@@ -100,7 +100,7 @@ class Consensus {
 					}
 				}
 				
-				// Check if not not a web worker
+				// Check if not not a web worker and local storage is usable
 				if((typeof self === "undefined" || typeof WorkerGlobalScope === "undefined" || self instanceof WorkerGlobalScope === false) && typeof localStorage !== "undefined") {
 				
 					// Check if saved wallet type needs to be updated
@@ -134,7 +134,7 @@ class Consensus {
 			// Check if consensus's network type doesn't exist
 			if(typeof Consensus.networkType === "undefined") {
 			
-				// Check if not not a web worker
+				// Check if not not a web worker and local storage is usable
 				if((typeof self === "undefined" || typeof WorkerGlobalScope === "undefined" || self instanceof WorkerGlobalScope === false) && typeof localStorage !== "undefined") {
 		
 					// Get the saved network type
@@ -228,7 +228,7 @@ class Consensus {
 					}
 				}
 				
-				// Check if not not a web worker
+				// Check if not not a web worker and local storage is usable
 				if((typeof self === "undefined" || typeof WorkerGlobalScope === "undefined" || self instanceof WorkerGlobalScope === false) && typeof localStorage !== "undefined") {
 				
 					// Check if saved network type needs to be updated
