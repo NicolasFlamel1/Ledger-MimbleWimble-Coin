@@ -1320,7 +1320,7 @@ class Consensus {
 				case Consensus.EPIC_WALLET_TYPE:
 		
 					// Return first hard fork height
-					return (isMainnet === true) ? new BigNumber(2600000) : new BigNumber(25800);
+					return (isMainnet === true) ? new BigNumber(9000000) : new BigNumber(25800);
 			}
 		}
 		

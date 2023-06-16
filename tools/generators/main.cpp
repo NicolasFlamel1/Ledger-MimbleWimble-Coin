@@ -53,7 +53,7 @@ static const size_t NUMBER_OF_GENERATORS = 128;
 static const size_t COMPONENT_SIZE = 32;
 
 // File location
-static const char FILE_LOCATION[] = "../../src/generators.c";
+static const char *FILE_LOCATION = "../../src/generators.c";
 
 // Hexadecimal character size
 static const size_t HEXADECIMAL_CHARACTER_SIZE = sizeof("FF") - sizeof('\0');
@@ -88,7 +88,7 @@ int main() {
 	file << "const uint8_t GENERATORS_FIRST_HALF[NUMBER_OF_GENERATORS / 2][GENERATOR_SIZE] = {" << endl;
 	
 	// Go through first half of the generators
-	for(uint8_t i = 0; i < NUMBER_OF_GENERATORS / 2; ++i) {
+	for(size_t i = 0; i < NUMBER_OF_GENERATORS / 2; ++i) {
 	
 		// Get generator
 		const secp256k1_ge &generator = generators->generators[i];
@@ -121,7 +121,7 @@ int main() {
 	file << "const uint8_t GENERATORS_SECOND_HALF[NUMBER_OF_GENERATORS / 2][GENERATOR_SIZE] = {" << endl;
 	
 	// Go through second half of the generators
-	for(uint8_t i = 0; i < NUMBER_OF_GENERATORS / 2; ++i) {
+	for(size_t i = 0; i < NUMBER_OF_GENERATORS / 2; ++i) {
 	
 		// Get generator from second half
 		const secp256k1_ge &generator = generators->generators[i + generators->numberOfGenerators / 2];

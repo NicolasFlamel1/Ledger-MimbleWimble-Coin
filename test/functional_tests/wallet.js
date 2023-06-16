@@ -1224,7 +1224,7 @@ class Wallet {
 					// Check if no last identifier exists
 					if(self.getLastIdentifier() === Wallet.NO_LAST_IDENTIFIER) {
 					
-						// Get default identifer
+						// Get default identifier
 						var defaultIdentifier = new Identifier();
 						
 						// Set the current identifier to the default identifier's child identifier
@@ -1358,7 +1358,7 @@ class Wallet {
 					// Check if no last identifier exists
 					if(self.getLastIdentifier() === Wallet.NO_LAST_IDENTIFIER) {
 					
-						// Get default identifer
+						// Get default identifier
 						var defaultIdentifier = new Identifier();
 						
 						// Set the current identifier to the default identifier's child identifier
@@ -2101,7 +2101,7 @@ class Wallet {
 					// Check if no last identifier exists
 					if(self.getLastIdentifier() === Wallet.NO_LAST_IDENTIFIER) {
 					
-						// Get default identifer
+						// Get default identifier
 						var defaultIdentifier = new Identifier();
 						
 						// Set the current identifier to the default identifier's child identifier
@@ -3117,6 +3117,20 @@ class Wallet {
 										// Set hardware wallet to the hardware wallet
 										self.hardwareWallet = hardwareWallet;
 										
+										// Check if hardware types differ
+										if(self.getHardwareType() !== self.hardwareWallet.getHardwareType()) {
+										
+											// Trigger wallet hardware type change event
+											$(document).trigger(Wallet.HARDWARE_TYPE_CHANGE_EVENT, [
+											
+												// Key path
+												self.getKeyPath(),
+												
+												// New hardware type
+												self.hardwareWallet.getHardwareType()
+											]);
+										}
+										
 										// Set hardware wallet's wallet key path
 										hardwareWallet.setWalletKeyPath(self.getKeyPath());
 										
@@ -3495,6 +3509,13 @@ class Wallet {
 		
 			// Return disconnect event
 			return "WalletConnectEvent";
+		}
+		
+		// Hardware type change event
+		static get HARDWARE_TYPE_CHANGE_EVENT() {
+		
+			// Return hardware type change event
+			return "WalletHardwareTypeChangeEvent";
 		}
 		
 		// Encrypt seed and BIP39 salt encrypted seed index
