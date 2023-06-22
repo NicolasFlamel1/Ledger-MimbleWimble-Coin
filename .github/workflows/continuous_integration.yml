@@ -783,7 +783,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt update -q && apt install -qy curl netcat
+          apt update -q && apt install -qy curl netcat-traditional
           curl -fsSL https://deb.nodesource.com/setup_17.x | bash -
           apt update -q && apt install -qy nodejs
           npm i @ledgerhq/hw-transport-node-speculos
