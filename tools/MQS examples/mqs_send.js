@@ -1,3 +1,6 @@
+// Install dependencies: npm i @ledgerhq/hw-transport-node-hid
+// Run: node mqs_send.js
+
 // Use strict
 "use strict";
 

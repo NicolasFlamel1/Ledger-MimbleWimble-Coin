@@ -17,7 +17,7 @@ This app supports the following commands.
 | 0xC7  | 0x0A        | `START_DECRYPTING_SLATE`                     | Prepares to start decrypted data that will be provided later with a provided nonce and optional salt for an account at a provided index |
 | 0xC7  | 0x0B        | `CONTINUE_DECRYPTING_SLATE`                  | Returns the decrypted version of the provided data that has then been encrypted with a random AES key |
 | 0xC7  | 0x0C        | `FINISH_DECRYPTING_SLATE`                    | Returns the random AES key used to decrypted the data that was previously returned if a valid tag is provided |
-| 0xC7  | 0x0D        | `START_TRANSACTION`                          | Starts a transaction for provided output, input, and fee amounts for an account at a provided index |
+| 0xC7  | 0x0D        | `START_TRANSACTION`                          | Starts a transaction for provided output, input, and fee values for an account at a provided index |
 | 0xC7  | 0x0E        | `CONTINUE_TRANSACTION_INCLUDE_OUTPUT`        | Includes the output for a provided identifier, value, and switch type in the transaction |
 | 0xC7  | 0x0F        | `CONTINUE_TRANSACTION_INCLUDE_INPUT`         | Includes the input for a provided identifier, value, and switch type in the transaction |
 | 0xC7  | 0x10        | `CONTINUE_TRANSACTION_APPLY_OFFSET`          | Applies an offset to the transaction's blinding factor |
@@ -108,9 +108,9 @@ Returns an account's MQS, Tor, or Slatepack address at a provided index. This ad
 
 **Output Data**
 
-| Length                                                  | Name      | Description |
-|---------------------------------------------------------|-----------|-------------|
-| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `address` | The account's MQS, Tor, or Slatepack address at the provided index |
+| Length                                                 | Name      | Description |
+|--------------------------------------------------------|-----------|-------------|
+| 52 for MQS, 56 for Tor, or >= 60 for Slatepack address | `address` | The account's MQS, Tor, or Slatepack address at the provided index |
 
 ### GET_SEED_COOKIE
 
@@ -386,10 +386,10 @@ Returns the tag for all the data that was encrypted.
 
 **Output Data**
 
-| Length        | Name        | Description |
-|---------------|-------------|-------------|
-| 16            | `tag`       | Tag for all the data that was encrypted |
-| > 0 and <= 72 | `signature` | Optional DER signature of the message if the data was encrypted for MQS transport |
+| Length           | Name                    | Description |
+|------------------|-------------------------|-------------|
+| 16               | `tag`                   | Tag for all the data that was encrypted |
+| 0, > 0 and <= 72 | `mqs_message_signature` | Optional DER signature of the message if the data was encrypted for MQS transport |
 
 ### START_DECRYPTING_SLATE
 
@@ -414,14 +414,14 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 **Input Data**
 
-| Length                                       | Name                                            | Description |
-|----------------------------------------------|-------------------------------------------------|-------------|
-| 4                                            | `account`                                       | Account number (little endian, max 0x7FFFFFFF)) |
-| 4                                            | `index`                                         | Index number (little endian) |
-| 12                                           | `nonce`                                         | Nonce that was used to encrypt the data |
-| 52 for MQS, 56 for Tor, and 32 for Slatepack | `sender_address_or_ephemeral_x25519_public_key` | Address or ephemeral X25519 public key that will be able to decrypt the data |
-| 8 for MQS, 0 for Tor, and 32 for Slatepack   | `salt_or_encrypted_file_key`                    | Optional salt that was used to encrypt the data if the `sender_address` is an MQS address or encrypted file key that was used to encrypt the data if the `sender_address` is an ephemeral X25519 public key |
-| 0 for MQS, 0 for Tor, and 16 for Slatepack   | `payload_nonce`                                 | Optional payload nonce that was used to encrypt the data if the `sender_address` is an ephemeral X25519 public key |
+| Length                                      | Name                                            | Description |
+|---------------------------------------------|-------------------------------------------------|-------------|
+| 4                                           | `account`                                       | Account number (little endian, max 0x7FFFFFFF)) |
+| 4                                           | `index`                                         | Index number (little endian) |
+| 12                                          | `nonce`                                         | Nonce that was used to encrypt the data |
+| 52 for MQS, 56 for Tor, or 32 for Slatepack | `sender_address_or_ephemeral_x25519_public_key` | Address or ephemeral X25519 public key that will be able to decrypt the data |
+| 8 for MQS, 0 for Tor, or 32 for Slatepack   | `salt_or_encrypted_file_key`                    | Optional salt that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an MQS address or encrypted file key that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an ephemeral X25519 public key |
+| 0 for MQS, 0 for Tor, or 16 for Slatepack   | `payload_nonce`                                 | Optional payload nonce that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an ephemeral X25519 public key |
 
 **Output Data**
 
@@ -518,15 +518,15 @@ Prepares the app's internal transaction state to be able to process a transactio
 
 **Input Data**
 
-| Length                                                  | Name                 | Description |
-|---------------------------------------------------------|----------------------|-------------|
-| 4                                                       | `account`            | Account number (little endian, max 0x7FFFFFFF)) |
-| 4                                                       | `index`              | Index number (little endian) |
-| 8                                                       | `output`             | Output amount (little endian) |
-| 8                                                       | `input`              | Input amount (little endian) |
-| 8                                                       | `fee`                | Fee amount (little endian) |
-| 1                                                       | `secret_nonce_index` | Index of the secret nonce to use or 0 to create secret nonce (max 20) |
-| 52 for MQS, 56 for Tor, and >= 60 for Slatepack address | `address`            | Sender or recipient address of the transaction |
+| Length                                                    | Name                 | Description |
+|-----------------------------------------------------------|----------------------|-------------|
+| 4                                                         | `account`            | Account number (little endian, max 0x7FFFFFFF)) |
+| 4                                                         | `index`              | Index number (little endian) |
+| 8                                                         | `output`             | Output value (little endian) |
+| 8                                                         | `input`              | Input value (little endian) |
+| 8                                                         | `fee`                | Fee value (little endian) |
+| 1                                                         | `secret_nonce_index` | Index of the secret nonce to use or 0 to create secret nonce (max 20) |
+| 0, 52 for MQS, 56 for Tor, or >= 60 for Slatepack address | `address`            | Optional sender or recipient address of the transaction |
 
 **Output Data**
 
@@ -732,9 +732,9 @@ Returns the signature for a provided UTF-8 message signed with the app's interna
 
 **Output Data**
 
-| Length | Name        | Description |
-|--------|-------------|-------------|
-| 64     | `signature` | Single-signer signature |
+| Length | Name                | Description |
+|--------|---------------------|-------------|
+| 64     | `message_signature` | Single-signer signature |
 
 ### FINISH_TRANSACTION
 
@@ -744,7 +744,7 @@ Returns the signature for the provided kernel information signed with the app's 
 
 A payment proof signature will be returned if receiving a payment, a `kernel_commitment` is provided, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the sender's address and the `address_type` will be treated as the desired receiver's address type.
 
-A payment proof address will be displayed if a `kernel_commitment` is provided, a `payment_proof_signature` is provided if sending a payment, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending a payment or the sender's address if receiving a payment. The `address_type` will be treated as the desired sender's address type if sending a payment or the desired receiver's address type if receiving a payment. The payment proof address displayed will be the recipient's payment proof address if sending a payment or the sender's payment proof address if receiving a payment.
+A payment proof address will be displayed if a `kernel_commitment` is provided, a `payment_proof` is provided if sending a payment, and an `address` was provided to the `START_TRANSACTION` command. In this situation, the the `address` provided to `START_TRANSACTION` will be treated as the receiver's address if sending a payment or the sender's address if receiving a payment. The `address_type` will be treated as the desired sender's address type if sending a payment or the desired receiver's address type if receiving a payment. The payment proof address displayed will be the recipient's payment proof address if sending a payment or the sender's payment proof address if receiving a payment.
 
 If a sent transaction needs to be finalized at a later time, then the app's internal slate state can be restored by starting a transaction, including the same inputs and outputs, applying the same offset, and using the secret nonce index that was previously obtained with a `CONTINUE_TRANSACTION_APPLY_OFFSET` command.
 
@@ -771,20 +771,20 @@ If a sent transaction needs to be finalized at a later time, then the app's inte
 | 33                                                              | `public_key`              | Public key |
 | 1, 3, or 9                                                      | `kernel_information`      | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
 | 0 or 33                                                         | `kernel_commitment`       | Optional kernel commitment that will be used for creating or verifying a payment proof |
-| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof_signature` | Optional receiver's payment proof signature that will be used when verifying a payment proof
+| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`           | Optional receiver's payment proof signature that will be used when verifying a payment proof
 
 **Output Data**
 
-| Length                                                         | Name                      | Description |
-|----------------------------------------------------------------|---------------------------|-------------|
-| 64                                                             | `signature`               | Single-signer signature for the transaction and kernel information |
-| 0, > 0 and <= 72 for MQS or 64 for Tor and Slatepack signature | `payment_proof_signature` | Optional receiver's payment proof signature |
+| Length                                                          | Name                      | Description |
+|-----------------------------------------------------------------|---------------------------|-------------|
+| 64                                                              | `signature`               | Single-signer signature for the transaction and kernel information |
+| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`           | Optional receiver's payment proof signature |
 
 ### GET_MQS_CHALLENGE_SIGNATURE
 
 #### Description
 
-Returns the signature for a provided timestamp or hardcoded challenge signed with an account's MQS private key at a provided index after obtaining user's approval. The default challenge, 7WUDtkSaKyGRUnQ22rE3QUXChV8DmA6NnunDYP4vheTpc, will be signed if no timestamp is provided.
+Returns the signature for a provided timestamp or hardcoded challenge signed with an account's MQS private key at a provided index after obtaining user's approval. The default challenge, `7WUDtkSaKyGRUnQ22rE3QUXChV8DmA6NnunDYP4vheTpc`, will be signed if no timestamp is provided.
 
 #### Encoding
 
@@ -812,9 +812,9 @@ Returns the signature for a provided timestamp or hardcoded challenge signed wit
 
 **Output Data**
 
-| Length        | Name        | Description |
-|---------------|-------------|-------------|
-| > 0 and <= 72 | `signature` | DER signature of the challenge |
+| Length        | Name                      | Description |
+|---------------|---------------------------|-------------|
+| > 0 and <= 72 | `mqs_challenge_signature` | DER signature of the challenge |
 
 ## Notes
 * The app will reset its internal slate and/or transaction state when unrelated commands are requested. For example, performing a `START_TRANSACTION` command followed by a `GET_COMMITMENT` command will reset the app's internal transaction state thus requiring another `START_TRANSACTION` command to be performed before a `CONTINUE_TRANSACTION_INCLUDE_OUTPUT` command can be successfully performed.

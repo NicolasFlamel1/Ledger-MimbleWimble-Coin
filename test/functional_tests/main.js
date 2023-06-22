@@ -1,3 +1,6 @@
+// Install dependencies: npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
+// Run: node main.js mimblewimble_coin speculos nanos
+
 // Use strict
 "use strict";
 
@@ -1624,7 +1627,6 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 				// Throw error
 				throw "Failed running encrypt slate test";
 			}
-			
 		}
 		
 		// Otherwise

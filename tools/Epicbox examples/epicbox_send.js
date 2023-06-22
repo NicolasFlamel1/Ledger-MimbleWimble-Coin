@@ -1,3 +1,6 @@
+// Install dependencies: npm i @ledgerhq/hw-transport-node-hid ws
+// Run: node epicbox_send.js
+
 // Use strict
 "use strict";
 
