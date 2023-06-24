@@ -256,7 +256,7 @@ const DEFAULT_CURRENCY = "mimblewimble_coin";
 		default:
 		
 			// Log message
-			console.log("Invalid currency. Supported currencies are: mimblewimble_coin, mimblewimble_coin_floonet, grin, and grin_testnet");
+			console.log("Invalid currency. Supported currencies are: mimblewimble_coin, mimblewimble_coin_floonet, grin, grin_testnet, epic_cash, and epic_cash_floonet");
 			
 			// Return
 			return;
@@ -3017,7 +3017,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 		]));
 		
 		// Apply offset to the transaction on the hardware wallet
-		let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
+		const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
 		
 		// Check if response contains a secret nonce index
 		if(response["length"] > RESPONSE_DELIMITER_LENGTH) {
