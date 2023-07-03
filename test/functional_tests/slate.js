@@ -142,7 +142,7 @@ class Slate {
 			// Reset
 			this.reset();
 			
-			// Check if a compact serialize slate is provided
+			// Check if a binary serialize slate is provided
 			if(serializedSlateOrAmount instanceof Uint8Array === true) {
 			
 				// Get serialized slate
@@ -232,7 +232,7 @@ class Slate {
 		}
 		
 		// Serialize
-		serialize(isMainnet, purpose) {
+		serialize(isMainnet, purpose, preferBinary = false) {
 			
 			// Check version
 			switch((this.getVersion() instanceof BigNumber === true) ? this.getVersion().toFixed() : this.getVersion()) {
@@ -581,134 +581,383 @@ class Slate {
 				// Version four
 				case Slate.VERSION_FOUR.toFixed():
 				
-					// Create serialized slate
-					var serializedSlate = {
+					// Check if prefer binary
+					if(preferBinary === true) {
 					
-						// ID
-						"id": this.getId().serialize(),
+						// Initialize bit writer
+						var bitWriter = new BitWriter();
 						
-						// Purpose
-						"sta": Slate.purposeToText(purpose),
+						// Try
+						try {
 						
-						// Version
-						"ver": this.getVersion().toFixed() + Slate.VERSION_SEPARATOR + this.getBlockHeaderVersion().toFixed()
-					};
-					
-					// Check if number of participants isn't the default
-					if(this.getNumberOfParticipants().isEqualTo(Slate.DEFAULT_NUMBER_OF_PARTICIPANTS) === false) {
-					
-						// Set serialized slate's number of participants
-						serializedSlate["num_parts"] = this.getNumberOfParticipants();
-					}
-					
-					// Check if time to live cut off height exists
-					if(this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT) {
-					
-						// Set serialized slate's time to live cut off height
-						serializedSlate["ttl"] = this.getTimeToLiveCutOffHeight().toFixed();
-					}
-					
-					// Check kernel features
-					switch(this.getKernelFeatures()) {
-					
-						// Plain features
-						case SlateKernel.PLAIN_FEATURES:
-						
-							// Break
-							break;
-						
-						// Height locked features
-						case SlateKernel.HEIGHT_LOCKED_FEATURES:
-						
-							// Set serialized slate's features
-							serializedSlate["feat"] = this.getKernelFeatures();
+							// Write version
+							bitWriter.setBytes(this.getVersion().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT16));
 							
-							// Set serialized slate's features arguments
-							serializedSlate["feat_args"] = {
+							// Write block header version
+							bitWriter.setBytes(this.getBlockHeaderVersion().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT16));
 							
-								// Lock height
-								"lock_hgt": this.getLockHeight().toFixed()
-							};
+							// Write ID
+							bitWriter.setBytes(this.getId().getData());
+							
+							// Write purpose
+							bitWriter.setBytes([purpose + 1]);
+							
+							// Write offset
+							bitWriter.setBytes((purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) ? Slate.ZERO_OFFSET : this.getOffset());
+							
+							// Initialize optional fields
+							var optionalFields = 0;
+							
+							// Check if number of participants isn't the default
+							if(this.getNumberOfParticipants().isEqualTo(Slate.DEFAULT_NUMBER_OF_PARTICIPANTS) === false) {
+							
+								// Set that optional fields includes number of participants
+								optionalFields |= 0b00000001;
+							}
+							
+							// Check if purpose is send initial
+							if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
+							
+								// Check if amount isn't zero
+								if(this.getAmount().isZero() === false) {
+								
+									// Set that optional fields includes amount
+									optionalFields |= 0b00000010;
+								}
+								
+								// Check if fee isn't zero
+								if(this.getFee().isZero() === false) {
+								
+									// Set that optional fields includes fee
+									optionalFields |= 0b00000100;
+								}
+							}
+							
+							// Check if kernel features isn't plain
+							if(this.getKernelFeatures() !== SlateKernel.PLAIN_FEATURES) {
+							
+								// Set that optional fields includes features
+								optionalFields |= 0b00001000;
+							}
+							
+							// Check if time to live cut off height exists
+							if(this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT) {
+							
+								// Set that optional fields includes time to live cut off height
+								optionalFields |= 0b00010000;
+							}
+							
+							// Write optional fields
+							bitWriter.setBytes([optionalFields]);
+							
+							// Check if optional fields includes number of participants
+							if((optionalFields & 0b00000001) !== 0) {
+							
+								// Write number of participants
+								bitWriter.setBytes(this.getNumberOfParticipants().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT8));
+							}
+							
+							// Check if optional fields includes amount
+							if((optionalFields & 0b00000010) !== 0) {
+							
+								// Write amount
+								bitWriter.setBytes(this.getAmount().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64));
+							}
+							
+							// Check if optional fields includes fee
+							if((optionalFields & 0b00000100) !== 0) {
+							
+								// Write fee
+								bitWriter.setBytes(this.getFee().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64));
+							}
+							
+							// Check if optional fields includes features
+							if((optionalFields & 0b00001000) !== 0) {
+							
+								// Write features
+								bitWriter.setBytes([this.getKernelFeatures()]);
+							}
+							
+							// Check if optional fields includes time to live cut off height
+							if((optionalFields & 0b00010000) !== 0) {
+							
+								// Write time to live cut off height
+								bitWriter.setBytes(this.getTimeToLiveCutOffHeight().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64));
+							}
+							
+							// Write participants length
+							bitWriter.setBytes([1]);
+							
+							// Check if purpose is send initial
+							if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
+							
+								// Write sender participant
+								this.getParticipant(SlateParticipant.SENDER_ID).serialize(this, bitWriter);
+							}
+							
+							// Otherwise
+							else {
+							
+								// Write receiver participant
+								this.getParticipant(SlateParticipant.SENDER_ID.plus(1)).serialize(this, bitWriter);
+							}
+							
+							// Initialize component fields
+							var componentFields = 0;
+							
+							// Check if purpose is send response
+							if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
+							
+								// Check if inputs or outputs exists
+								if(this.getInputs()["length"] + this.getOutputs()["length"] !== 0) {
+								
+									// Set that component fields includes inputs and outputs
+									componentFields |= 0b00000001;
+								}
+							}
+							
+							// Check if has payment proof
+							if(this.hasPaymentProof() === true) {
+							
+								// Set that component fields includes payment proof
+								componentFields |= 0b00000010;
+							}
+							
+							// Write component fields
+							bitWriter.setBytes([componentFields]);
+							
+							// Check if component fields includes inputs and outputs
+							if((componentFields & 0b00000001) !== 0) {
+							
+								// Write inputs and outputs length
+								bitWriter.setBytes((new BigNumber(this.getInputs()["length"] + this.getOutputs()["length"])).toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT16));
+								
+								// Go through all inputs
+								for(var i = 0; i < this.getInputs()["length"]; ++i) {
+								
+									// Get input
+									var input = this.getInputs()[i];
+									
+									// Write input or output is input
+									bitWriter.setBytes([0]);
+									
+									// Write input
+									input.serialize(this, bitWriter);
+								}
+								
+								// Go through all outputs
+								for(var i = 0; i < this.getOutputs()["length"]; ++i) {
+								
+									// Get output
+									var output = this.getOutputs()[i];
+									
+									// Write input or output is output
+									bitWriter.setBytes([1]);
+									
+									// Write output
+									output.serialize(this, bitWriter);
+								}
+							}
+							
+							// Check if component fields includes payment proof
+							if((componentFields & 0b00000010) !== 0) {
+							
+								// Write sender address
+								bitWriter.setBytes(Slatepack.slatepackAddressToPublicKey(this.getSenderAddress()));
+								
+								// Write receiver address
+								bitWriter.setBytes(Slatepack.slatepackAddressToPublicKey(this.getReceiverAddress()));
+								
+								// Check if receiver signature exists
+								if(this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) {
+								
+									// Write receiver signature exists
+									bitWriter.setBytes([1]);
+									
+									// Write receiver signature
+									bitWriter.setBytes(this.getReceiverSignature());
+								}
+								
+								// Otherwise
+								else {
+								
+									// Write receiver signature doesn't exists
+									bitWriter.setBytes([0]);
+								}
+							}
+							
+							// Check kernel features
+							switch(this.getKernelFeatures()) {
+							
+								// Plain features
+								case SlateKernel.PLAIN_FEATURES:
+								
+									// Break
+									break;
+								
+								// Height locked features
+								case SlateKernel.HEIGHT_LOCKED_FEATURES:
+								
+									// Write lock height
+									bitWriter.setBytes(this.getLockHeight().toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64));
+								
+									// Break
+									break;
+									
+								// Default
+								default:
+								
+									// Throw error
+									throw "Unsupported features.";
+							}
+							
+							// Return serialized slate
+							return bitWriter.getBytes();
+						}
 						
-							// Break
-							break;
-							
-						// Default
-						default:
+						// Catch errors
+						catch(error) {
 						
 							// Throw error
-							throw "Unsupported features.";
+							throw "Compacting slate failed.";
+						}
 					}
 					
-					// Check if has payment proof
-					if(this.hasPaymentProof() === true) {
-					
-						// Set serialized slate's payment proof
-						serializedSlate["proof"] = {
-					
-							// Receiver address
-							"raddr": Common.toHexString(Slatepack.slatepackAddressToPublicKey(this.getReceiverAddress())),
+					// Otherwise
+					else {
+				
+						// Create serialized slate
+						var serializedSlate = {
 						
-							// Sender address
-							"saddr": Common.toHexString(Slatepack.slatepackAddressToPublicKey(this.getSenderAddress()))
+							// ID
+							"id": this.getId().serialize(),
+							
+							// Purpose
+							"sta": Slate.purposeToText(purpose),
+							
+							// Version
+							"ver": this.getVersion().toFixed() + Slate.VERSION_SEPARATOR + this.getBlockHeaderVersion().toFixed()
 						};
 						
-						// Check if receiver signature exists
-						if(this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) {
+						// Check if number of participants isn't the default
+						if(this.getNumberOfParticipants().isEqualTo(Slate.DEFAULT_NUMBER_OF_PARTICIPANTS) === false) {
 						
-							// Set payment proof's receiver signature
-							serializedSlate["proof"]["rsig"] = Common.toHexString(this.getReceiverSignature());
+							// Set serialized slate's number of participants
+							serializedSlate["num_parts"] = this.getNumberOfParticipants();
 						}
-					}
-					
-					// Check if purpose is send initial
-					if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
-					
-						// Set serialized slate's amount
-						serializedSlate["amt"] = this.getAmount().toFixed();
 						
-						// Set serialized slate's fee
-						serializedSlate["fee"] = this.getFee().toFixed();
+						// Check if time to live cut off height exists
+						if(this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT) {
 						
-						// Set serialized slate's participants
-						serializedSlate["sigs"] = [this.getParticipant(SlateParticipant.SENDER_ID).serialize(this)];
-					}
-					
-					// Check if purpose is send response
-					if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
-					
-						// Set serialized slate's offset
-						serializedSlate["off"] = Common.toHexString(this.getOffset());
+							// Set serialized slate's time to live cut off height
+							serializedSlate["ttl"] = this.getTimeToLiveCutOffHeight().toFixed();
+						}
 						
-						// Set serialized slate's participants
-						serializedSlate["sigs"] = [this.getParticipant(SlateParticipant.SENDER_ID.plus(1)).serialize(this)];
+						// Check kernel features
+						switch(this.getKernelFeatures()) {
 						
-						// Set serialized slate's inputs and outputs
-						serializedSlate["coms"] = [];
-						
-						// Go through all inputs
-						for(var i = 0; i < this.getInputs()["length"]; ++i) {
-						
-							// Get input
-							var input = this.getInputs()[i];
+							// Plain features
+							case SlateKernel.PLAIN_FEATURES:
+							
+								// Break
+								break;
+							
+							// Height locked features
+							case SlateKernel.HEIGHT_LOCKED_FEATURES:
+							
+								// Set serialized slate's features
+								serializedSlate["feat"] = this.getKernelFeatures();
 								
-							// Add serialized input to the serialized slate's inputs and outputs
-							serializedSlate["coms"].push(input.serialize(this));
-						}
-						
-						// Go through all outputs
-						for(var i = 0; i < this.getOutputs()["length"]; ++i) {
-						
-							// Get output
-							var output = this.getOutputs()[i];
+								// Set serialized slate's features arguments
+								serializedSlate["feat_args"] = {
 								
-							// Add serialized output to the serialized slate's inputs and outputs
-							serializedSlate["coms"].push(output.serialize(this));
+									// Lock height
+									"lock_hgt": this.getLockHeight().toFixed()
+								};
+							
+								// Break
+								break;
+								
+							// Default
+							default:
+							
+								// Throw error
+								throw "Unsupported features.";
 						}
+						
+						// Check if has payment proof
+						if(this.hasPaymentProof() === true) {
+						
+							// Set serialized slate's payment proof
+							serializedSlate["proof"] = {
+						
+								// Receiver address
+								"raddr": Common.toHexString(Slatepack.slatepackAddressToPublicKey(this.getReceiverAddress())),
+							
+								// Sender address
+								"saddr": Common.toHexString(Slatepack.slatepackAddressToPublicKey(this.getSenderAddress()))
+							};
+							
+							// Check if receiver signature exists
+							if(this.getReceiverSignature() !== Slate.NO_RECEIVER_SIGNATURE) {
+							
+								// Set payment proof's receiver signature
+								serializedSlate["proof"]["rsig"] = Common.toHexString(this.getReceiverSignature());
+							}
+						}
+						
+						// Check if purpose is send initial
+						if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
+						
+							// Set serialized slate's amount
+							serializedSlate["amt"] = this.getAmount().toFixed();
+							
+							// Set serialized slate's fee
+							serializedSlate["fee"] = this.getFee().toFixed();
+							
+							// Set serialized slate's participants
+							serializedSlate["sigs"] = [this.getParticipant(SlateParticipant.SENDER_ID).serialize(this)];
+						}
+						
+						// Check if purpose is send response
+						if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
+						
+							// Set serialized slate's offset
+							serializedSlate["off"] = Common.toHexString(this.getOffset());
+							
+							// Set serialized slate's participants
+							serializedSlate["sigs"] = [this.getParticipant(SlateParticipant.SENDER_ID.plus(1)).serialize(this)];
+							
+							// Set serialized slate's inputs and outputs
+							serializedSlate["coms"] = [];
+							
+							// Go through all inputs
+							for(var i = 0; i < this.getInputs()["length"]; ++i) {
+							
+								// Get input
+								var input = this.getInputs()[i];
+									
+								// Add serialized input to the serialized slate's inputs and outputs
+								serializedSlate["coms"].push(input.serialize(this));
+							}
+							
+							// Go through all outputs
+							for(var i = 0; i < this.getOutputs()["length"]; ++i) {
+							
+								// Get output
+								var output = this.getOutputs()[i];
+									
+								// Add serialized output to the serialized slate's inputs and outputs
+								serializedSlate["coms"].push(output.serialize(this));
+							}
+						}
+						
+						// Return serialzied slate
+						return serializedSlate;
 					}
 					
-					// Return serialzied slate
-					return serializedSlate;
+					// Break
+					break;
 				
 				// Default
 				default:
@@ -1140,16 +1389,16 @@ class Slate {
 		}
 		
 		// Combine offsets
-		combineOffsets(slate) {
+		combineOffsets(offset) {
 		
-			// Check if updating offset with the slate's offset failed
+			// Check if updating offset with the offset failed
 			this.offset = Secp256k1Zkp.blindSum([
 							
 				// Offset
 				this.getOffset(),
 				
-				// Slate's offset
-				slate.getOffset()
+				// Offset
+				offset
 			], []);
 			
 			if(this.getOffset() === Secp256k1Zkp.OPERATION_FAILED) {
@@ -2398,7 +2647,7 @@ class Slate {
 		// Parse slate asynchronous
 		static parseSlateAsynchronous(serializedSlate, isMainnet, purpose, initialSendSlate) {
 		
-			// Check if serialized slate is compact
+			// Check if serialized slate is binary
 			if(serializedSlate instanceof Uint8Array === true) {
 		
 				// Get serialized slate data
@@ -3976,332 +4225,398 @@ class Slate {
 					// Set original version to version
 					this.originalVersion = this.getVersion();
 					
-					// Check if serialized slate's purpose isn't correct
-					if("sta" in serializedSlate === false || typeof serializedSlate["sta"] !== "string" || serializedSlate["sta"] !== Slate.purposeToText(purpose)) {
+					// Check if serialized slate is binary
+					if(serializedSlate instanceof Uint8Array === true) {
 					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Check if serialized slate's number of participants isn't supported
-					if("num_parts" in serializedSlate === true && ((Common.isNumberString(serializedSlate["num_parts"]) === false && serializedSlate["num_parts"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["num_parts"])).isInteger() === false || (new BigNumber(serializedSlate["num_parts"])).isLessThan(Slate.MINIMUM_NUMBER_OF_PARTICIPANTS) === true)) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Set number of participants to serialized slate's number of participants
-					this.numberOfParticipants = ("num_parts" in serializedSlate === true) ? new BigNumber(serializedSlate["num_parts"]) : Slate.DEFAULT_NUMBER_OF_PARTICIPANTS;
-					
-					// Check if serialized slate's ID isn't supported
-					if("id" in serializedSlate === false || typeof serializedSlate["id"] !== "string") {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Try
-					try {
-					
-						// Set ID to serialized slate's ID
-						this.id = new Uuid(serializedSlate["id"]);
-					
-						// Check if ID isn't a random UUID
-						if(this.getId().isRandom() === false) {
+						// Initialize bit reader for the serialized slate
+						var bitReader = new BitReader(serializedSlate);
 						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-					}
-					
-					// Catch errors
-					catch(error) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Check if serialized slate's block header version isn't supported
-					if("ver" in serializedSlate === false || typeof serializedSlate["ver"] !== "string" || Slate.VERSION_PATTERN.test(serializedSlate["ver"]) === false) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Set block header version to serialized slate's block header version
-					this.blockHeaderVersion = new BigNumber(serializedSlate["ver"].split(Slate.VERSION_SEPARATOR)[1]);
-					
-					// Check if serialzed slate contains features
-					if("feat" in serializedSlate === true) {
-					
-						// Check if serialized slate's features isn't supported
-						if((Common.isNumberString(serializedSlate["feat"]) === false && serializedSlate["feat"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["feat"])).isGreaterThan(Number.MAX_SAFE_INTEGER) === true) {
+						// Try
+						try {
 						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-					
-						// Check serialized slate's features
-						switch((new BigNumber(serializedSlate["feat"])).toNumber()) {
-						
-							// Plain features
-							case SlateKernel.PLAIN_FEATURES:
+							// Skip serialized slate's version
+							bitReader.getBytes(Common.BYTES_IN_A_UINT16);
 							
-								// Break
-								break;
+							// Set block header version to serialized slate's block header version
+							this.blockHeaderVersion = new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT16)));
 							
-							// Height locked features
-							case SlateKernel.HEIGHT_LOCKED_FEATURES:
+							// Set ID to serialized slate's ID
+							this.id = new Uuid(Uuid.serializeData(bitReader.getBytes(Uuid.BYTE_LENGTH)));
 							
-								// Check if serialized slate's lock height isn't supported
-								if("feat_args" in serializedSlate === false || serializedSlate["feat_args"] === null || Object.isObject(serializedSlate["feat_args"]) === false || "lock_hgt" in serializedSlate["feat_args"] === false || (Common.isNumberString(serializedSlate["feat_args"]["lock_hgt"]) === false && serializedSlate["feat_args"]["lock_hgt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["feat_args"]["lock_hgt"])).isInteger() === false || (new BigNumber(serializedSlate["feat_args"]["lock_hgt"])).isLessThan(Slate.NO_LOCK_HEIGHT) === true) {
-								
-									// Throw error
-									throw "Unsupported slate.";
-								}
-								
-								// Set lock height to serialized slate's lock height
-								this.lockHeight = new BigNumber(serializedSlate["feat_args"]["lock_hgt"]);
-							
-								// Break
-								break;
-						
-							// Default
-							default:
+							// Check if ID isn't a random UUID
+							if(this.getId().isRandom() === false) {
 							
 								// Throw error
 								throw "Unsupported slate.";
+							}
+							
+							// Check if serialized slate's purpose isn't correct
+							if(bitReader.getBytes(1)[0] !== purpose + 1) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set offset to serialized slate's offset
+							this.offset = bitReader.getBytes(Crypto.BLINDING_FACTOR_LENGTH);
+							
+							// Check if serialized slate's offset isn't supported
+							if((purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL && Common.arraysAreEqual(this.getOffset(), Slate.ZERO_OFFSET) === false && Secp256k1Zkp.isValidSecretKey(this.getOffset()) !== true) || (purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE && Secp256k1Zkp.isValidSecretKey(this.getOffset()) !== true)) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Get serialized slate's optional fields
+							var optionalFields = bitReader.getBytes(1)[0];
+							
+							// Set number of participants to serialized slate's number of participants if it includes it
+							this.numberOfParticipants = ((optionalFields & 0b00000001) !== 0) ? new BigNumber(bitReader.getBytes(1)[0]) : Slate.DEFAULT_NUMBER_OF_PARTICIPANTS;
+							
+							// Check if serialized slate's number of participants isn't supported
+							if(this.getNumberOfParticipants().isLessThan(Slate.MINIMUM_NUMBER_OF_PARTICIPANTS) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set amount to serialized slate's amount if it includes it
+							this.amount = ((optionalFields & 0b00000010) !== 0) ? new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT64))) : ((purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) ? new BigNumber(0) : initialSendSlate.getAmount());
+							
+							// Check if serialized slate's amount isn't supported
+							if(this.getAmount().isLessThan(Slate.MINIMUM_AMOUNT) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set fee to serialized slate's fee if it includes it
+							this.fee = ((optionalFields & 0b00000100) !== 0) ? new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT64))) : ((purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) ? new BigNumber(0) : initialSendSlate.getFee());
+							
+							// Check if serialized slate's fee isn't supported
+							if(this.getFee().isLessThan(Slate.MINIMUM_FEE) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Get serialized slate's features if it includes it
+							var features = ((optionalFields & 0b00001000) !== 0) ? bitReader.getBytes(1)[0] : SlateKernel.PLAIN_FEATURES;
+							
+							// Set time to live cut off height to serialized slate's time to live cut off height if it includes it
+							this.timeToLiveCutOffHeight = ((optionalFields & 0b00010000) !== 0) ? new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT64))) : Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT;
+							
+							// Get serialized sate's participants length
+							var participantsLength = bitReader.getBytes(1)[0];
+							
+							// Check if purpose is send response
+							if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
+							
+								// Set height to initial send slate's height
+								this.height = initialSendSlate.getHeight();
+								
+								// Set inputs to initial send slate's inputs
+								this.inputs = initialSendSlate.getInputs().map(function(input) {
+								
+									// Return input
+									return new SlateInput(input.getFeatures(), input.getCommit());
+								});
+								
+								// Set outputs to initial send slate's outputs
+								this.outputs = initialSendSlate.getOutputs().map(function(output) {
+								
+									// Return output
+									return new SlateOutput(output.getFeatures(), output.getCommit(), output.getProof());
+								});
+								
+								// Set participants to initial send slate's participants
+								this.participants = initialSendSlate.getParticipants().map(function(participant) {
+								
+									// Return participant
+									return new SlateParticipant(participant.getId(), participant.getPublicBlindExcess(), participant.getPublicNonce(), participant.getPartialSignature(), participant.getMessage(), participant.getMessageSignature());
+								});
+							}
+							
+							// Check if serialized slate's participants isn't supported
+							if(this.getNumberOfParticipants().isLessThan(participantsLength + this.getParticipants()["length"]) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Go through all of the serialized slate's participants
+							for(var i = 0; i < participantsLength; ++i) {
+							
+								// Add serialized slate's participant to the participants
+								this.participants.push(new SlateParticipant(bitReader, this));
+							}
+							
+							// Get serialized slate's component fields
+							var componentFields = bitReader.getBytes(1)[0];
+							
+							// Check if serialized slate includes inputs and outputs
+							if((componentFields & 0b00000001) !== 0) {
+							
+								// Get serialized slate's inputs and outputs length
+								var inputsAndOutputsLength = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT16)))).toNumber();
+								
+								// Go through all of the serialized slate's inputs and outputs
+								var inputs = [];
+								var outputs = [];
+								for(var i = 0; i < inputsAndOutputsLength; ++i) {
+								
+									// Check if input or output is an input
+									if(bitReader.getBytes(1)[0] === 0) {
+									
+										// Append serialized slate's input to inputs
+										inputs.push(new SlateInput(bitReader, this));
+									}
+									
+									// Otherwise
+									else {
+									
+										// Append serialized slate's output to outputs
+										outputs.push(new SlateOutput(bitReader, this));
+									}
+								}
+								
+								// Check if purpose is send response
+								if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
+								
+									// Add inputs
+									this.addInputs(inputs, false, outputs["length"]);
+									
+									// Add outputs
+									this.addOutputs(outputs, false);
+								}
+							}
+							
+							// Check if serialized slate includes payment proof
+							if((componentFields & 0b00000010) !== 0) {
+							
+								// Set sender address to the Slatepack address created from the serialized slate's sender public key
+								this.senderAddress = Slatepack.publicKeyToSlatepackAddress(bitReader.getBytes(Crypto.ED25519_PUBLIC_KEY_LENGTH));
+								
+								// Set receiver address to the Slatepack address created from the serialized slate's receiver public key
+								this.receiverAddress = Slatepack.publicKeyToSlatepackAddress(bitReader.getBytes(Crypto.ED25519_PUBLIC_KEY_LENGTH));
+								
+								// Check if serialized slate includes a payment proof's receiver signature
+								if(bitReader.getBytes(1)[0] !== 0) {
+								
+									// Set receiver signature to serialized slate's receiver signature
+									this.receiverSignature = bitReader.getBytes(Crypto.ED25519_SIGNATURE_LENGTH);
+								}
+							}
+							
+							// Check serialized slate's features
+							switch(features) {
+							
+								// Plain features
+								case SlateKernel.PLAIN_FEATURES:
+								
+									// Break
+									break;
+								
+								// Height locked features
+								case SlateKernel.HEIGHT_LOCKED_FEATURES:
+								
+									// Set lock height to serialized slate's lock height
+									this.lockHeight = new BigNumber(Common.HEX_PREFIX + Common.toHexString(bitReader.getBytes(Common.BYTES_IN_A_UINT64)));
+									
+									// Check if serialized slate's lock height isn't supported
+									if(this.getLockHeight().isLessThan(Slate.NO_LOCK_HEIGHT) === true) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+								
+									// Break
+									break;
+							
+								// Default
+								default:
+								
+									// Throw error
+									throw "Unsupported slate.";
+							}
+							
+							// Check if serialized slate's time to live cut off height isn't supported
+							if(this.getTimeToLiveCutOffHeight() !== Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT && (this.getTimeToLiveCutOffHeight().isLessThan(Consensus.FIRST_BLOCK_HEIGHT) === true || (this.getLockHeight().isEqualTo(Slate.NO_LOCK_HEIGHT) === false && this.getTimeToLiveCutOffHeight().isLessThan(this.getLockHeight()) === true))) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set kernels to serialized slate's kernels
+							this.kernels.push(new SlateKernel(this.getKernelFeatures(), this.getFee(), this.getLockHeight(), this.getRelativeHeight()));
+						}
+					
+						// Catch errors
+						catch(error) {
+						
+							// Throw error
+							throw "Unsupported slate.";
 						}
 					}
 					
 					// Otherwise
 					else {
 					
-						// Check if serialized slate's features arguments isn't supported
-						if("feat_args" in serializedSlate === true && serializedSlate["feat_args"] !== null) {
+						// Check if serialized slate's purpose isn't correct
+						if("sta" in serializedSlate === false || typeof serializedSlate["sta"] !== "string" || serializedSlate["sta"] !== Slate.purposeToText(purpose)) {
 						
 							// Throw error
 							throw "Unsupported slate.";
 						}
-					}
-				
-					// Check if serialized slate's time to live cut off height isn't supported
-					if("ttl" in serializedSlate === true && serializedSlate["ttl"] !== null && ((Common.isNumberString(serializedSlate["ttl"]) === false && serializedSlate["ttl"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["ttl"])).isInteger() === false || (new BigNumber(serializedSlate["ttl"])).isLessThan(Consensus.FIRST_BLOCK_HEIGHT) === true || (this.getLockHeight().isEqualTo(Slate.NO_LOCK_HEIGHT) === false && (new BigNumber(serializedSlate["ttl"])).isLessThan(this.getLockHeight()) === true))) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Set time to live cut off height to serialized slate's time to live cut off height
-					this.timeToLiveCutOffHeight = ("ttl" in serializedSlate === true && serializedSlate["ttl"] !== null) ? new BigNumber(serializedSlate["ttl"]) : Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT;
-					
-					// Check if purpose is send response
-					if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
-					
-						// Set participants to initial send slate's participants
-						this.participants = initialSendSlate.getParticipants().map(function(participant) {
 						
-							// Return participant
-							return new SlateParticipant(participant.getId(), participant.getPublicBlindExcess(), participant.getPublicNonce(), participant.getPartialSignature(), participant.getMessage(), participant.getMessageSignature());
-						});
-					}
-					
-					// Check if serialized slate's participants isn't supported
-					if("sigs" in serializedSlate === false || Array.isArray(serializedSlate["sigs"]) === false || this.getNumberOfParticipants().isLessThan(serializedSlate["sigs"]["length"] + this.participants["length"]) === true) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Try
-					try {
-					
-						// Go through all of the serialized slate's participants
-						for(var i = 0; i < serializedSlate["sigs"]["length"]; ++i) {
+						// Check if serialized slate's number of participants isn't supported
+						if("num_parts" in serializedSlate === true && ((Common.isNumberString(serializedSlate["num_parts"]) === false && serializedSlate["num_parts"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["num_parts"])).isInteger() === false || (new BigNumber(serializedSlate["num_parts"])).isLessThan(Slate.MINIMUM_NUMBER_OF_PARTICIPANTS) === true)) {
 						
-							// Get participant
-							var participant = serializedSlate["sigs"][i];
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Set number of participants to serialized slate's number of participants
+						this.numberOfParticipants = ("num_parts" in serializedSlate === true) ? new BigNumber(serializedSlate["num_parts"]) : Slate.DEFAULT_NUMBER_OF_PARTICIPANTS;
+						
+						// Check if serialized slate's ID isn't supported
+						if("id" in serializedSlate === false || typeof serializedSlate["id"] !== "string") {
+						
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Try
+						try {
+						
+							// Set ID to serialized slate's ID
+							this.id = new Uuid(serializedSlate["id"]);
+						
+							// Check if ID isn't a random UUID
+							if(this.getId().isRandom() === false) {
 							
-							// Check if participant isn't supported
-							if(Object.isObject(participant) === false) {
+								// Throw error
+								throw "Unsupported slate.";
+							}
+						}
+						
+						// Catch errors
+						catch(error) {
+						
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Check if serialized slate's block header version isn't supported
+						if("ver" in serializedSlate === false || typeof serializedSlate["ver"] !== "string" || Slate.VERSION_PATTERN.test(serializedSlate["ver"]) === false) {
+						
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Set block header version to serialized slate's block header version
+						this.blockHeaderVersion = new BigNumber(serializedSlate["ver"].split(Slate.VERSION_SEPARATOR)[1]);
+						
+						// Check if serialzed slate contains features
+						if("feat" in serializedSlate === true) {
+						
+							// Check if serialized slate's features isn't supported
+							if((Common.isNumberString(serializedSlate["feat"]) === false && serializedSlate["feat"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["feat"])).isGreaterThan(Number.MAX_SAFE_INTEGER) === true) {
 							
 								// Throw error
 								throw "Unsupported slate.";
 							}
 						
-							// Append slate participant to participants
-							this.participants.push(new SlateParticipant(participant, this));
-						}
-					}
-					
-					// Catch errors
-					catch(error) {
-					
-						// Throw error
-						throw "Unsupported slate.";
-					}
-					
-					// Check if serialized slate contains a payment proof
-					if("proof" in serializedSlate === true && serializedSlate["proof"] !== null) {
-					
-						// Check if serialized slate's proof isn't supported
-						if(Object.isObject(serializedSlate["proof"]) === false) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Check if payment proof's receiver address isn't supported
-						if("raddr" in serializedSlate["proof"] === false || Common.isHexString(serializedSlate["proof"]["raddr"]) === false || Common.hexStringLength(serializedSlate["proof"]["raddr"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Try
-						try {
-						
-							// Set receiver address to the Slatepack address created from the receiver's public key
-							this.receiverAddress = Slatepack.publicKeyToSlatepackAddress(Common.fromHexString(serializedSlate["proof"]["raddr"]));
-						}
-						
-						// Catch errors
-						catch(error) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Check if payment proof's receiver signature isn't supported
-						if("rsig" in serializedSlate["proof"] === true && serializedSlate["proof"]["rsig"] !== null && (Common.isHexString(serializedSlate["proof"]["rsig"]) === false || Common.hexStringLength(serializedSlate["proof"]["rsig"]) !== Crypto.ED25519_SIGNATURE_LENGTH)) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Set receiver signature to serialized slate's receiver signature
-						this.receiverSignature = ("rsig" in serializedSlate["proof"] === true && serializedSlate["proof"]["rsig"] !== null) ? Common.fromHexString(serializedSlate["proof"]["rsig"]) : Slate.NO_RECEIVER_SIGNATURE;
-						
-						// Check if payment proof's sender address isn't supported
-						if("saddr" in serializedSlate["proof"] === false || Common.isHexString(serializedSlate["proof"]["saddr"]) === false || Common.hexStringLength(serializedSlate["proof"]["saddr"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Try
-						try {
-						
-							// Set sender address to the Slatepack address created from the sender's public key
-							this.senderAddress = Slatepack.publicKeyToSlatepackAddress(Common.fromHexString(serializedSlate["proof"]["saddr"]));
-						}
-						
-						// Catch errors
-						catch(error) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-					}
-					
-					// Check if purpose is send initial
-					if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
-					
-						// Check if serialized slate contains inputs and outputs isn't supported
-						if("coms" in serializedSlate === true && serializedSlate["coms"] !== null) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-					
-						// Check if serialized slate's amount isn't supported
-						if("amt" in serializedSlate === false || (Common.isNumberString(serializedSlate["amt"]) === false && serializedSlate["amt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["amt"])).isInteger() === false || (new BigNumber(serializedSlate["amt"])).isLessThan(Slate.MINIMUM_AMOUNT) === true) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Set amount to serialized slate's amount
-						this.amount = new BigNumber(serializedSlate["amt"]);
-						
-						// Check if serialized slate's fee isn't supported
-						if("fee" in serializedSlate === false || (Common.isNumberString(serializedSlate["fee"]) === false && serializedSlate["fee"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["fee"])).isInteger() === false || (new BigNumber(serializedSlate["fee"])).isLessThan(Slate.MINIMUM_FEE) === true) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Set fee to serialized slate's fee
-						this.fee = new BigNumber(serializedSlate["fee"]);
-					
-						// Check if serialized slate's offset isn't supported
-						if("off" in serializedSlate === true && (Common.isHexString(serializedSlate["off"]) === false || Common.arraysAreEqual(Common.fromHexString(serializedSlate["off"]), Slate.ZERO_OFFSET) === false)) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-					}
-					
-					// Check if purpose is send response
-					if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
-					
-						// Set height to initial send slate's height
-						this.height = initialSendSlate.getHeight();
-					
-						// Set inputs to initial send slate's inputs
-						this.inputs = initialSendSlate.getInputs().map(function(input) {
-						
-							// Return input
-							return new SlateInput(input.getFeatures(), input.getCommit());
-						});
-						
-						// Set outputs to initial send slate's outputs
-						this.outputs = initialSendSlate.getOutputs().map(function(output) {
-						
-							// Return output
-							return new SlateOutput(output.getFeatures(), output.getCommit(), output.getProof());
-						});
-						
-						// Check if serialized slate contains inputs and outputs isn't supported
-						if("coms" in serializedSlate === false || serializedSlate["coms"] === null || Array.isArray(serializedSlate["coms"]) === false) {
-						
-							// Throw error
-							throw "Unsupported slate.";
-						}
-						
-						// Initialize inputs and outputs
-						var inputs = [];
-						var outputs = [];
-						
-						// Try
-						try {
-						
-							// Go through all serialized slate's input and outputs
-							for(var i = 0; i < serializedSlate["coms"]["length"]; ++i) {
+							// Check serialized slate's features
+							switch((new BigNumber(serializedSlate["feat"])).toNumber()) {
 							
-								// Get serialize slate's value
-								var value = serializedSlate["coms"][i];
+								// Plain features
+								case SlateKernel.PLAIN_FEATURES:
 								
-								// Check if value isn't supported
-								if(Object.isObject(value) === false) {
+									// Break
+									break;
+								
+								// Height locked features
+								case SlateKernel.HEIGHT_LOCKED_FEATURES:
+								
+									// Check if serialized slate's lock height isn't supported
+									if("feat_args" in serializedSlate === false || serializedSlate["feat_args"] === null || Object.isObject(serializedSlate["feat_args"]) === false || "lock_hgt" in serializedSlate["feat_args"] === false || (Common.isNumberString(serializedSlate["feat_args"]["lock_hgt"]) === false && serializedSlate["feat_args"]["lock_hgt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["feat_args"]["lock_hgt"])).isInteger() === false || (new BigNumber(serializedSlate["feat_args"]["lock_hgt"])).isLessThan(Slate.NO_LOCK_HEIGHT) === true) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
+									// Set lock height to serialized slate's lock height
+									this.lockHeight = new BigNumber(serializedSlate["feat_args"]["lock_hgt"]);
+								
+									// Break
+									break;
+							
+								// Default
+								default:
+								
+									// Throw error
+									throw "Unsupported slate.";
+							}
+						}
+						
+						// Otherwise
+						else {
+						
+							// Check if serialized slate's features arguments isn't supported
+							if("feat_args" in serializedSlate === true && serializedSlate["feat_args"] !== null) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+						}
+					
+						// Check if serialized slate's time to live cut off height isn't supported
+						if("ttl" in serializedSlate === true && serializedSlate["ttl"] !== null && ((Common.isNumberString(serializedSlate["ttl"]) === false && serializedSlate["ttl"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["ttl"])).isInteger() === false || (new BigNumber(serializedSlate["ttl"])).isLessThan(Consensus.FIRST_BLOCK_HEIGHT) === true || (this.getLockHeight().isEqualTo(Slate.NO_LOCK_HEIGHT) === false && (new BigNumber(serializedSlate["ttl"])).isLessThan(this.getLockHeight()) === true))) {
+						
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Set time to live cut off height to serialized slate's time to live cut off height
+						this.timeToLiveCutOffHeight = ("ttl" in serializedSlate === true && serializedSlate["ttl"] !== null) ? new BigNumber(serializedSlate["ttl"]) : Slate.NO_TIME_TO_LIVE_CUT_OFF_HEIGHT;
+						
+						// Check if purpose is send response
+						if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
+						
+							// Set participants to initial send slate's participants
+							this.participants = initialSendSlate.getParticipants().map(function(participant) {
+							
+								// Return participant
+								return new SlateParticipant(participant.getId(), participant.getPublicBlindExcess(), participant.getPublicNonce(), participant.getPartialSignature(), participant.getMessage(), participant.getMessageSignature());
+							});
+						}
+						
+						// Check if serialized slate's participants isn't supported
+						if("sigs" in serializedSlate === false || Array.isArray(serializedSlate["sigs"]) === false || this.getNumberOfParticipants().isLessThan(serializedSlate["sigs"]["length"] + this.getParticipants()["length"]) === true) {
+						
+							// Throw error
+							throw "Unsupported slate.";
+						}
+						
+						// Try
+						try {
+						
+							// Go through all of the serialized slate's participants
+							for(var i = 0; i < serializedSlate["sigs"]["length"]; ++i) {
+							
+								// Get participant
+								var participant = serializedSlate["sigs"][i];
+								
+								// Check if participant isn't supported
+								if(Object.isObject(participant) === false) {
 								
 									// Throw error
 									throw "Unsupported slate.";
 								}
-								
-								// Check if value is an output
-								if("p" in value === true && value["p"] !== null) {
-								
-									// Add value to list of outputs
-									outputs.push(new SlateOutput(value, this));
-								}
-								
-								// Otherwise
-								else {
-								
-									// Add value to list of inputs
-									inputs.push(new SlateInput(value, this));
-								}
+							
+								// Append slate participant to participants
+								this.participants.push(new SlateParticipant(participant, this));
 							}
 						}
 						
@@ -4312,46 +4627,218 @@ class Slate {
 							throw "Unsupported slate.";
 						}
 						
-						// Add inputs
-						this.addInputs(inputs, false, outputs["length"]);
+						// Check if serialized slate contains a payment proof
+						if("proof" in serializedSlate === true && serializedSlate["proof"] !== null) {
 						
-						// Add outputs
-						this.addOutputs(outputs, false);
-					
-						// Check if serialized slate's amount isn't supported
-						if("amt" in serializedSlate === true && ((Common.isNumberString(serializedSlate["amt"]) === false && serializedSlate["amt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["amt"])).isInteger() === false || (new BigNumber(serializedSlate["amt"])).isLessThan(Slate.MINIMUM_AMOUNT) === true)) {
-						
-							// Throw error
-							throw "Unsupported slate.";
+							// Check if serialized slate's proof isn't supported
+							if(Object.isObject(serializedSlate["proof"]) === false) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Check if payment proof's receiver address isn't supported
+							if("raddr" in serializedSlate["proof"] === false || Common.isHexString(serializedSlate["proof"]["raddr"]) === false || Common.hexStringLength(serializedSlate["proof"]["raddr"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Try
+							try {
+							
+								// Set receiver address to the Slatepack address created from the receiver's public key
+								this.receiverAddress = Slatepack.publicKeyToSlatepackAddress(Common.fromHexString(serializedSlate["proof"]["raddr"]));
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Check if payment proof's receiver signature isn't supported
+							if("rsig" in serializedSlate["proof"] === true && serializedSlate["proof"]["rsig"] !== null && (Common.isHexString(serializedSlate["proof"]["rsig"]) === false || Common.hexStringLength(serializedSlate["proof"]["rsig"]) !== Crypto.ED25519_SIGNATURE_LENGTH)) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set receiver signature to serialized slate's receiver signature
+							this.receiverSignature = ("rsig" in serializedSlate["proof"] === true && serializedSlate["proof"]["rsig"] !== null) ? Common.fromHexString(serializedSlate["proof"]["rsig"]) : Slate.NO_RECEIVER_SIGNATURE;
+							
+							// Check if payment proof's sender address isn't supported
+							if("saddr" in serializedSlate["proof"] === false || Common.isHexString(serializedSlate["proof"]["saddr"]) === false || Common.hexStringLength(serializedSlate["proof"]["saddr"]) !== Crypto.ED25519_PUBLIC_KEY_LENGTH) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Try
+							try {
+							
+								// Set sender address to the Slatepack address created from the sender's public key
+								this.senderAddress = Slatepack.publicKeyToSlatepackAddress(Common.fromHexString(serializedSlate["proof"]["saddr"]));
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
 						}
 						
-						// Set amount to serialized slate's amount
-						this.amount = ("amt" in serializedSlate === true) ? new BigNumber(serializedSlate["amt"]) : initialSendSlate.getAmount();
+						// Check if purpose is send initial
+						if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_INITIAL) {
 						
-						// Check if serialized slate's fee isn't supported
-						if("fee" in serializedSlate === true && ((Common.isNumberString(serializedSlate["fee"]) === false && serializedSlate["fee"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["fee"])).isInteger() === false || (new BigNumber(serializedSlate["fee"])).isLessThan(Slate.MINIMUM_FEE) === true)) {
+							// Check if serialized slate contains inputs and outputs isn't supported
+							if("coms" in serializedSlate === true && serializedSlate["coms"] !== null) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
 						
-							// Throw error
-							throw "Unsupported slate.";
+							// Check if serialized slate's amount isn't supported
+							if("amt" in serializedSlate === false || (Common.isNumberString(serializedSlate["amt"]) === false && serializedSlate["amt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["amt"])).isInteger() === false || (new BigNumber(serializedSlate["amt"])).isLessThan(Slate.MINIMUM_AMOUNT) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set amount to serialized slate's amount
+							this.amount = new BigNumber(serializedSlate["amt"]);
+							
+							// Check if serialized slate's fee isn't supported
+							if("fee" in serializedSlate === false || (Common.isNumberString(serializedSlate["fee"]) === false && serializedSlate["fee"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["fee"])).isInteger() === false || (new BigNumber(serializedSlate["fee"])).isLessThan(Slate.MINIMUM_FEE) === true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set fee to serialized slate's fee
+							this.fee = new BigNumber(serializedSlate["fee"]);
+						
+							// Check if serialized slate's offset isn't supported
+							if("off" in serializedSlate === true && (Common.isHexString(serializedSlate["off"]) === false || Common.arraysAreEqual(Common.fromHexString(serializedSlate["off"]), Slate.ZERO_OFFSET) === false)) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
 						}
 						
-						// Set fee to serialized slate's fee
-						this.fee = ("fee" in serializedSlate === true) ? new BigNumber(serializedSlate["fee"]) : initialSendSlate.getFee();
-					
-						// Check if serialized slate's offset isn't supported
-						if("off" in serializedSlate === false || Common.isHexString(serializedSlate["off"]) === false || Common.hexStringLength(serializedSlate["off"]) !== Crypto.BLINDING_FACTOR_LENGTH || Secp256k1Zkp.isValidSecretKey(Common.fromHexString(serializedSlate["off"])) !== true) {
+						// Check if purpose is send response
+						if(purpose === Slate.COMPACT_SLATE_PURPOSE_SEND_RESPONSE) {
 						
-							// Throw error
-							throw "Unsupported slate.";
+							// Set height to initial send slate's height
+							this.height = initialSendSlate.getHeight();
+						
+							// Set inputs to initial send slate's inputs
+							this.inputs = initialSendSlate.getInputs().map(function(input) {
+							
+								// Return input
+								return new SlateInput(input.getFeatures(), input.getCommit());
+							});
+							
+							// Set outputs to initial send slate's outputs
+							this.outputs = initialSendSlate.getOutputs().map(function(output) {
+							
+								// Return output
+								return new SlateOutput(output.getFeatures(), output.getCommit(), output.getProof());
+							});
+							
+							// Check if serialized slate contains inputs and outputs isn't supported
+							if("coms" in serializedSlate === false || serializedSlate["coms"] === null || Array.isArray(serializedSlate["coms"]) === false) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Initialize inputs and outputs
+							var inputs = [];
+							var outputs = [];
+							
+							// Try
+							try {
+							
+								// Go through all serialized slate's input and outputs
+								for(var i = 0; i < serializedSlate["coms"]["length"]; ++i) {
+								
+									// Get serialize slate's value
+									var value = serializedSlate["coms"][i];
+									
+									// Check if value isn't supported
+									if(Object.isObject(value) === false) {
+									
+										// Throw error
+										throw "Unsupported slate.";
+									}
+									
+									// Check if value is an output
+									if("p" in value === true && value["p"] !== null) {
+									
+										// Add value to list of outputs
+										outputs.push(new SlateOutput(value, this));
+									}
+									
+									// Otherwise
+									else {
+									
+										// Add value to list of inputs
+										inputs.push(new SlateInput(value, this));
+									}
+								}
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Add inputs
+							this.addInputs(inputs, false, outputs["length"]);
+							
+							// Add outputs
+							this.addOutputs(outputs, false);
+						
+							// Check if serialized slate's amount isn't supported
+							if("amt" in serializedSlate === true && ((Common.isNumberString(serializedSlate["amt"]) === false && serializedSlate["amt"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["amt"])).isInteger() === false || (new BigNumber(serializedSlate["amt"])).isLessThan(Slate.MINIMUM_AMOUNT) === true)) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set amount to serialized slate's amount
+							this.amount = ("amt" in serializedSlate === true) ? new BigNumber(serializedSlate["amt"]) : initialSendSlate.getAmount();
+							
+							// Check if serialized slate's fee isn't supported
+							if("fee" in serializedSlate === true && ((Common.isNumberString(serializedSlate["fee"]) === false && serializedSlate["fee"] instanceof BigNumber === false) || (new BigNumber(serializedSlate["fee"])).isInteger() === false || (new BigNumber(serializedSlate["fee"])).isLessThan(Slate.MINIMUM_FEE) === true)) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set fee to serialized slate's fee
+							this.fee = ("fee" in serializedSlate === true) ? new BigNumber(serializedSlate["fee"]) : initialSendSlate.getFee();
+						
+							// Check if serialized slate's offset isn't supported
+							if("off" in serializedSlate === false || Common.isHexString(serializedSlate["off"]) === false || Common.hexStringLength(serializedSlate["off"]) !== Crypto.BLINDING_FACTOR_LENGTH || Secp256k1Zkp.isValidSecretKey(Common.fromHexString(serializedSlate["off"])) !== true) {
+							
+								// Throw error
+								throw "Unsupported slate.";
+							}
+							
+							// Set offset to serialized slate's offset
+							this.offset = Common.fromHexString(serializedSlate["off"]);
 						}
 						
-						// Set offset to serialized slate's offset
-						this.offset = Common.fromHexString(serializedSlate["off"]);
+						// Set kernels to serialized slate's kernels
+						this.kernels.push(new SlateKernel(this.getKernelFeatures(), this.getFee(), this.getLockHeight(), this.getRelativeHeight()));
 					}
 					
-					// Set kernels to serialized slate's kernels
-					this.kernels.push(new SlateKernel(this.getKernelFeatures(), this.getFee(), this.getLockHeight(), this.getRelativeHeight()));
-				
 					// Break
 					break;
 				
@@ -5708,7 +6195,7 @@ class Slate {
 				// MWC wallet
 				case Consensus.MWC_WALLET_TYPE:
 		
-					// Check if a compact serialized slate is provided
+					// Check if a binary serialized slate is provided
 					if(serializedSlate instanceof Uint8Array === true) {
 					
 						// Return version Slatepack
@@ -5777,6 +6264,24 @@ class Slate {
 							return new BigNumber(serializedSlate["ver"].split(Slate.VERSION_SEPARATOR)[0]);
 						}
 							
+						// Otherwise
+						else {
+						
+							// Return unknown version
+							return Slate.UNKNOWN_VERSION;
+						}
+					}
+					
+					// Otherwise check if a binary serialized slate is provided
+					else if(serializedSlate instanceof Uint8Array === true) {
+					
+						// Check if serialized slate contains a version
+						if(serializedSlate["length"] >= Common.BYTES_IN_A_UINT16) {
+						
+							// Return serialized slate's version
+							return new BigNumber(Common.HEX_PREFIX + Common.toHexString(serializedSlate.subarray(0, Common.BYTES_IN_A_UINT16)));
+						}
+						
 						// Otherwise
 						else {
 						

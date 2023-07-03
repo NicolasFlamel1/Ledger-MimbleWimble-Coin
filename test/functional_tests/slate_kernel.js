@@ -23,7 +23,7 @@ class SlateKernel {
 			// Reset
 			this.reset();
 			
-			// Check if a compact serialized slate kernel is provided
+			// Check if a binary serialized slate kernel is provided
 			if(serializedSlateKernelOrFeatures instanceof BitReader === true) {
 			
 				// Get serialized slate kernel

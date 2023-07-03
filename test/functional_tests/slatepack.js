@@ -79,18 +79,28 @@ class Slatepack {
 		// Is encrypted Slatepack
 		static isEncryptedSlatepack(slatepack) {
 		
-			// Get offset of Slatepack's header delimiter
-			var headerDelimiter = slatepack.indexOf(Slatepack.COMPONENT_SEPARATOR);
+			// Check wallet type
+			switch(Consensus.getWalletType()) {
 			
-			// Check if header delmiter doesn't exist
-			if(headerDelimiter === Common.INDEX_NOT_FOUND) {
-			
-				// Return false
-				return false;
+				// MWC wallet
+				case Consensus.MWC_WALLET_TYPE:
+		
+					// Get offset of Slatepack's header delimiter
+					var headerDelimiter = slatepack.indexOf(Slatepack.COMPONENT_SEPARATOR);
+					
+					// Check if header delmiter doesn't exist
+					if(headerDelimiter === Common.INDEX_NOT_FOUND) {
+					
+						// Return false
+						return false;
+					}
+					
+					// Return if Slatepack's header is an encrypted header
+					return Slatepack.ENCRYPTED_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === true;
 			}
 			
-			// Return if Slatepack's header is an encrypted header
-			return Slatepack.ENCRYPTED_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === true;
+			// Return false
+			return false;
 		}
 		
 		// Get Slatepack sender public key
@@ -348,38 +358,64 @@ class Slatepack {
 				if(headerDelimiter === Common.INDEX_NOT_FOUND) {
 				
 					// Reject error
-					reject("Unsupported slatepack.");
+					reject("Unsupported Slatepack.");
 					
 					// Return
 					return;
 				}
 				
-				// Check if Slatepack's header isn't an encrypted header
-				if(Slatepack.ENCRYPTED_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === false) {
+				// Check wallet type
+				switch(Consensus.getWalletType()) {
 				
-					// Check if Slatepack's header isn't a binary header
-					if(Slatepack.BINARY_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === false) {
-					
-						// Reject error
-						reject("Unsupported slatepack.");
+					// MWC wallet
+					case Consensus.MWC_WALLET_TYPE:
+				
+						// Check if Slatepack's header isn't an encrypted header
+						if(Slatepack.ENCRYPTED_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === false) {
 						
-						// Return
-						return;
-					}
+							// Check if Slatepack's header isn't a binary header
+							if(Slatepack.BINARY_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === false) {
+							
+								// Reject error
+								reject("Unsupported Slatepack.");
+								
+								// Return
+								return;
+							}
+							
+							// Otherwise
+							else {
+							
+								// Clear encrypted
+								var encrypted = false;
+							}
+						}
+						
+						// Otherwise
+						else {
+						
+							// Set encrypted
+							var encrypted = true;
+						}
+						
+						// Break
+						break;
 					
-					// Otherwise
-					else {
+					// GRIN wallet
+					case Consensus.GRIN_WALLET_TYPE:
 					
-						// Clear encrypted
-						var encrypted = false;
-					}
-				}
-				
-				// Otherwise
-				else {
-				
-					// Set encrypted
-					var encrypted = true;
+						// Check if Slatepack's header is invalid
+						if(Slatepack.ENCRYPTED_HEADER_PATTERN.test(slatepack.substring(0, headerDelimiter)) === false) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Break
+						break;
 				}
 				
 				// Get offset of Slatepack's payload delimiter
@@ -402,30 +438,56 @@ class Slatepack {
 				if(footerDelimiter === Common.INDEX_NOT_FOUND) {
 				
 					// Reject error
-					reject("Unsupported slatepack.");
+					reject("Unsupported Slatepack.");
 					
 					// Return
 					return;
 				}
 				
-				// Check if encrypted slatepack's footer isn't an encrypted footer
-				if(encrypted === true && Slatepack.ENCRYPTED_FOOTER_PATTERN.test(slatepack.substring(payloadDelimiter + Slatepack.COMPONENT_SEPARATOR["length"], footerDelimiter)) === false) {
+				// Check wallet type
+				switch(Consensus.getWalletType()) {
 				
-					// Reject error
-					reject("Unsupported slatepack.");
+					// MWC wallet
+					case Consensus.MWC_WALLET_TYPE:
+				
+						// Check if encrypted Slatepack's footer isn't an encrypted footer
+						if(encrypted === true && Slatepack.ENCRYPTED_FOOTER_PATTERN.test(slatepack.substring(payloadDelimiter + Slatepack.COMPONENT_SEPARATOR["length"], footerDelimiter)) === false) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Otherwise check if not encrypted Slatepack's footer isn't a binary footer
+						else if(encrypted === false && Slatepack.BINARY_FOOTER_PATTERN.test(slatepack.substring(payloadDelimiter + Slatepack.COMPONENT_SEPARATOR["length"], footerDelimiter)) === false) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Break
+						break;
 					
-					// Return
-					return;
-				}
-				
-				// Otherwise check if not encrypted slatepack's footer isn't a binary footer
-				else if(encrypted === false && Slatepack.BINARY_FOOTER_PATTERN.test(slatepack.substring(payloadDelimiter + Slatepack.COMPONENT_SEPARATOR["length"], footerDelimiter)) === false) {
-				
-					// Reject error
-					reject("Unsupported slatepack.");
+					// GRIN wallet
+					case Consensus.GRIN_WALLET_TYPE:
 					
-					// Return
-					return;
+						// Check if Slatepack's footer is invalid
+						if(Slatepack.ENCRYPTED_FOOTER_PATTERN.test(slatepack.substring(payloadDelimiter + Slatepack.COMPONENT_SEPARATOR["length"], footerDelimiter)) === false) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Break
+						break;
 				}
 				
 				// Get Slatepack's payload without whitespace
@@ -442,17 +504,17 @@ class Slatepack {
 				catch(error) {
 				
 					// Reject error
-					reject("Unsupported slatepack.");
+					reject("Unsupported Slatepack.");
 					
 					// Return
 					return;
 				}
 				
 				// Check if decoded payload is too short
-				if(decodedPayload["length"] < Base58.CHECKSUM_LENGTH + Uint8Array["BYTES_PER_ELEMENT"]) {
+				if(decodedPayload["length"] < Base58.CHECKSUM_LENGTH) {
 				
 					// Reject error
-					reject("Unsupported slatepack.");
+					reject("Unsupported Slatepack.");
 					
 					// Return
 					return;
@@ -467,351 +529,463 @@ class Slatepack {
 				if(Common.arraysAreEqual(checksum, Base58.getChecksum(data)) === false) {
 				
 					// Reject error
-					reject("Unsupported slatepack.");
+					reject("Unsupported Slatepack.");
 					
 					// Return
 					return;
 				}
 				
-				// Get version from data
-				var version = data[0];
+				// Check wallet type
+				switch(Consensus.getWalletType()) {
 				
-				// Check if version isn't supported
-				if(version > Slatepack.VERSION) {
-				
-					// Reject error
-					reject("Unsupported slatepack.");
+					// MWC wallet
+					case Consensus.MWC_WALLET_TYPE:
 					
-					// Return
-					return;
-				}
-				
-				// Check if encrypted
-				if(encrypted === true) {
-				
-					// Check if secret key or hardware wallet don't exist
-					if(secretKeyOrHardwareWallet === Slatepack.NO_SECRET_KEY) {
-					
-						// Reject error
-						reject("Decrypting Slatepack failed.");
+						// Check if data's length is too short
+						if(data["length"] < data["BYTES_PER_ELEMENT"]) {
 						
-						// Return
-						return;
-					}
-				
-					// Check if data's length is too short
-					if(data["length"] < data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"]) {
-					
-						// Reject error
-						reject("Unsupported slatepack.");
-						
-						// Return
-						return;
-					}
-				
-					// Get sender public key from data
-					var senderPublicKey = data.subarray(data["BYTES_PER_ELEMENT"], data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH);
-					
-					// Try
-					try {
-					
-						// Get Tor address from the sender public key
-						Tor.publicKeyToTorAddress(senderPublicKey);
-					}
-					
-					// Catch errors
-					catch(error) {
-					
-						// Reject error
-						reject("Invalid sender public key.");
-					
-						// Return
-						return;
-					}
-					
-					// Get receiver public key from data
-					var receiverPublicKey = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH);
-					
-					// Try
-					try {
-					
-						// Get Tor address from the receiver public key
-						Tor.publicKeyToTorAddress(receiverPublicKey);
-					}
-					
-					// Catch errors
-					catch(error) {
-					
-						// Reject error
-						reject("Invalid receiver public key.");
-					
-						// Return
-						return;
-					}
-					
-					// Get expected receiver public key
-					var getExpectedReceiverPublicKey = function() {
-					
-						// Return promise
-						return new Promise(function(resolve, reject) {
-				
-							// Check if a secret key is provided
-							if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
+							// Reject error
+							reject("Unsupported Slatepack.");
 							
-								// Get secret key
-								var secretKey = secretKeyOrHardwareWallet;
+							// Return
+							return;
+						}
+				
+						// Get version from data
+						var version = data[0];
 						
-								// Check if getting expected receiver public key from secret key failed
-								var expectedReceiverPublicKey = Ed25519.publicKeyFromSecretKey(secretKey);
+						// Check if version isn't supported
+						if(version > Slatepack.VERSION) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Check if encrypted
+						if(encrypted === true) {
+						
+							// Check if secret key or hardware wallet don't exist
+							if(secretKeyOrHardwareWallet === Slatepack.NO_SECRET_KEY) {
+							
+								// Reject error
+								reject("Decrypting Slatepack failed.");
 								
-								if(expectedReceiverPublicKey === Ed25519.OPERATION_FAILED) {
+								// Return
+								return;
+							}
+						
+							// Check if data's length is too short
+							if(data["length"] < data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"]) {
+							
+								// Reject error
+								reject("Unsupported Slatepack.");
 								
-									// Reject error
-									reject("Getting expected receiver public key from secret key failed.");
-									
-									// Return
-									return;
-								}
-								
-								// Resolve expected receiver public key
-								resolve(expectedReceiverPublicKey);
+								// Return
+								return;
+							}
+						
+							// Get sender public key from data
+							var senderPublicKey = data.subarray(data["BYTES_PER_ELEMENT"], data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH);
+							
+							// Try
+							try {
+							
+								// Get Tor address from the sender public key
+								Tor.publicKeyToTorAddress(senderPublicKey);
 							}
 							
-							// Otherwise
-							else {
+							// Catch errors
+							catch(error) {
 							
-								// Get hardware wallet
-								var hardwareWallet = secretKeyOrHardwareWallet;
-								
-								// Return getting Tor address from the hardware wallet
-								return hardwareWallet.getTorAddress(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(torAddress) {
-								
-									// Try
-									try {
+								// Reject error
+								reject("Invalid sender public key.");
+							
+								// Return
+								return;
+							}
+							
+							// Get receiver public key from data
+							var receiverPublicKey = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH);
+							
+							// Try
+							try {
+							
+								// Get Tor address from the receiver public key
+								Tor.publicKeyToTorAddress(receiverPublicKey);
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Reject error
+								reject("Invalid receiver public key.");
+							
+								// Return
+								return;
+							}
+							
+							// Get expected receiver public key
+							var getExpectedReceiverPublicKey = function() {
+							
+								// Return promise
+								return new Promise(function(resolve, reject) {
+						
+									// Check if a secret key is provided
+									if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
 									
-										// Get expected receiver public key from the Tor address
-										var expectedReceiverPublicKey = Tor.torAddressToPublicKey(torAddress);
+										// Get secret key
+										var secretKey = secretKeyOrHardwareWallet;
+								
+										// Check if getting expected receiver public key from secret key failed
+										var expectedReceiverPublicKey = Ed25519.publicKeyFromSecretKey(secretKey);
+										
+										if(expectedReceiverPublicKey === Ed25519.OPERATION_FAILED) {
+										
+											// Reject error
+											reject("Getting expected receiver public key from secret key failed.");
+											
+											// Return
+											return;
+										}
+										
+										// Resolve expected receiver public key
+										resolve(expectedReceiverPublicKey);
 									}
 									
-									// Catch errors
-									catch(error) {
+									// Otherwise
+									else {
+									
+										// Get hardware wallet
+										var hardwareWallet = secretKeyOrHardwareWallet;
+										
+										// Return getting Tor address from the hardware wallet
+										return hardwareWallet.getTorAddress(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(torAddress) {
+										
+											// Try
+											try {
+											
+												// Get expected receiver public key from the Tor address
+												var expectedReceiverPublicKey = Tor.torAddressToPublicKey(torAddress);
+											}
+											
+											// Catch errors
+											catch(error) {
+											
+												// Reject error
+												reject(error);
+												
+												// Return
+												return;
+											}
+											
+											// Resolve expected receiver public key
+											resolve(expectedReceiverPublicKey);
+											
+										// Catch errors
+										}).catch(function(error) {
+										
+											// Reject error
+											reject(error);
+										});
+									}
+								});
+							};
+							
+							// Return getting expected receiver public key
+							return getExpectedReceiverPublicKey().then(function(expectedReceiverPublicKey) {
+							
+								// Check if receiver public key doesn't match the expected receiver public key
+								if(Common.arraysAreEqual(receiverPublicKey, expectedReceiverPublicKey) === false) {
+								
+									// Reject error
+									reject("Invalid receiver public key.");
+								}
+								
+								// Otherwise
+								else {
+							
+									// Get nonce form data
+									var nonce = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH);
+									
+									// Get length from data
+									var length = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"])))).toNumber();
+									
+									// Check if length isn't supported
+									if(length === 0 || length !== data["length"] - (data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"])) {
 									
 										// Reject error
-										reject(error);
+										reject("Unsupported Slatepack.");
 										
 										// Return
 										return;
 									}
 									
-									// Resolve expected receiver public key
-									resolve(expectedReceiverPublicKey);
+									// Get encrypted slate from data
+									var encryptedSlate = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"]);
 									
-								// Catch errors
-								}).catch(function(error) {
+									// Check if a secret key is provided
+									if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
+									
+										// Get secret key
+										var secretKey = secretKeyOrHardwareWallet;
+									
+										// Return decrypting the encrypted slate
+										return Slatepack.decrypt(secretKey, senderPublicKey, encryptedSlate, nonce).then(function(slate) {
+										
+											// Check if slate's length isn't supported
+											if(slate["length"] <= Uint32Array["BYTES_PER_ELEMENT"]) {
+											
+												// Reject error
+												reject("Unsupported Slatepack.");
+												
+												// Return
+												return;
+											}
+											
+											// Get expected checksum from slate
+											var expectedChecksum = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(slate.subarray(slate["length"] - Uint32Array["BYTES_PER_ELEMENT"])))).toNumber();
+											
+											// Remove expected checksum from slate
+											slate = slate.subarray(0, slate["length"] - Uint32Array["BYTES_PER_ELEMENT"]);
+											
+											// Calculate checksum
+											var checksum = CRC32.buf(Common.mergeArrays([
+											
+												// Version
+												new Uint8Array([version]),
+												
+												// Sender public key
+												senderPublicKey,
+												
+												// Receiver public key
+												receiverPublicKey,
+												
+												// Slate
+												slate
+											]));
+											
+											// Check if checksum doesn't match the expected checksum
+											if((new Uint32Array([checksum]))[0] !== expectedChecksum) {
+											
+												// Reject error
+												reject("Unsupported Slatepack.");
+												
+												// Return
+												return;
+											}
+											
+											// Resolve slate
+											resolve(slate);
+										
+										// Catch errors
+										}).catch(function(error) {
+										
+											// Reject error
+											reject(error);
+										});
+									}
+									
+									// Otherwise
+									else {
+									
+										// Get hardware wallet
+										var hardwareWallet = secretKeyOrHardwareWallet;
+										
+										// Return decrypting the slate with the hardware wallet
+										return hardwareWallet.decryptSlate(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, encryptedSlate, Tor.publicKeyToTorAddress(senderPublicKey), nonce, HardwareWallet.NO_SALT, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(slate) {
+										
+											// Check if slate's length isn't supported
+											if(slate["length"] <= Uint32Array["BYTES_PER_ELEMENT"]) {
+											
+												// Reject error
+												reject("Unsupported Slatepack.");
+												
+												// Return
+												return;
+											}
+											
+											// Get expected checksum from slate
+											var expectedChecksum = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(slate.subarray(slate["length"] - Uint32Array["BYTES_PER_ELEMENT"])))).toNumber();
+											
+											// Remove expected checksum from slate
+											slate = slate.subarray(0, slate["length"] - Uint32Array["BYTES_PER_ELEMENT"]);
+											
+											// Calculate checksum
+											var checksum = CRC32.buf(Common.mergeArrays([
+											
+												// Version
+												new Uint8Array([version]),
+												
+												// Sender public key
+												senderPublicKey,
+												
+												// Receiver public key
+												receiverPublicKey,
+												
+												// Slate
+												slate
+											]));
+											
+											// Check if checksum doesn't match the expected checksum
+											if((new Uint32Array([checksum]))[0] !== expectedChecksum) {
+											
+												// Reject error
+												reject("Unsupported Slatepack.");
+												
+												// Return
+												return;
+											}
+											
+											// Resolve slate
+											resolve(slate);
+										
+										// Catch errors
+										}).catch(function(error) {
+										
+											// Reject error
+											reject(error);
+										});
+									}
+								}
 								
-									// Reject error
-									reject(error);
-								});
-							}
-						});
-					};
-					
-					// Return getting expected receiver public key
-					return getExpectedReceiverPublicKey().then(function(expectedReceiverPublicKey) {
-					
-						// Check if receiver public key doesn't match the expected receiver public key
-						if(Common.arraysAreEqual(receiverPublicKey, expectedReceiverPublicKey) === false) {
-						
-							// Reject error
-							reject("Invalid receiver public key.");
+							// Catch errors
+							}).catch(function(error) {
+							
+								// Reject error
+								reject(error);
+							});
 						}
 						
 						// Otherwise
 						else {
-					
-							// Get nonce form data
-							var nonce = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH);
-							
-							// Get length from data
-							var length = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH, data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"])))).toNumber();
-							
-							// Check if length isn't supported
-							if(length === 0 || length !== data["length"] - (data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"])) {
+						
+							// Check if data's length is too short
+							if(data["length"] < data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"]) {
 							
 								// Reject error
-								reject("Unsupported slatepack.");
+								reject("Unsupported Slatepack.");
+								
+								// Return
+								return;
+							}
+						
+							// Get length from data
+							var length = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"], data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"])))).toNumber();
+							
+							// Check if length isn't supported
+							if(length === 0 || length !== data["length"] - (data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"])) {
+							
+								// Reject error
+								reject("Unsupported Slatepack.");
 								
 								// Return
 								return;
 							}
 							
-							// Get encrypted slate from data
-							var encryptedSlate = data.subarray(data["BYTES_PER_ELEMENT"] + Crypto.ED25519_PUBLIC_KEY_LENGTH + Crypto.ED25519_PUBLIC_KEY_LENGTH + Slatepack.NONCE_LENGTH + Uint16Array["BYTES_PER_ELEMENT"]);
+							// Get slate from data
+							var slate = data.subarray(data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"]);
 							
-							// Check if a secret key is provided
-							if(secretKeyOrHardwareWallet instanceof Uint8Array === true) {
-							
-								// Get secret key
-								var secretKey = secretKeyOrHardwareWallet;
-							
-								// Return decrypting the encrypted slate
-								return Slatepack.decrypt(secretKey, senderPublicKey, encryptedSlate, nonce).then(function(slate) {
-								
-									// Check if slate's length isn't supported
-									if(slate["length"] <= Uint32Array["BYTES_PER_ELEMENT"]) {
-									
-										// Reject error
-										reject("Unsupported slatepack.");
-										
-										// Return
-										return;
-									}
-									
-									// Get expected checksum from slate
-									var expectedChecksum = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(slate.subarray(slate["length"] - Uint32Array["BYTES_PER_ELEMENT"])))).toNumber();
-									
-									// Remove expected checksum from slate
-									slate = slate.subarray(0, slate["length"] - Uint32Array["BYTES_PER_ELEMENT"]);
-									
-									// Calculate checksum
-									var checksum = CRC32.buf(Common.mergeArrays([
-									
-										// Version
-										new Uint8Array([version]),
-										
-										// Sender public key
-										senderPublicKey,
-										
-										// Receiver public key
-										receiverPublicKey,
-										
-										// Slate
-										slate
-									]));
-									
-									// Check if checksum doesn't match the expected checksum
-									if((new Uint32Array([checksum]))[0] !== expectedChecksum) {
-									
-										// Reject error
-										reject("Unsupported slatepack.");
-										
-										// Return
-										return;
-									}
-									
-									// Resolve slate
-									resolve(slate);
-								
-								// Catch errors
-								}).catch(function(error) {
-								
-									// Reject error
-									reject(error);
-								});
-							}
-							
-							// Otherwise
-							else {
-							
-								// Get hardware wallet
-								var hardwareWallet = secretKeyOrHardwareWallet;
-								
-								// Return decrypting the slate with the hardware wallet
-								return hardwareWallet.decryptSlate(Wallet.PAYMENT_PROOF_TOR_ADDRESS_KEY_INDEX, encryptedSlate, Tor.publicKeyToTorAddress(senderPublicKey), nonce, HardwareWallet.NO_SALT, hardwareWalletLockedText, hardwareWalletLockedTextArguments, allowUnlock, preventMessages, cancelOccurred).then(function(slate) {
-								
-									// Check if slate's length isn't supported
-									if(slate["length"] <= Uint32Array["BYTES_PER_ELEMENT"]) {
-									
-										// Reject error
-										reject("Unsupported slatepack.");
-										
-										// Return
-										return;
-									}
-									
-									// Get expected checksum from slate
-									var expectedChecksum = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(slate.subarray(slate["length"] - Uint32Array["BYTES_PER_ELEMENT"])))).toNumber();
-									
-									// Remove expected checksum from slate
-									slate = slate.subarray(0, slate["length"] - Uint32Array["BYTES_PER_ELEMENT"]);
-									
-									// Calculate checksum
-									var checksum = CRC32.buf(Common.mergeArrays([
-									
-										// Version
-										new Uint8Array([version]),
-										
-										// Sender public key
-										senderPublicKey,
-										
-										// Receiver public key
-										receiverPublicKey,
-										
-										// Slate
-										slate
-									]));
-									
-									// Check if checksum doesn't match the expected checksum
-									if((new Uint32Array([checksum]))[0] !== expectedChecksum) {
-									
-										// Reject error
-										reject("Unsupported slatepack.");
-										
-										// Return
-										return;
-									}
-									
-									// Resolve slate
-									resolve(slate);
-								
-								// Catch errors
-								}).catch(function(error) {
-								
-									// Reject error
-									reject(error);
-								});
-							}
+							// Resolve slate
+							resolve(slate);
 						}
 						
-					// Catch errors
-					}).catch(function(error) {
+						// Break
+						break;
 					
-						// Reject error
-						reject(error);
-					});
-				}
-				
-				// Otherwise
-				else {
-				
-					// Check if data's length is too short
-					if(data["length"] < data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"]) {
+					// GRIN wallet
+					case Consensus.GRIN_WALLET_TYPE:
 					
-						// Reject error
-						reject("Unsupported slatepack.");
+						// Check if data's length is too short
+						if(data["length"] < data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"]) {
 						
-						// Return
-						return;
-					}
-				
-					// Get length from data
-					var length = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"], data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"])))).toNumber();
-					
-					// Check if length isn't supported
-					if(length === 0 || length !== data["length"] - (data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"])) {
-					
-						// Reject error
-						reject("Unsupported slatepack.");
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
 						
-						// Return
-						return;
-					}
-					
-					// Get slate from data
-					var slate = data.subarray(data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"]);
-					
-					// Resolve slate
-					resolve(slate);
+						// Check data's transfer mode
+						switch(data[data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"]]) {
+						
+							// Plain text
+							case Slatepack.PLAIN_TEXT_TRANSFER_MODE:
+							
+								// Clear encrypted
+								var encrypted = false;
+								
+								// Break
+								break;
+							
+							// Age encrypted transfer mode
+							case Slatepack.AGE_ENCRYPTED_TRANSFER_MODE:
+							
+								// Set encrypted
+								var encrypted = true;
+								
+								// Break
+								break;
+							
+							// Default
+							default:
+							
+								// Reject error
+								reject("Unsupported Slatepack.");
+								
+								// Return
+								return;
+						}
+						
+						// Get optional fields length from data
+						var optionalFieldsLength = (new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"], data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"])))).toNumber();
+						
+						// Check if data's length is too short
+						if(data["length"] < data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"] + optionalFieldsLength + Common.BYTES_IN_A_UINT64) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Get length from data
+						var length = new BigNumber(Common.HEX_PREFIX + Common.toHexString(data.subarray(data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"] + optionalFieldsLength, data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"] + optionalFieldsLength + Common.BYTES_IN_A_UINT64)));
+						
+						// Check if length isn't supported
+						if(length.isZero() === true || length.isEqualTo(data["length"] - (data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"] + optionalFieldsLength + Common.BYTES_IN_A_UINT64)) === false) {
+						
+							// Reject error
+							reject("Unsupported Slatepack.");
+							
+							// Return
+							return;
+						}
+						
+						// Check if encrypted
+						if(encrypted === true) {
+						
+							// TODO Support encrypted Grin Slatepacks
+							
+							// Reject error
+							reject("Unsupported Slatepack.");
+						}
+						
+						// Otherwise
+						else {
+						
+							// Get slate from data
+							var slate = data.subarray(data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + data["BYTES_PER_ELEMENT"] + Uint16Array["BYTES_PER_ELEMENT"] + Uint32Array["BYTES_PER_ELEMENT"] + optionalFieldsLength + Common.BYTES_IN_A_UINT64);
+							
+							// Resolve slate
+							resolve(slate);
+						}
+						
+						// Break
+						break;
 				}
 			});
 		}
@@ -1074,44 +1248,118 @@ class Slatepack {
 				// Otherwise
 				else {
 				
-					// Check if slate is too long
-					if(slate["length"] > Common.UINT16_MAX_VALUE) {
+					// Check wallet type
+					switch(Consensus.getWalletType()) {
 					
-						// Reject error
-						reject("Slate is too long.");
-					}
-			
-					// Create payload
-					var payload = Common.mergeArrays([
-					
-						// Version
-						new Uint8Array([Slatepack.VERSION]),
-						
-						// Length
-						(new BigNumber(slate["length"])).toBytes(BigNumber.BIG_ENDIAN, Uint16Array["BYTES_PER_ELEMENT"]),
-						
-						// Slate
-						slate
-					]);
+						// MWC wallet
+						case Consensus.MWC_WALLET_TYPE:
 				
-					// Encode the payload
-					var encodedPayload = Base58.encode(Common.mergeArrays([
+							// Check if slate is too long
+							if(slate["length"] > Common.UINT16_MAX_VALUE) {
+							
+								// Reject error
+								reject("Slate is too long.");
+								
+								// Return
+								return;
+							}
 					
-						// Checksum
-						Base58.getChecksum(payload),
+							// Create payload
+							var payload = Common.mergeArrays([
+							
+								// Version
+								new Uint8Array([Slatepack.VERSION]),
+								
+								// Length
+								(new BigNumber(slate["length"])).toBytes(BigNumber.BIG_ENDIAN, Uint16Array["BYTES_PER_ELEMENT"]),
+								
+								// Slate
+								slate
+							]);
 						
-						// Payload
-						payload
-					]));
-					
-					// Format the encoded payload
-					encodedPayload = Slatepack.format(encodedPayload);
-					
-					// Add binary header and footer to the encoded payload
-					encodedPayload = Slatepack.BINARY_HEADER + encodedPayload + Slatepack.BINARY_FOOTER;
-					
-					// Resolve encoded payload
-					resolve(encodedPayload);
+							// Encode the payload
+							var encodedPayload = Base58.encode(Common.mergeArrays([
+							
+								// Checksum
+								Base58.getChecksum(payload),
+								
+								// Payload
+								payload
+							]));
+							
+							// Format the encoded payload
+							encodedPayload = Slatepack.format(encodedPayload);
+							
+							// Add binary header and footer to the encoded payload
+							encodedPayload = Slatepack.BINARY_HEADER + encodedPayload + Slatepack.BINARY_FOOTER;
+							
+							// Resolve encoded payload
+							resolve(encodedPayload);
+							
+							// Break
+							break;
+						
+						// GRIN wallet
+						case Consensus.GRIN_WALLET_TYPE:
+						
+							// Try
+							try {
+						
+								// Create payload
+								var payload = Common.mergeArrays([
+								
+									// Version
+									new Uint8Array([Slatepack.MAJOR_VERSION, Slatepack.MINOR_VERSION]),
+									
+									// Transfer mode
+									new Uint8Array([Slatepack.PLAIN_TEXT_TRANSFER_MODE]),
+									
+									// Optional content flags
+									(new BigNumber(0)).toBytes(BigNumber.BIG_ENDIAN, Uint16Array["BYTES_PER_ELEMENT"]),
+									
+									// Optional fields length
+									(new BigNumber(0)).toBytes(BigNumber.BIG_ENDIAN, Uint32Array["BYTES_PER_ELEMENT"]),
+									
+									// Length
+									(new BigNumber(slate["length"])).toBytes(BigNumber.BIG_ENDIAN, Common.BYTES_IN_A_UINT64),
+									
+									// Slate
+									slate
+								]);
+							}
+							
+							// Catch errors
+							catch(error) {
+							
+								// Reject error
+								reject(error);
+								
+								// Return
+								return;
+							}
+							
+							// Encode the payload
+							var encodedPayload = Base58.encode(Common.mergeArrays([
+							
+								// Checksum
+								Base58.getChecksum(payload),
+								
+								// Payload
+								payload
+							]));
+							
+							// Format the encoded payload
+							encodedPayload = Slatepack.format(encodedPayload);
+							
+							// Add header and footer to the encoded payload
+							encodedPayload = Slatepack.ENCRYPTED_HEADER + encodedPayload + Slatepack.ENCRYPTED_FOOTER;
+							
+							// Resolve encoded payload
+							resolve(encodedPayload);
+							
+							// Break
+							break;
+					}
 				}
 			});
 		}
@@ -1581,6 +1829,34 @@ class Slatepack {
 		
 			// Return address without human-readable part length
 			return 59;
+		}
+		
+		// Pain text transfer mode
+		static get PLAIN_TEXT_TRANSFER_MODE() {
+		
+			// Return plain text transfer mode
+			return 0;
+		}
+		
+		// Age encrypted transfer mode
+		static get AGE_ENCRYPTED_TRANSFER_MODE() {
+		
+			// Return age encrypted transfer mode
+			return Slatepack.PLAIN_TEXT_TRANSFER_MODE + 1;
+		}
+		
+		// Major version
+		static get MAJOR_VERSION() {
+		
+			// Return major version
+			return 1;
+		}
+		
+		// Minor version
+		static get MINOR_VERSION() {
+		
+			// Return minor version
+			return 0;
 		}
 }
 

@@ -847,6 +847,13 @@ class Common {
 			return Common.HAS_WHITESPACE_PATTERN.test(text) === true;
 		}
 		
+		// Remove whitespace
+		static removeWhitespace(text) {
+		
+			// Return text with whitespace removed
+			return text.replace(Common.HAS_WHITESPACE_PATTERN, "");
+		}
+		
 		// Milliseconds in a second
 		static get MILLISECONDS_IN_A_SECOND() {
 		
@@ -915,6 +922,13 @@ class Common {
 		
 			// Return int32 max value
 			return Math.pow(2, Common.BITS_IN_A_BYTE * Int32Array["BYTES_PER_ELEMENT"] - 1) - 1;
+		}
+		
+		// Bytes in a uint8
+		static get BYTES_IN_A_UINT8() {
+		
+			// Return bytes in a uint8
+			return 8 / Common.BITS_IN_A_BYTE;
 		}
 		
 		// Bytes in a uint16
