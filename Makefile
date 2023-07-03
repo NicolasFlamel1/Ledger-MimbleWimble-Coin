@@ -456,7 +456,7 @@ endif
 
 # Compiler settings
 CC := $(CLANGPATH)clang
-CFLAGS += -Oz -Wall -Wextra
+CFLAGS += -Oz -Wall -Wextra -Wno-deprecated-declarations
 AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS +=

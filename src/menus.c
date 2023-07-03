@@ -21,7 +21,7 @@
 #define PROGRESS_BAR_PADDING 6
 
 // Check if device has low height
-#if BAGL_HEIGHT < 64
+#if defined BAGL_HEIGHT && BAGL_HEIGHT < 64
 
 	// Progress bar height
 	#define PROGRESS_BAR_HEIGHT 10

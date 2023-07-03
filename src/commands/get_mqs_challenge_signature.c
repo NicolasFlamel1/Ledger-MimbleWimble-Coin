@@ -92,7 +92,7 @@ void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsign
 		epochToTime(&time, timestamp - timeZoneOffset * SECONDS_IN_A_MINUTE);
 		
 		// Check if device has low height
-		#if BAGL_HEIGHT < 64
+		#if defined BAGL_HEIGHT && BAGL_HEIGHT < 64
 		
 			// Copy time into the time line buffer
 			snprintf(timeLineBuffer, sizeof(timeLineBuffer), "%02d:%02d:%02d on %d-%02d-%02d UTC%c%02d:%02d", time.hour, time.minute, time.second, time.year, time.month, time.day, (timeZoneOffset > 0) ? '-' : '+', abs(timeZoneOffset) / MINUTES_IN_AN_HOUR, abs(timeZoneOffset) % MINUTES_IN_AN_HOUR);
