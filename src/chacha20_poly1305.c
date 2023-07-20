@@ -364,7 +364,7 @@ void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305Sta
 			cx_math_add(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, block, sizeof(chaCha20Poly1305State->poly1305Accumulator));
 			
 			// Multiply the Poly1305 accumulator by the Poly1305 r and modulo it by the Poly1305 p
-			cx_math_multm(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305R, POLY1305_P, sizeof(chaCha20Poly1305State->poly1305Accumulator));
+			CX_THROW(cx_math_multm_no_throw(chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305Accumulator, chaCha20Poly1305State->poly1305R, POLY1305_P, sizeof(chaCha20Poly1305State->poly1305Accumulator)));
 		}
 	}
 }

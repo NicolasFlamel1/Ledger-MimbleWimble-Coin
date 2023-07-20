@@ -61,8 +61,8 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			
 			// Get Ed25519 public key from the Ed25519 private key
 			cx_ecfp_public_key_t ed25519PublicKey;
-			cx_ecfp_generate_pair(CX_CURVE_Ed25519, &ed25519PublicKey, (cx_ecfp_private_key_t *)&ed25519PrivateKey, true);
-			cx_edwards_compress_point(CX_CURVE_Ed25519, ed25519PublicKey.W, ed25519PublicKey.W_len);
+			CX_THROW(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &ed25519PublicKey, (cx_ecfp_private_key_t *)&ed25519PrivateKey, true));
+			CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, ed25519PublicKey.W, ed25519PublicKey.W_len));
 			
 			// Get X25519 public key from the Ed25519 public key
 			uint8_t x25519PublicKey[X25519_PUBLIC_KEY_SIZE];
@@ -73,11 +73,11 @@ void getAgePayloadKey(volatile uint8_t *payloadKey, const uint32_t account, cons
 			uncompressedEphemeralX25519PublicKey[0] = X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedEphemeralX25519PublicKey[PUBLIC_KEY_PREFIX_SIZE], ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE);
 			
-			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey));
+			CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Curve25519, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey)));
 			
 			// Create a shared private key from the X25519 private key and uncompressed ephemeral X25519 public key
 			uint8_t *sharedPrivateKey = (uint8_t *)ed25519PrivateKey.d;
-			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey), sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE);
+			CX_THROW(cx_ecdh_no_throw((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedEphemeralX25519PublicKey, sizeof(uncompressedEphemeralX25519PublicKey), sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE));
 			
 			// Swap shared private key's endianness
 			swapEndianness(sharedPrivateKey, SHARED_PRIVATE_KEY_SIZE);

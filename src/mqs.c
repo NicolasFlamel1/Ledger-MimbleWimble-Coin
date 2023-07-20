@@ -121,7 +121,7 @@ bool getPublicKeyFromMqsAddress(cx_ecfp_public_key_t *publicKey, const char *mqs
 		uncompressSecp256k1PublicKey(uncompressedPublicKey);
 		
 		// Initialize the public key with the uncompressed public key
-		cx_ecfp_init_public_key(CX_CURVE_SECP256K1, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
+		CX_THROW(cx_ecfp_init_public_key_no_throw(CX_CURVE_SECP256K1, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey));
 	}
 
 	// Return true

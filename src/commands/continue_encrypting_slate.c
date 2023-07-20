@@ -53,7 +53,7 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 		toHexString(encryptedDataString, encryptedData, dataLength);
 		
 		// Add encrypted data string to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)encryptedDataString, encryptedDataStringLength, NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)encryptedDataString, encryptedDataStringLength, NULL, 0));
 	}
 	
 	// Check if response with the encrypted data will overflow

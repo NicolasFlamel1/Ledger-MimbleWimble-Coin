@@ -139,6 +139,9 @@ static bool isQuadraticResidue(const uint8_t *component);
 // Generator double point scalar multiply
 static void generatorDoublePointScalarMultiply(uint8_t *result, const size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
 
+// Compare big numbers
+static int compareBigNumbers(const uint8_t *firstValue, const uint8_t *secondValue, const size_t valueLength);
+
 
 // Supporting function implementation
 
@@ -165,7 +168,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 		TRY {
 
 			// Derive node and chain code from path and seed key
-			os_perso_derive_node_with_seed_key(HDW_NORMAL, CX_CURVE_SECP256K1, bip44Path, ARRAYLEN(bip44Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY));
+			CX_THROW(os_derive_bip32_with_seed_no_throw(HDW_NORMAL, CX_CURVE_SECP256K1, bip44Path, ARRAYLEN(bip44Path), (uint8_t *)node, (uint8_t *)chainCode, (unsigned char *)SEED_KEY, sizeof(SEED_KEY)));
 			
 			// Check if node isn't a valid secret key
 			if(!isValidSecp256k1PrivateKey((uint8_t *)node, sizeof(privateKey->d))) {
@@ -175,7 +178,7 @@ void getPrivateKeyAndChainCode(volatile cx_ecfp_private_key_t *privateKey, volat
 			}
 			
 			// Get private key from node
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey);
+			CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey->d), (cx_ecfp_private_key_t *)privateKey));
 		}
 		
 		// Finally
@@ -203,7 +206,7 @@ void getPublicKeyFromPrivateKey(volatile uint8_t *publicKey, const cx_ecfp_priva
 		TRY {
 	
 			// Get uncompressed public key from the private key
-			cx_ecfp_generate_pair(CX_CURVE_SECP256K1, (cx_ecfp_public_key_t *)&uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, true);
+			CX_THROW(cx_ecfp_generate_pair_no_throw(CX_CURVE_SECP256K1, (cx_ecfp_public_key_t *)&uncompressedPublicKey, (cx_ecfp_private_key_t *)privateKey, true));
 			
 			// Set prefix in the public key
 			publicKey[0] = (uncompressedPublicKey.W[uncompressedPublicKey.W_len - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
@@ -269,7 +272,7 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, const uint32_t accou
 						
 						// Add commitment to the hash
 						cx_sha256_init((cx_sha256_t *)&hash);
-						cx_hash((cx_hash_t *)&hash, 0, commitment, COMMITMENT_SIZE, NULL, 0);
+						CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, commitment, COMMITMENT_SIZE, NULL, 0));
 						
 						// Get product of the generator public key and the child's private key
 						memcpy((uint8_t *)&publicKeyGenerator[PUBLIC_KEY_PREFIX_SIZE], GENERATOR_J, sizeof(GENERATOR_J));
@@ -286,17 +289,17 @@ void deriveBlindingFactor(volatile uint8_t *blindingFactor, const uint32_t accou
 						publicKeyGenerator[0] = (publicKeyGenerator[sizeof(publicKeyGenerator) - 1] & 1) ? ODD_COMPRESSED_PUBLIC_KEY_PREFIX : EVEN_COMPRESSED_PUBLIC_KEY_PREFIX;
 						
 						// Add result to the hash and get the blinding factor
-						cx_hash((cx_hash_t *)&hash, CX_LAST, (uint8_t *)publicKeyGenerator, COMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)blindingFactor, BLINDING_FACTOR_SIZE);
+						CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, CX_LAST, (uint8_t *)publicKeyGenerator, COMPRESSED_PUBLIC_KEY_SIZE, (uint8_t *)blindingFactor, BLINDING_FACTOR_SIZE));
 						
 						// Check if the blinding factor overflows
-						if(cx_math_cmp((uint8_t *)blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE) >= 0) {
+						if(compareBigNumbers((uint8_t *)blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE) >= 0) {
 						
 							// Throw internal error error
 							THROW(INTERNAL_ERROR_ERROR);
 						}
 						
 						// Add the child's private key to the blinding factor
-						cx_math_addm((uint8_t *)blindingFactor, (uint8_t *)blindingFactor, (uint8_t *)childPrivateKey.d, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+						CX_THROW(cx_math_addm_no_throw((uint8_t *)blindingFactor, (uint8_t *)blindingFactor, (uint8_t *)childPrivateKey.d, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE));
 						
 						// Check if blinding factor isn't a valid secret key
 						if(!isValidSecp256k1PrivateKey((uint8_t *)blindingFactor, BLINDING_FACTOR_SIZE)) {
@@ -550,7 +553,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 					}
 					
 					// Get private key from node
-					cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey);
+					CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(privateKey.d), (cx_ecfp_private_key_t *)&privateKey));
 					
 					// Get chain code from the node
 					uint8_t *chainCode = (uint8_t *)&node[sizeof(privateKey.d)];
@@ -588,7 +591,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 					}
 					
 					// Get private key from hash
-					cx_ecfp_init_private_key(CX_CURVE_SECP256K1, hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey);
+					CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, hash, SECP256K1_PRIVATE_KEY_SIZE, (cx_ecfp_private_key_t *)&privateKey));
 					
 					// Break
 					break;
@@ -643,7 +646,7 @@ void getAddressPrivateKey(volatile cx_ecfp_private_key_t *addressPrivateKey, con
 			}
 			
 			// Get address private key from the private key
-			cx_ecfp_init_private_key(curve, (uint8_t *)privateKey.d, privateKey.d_len, (cx_ecfp_private_key_t *)addressPrivateKey);
+			CX_THROW(cx_ecfp_init_private_key_no_throw(curve, (uint8_t *)privateKey.d, privateKey.d_len, (cx_ecfp_private_key_t *)addressPrivateKey));
 		}
 		
 		// Finally
@@ -671,14 +674,14 @@ void updateBlindingFactorSum(uint8_t *blindingFactorSum, const uint8_t *blinding
 	if(blindingFactorIsPositive) {
 	
 		// Add blinding factor to the blinding factor sum
-		cx_math_addm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+		CX_THROW(cx_math_addm_no_throw(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE));
 	}
 	
 	// Otherwise
 	else {
 	
 		// Subtract blinding factor from the blinding factor sum
-		cx_math_subm(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE);
+		CX_THROW(cx_math_subm_no_throw(blindingFactorSum, blindingFactorSum, blindingFactor, SECP256K1_CURVE_ORDER, BLINDING_FACTOR_SIZE));
 	}
 	
 	// Check if blinding factor sum is invalid
@@ -699,7 +702,7 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 		cx_rng(secretNonce, NONCE_SIZE);
 		
 		// Normalize the secret nonce
-		cx_math_modm(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
+		CX_THROW(cx_math_modm_no_throw(secretNonce, NONCE_SIZE, SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER)));
 		
 	} while(isZeroArraySecure(secretNonce, NONCE_SIZE));
 	
@@ -721,8 +724,8 @@ void createSingleSignerNonces(uint8_t *secretNonce, uint8_t *publicNonce) {
 	if(!isQuadraticResidue(y)) {
 	
 		// Negate the secret nonce and the result's y component
-		cx_math_subm(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE);
-		cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+		CX_THROW(cx_math_subm_no_throw(secretNonce, SECP256K1_CURVE_ORDER, secretNonce, SECP256K1_CURVE_ORDER, NONCE_SIZE));
+		CX_THROW(cx_math_subm_no_throw(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 	}
 	
 	// Check if creating public nonce
@@ -763,13 +766,13 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 	// Get signature hash from the public nonce's x component, public key, and message
 	cx_sha256_t hash;
 	cx_sha256_init(&hash);
-	cx_hash((cx_hash_t *)&hash, 0, &publicNonce[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, NULL, 0);
-	cx_hash((cx_hash_t *)&hash, 0, publicKey, COMPRESSED_PUBLIC_KEY_SIZE, NULL, 0);
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, &publicNonce[PUBLIC_KEY_PREFIX_SIZE], PUBLIC_KEY_COMPONENT_SIZE, NULL, 0));
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, publicKey, COMPRESSED_PUBLIC_KEY_SIZE, NULL, 0));
 	uint8_t signatureHash[CX_SHA256_SIZE];
-	cx_hash((cx_hash_t *)&hash, CX_LAST, message, SINGLE_SIGNER_MESSAGE_SIZE, signatureHash, sizeof(signatureHash));
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, CX_LAST, message, SINGLE_SIGNER_MESSAGE_SIZE, signatureHash, sizeof(signatureHash)));
 	
 	// Normalize the signature hash
-	cx_math_modm(signatureHash, sizeof(signatureHash), SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER));
+	CX_THROW(cx_math_modm_no_throw(signatureHash, sizeof(signatureHash), SECP256K1_CURVE_ORDER, sizeof(SECP256K1_CURVE_ORDER)));
 	
 	// Initialize the s component
 	volatile uint8_t s[SCALAR_SIZE];
@@ -781,20 +784,20 @@ void createSingleSignerSignature(volatile uint8_t *signature, const uint8_t *mes
 		TRY {
 		
 			// Multiply blinding factor by the signature hash
-			cx_math_multm((uint8_t *)s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, sizeof(s));
+			CX_THROW(cx_math_multm_no_throw((uint8_t *)s, blindingFactor, signatureHash, SECP256K1_CURVE_ORDER, sizeof(s)));
 			
 			// Check if the uncompressed public nonce's y component is quadratic residue
 			if(isQuadraticResidue(&uncompressedPublicNonce[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE])) {
 			
 				// Add secret nonce to the result
-				cx_math_addm((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s));
+				CX_THROW(cx_math_addm_no_throw((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s)));
 			}
 			
 			// Otherwise
 			else {
 			
 				// Subtract secret nonce from the result
-				cx_math_subm((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s));
+				CX_THROW(cx_math_subm_no_throw((uint8_t *)s, (uint8_t *)s, secretNonce, SECP256K1_CURVE_ORDER, sizeof(s)));
 			}
 			
 			// Set signature's s component
@@ -844,10 +847,11 @@ void encryptData(volatile uint8_t *result, const uint8_t *data, const size_t dat
 			memset((uint8_t *)&paddedData[dataLength], paddedDataLength - dataLength, paddedDataLength - dataLength);
 		
 			// Initialize the encryption key with the key
-			cx_aes_init_key(key, keyLength, (cx_aes_key_t *)&encryptionKey);
+			CX_THROW(cx_aes_init_key_no_throw(key, keyLength, (cx_aes_key_t *)&encryptionKey));
 			
 			// Encrypt the padded data with the encryption key
-			cx_aes((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, (uint8_t *)paddedData, paddedDataLength, (uint8_t *)result, paddedDataLength);
+			size_t length = paddedDataLength;
+			CX_THROW(cx_aes_no_throw((cx_aes_key_t *)&encryptionKey, CX_ENCRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, (uint8_t *)paddedData, paddedDataLength, (uint8_t *)result, &length));
 		}
 		
 		// Finally
@@ -881,10 +885,11 @@ size_t decryptData(volatile uint8_t *result, const uint8_t *data, const size_t d
 		TRY {
 		
 			// Initialize the decryption key with the key
-			cx_aes_init_key(key, keyLength, (cx_aes_key_t *)&decryptionKey);
+			CX_THROW(cx_aes_init_key_no_throw(key, keyLength, (cx_aes_key_t *)&decryptionKey));
 			
 			// Decrypt the data with the decryption key
-			cx_aes((cx_aes_key_t *)&decryptionKey, CX_DECRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, data, dataLength, (uint8_t *)result, dataLength);
+			size_t length = dataLength;
+			CX_THROW(cx_aes_no_throw((cx_aes_key_t *)&decryptionKey, CX_DECRYPT | CX_PAD_NONE | CX_CHAIN_CBC | CX_LAST, data, dataLength, (uint8_t *)result, &length));
 			
 			// Check if last padding byte is invalid
 			if(!result[dataLength - 1] || result[dataLength - 1] > CX_AES_BLOCK_SIZE || result[dataLength - 1] > dataLength) {
@@ -960,7 +965,7 @@ void getX25519PrivateKeyFromEd25519PrivateKey(volatile cx_ecfp_private_key_t *x2
 			}
 			
 			// Get X25519 private key from the hash
-			cx_ecfp_init_private_key(CX_CURVE_Curve25519, (uint8_t *)hash, sizeof(x25519PrivateKey->d), (cx_ecfp_private_key_t *)x25519PrivateKey);
+			CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_Curve25519, (uint8_t *)hash, sizeof(x25519PrivateKey->d), (cx_ecfp_private_key_t *)x25519PrivateKey));
 		}
 		
 		// Finally
@@ -983,7 +988,7 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	uncompressedEd25519PublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 	memcpy(&uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE], ed25519PublicKey, ED25519_PUBLIC_KEY_SIZE);
 	
-	cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedEd25519PublicKey, sizeof(uncompressedEd25519PublicKey));
+	CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Ed25519, uncompressedEd25519PublicKey, sizeof(uncompressedEd25519PublicKey)));
 	
 	// Get uncompressed Ed25519 public key's y value
 	uint8_t *y = &uncompressedEd25519PublicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
@@ -993,8 +998,8 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 		[SCALAR_SIZE - 1] = 1
 	};
 	
-	cx_math_addm(x25519PublicKey, one, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE);
-	cx_math_subm(y, one, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	CX_THROW(cx_math_addm_no_throw(x25519PublicKey, one, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE));
+	CX_THROW(cx_math_subm_no_throw(y, one, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 	
 	// Check if the difference of one and y is zero
 	if(isZeroArraySecure(y, PUBLIC_KEY_COMPONENT_SIZE)) {
@@ -1004,8 +1009,8 @@ void getX25519PublicKeyFromEd25519PublicKey(uint8_t *x25519PublicKey, const uint
 	}
 	
 	// Compute the X25519 public key as the sum of one and y divided by the difference of one and y
-	cx_math_invprimem(y, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
-	cx_math_multm(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE);
+	CX_THROW(cx_math_invprimem_no_throw(y, y, ED25519_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
+	CX_THROW(cx_math_multm_no_throw(x25519PublicKey, x25519PublicKey, y, ED25519_CURVE_PRIME, X25519_PUBLIC_KEY_SIZE));
 	
 	// Swap the X25519 public key's endianness
 	swapEndianness(x25519PublicKey, X25519_PUBLIC_KEY_SIZE);
@@ -1299,7 +1304,7 @@ void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_
 						}
 						
 						// Compress the sender public key
-						cx_edwards_compress_point(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len);
+						CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len));
 						
 						// Convert value to big endian
 						swapEndianness((uint8_t *)&value, sizeof(value));
@@ -1378,7 +1383,7 @@ void getPaymentProofMessage(uint8_t *message, const uint64_t value, const uint8_
 						}
 						
 						// Compress the sender public key
-						cx_edwards_compress_point(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len);
+						CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, senderPublicKey.W, senderPublicKey.W_len));
 						
 						// Convert value to big endian
 						swapEndianness((uint8_t *)&value, sizeof(value));
@@ -1606,7 +1611,7 @@ bool isValidEd25519PublicKey(const uint8_t *publicKey, const size_t length) {
 			uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
 			
-			cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+			CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey)));
 		}
 		
 		// Catch all errors
@@ -1667,7 +1672,7 @@ bool isValidX25519PublicKey(const uint8_t *publicKey, const size_t length) {
 			uncompressedPublicKey[0] = X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], publicKey, length);
 			
-			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+			CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Curve25519, uncompressedPublicKey, sizeof(uncompressedPublicKey)));
 		}
 		
 		// Catch all errors
@@ -1704,7 +1709,7 @@ bool isValidSecp256k1PrivateKey(const uint8_t *privateKey, const size_t length) 
 	}
 	
 	// Return if the private key doesn't overflow and isn't zero
-	return cx_math_cmp(privateKey, SECP256K1_CURVE_ORDER, length) < 0 && !isZeroArraySecure(privateKey, length);
+	return compareBigNumbers(privateKey, SECP256K1_CURVE_ORDER, length) < 0 && !isZeroArraySecure(privateKey, length);
 }
 
 // Is valid secp256k1 public key
@@ -1760,7 +1765,7 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	const uint8_t *x = &publicKey[PUBLIC_KEY_PREFIX_SIZE];
 
 	// Check if public key's prefix is invalid or its x component overflows
-	if((publicKey[0] != EVEN_COMPRESSED_PUBLIC_KEY_PREFIX && publicKey[0] != ODD_COMPRESSED_PUBLIC_KEY_PREFIX) || cx_math_cmp(x, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE) >= 0) {
+	if((publicKey[0] != EVEN_COMPRESSED_PUBLIC_KEY_PREFIX && publicKey[0] != ODD_COMPRESSED_PUBLIC_KEY_PREFIX) || compareBigNumbers(x, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE) >= 0) {
 	
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -1769,12 +1774,12 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	// Get y squared as x cubed plus seven
 	uint8_t ySquared[PUBLIC_KEY_COMPONENT_SIZE];
 	const uint8_t three = 3;
-	cx_math_powm(ySquared, x, &three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared));
+	CX_THROW(cx_math_powm_no_throw(ySquared, x, &three, sizeof(three), SECP256K1_CURVE_PRIME, sizeof(ySquared)));
 	
 	const uint8_t seven[SCALAR_SIZE] = {
 		[SCALAR_SIZE - 1] = 7
 	};
-	cx_math_addm(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared));
+	CX_THROW(cx_math_addm_no_throw(ySquared, ySquared, seven, SECP256K1_CURVE_PRIME, sizeof(ySquared)));
 	
 	// Return if the y squared isn't quadratic residue
 	if(!isQuadraticResidue(ySquared)) {
@@ -1785,13 +1790,13 @@ void uncompressSecp256k1PublicKey(uint8_t *publicKey) {
 	
 	// Get the square root of y squared
 	uint8_t *y = &publicKey[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
-	cx_math_powm(y, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+	CX_THROW(cx_math_powm_no_throw(y, ySquared, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 	
 	// Check if the y component's oddness doesn't match the expected oddness
 	if((y[PUBLIC_KEY_COMPONENT_SIZE - 1] & 1) != (publicKey[0] == ODD_COMPRESSED_PUBLIC_KEY_PREFIX)) {
 	
 		// Negate the y component
-		cx_math_subm(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+		CX_THROW(cx_math_subm_no_throw(y, SECP256K1_CURVE_PRIME, y, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 	}
 	
 	// Set public key's prefix to be uncompressed
@@ -1817,10 +1822,10 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, const uint32_t account, cons
 			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_Ed25519);
 			
 			// Get address public key from address private key
-			cx_ecfp_generate_pair(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
+			CX_THROW(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, (cx_ecfp_public_key_t *)&addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true));
 			
 			// Compress the address public key
-			cx_edwards_compress_point(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len);
+			CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, (uint8_t *)addressPublicKey.W, addressPublicKey.W_len));
 		}
 		
 		// Finally
@@ -1884,7 +1889,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			createScalarsFromChaCha20(alpha, rho, rewindNonce, 0);
 
 			// Subtract value bytes from alpha
-			cx_math_subm((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha));
+			CX_THROW(cx_math_subm_no_throw((uint8_t *)alpha, (uint8_t *)alpha, valueBytes, SECP256K1_CURVE_ORDER, sizeof(alpha)));
 			
 			// Check if alpha or rho is zero
 			if(isZeroArraySecure((uint8_t *)alpha, sizeof(alpha)) || isZeroArraySecure((uint8_t *)rho, sizeof(rho))) {
@@ -1929,7 +1934,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Negate the aterm's y component if the bit isn't set in a way that tries to mitigate timing attacks
 				uint8_t *atermY = (uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
 				
-				cx_math_subm(bit ? (uint8_t *)alpha : atermY, SECP256K1_CURVE_PRIME, atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+				CX_THROW(cx_math_subm_no_throw(bit ? (uint8_t *)alpha : atermY, SECP256K1_CURVE_PRIME, atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 				
 				// Check if the sum of aterm to the alpha generator has an x component of zero
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
@@ -2003,7 +2008,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(compareBigNumbers((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -2017,7 +2022,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
 
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(compareBigNumbers((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -2035,22 +2040,22 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
 			
 			// Get the difference of t1 and t2
-			cx_math_subm((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1));
+			CX_THROW(cx_math_subm_no_throw((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1)));
 			
 			// Divide the difference by two
 			uint8_t *twoInverse = (uint8_t *)alpha;
 			explicit_bzero(twoInverse, SCALAR_SIZE - 1);
 			twoInverse[SCALAR_SIZE - 1] = 2;
 			
-			cx_math_invprimem(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_invprimem_no_throw(twoInverse, twoInverse, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
-			cx_math_multm((uint8_t *)t1, (uint8_t *)t1, twoInverse, SECP256K1_CURVE_ORDER, sizeof(t1));
+			CX_THROW(cx_math_multm_no_throw((uint8_t *)t1, (uint8_t *)t1, twoInverse, SECP256K1_CURVE_ORDER, sizeof(t1)));
 			
 			// Get the difference of t2 and t0
-			cx_math_subm((uint8_t *)t2, (uint8_t *)t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2));
+			CX_THROW(cx_math_subm_no_throw((uint8_t *)t2, (uint8_t *)t2, t0, SECP256K1_CURVE_ORDER, sizeof(t2)));
 			
 			// Add t1 to the difference
-			cx_math_addm((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2));
+			CX_THROW(cx_math_addm_no_throw((uint8_t *)t2, (uint8_t *)t2, (uint8_t *)t1, SECP256K1_CURVE_ORDER, sizeof(t2)));
 			
 			// Check if t1 or t2 is zero
 			if(isZeroArraySecure((uint8_t *)t1, sizeof(t1)) || isZeroArraySecure((uint8_t *)t2, sizeof(t2))) {
@@ -2181,7 +2186,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			bulletproofUpdateCommitment(runningCommitment, &t1Generator[PUBLIC_KEY_PREFIX_SIZE], &t2Generator[PUBLIC_KEY_PREFIX_SIZE]);
 			
 			// Check if running commitment overflows or is zero
-			if(cx_math_cmp((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
+			if(compareBigNumbers((uint8_t *)runningCommitment, SECP256K1_CURVE_ORDER, sizeof(runningCommitment)) >= 0 || isZeroArraySecure((uint8_t *)runningCommitment, sizeof(runningCommitment))) {
 
 				// Throw internal error error
 				THROW(INTERNAL_ERROR_ERROR);
@@ -2192,25 +2197,25 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			
 			// Get the product of tau1 and x
 			uint8_t *tempOne = tau1;
-			cx_math_multm(tempOne, tau1, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_multm_no_throw(tempOne, tau1, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
 			// Square x
 			const uint8_t two[] = {2};
-			cx_math_powm(x, x, two, sizeof(two), SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_powm_no_throw(x, x, two, sizeof(two), SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
 			// Get the product of tau2 and x
 			uint8_t *tempTwo = tau2;
-			cx_math_multm(tempTwo, tau2, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_multm_no_throw(tempTwo, tau2, x, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
 			// Add the result
-			cx_math_addm(tempOne, tempOne, tempTwo, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_addm_no_throw(tempOne, tempOne, tempTwo, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
 			// Multiply z squared by the blinding factor
-			cx_math_powm((uint8_t *)z, (uint8_t *)z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z));
-			cx_math_multm(tempTwo, (uint8_t *)z, blindingFactor, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_powm_no_throw((uint8_t *)z, (uint8_t *)z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z)));
+			CX_THROW(cx_math_multm_no_throw(tempTwo, (uint8_t *)z, blindingFactor, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 			
 			// Add the result to get tau x
-			cx_math_addm((uint8_t *)tauX, tempOne, tempTwo, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+			CX_THROW(cx_math_addm_no_throw((uint8_t *)tauX, tempOne, tempTwo, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 		}
 		
 		// Finally
@@ -2302,10 +2307,10 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				}
 				
 				// Get new private key from the node
-				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey);
+				CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)node, sizeof(newPrivateKey.d), (cx_ecfp_private_key_t *)&newPrivateKey));
 				
 				// Add private key to the new private key
-				cx_math_addm((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len);
+				CX_THROW(cx_math_addm_no_throw((uint8_t *)newPrivateKey.d, (uint8_t *)newPrivateKey.d, (uint8_t *)privateKey->d, SECP256K1_CURVE_ORDER, newPrivateKey.d_len));
 				
 				// Check if new private key isn't a valid private key
 				if(!isValidSecp256k1PrivateKey((uint8_t *)newPrivateKey.d, newPrivateKey.d_len)) {
@@ -2315,7 +2320,7 @@ void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t
 				}
 				
 				// Get private key from the new private key
-				cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)newPrivateKey.d, newPrivateKey.d_len, (cx_ecfp_private_key_t *)privateKey);
+				CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)newPrivateKey.d, newPrivateKey.d_len, (cx_ecfp_private_key_t *)privateKey));
 				
 				// Get chain code from the node
 				memcpy((uint8_t *)chainCode, (uint8_t *)&node[sizeof(newPrivateKey.d)], CHAIN_CODE_SIZE);
@@ -2356,19 +2361,19 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 			cx_sha256_init((cx_sha256_t *)&hash);
 			
 			// Add commitment to the hash
-			cx_hash((cx_hash_t *)&hash, 0, (uint8_t *)commitment, CX_SHA256_SIZE, NULL, 0);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, (uint8_t *)commitment, CX_SHA256_SIZE, NULL, 0));
 			
 			// Set parity to if the part's y components aren't quadratic residue
 			const uint8_t parity = ((bool)!isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) << 1) | (bool)!isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]);
 			
 			// Add parity to the hash
-			cx_hash((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0));
 			
 			// Add left part's x component to the hash
-			cx_hash((cx_hash_t *)&hash, 0, leftPart, PUBLIC_KEY_COMPONENT_SIZE, NULL, 0);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, leftPart, PUBLIC_KEY_COMPONENT_SIZE, NULL, 0));
 			
 			// Add right part's x component to the hash and set the commitment to the result
-			cx_hash((cx_hash_t *)&hash, CX_LAST, rightPart, PUBLIC_KEY_COMPONENT_SIZE, (uint8_t *)commitment, CX_SHA256_SIZE);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, CX_LAST, rightPart, PUBLIC_KEY_COMPONENT_SIZE, (uint8_t *)commitment, CX_SHA256_SIZE));
 		}
 	
 		// Finally
@@ -2414,7 +2419,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 				// Increment nonce's counter
 				++nonce[2];
 				
-			} while(cx_math_cmp((uint8_t *)chaCha20CurrentState, SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0 || cx_math_cmp((uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0);
+			} while(compareBigNumbers((uint8_t *)chaCha20CurrentState, SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0 || compareBigNumbers((uint8_t *)&chaCha20CurrentState[ARRAYLEN(chaCha20CurrentState) / 2], SECP256K1_CURVE_ORDER, SCALAR_SIZE) >= 0);
 			
 			// Set scalars to the ChaCha20 current state
 			memcpy((uint8_t *)firstScalar, (uint8_t *)chaCha20CurrentState, SCALAR_SIZE);
@@ -2474,7 +2479,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 			{
 				// Set z22n to z squared
 				const uint8_t two[] = {2};
-				cx_math_powm((uint8_t *)z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n));
+				CX_THROW(cx_math_powm_no_throw((uint8_t *)z22n, z, two, sizeof(two), SECP256K1_CURVE_ORDER, sizeof(z22n)));
 			}
 			
 			// Create inputs
@@ -2483,7 +2488,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 					[SCALAR_SIZE - 1] = 1
 				}
 			};
-			cx_math_subm(inputs[2], SECP256K1_CURVE_ORDER, inputs[1], SECP256K1_CURVE_ORDER, sizeof(inputs[1]));
+			CX_THROW(cx_math_subm_no_throw(inputs[2], SECP256K1_CURVE_ORDER, inputs[1], SECP256K1_CURVE_ORDER, sizeof(inputs[1])));
 			
 			// Create outputs
 			uint8_t *outputs[3] = {(uint8_t *)t0, (uint8_t *)t1, (uint8_t *)t2};
@@ -2499,14 +2504,14 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 				lout[SCALAR_SIZE - 1] = bit;
 				
 				// Update lout
-				cx_math_subm((uint8_t *)lout, (uint8_t *)lout, z, SECP256K1_CURVE_ORDER, sizeof(lout));
+				CX_THROW(cx_math_subm_no_throw((uint8_t *)lout, (uint8_t *)lout, z, SECP256K1_CURVE_ORDER, sizeof(lout)));
 				
 				// Set bit in rout
 				explicit_bzero((uint8_t *)rout, SCALAR_SIZE - 1);
 				rout[SCALAR_SIZE - 1] = 1 - bit;
 				
 				// Update rout
-				cx_math_subm((uint8_t *)rout, z, (uint8_t *)rout, SECP256K1_CURVE_ORDER, sizeof(rout));
+				CX_THROW(cx_math_subm_no_throw((uint8_t *)rout, z, (uint8_t *)rout, SECP256K1_CURVE_ORDER, sizeof(rout)));
 				
 				// Create sl and sr
 				createScalarsFromChaCha20(sl, sr, nonce, i + 2);
@@ -2515,25 +2520,25 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 				for(size_t j = 0; j < ARRAYLEN(outputs); ++j) {
 				
 					// Multiply sl and sr by input
-					cx_math_multm((uint8_t *)tempSl, (uint8_t *)sl, inputs[j], SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-					cx_math_multm((uint8_t *)tempSr, (uint8_t *)sr, inputs[j], SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					CX_THROW(cx_math_multm_no_throw((uint8_t *)tempSl, (uint8_t *)sl, inputs[j], SECP256K1_CURVE_ORDER, SCALAR_SIZE));
+					CX_THROW(cx_math_multm_no_throw((uint8_t *)tempSr, (uint8_t *)sr, inputs[j], SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 					
 					// Update lout
-					cx_math_addm((uint8_t *)tempLout, (uint8_t *)lout, (uint8_t *)tempSl, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					CX_THROW(cx_math_addm_no_throw((uint8_t *)tempLout, (uint8_t *)lout, (uint8_t *)tempSl, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 					
 					// Update rout
-					cx_math_addm((uint8_t *)tempRout, (uint8_t *)rout, (uint8_t *)tempSr, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-					cx_math_multm((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
-					cx_math_addm((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					CX_THROW(cx_math_addm_no_throw((uint8_t *)tempRout, (uint8_t *)rout, (uint8_t *)tempSr, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
+					CX_THROW(cx_math_multm_no_throw((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)yn, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
+					CX_THROW(cx_math_addm_no_throw((uint8_t *)tempRout, (uint8_t *)tempRout, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 					
 					// Update output with lout and rout
-					cx_math_multm((uint8_t *)tempLout, (uint8_t *)tempLout, (uint8_t *)tempRout, SECP256K1_CURVE_ORDER, sizeof(tempLout));
-					cx_math_addm(outputs[j], outputs[j], (uint8_t *)tempLout, SECP256K1_CURVE_ORDER, SCALAR_SIZE);
+					CX_THROW(cx_math_multm_no_throw((uint8_t *)tempLout, (uint8_t *)tempLout, (uint8_t *)tempRout, SECP256K1_CURVE_ORDER, sizeof(tempLout)));
+					CX_THROW(cx_math_addm_no_throw(outputs[j], outputs[j], (uint8_t *)tempLout, SECP256K1_CURVE_ORDER, SCALAR_SIZE));
 				}
 				
 				// Update yn and z22n generator
-				cx_math_multm((uint8_t *)yn, (uint8_t *)yn, y, SECP256K1_CURVE_ORDER, sizeof(yn));
-				cx_math_addm((uint8_t *)z22n, (uint8_t *)z22n, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, sizeof(z22n));
+				CX_THROW(cx_math_multm_no_throw((uint8_t *)yn, (uint8_t *)yn, y, SECP256K1_CURVE_ORDER, sizeof(yn)));
+				CX_THROW(cx_math_addm_no_throw((uint8_t *)z22n, (uint8_t *)z22n, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, sizeof(z22n)));
 				
 				// Check if time to update progress
 				if(!(i % 16)) {
@@ -2612,13 +2617,13 @@ bool isQuadraticResidue(const uint8_t *component) {
 		TRY {
 
 			// Get the square root of the component squared
-			cx_math_powm((uint8_t *)squareRootSquared, component, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			CX_THROW(cx_math_powm_no_throw((uint8_t *)squareRootSquared, component, SECP256K1_CURVE_SQUARE_ROOT_EXPONENT, sizeof(SECP256K1_CURVE_SQUARE_ROOT_EXPONENT), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 			
 			const uint8_t two[] = {2};
-			cx_math_powm((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE);
+			CX_THROW(cx_math_powm_no_throw((uint8_t *)squareRootSquared, (uint8_t *)squareRootSquared, two, sizeof(two), SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
 			
 			// Set result to if the component is quadratic residue
-			result = !cx_math_cmp(component, (uint8_t *)squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE);
+			result = !compareBigNumbers(component, (uint8_t *)squareRootSquared, PUBLIC_KEY_COMPONENT_SIZE);
 		}
 		
 		// Finally
@@ -2734,4 +2739,17 @@ end:
 		// Throw error
 		THROW(error);
 	}
+}
+
+// Compare big numbers
+int compareBigNumbers(const uint8_t *firstValue, const uint8_t *secondValue, const size_t valueLength) {
+
+	// Initialize result
+	int result;
+	
+	// Compare values and check if it fails
+	CX_THROW(cx_math_cmp_no_throw(firstValue, secondValue, valueLength, &result));
+	
+	// Return result
+	return result;
 }

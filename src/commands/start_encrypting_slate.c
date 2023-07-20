@@ -196,13 +196,13 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		cx_sha256_init(&slate.messageHashState);
 		
 		// Add MQS message part one to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_ONE, sizeof(MQS_MESSAGE_PART_ONE), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_ONE, sizeof(MQS_MESSAGE_PART_ONE), NULL, 0));
 		
 		// Add address to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)address, addressDomain ? addressDomain - address : addressLength, NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)address, addressDomain ? addressDomain - address : addressLength, NULL, 0));
 		
 		// Add MQS message part two to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_TWO, sizeof(MQS_MESSAGE_PART_TWO), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_TWO, sizeof(MQS_MESSAGE_PART_TWO), NULL, 0));
 		
 		// Check if address has a domain
 		if(addressDomain) {
@@ -214,26 +214,26 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 			if(addressPort) {
 			
 				// Add address domain to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressPort - addressDomain - sizeof((char)'@'), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressPort - addressDomain - sizeof((char)'@'), NULL, 0));
 				
 				// Add MQS message part three to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0));
 				
 				// Add address port to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressPort[sizeof((char)':')], addressLength - (addressPort - address + sizeof((char)':')), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressPort[sizeof((char)':')], addressLength - (addressPort - address + sizeof((char)':')), NULL, 0));
 			}
 			
 			// Otherwise
 			else {
 			
 				// Add address domain to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressLength - (addressDomain - address + sizeof((char)'@')), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)&addressDomain[sizeof((char)'@')], addressLength - (addressDomain - address + sizeof((char)'@')), NULL, 0));
 				
 				// Add MQS message part three to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0));
 				
 				// Add MQS message no port to the message hash state
-				cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0));
 			}
 		}
 		
@@ -241,24 +241,24 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		else {
 		
 			// Add MQS message part three to the message hash state
-			cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_THREE, sizeof(MQS_MESSAGE_PART_THREE), NULL, 0));
 			
 			// Add MQS message no port to the message hash state
-			cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_NO_PORT, sizeof(MQS_MESSAGE_NO_PORT), NULL, 0));
 		}
 		
 		// Add MQS message part four to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FOUR, sizeof(MQS_MESSAGE_PART_FOUR), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FOUR, sizeof(MQS_MESSAGE_PART_FOUR), NULL, 0));
 		
 		// Get nonce as a string
 		char nonceString[sizeof(nonce) * HEXADECIMAL_CHARACTER_SIZE];
 		toHexString(nonceString, nonce, sizeof(nonce));
 		
 		// Add nonce string to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)nonceString, sizeof(nonceString), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)nonceString, sizeof(nonceString), NULL, 0));
 		
 		// Add MQS message part five to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FIVE, sizeof(MQS_MESSAGE_PART_FIVE), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_FIVE, sizeof(MQS_MESSAGE_PART_FIVE), NULL, 0));
 		
 		// Get salt as a string
 		const size_t saltStringLength = saltLength * HEXADECIMAL_CHARACTER_SIZE;
@@ -266,10 +266,10 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		toHexString(saltString, salt, saltLength);
 		
 		// Add salt string to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)saltString, saltStringLength, NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)saltString, saltStringLength, NULL, 0));
 		
 		// Add MQS message part six to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_SIX, sizeof(MQS_MESSAGE_PART_SIX), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)MQS_MESSAGE_PART_SIX, sizeof(MQS_MESSAGE_PART_SIX), NULL, 0));
 	}
 	
 	// Check if response with the nonce and salt will overflow

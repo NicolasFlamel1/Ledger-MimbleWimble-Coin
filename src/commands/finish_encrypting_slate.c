@@ -44,7 +44,7 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 	volatile uint8_t signature[MAXIMUM_DER_SIGNATURE_SIZE];
 	
 	// Initialize signature length
-	volatile size_t signatureLength = 0;
+	volatile size_t signatureLength = sizeof(signature);
 	
 	// Check if creating message hash
 	if(slate.messageHashState.header.info) {
@@ -54,11 +54,11 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 		toHexString(tagString, tag, sizeof(tag));
 		
 		// Add tag string to the message hash state
-		cx_hash((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)tagString, sizeof(tagString), NULL, 0);
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, 0, (uint8_t *)tagString, sizeof(tagString), NULL, 0));
 		
 		// Add MQS message part seven to the message hash and get the message hash
 		uint8_t messageHash[CX_SHA256_SIZE];
-		cx_hash((cx_hash_t *)&slate.messageHashState, CX_LAST, (uint8_t *)MQS_MESSAGE_PART_SEVEN, sizeof(MQS_MESSAGE_PART_SEVEN), messageHash, sizeof(messageHash));
+		CX_THROW(cx_hash_no_throw((cx_hash_t *)&slate.messageHashState, CX_LAST, (uint8_t *)MQS_MESSAGE_PART_SEVEN, sizeof(MQS_MESSAGE_PART_SEVEN), messageHash, sizeof(messageHash)));
 		
 		// Initialize address private key
 		volatile cx_ecfp_private_key_t addressPrivateKey;
@@ -73,7 +73,7 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 				getAddressPrivateKey(&addressPrivateKey, slate.account, slate.index, CX_CURVE_SECP256K1);
 				
 				// Get signature of the message hash
-				signatureLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, messageHash, sizeof(messageHash), (uint8_t *)signature, sizeof(signature), NULL);
+				CX_THROW(cx_ecdsa_sign_no_throw((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, messageHash, sizeof(messageHash), (uint8_t *)signature, (size_t *)&signatureLength, NULL));
 			}
 			
 			// Finally

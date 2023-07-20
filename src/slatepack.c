@@ -53,7 +53,7 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const u
 	}
 	
 	// Compress the public key
-	cx_edwards_compress_point(CX_CURVE_Ed25519, publicKey.W, publicKey.W_len);
+	CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, publicKey.W, publicKey.W_len));
 
 	// Initialize Ed25519 private key
 	volatile cx_ecfp_private_key_t ed25519PrivateKey;
@@ -82,10 +82,10 @@ void createSlatepackSharedPrivateKey(volatile uint8_t *sharedPrivateKey, const u
 			uncompressedX25519PublicKey[0] = X25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 			memcpy(&uncompressedX25519PublicKey[PUBLIC_KEY_PREFIX_SIZE], x25519PublicKey, sizeof(x25519PublicKey));
 			
-			cx_edwards_decompress_point(CX_CURVE_Curve25519, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey));
+			CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Curve25519, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey)));
 			
 			// Create a shared private key from the X25519 private key and uncompressed X25519 public key
-			cx_ecdh((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey), (uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE);
+			CX_THROW(cx_ecdh_no_throw((cx_ecfp_private_key_t *)&x25519PrivateKey, CX_ECDH_X, uncompressedX25519PublicKey, sizeof(uncompressedX25519PublicKey), (uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE));
 			
 			// Swap shared private key's endianness
 			swapEndianness((uint8_t *)sharedPrivateKey, SLATEPACK_SHARED_PRIVATE_KEY_SIZE);
@@ -159,10 +159,10 @@ bool getPublicKeyFromSlatepackAddress(cx_ecfp_public_key_t *publicKey, const cha
 		uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedSlatepackAddress, sizeof(decodedSlatepackAddress));
 		
-		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey)));
 		
 		// Initialize the public key with the uncompressed public key
-		cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
+		CX_THROW(cx_ecfp_init_public_key_no_throw(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey));
 	}
 	
 	// Return true

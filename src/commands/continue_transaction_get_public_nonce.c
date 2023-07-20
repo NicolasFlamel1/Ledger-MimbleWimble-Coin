@@ -61,7 +61,7 @@ void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLen
 		TRY {
 		
 			// Get private key from the transaction's secret nonce
-			cx_ecfp_init_private_key(CX_CURVE_SECP256K1, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce), (cx_ecfp_private_key_t *)&privateKey);
+			CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)transaction.secretNonce, sizeof(transaction.secretNonce), (cx_ecfp_private_key_t *)&privateKey));
 	
 			// Get public nonce from the private key
 			getPublicKeyFromPrivateKey(publicNonce, (cx_ecfp_private_key_t *)&privateKey);

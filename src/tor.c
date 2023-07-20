@@ -90,10 +90,10 @@ bool getPublicKeyFromTorAddress(cx_ecfp_public_key_t *publicKey, const char *tor
 		uncompressedPublicKey[0] = ED25519_COMPRESSED_PUBLIC_KEY_PREFIX;
 		memcpy(&uncompressedPublicKey[PUBLIC_KEY_PREFIX_SIZE], decodedTorAddress, ED25519_PUBLIC_KEY_SIZE);
 		
-		cx_edwards_decompress_point(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey));
+		CX_THROW(cx_edwards_decompress_point_no_throw(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey)));
 		
 		// Initialize the public key with the uncompressed public key
-		cx_ecfp_init_public_key(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey);
+		CX_THROW(cx_ecfp_init_public_key_no_throw(CX_CURVE_Ed25519, uncompressedPublicKey, sizeof(uncompressedPublicKey), publicKey));
 	}
 	
 	// Return true
@@ -139,10 +139,10 @@ void getChecksum(uint8_t *checksum, const uint8_t *data) {
 	
 	// Get hash of the checksum data
 	cx_sha3_t hash;
-	cx_sha3_init(&hash, CX_SHA256_SIZE * BITS_IN_A_BYTE);
+	CX_THROW(cx_sha3_init_no_throw(&hash, CX_SHA256_SIZE * BITS_IN_A_BYTE));
 	
 	uint8_t hashResult[CX_SHA256_SIZE];
-	cx_hash(&hash.header, CX_LAST, checksumData, sizeof(checksumData), hashResult, sizeof(hashResult));
+	CX_THROW(cx_hash_no_throw(&hash.header, CX_LAST, checksumData, sizeof(checksumData), hashResult, sizeof(hashResult)));
 	
 	// Get checksum from the hash
 	memcpy(checksum, hashResult, ADDRESS_CHECKSUM_SIZE);

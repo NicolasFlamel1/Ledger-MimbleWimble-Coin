@@ -798,7 +798,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						{
 							// Get address public key from the address private key
 							cx_ecfp_public_key_t addressPublicKey;
-							cx_ecfp_generate_pair(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
+							CX_THROW(cx_ecfp_generate_pair_no_throw(CX_CURVE_SECP256K1, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true));
 							
 							// Check if the address public key is in the payment proof message
 							if(memmem(paymentProofMessage, paymentProofMessageLength, addressPublicKey.W, addressPublicKey.W_len)) {
@@ -829,7 +829,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						cx_hash_sha256(paymentProofMessage, paymentProofMessageLength, hash, sizeof(hash));
 				
 						// Get signature of the hash
-						paymentProofLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)paymentProof, paymentProofLength, NULL);
+						CX_THROW(cx_ecdsa_sign_no_throw((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)paymentProof, (size_t *)&paymentProofLength, NULL));
 					
 						// Break
 						break;
@@ -844,10 +844,10 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						{
 							// Get address public key from address private key
 							cx_ecfp_public_key_t addressPublicKey;
-							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true);
+							CX_THROW(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &addressPublicKey, (cx_ecfp_private_key_t *)&addressPrivateKey, true));
 							
 							// Compress the address public key
-							cx_edwards_compress_point(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len);
+							CX_THROW(cx_edwards_compress_point_no_throw(CX_CURVE_Ed25519, addressPublicKey.W, addressPublicKey.W_len));
 							
 							// Check if the address public key is in the payment proof message
 							if(memmem(paymentProofMessage, paymentProofMessageLength, &addressPublicKey.W[PUBLIC_KEY_PREFIX_SIZE], ED25519_PUBLIC_KEY_SIZE)) {
@@ -864,7 +864,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						paymentProof = alloca(paymentProofLength);
 					
 						// Get signature of the payment proof message
-						cx_eddsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_LAST, CX_SHA512, paymentProofMessage, paymentProofMessageLength, NULL, 0, (uint8_t *)paymentProof, paymentProofLength, NULL);
+						CX_THROW(cx_eddsa_sign_no_throw((cx_ecfp_private_key_t *)&addressPrivateKey, CX_SHA512, paymentProofMessage, paymentProofMessageLength, (uint8_t *)paymentProof, paymentProofLength));
 					
 						// Break
 						break;

@@ -224,7 +224,7 @@ void processGetMqsChallengeSignatureUserInteraction(unsigned short *responseLeng
 	volatile uint8_t signature[MAXIMUM_DER_SIGNATURE_SIZE];
 	
 	// Initialize signature length
-	volatile size_t signatureLength;
+	volatile size_t signatureLength = sizeof(signature);
 	
 	// Begin try
 	BEGIN_TRY {
@@ -236,7 +236,7 @@ void processGetMqsChallengeSignatureUserInteraction(unsigned short *responseLeng
 			getAddressPrivateKey(&addressPrivateKey, account, index, CX_CURVE_SECP256K1);
 			
 			// Get signature of the hash
-			signatureLength = cx_ecdsa_sign((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)signature, sizeof(signature), NULL);
+			CX_THROW(cx_ecdsa_sign_no_throw((cx_ecfp_private_key_t *)&addressPrivateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), (uint8_t *)signature, (size_t *)&signatureLength, NULL));
 		}
 		
 		// Finally

@@ -85,7 +85,7 @@ void getBlake2b(volatile uint8_t *output, const size_t outputLength, const uint8
 
 	// Initialize hash
 	volatile cx_blake2b_t hash;
-	cx_blake2b_init((cx_blake2b_t *)&hash, BITS_SIZE);
+	CX_THROW(cx_blake2b_init_no_throw((cx_blake2b_t *)&hash, BITS_SIZE));
 	
 	// Initialize parameter
 	struct Parameter parameter = {
@@ -122,11 +122,11 @@ void getBlake2b(volatile uint8_t *output, const size_t outputLength, const uint8
 				memcpy((uint8_t *)keyBlock, key, keyLength);
 				
 				// Update the hash with the block
-				cx_hash((cx_hash_t *)&hash.header, 0, (uint8_t *)keyBlock, sizeof(keyBlock), NULL, 0);
+				CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash.header, 0, (uint8_t *)keyBlock, sizeof(keyBlock), NULL, 0));
 			}
 	
 			// Get hash
-			cx_hash((cx_hash_t *)&hash.header, CX_LAST, input, inputLength, (uint8_t *)output, outputLength);
+			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash.header, CX_LAST, input, inputLength, (uint8_t *)output, outputLength));
 		}
 		
 		// Finally
