@@ -1,4 +1,4 @@
-name: Compilation & tests
+name: Build and perform unit and functional tests
 
 on: [push, pull_request]
 
