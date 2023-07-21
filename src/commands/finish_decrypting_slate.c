@@ -13,79 +13,79 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
-	
+
 	// Get request's second parameter
 	const uint8_t secondParameter = G_io_apdu_buffer[APDU_OFF_P2];
-	
+
 	// Get request's data length
 	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
-	
+
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
 	if(firstParameter || secondParameter || dataLength != POLY1305_TAG_SIZE) {
-	
+
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
-	
+
 	// Check if slate decrypting state isn't active or complete
 	if(slate.decryptingState != ACTIVE_SLATE_STATE && slate.decryptingState != COMPLETE_SLATE_STATE) {
-	
+
 		// Throw invalid state error
 		THROW(INVALID_STATE_ERROR);
 	}
-	
+
 	// Get tag from data
 	const uint8_t *tag = data;
-	
+
 	// Initialize expected tag
 	volatile uint8_t expectedTag[POLY1305_TAG_SIZE];
-	
+
 	// Begin try
 	BEGIN_TRY {
-	
+
 		// Try
 		TRY {
-	
+
 			// Get ChaCha20 Poly1305 expected tag
 			getChaCha20Poly1305Tag((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, expectedTag);
-			
+
 			// Check if tag isn't equal to the expected tag
 			if(os_secure_memcmp((uint8_t *)tag, (uint8_t *)expectedTag, sizeof(expectedTag))) {
-			
+
 				// Throw invalid parameters error
 				THROW(INVALID_PARAMETERS_ERROR);
 			}
 		}
-		
+
 		// Finally
 		FINALLY {
-		
+
 			// Clear the expected tag
 			explicit_bzero((uint8_t *)expectedTag, sizeof(expectedTag));
 		}
 	}
-	
+
 	// End try
 	END_TRY;
-	
+
 	// Check if response with the slate session key will overflow
 	if(willResponseOverflow(*responseLength, sizeof(slate.sessionKey))) {
-	
+
 		// Throw length error
 		THROW(ERR_APD_LEN);
 	}
-	
+
 	// Append slate session key to response
 	memcpy(&G_io_apdu_buffer[*responseLength], slate.sessionKey, sizeof(slate.sessionKey));
-	
+
 	*responseLength += sizeof(slate.sessionKey);
-	
+
 	// Reset the slate
 	resetSlate();
-	
+
 	// Throw success
 	THROW(SWO_SUCCESS);
 }

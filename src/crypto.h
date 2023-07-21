@@ -83,7 +83,7 @@ enum SwitchType {
 
 	// No switch type
 	NO_SWITCH_TYPE,
-	
+
 	// Regular switch type
 	REGULAR_SWITCH_TYPE
 };

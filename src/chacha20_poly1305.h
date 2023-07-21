@@ -30,19 +30,19 @@ struct ChaCha20Poly1305State {
 
 	// ChaCha20 original state
 	uint32_t chaCha20OriginalState[CHACHA20_BLOCK_SIZE / sizeof(uint32_t)];
-	
+
 	// Poly1305 r
 	uint8_t poly1305R[POLY1305_NUMBER_SIZE];
-	
+
 	// Poly1305 s
 	uint8_t poly1305S[POLY1305_NUMBER_SIZE];
-	
+
 	// Poly1305 accumulator
 	uint8_t poly1305Accumulator[POLY1305_NUMBER_SIZE];
-	
+
 	// Additional authenticated data length
 	uint64_t additionalAuthenticatedDataLength;
-	
+
 	// Data length
 	uint64_t dataLength;
 };

@@ -35,19 +35,19 @@ struct Time {
 
 	// Second
 	uint8_t second;
-	
+
 	// Minute
 	uint8_t minute;
-	
+
 	// Hour
 	uint8_t hour;
-	
+
 	// Day
 	uint16_t day;
-	
+
 	// Month
 	uint8_t month;
-	
+
 	// Year
 	uint32_t year;
 };

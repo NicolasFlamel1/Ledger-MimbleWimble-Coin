@@ -1,0 +1,27 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+---
+Language: Cpp
+ColumnLimit: 0
+PointerAlignment: Right
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: true
+AllowAllParametersOfDeclarationOnNextLine: false
+SortIncludes: false
+SpaceAfterCStyleCast: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+BinPackArguments: false
+BinPackParameters: false
+UseTab: Always
+TabWidth: 4
+MaxEmptyLinesToKeep: 2
+SpaceBeforeParens: Never
+KeepEmptyLinesAtTheStartOfBlocks: true
+IndentPPDirectives: BeforeHash
+AlignConsecutiveMacros: false
+---

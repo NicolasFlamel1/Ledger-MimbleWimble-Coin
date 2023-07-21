@@ -23,7 +23,7 @@ struct PersistentStorage {
 
 	// Transaction secret nonces
 	uint8_t transactionSecretNonces[NUMBER_OF_TRANSACTION_SECRET_NONCES][sizeof(transaction.secretNonce) + ((sizeof(transaction.secretNonce) % CX_AES_BLOCK_SIZE) ? CX_AES_BLOCK_SIZE - sizeof(transaction.secretNonce) % CX_AES_BLOCK_SIZE : CX_AES_BLOCK_SIZE)];
-	
+
 	// Current transaction secret nonce index
 	uint8_t currentTransactionSecretNonceIndex;
 };

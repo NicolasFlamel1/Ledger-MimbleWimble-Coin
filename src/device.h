@@ -12,7 +12,7 @@
 
 	// Header files
 	#include <os_utils.h>
-	
+
 	// Disable exception handling macros
 	#undef BEGIN_TRY
 	#define BEGIN_TRY

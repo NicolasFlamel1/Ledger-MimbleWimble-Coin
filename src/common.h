@@ -33,25 +33,25 @@ enum Error {
 
 	// Unknown class error
 	UNKNOWN_CLASS_ERROR = ERR_APP_RANGE_01 + ERR_GEN_SUB_01,
-	
+
 	// Unknown instruction error
 	UNKNOWN_INSTRUCTION_ERROR,
-	
+
 	// Malformed request error
 	MALFORMED_REQUEST_ERROR,
-	
+
 	// User rejected error
 	USER_REJECTED_ERROR,
-	
+
 	// Internal error error
 	INTERNAL_ERROR_ERROR,
-	
+
 	// Invalid parameters error
 	INVALID_PARAMETERS_ERROR = ERR_APP_RANGE_03 + ERR_GEN_SUB_01,
-	
+
 	// Invalid state error
 	INVALID_STATE_ERROR,
-	
+
 	// Device locked error
 	DEVICE_LOCKED_ERROR
 };
@@ -61,10 +61,10 @@ enum AddressType {
 
 	// MQS address type
 	MQS_ADDRESS_TYPE,
-	
+
 	// Tor ddress type
 	TOR_ADDRESS_TYPE,
-	
+
 	// Slatepack address type
 	SLATEPACK_ADDRESS_TYPE
 };

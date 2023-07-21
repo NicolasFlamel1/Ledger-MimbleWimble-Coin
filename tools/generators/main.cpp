@@ -111,7 +111,7 @@ int main() {
 		}
 		
 		// Write end of generator to file
-		file << '}' << ((i != NUMBER_OF_GENERATORS / 2 - 1) ? "," : "") << endl;
+		file << "}," << endl;
 	}
 	
 	// Write end of generators first half to file
@@ -144,7 +144,7 @@ int main() {
 		}
 		
 		// Write end of generator to file
-		file << '}' << ((i != NUMBER_OF_GENERATORS / 2 - 1) ? "," : "") << endl;
+		file << "}," << endl;
 	}
 	
 	// Write end of generators second half to file

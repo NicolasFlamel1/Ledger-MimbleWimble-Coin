@@ -56,7 +56,8 @@
 #ifndef CURRENCY_MQS_VERSION
 
 	// Define default currency MQS version
-	#define CURRENCY_MQS_VERSION {0, 0}
+	#define CURRENCY_MQS_VERSION \
+		{ 0, 0 }
 #endif
 
 // Check if currency Slatepack address human readable part isn't defined
@@ -130,7 +131,7 @@ enum AddressDerivationTypes {
 
 	// MWC address derivation
 	MWC_ADDRESS_DERIVATION,
-	
+
 	// GRIN address derivation
 	GRIN_ADDRESS_DERIVATION
 };
@@ -140,7 +141,7 @@ enum PaymentProofMessageTypes {
 
 	// ASCII payment proof message
 	ASCII_PAYMENT_PROOF_MESSAGE,
-	
+
 	// Binary payment proof message
 	BINARY_PAYMENT_PROOF_MESSAGE
 };
@@ -150,10 +151,10 @@ enum PaymentProofAddressTypes {
 
 	// MQS payment proof address
 	MQS_PAYMENT_PROOF_ADDRESS = 1 << 0,
-	
+
 	// Tor payment proof address
 	TOR_PAYMENT_PROOF_ADDRESS = 1 << 1,
-	
+
 	// Slatepack payment proof address
 	SLATEPACK_PAYMENT_PROOF_ADDRESS = 1 << 2
 };
@@ -163,10 +164,10 @@ enum SlateEncryptionTypes {
 
 	// MQS slate encryption
 	MQS_SLATE_ENCRYPTION = 1 << 0,
-	
+
 	// Tor slate encryption
 	TOR_SLATE_ENCRYPTION = 1 << 1,
-	
+
 	// Slatepack slate encryption
 	SLATEPACK_SLATE_ENCRYPTION = 1 << 2
 };
@@ -181,7 +182,7 @@ _Static_assert(CURRENCY_BIP44_COIN_TYPE >= 0 && CURRENCY_BIP44_COIN_TYPE <= UINT
 _Static_assert(CURRENCY_FRACTIONAL_DIGITS >= 0 && CURRENCY_FRACTIONAL_DIGITS <= UINT64_BUFFER_SIZE, "Invalid currency fractional digits");
 
 // Assert that currency MQS version is valid
-_Static_assert(sizeof((uint8_t [])CURRENCY_MQS_VERSION) == sizeof(uint16_t), "Invalid currency MQS version");
+_Static_assert(sizeof((uint8_t[])CURRENCY_MQS_VERSION) == sizeof(uint16_t), "Invalid currency MQS version");
 
 // Assert that currency maximum fee is valid
 _Static_assert(CURRENCY_MAXIMUM_FEE >= 0 && CURRENCY_MAXIMUM_FEE <= UINT64_MAX, "Invalid currency maximum fee");
