@@ -155,7 +155,7 @@
 					if(requestLength >= sizeof(G_io_apdu_buffer)) {
 					
 						// Throw length error
-						THROW(ERR_APD_LEN);
+						THROW(LENGTH_ERROR);
 					}
 					
 					// Get request and/or send response
@@ -175,7 +175,7 @@
 					if(requestLength >= sizeof(G_io_apdu_buffer)) {
 					
 						// Throw length error
-						THROW(ERR_APD_LEN);
+						THROW(LENGTH_ERROR);
 					}
 					
 					// Check if pin is not validated
@@ -221,7 +221,7 @@
 							if(willResponseOverflow(responseLength, sizeof(uint16_t))) {
 							
 								// Throw length error
-								THROW(ERR_APD_LEN);
+								THROW(LENGTH_ERROR);
 							}
 							
 							// Otherwise

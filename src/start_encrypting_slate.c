@@ -204,7 +204,7 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 	if(willResponseOverflow(*responseLength, sizeof(nonce) + saltLength)) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append nonce to response	

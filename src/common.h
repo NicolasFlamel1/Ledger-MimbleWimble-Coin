@@ -27,6 +27,8 @@
 
 // Error
 enum Error {
+	// Length error
+	LENGTH_ERROR = 0x6700,
 
 	// Unknown class error
 	UNKNOWN_CLASS_ERROR = ERR_APP_RANGE_01 + ERR_GEN_SUB_01,

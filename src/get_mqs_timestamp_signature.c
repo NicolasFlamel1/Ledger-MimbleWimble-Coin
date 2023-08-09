@@ -168,7 +168,7 @@ void processGetMqsTimestampSignatureUserInteraction(unsigned short *responseLeng
 	if(willResponseOverflow(*responseLength, signatureLength)) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append signature to response

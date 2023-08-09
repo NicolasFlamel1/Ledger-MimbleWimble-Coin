@@ -42,7 +42,7 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 	if(willResponseOverflow(*responseLength, sizeof(tag))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append tag to response

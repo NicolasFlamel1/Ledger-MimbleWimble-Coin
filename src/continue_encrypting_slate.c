@@ -47,7 +47,7 @@ void processContinueEncryptingSlateRequest(unsigned short *responseLength, __att
 	if(willResponseOverflow(*responseLength, sizeof(encryptedData))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append encrypted data to response

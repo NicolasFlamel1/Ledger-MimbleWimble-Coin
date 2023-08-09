@@ -75,7 +75,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 	if(willResponseOverflow(*responseLength, sizeof(slate.sessionKey))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append slate session key to response

@@ -82,7 +82,7 @@ void processContinueTransactionGetPublicKeyRequest(unsigned short *responseLengt
 	if(willResponseOverflow(*responseLength, sizeof(publicKey))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append public key to response

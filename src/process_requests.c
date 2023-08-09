@@ -317,10 +317,10 @@ void processRequest(unsigned short requestLength, volatile unsigned short *respo
 		}
 		
 		// Catch length error
-		CATCH(ERR_APD_LEN) {
+		CATCH(LENGTH_ERROR) {
 		
 			// Throw length error
-			THROW(ERR_APD_LEN);
+			THROW(LENGTH_ERROR);
 		}
 		
 		// Catch other errors
@@ -463,10 +463,10 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 		}
 		
 		// Catch length error
-		CATCH(ERR_APD_LEN) {
+		CATCH(LENGTH_ERROR) {
 		
 			// Throw length error
-			THROW(ERR_APD_LEN);
+			THROW(LENGTH_ERROR);
 		}
 		
 		// Catch other errors
@@ -497,7 +497,7 @@ void processUserInteraction(size_t instruction, bool isApprovedResult, bool show
 					if(willResponseOverflow(responseLength, sizeof(uint16_t))) {
 				
 						// Throw length error
-						THROW(ERR_APD_LEN);
+						THROW(LENGTH_ERROR);
 					}
 					
 					// Otherwise

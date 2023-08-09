@@ -134,7 +134,7 @@ void processGetAddressRequest(unsigned short *responseLength, __attribute__((unu
 	if(willResponseOverflow(*responseLength, addressLength)) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append address to response

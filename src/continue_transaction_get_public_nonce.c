@@ -82,7 +82,7 @@ void processContinueTransactionGetPublicNonceRequest(unsigned short *responseLen
 	if(willResponseOverflow(*responseLength, sizeof(publicNonce))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append public nonce to response

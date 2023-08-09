@@ -117,7 +117,7 @@ void processContinueTransactionGetEncryptedSecretNonceRequest(unsigned short *re
 	if(willResponseOverflow(*responseLength, encryptedSecretNonceAndSignatureLength)) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append encrypted secret nonce and signature to response

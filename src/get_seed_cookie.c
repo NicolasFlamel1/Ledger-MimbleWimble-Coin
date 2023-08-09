@@ -83,7 +83,7 @@ void processGetSeedCookieRequest(unsigned short *responseLength, __attribute__((
 	if(willResponseOverflow(*responseLength, sizeof(seedCookie))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append seed cookie to response

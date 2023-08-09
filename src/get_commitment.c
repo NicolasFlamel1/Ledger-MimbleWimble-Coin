@@ -116,7 +116,7 @@ void processGetCommitmentRequest(unsigned short *responseLength, __attribute__((
 	if(willResponseOverflow(*responseLength, sizeof(commitment))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 
 	// Append commitment to response

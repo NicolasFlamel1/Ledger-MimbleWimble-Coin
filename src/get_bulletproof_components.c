@@ -234,7 +234,7 @@ void processGetBulletproofComponentsRequest(unsigned short *responseLength, __at
 	if(willResponseOverflow(*responseLength, sizeof(bulletproofTauX) + sizeof(bulletproofTOne) + sizeof(bulletproofTTwo))) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 
 	// Append bulletproof tau x, t one, and t two to response

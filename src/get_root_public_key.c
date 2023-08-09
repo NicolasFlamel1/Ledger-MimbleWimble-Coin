@@ -80,7 +80,7 @@ void processGetRootPublicKeyUserInteraction(unsigned short *responseLength) {
 			if(willResponseOverflow(*responseLength, sizeof(rootPublicKey))) {
 			
 				// Throw length error
-				THROW(ERR_APD_LEN);
+				THROW(LENGTH_ERROR);
 			}
 			
 			// Append root public key to response

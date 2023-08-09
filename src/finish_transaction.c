@@ -743,7 +743,7 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 	if(willResponseOverflow(*responseLength, sizeof(signature) + paymentProofLength)) {
 	
 		// Throw length error
-		THROW(ERR_APD_LEN);
+		THROW(LENGTH_ERROR);
 	}
 	
 	// Append signature to response
