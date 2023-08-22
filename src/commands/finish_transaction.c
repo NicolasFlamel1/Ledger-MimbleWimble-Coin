@@ -11,13 +11,14 @@
 #include "../mqs.h"
 #include "../transaction.h"
 #include "../slatepack.h"
+#include "../time.h"
 #include "../tor.h"
 
 
 // Definitions
 
 // Maximum relative height
-#define MAXIMUM_RELATIVE_HEIGHT (7 * 24 * 60)
+#define MAXIMUM_RELATIVE_HEIGHT (DAYS_IN_A_WEEK * HOURS_IN_A_DAY * MINUTES_IN_AN_HOUR)
 
 
 // Constants

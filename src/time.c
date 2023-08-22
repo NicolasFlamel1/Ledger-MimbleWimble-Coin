@@ -10,7 +10,7 @@
 #define MONTHS_IN_A_YEAR 12
 
 // Rebase year
-#define REBEASE_YEAR 1601
+#define REBASE_YEAR 1601
 
 // Seconds from 1601 to 1970
 #define SECONDS_FROM_1601_TO_1970 11644473600
@@ -117,7 +117,7 @@ void epochToTime(struct Time *time, const uint64_t epoch) {
 	time->second = seconds;
 
 	// Set time's year
-	time->year = REBEASE_YEAR + quadricentennials * YEARS_IN_A_QUADRICENTENNIAL + centennials * YEARS_IN_A_CENTENNIAL + quadrennials * YEARS_IN_A_QUADRENNIAL + annuals;
+	time->year = REBASE_YEAR + quadricentennials * YEARS_IN_A_QUADRICENTENNIAL + centennials * YEARS_IN_A_CENTENNIAL + quadrennials * YEARS_IN_A_QUADRENNIAL + annuals;
 
 	// Get if year is a leap year
 	const bool leapYear = isLeapYear(time->year);

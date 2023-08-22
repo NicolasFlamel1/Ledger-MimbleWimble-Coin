@@ -18,6 +18,12 @@
 // Minutes in an hour
 #define MINUTES_IN_AN_HOUR 60
 
+// Hours in a day
+#define HOURS_IN_A_DAY 24
+
+// Days in a week
+#define DAYS_IN_A_WEEK 7
+
 // Maximum epoch
 #define MAXIMUM_EPOCH ((uint64_t)UINT32_MAX * MINUTES_IN_AN_HOUR * SECONDS_IN_A_MINUTE)
 
