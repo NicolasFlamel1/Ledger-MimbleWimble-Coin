@@ -327,7 +327,7 @@
       t1 = e + s1 + ch + K[j + 3] + blocks[j + 3];
       t2 = s0 + maj;
       e = a + t1 << 0;
-      a = t1 + t2 << 0;
+      a = t1 + t2 << 0;(function(){})(a);
     }
 
     this.h0 = this.h0 + a << 0;
