@@ -83,7 +83,7 @@
 	#define FAILED_LINE_BUFFER_SIZE sizeof("Verifying Tor\naddress failed")
 
 	// Canceled line buffer size
-	#define CANCELED_LINE_BUFFER_SIZE sizeof("Verifying Tor"\naddress canceled")
+	#define CANCELED_LINE_BUFFER_SIZE sizeof("Verifying Tor\naddress canceled")
 
 	// Cancel prompt line buffer size
 	#define CANCEL_PROMPT_LINE_BUFFER_SIZE sizeof("Deny receiving\ntransaction?")

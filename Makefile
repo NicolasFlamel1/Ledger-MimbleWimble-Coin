@@ -111,25 +111,25 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME="icons/MimbleWimble Coin/nanos_app.gif"
+	ICONNAME="icons/nanos_app.gif"
 
 # Otherwise check if target is the Nano X
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
-	ICONNAME="icons/MimbleWimble Coin/nanox_app.gif"
+	ICONNAME="icons/nanox_app.gif"
 
 # Otherwise check if target is the Nano S Plus
 else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Icon name
-	ICONNAME="icons/MimbleWimble Coin/nanosplus_app.gif"
+	ICONNAME="icons/nanosplus_app.gif"
 
 # Otherwise check if target is the Stax
 else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Icon name
-	ICONNAME="icons/MimbleWimble Coin/stax_app.gif"
+	ICONNAME="icons/stax_app.gif"
 endif
 
 # Make command
