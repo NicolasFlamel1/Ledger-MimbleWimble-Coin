@@ -5,7 +5,6 @@
 
 // Header files
 #include <libcxng.h>
-#include <../src/cx_hkdf.h>
 
 // Check if performing unit tests
 #ifdef UNIT_TESTS
