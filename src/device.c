@@ -74,6 +74,9 @@ unsigned short io_exchange_al(const unsigned char channel, const unsigned short 
 
 			// Throw invalid parameter error
 			THROW(INVALID_PARAMETER);
+
+			// Break
+			break;
 	}
 
 	// Return zero

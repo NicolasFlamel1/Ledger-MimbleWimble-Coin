@@ -5,7 +5,7 @@
 
 // Header files
 #include "crypto.h"
-#include "mqs.h"
+#include "currency.h"
 #include "tor.h"
 #include "slatepack.h"
 

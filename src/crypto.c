@@ -7,6 +7,7 @@
 #include "chacha20_poly1305.h"
 #include "common.h"
 #include "crypto.h"
+#include "currency.h"
 #include "generators.h"
 #include "menus.h"
 #include "mqs.h"

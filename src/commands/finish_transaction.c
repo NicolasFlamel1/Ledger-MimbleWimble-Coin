@@ -6,6 +6,7 @@
 #include "../blake2b.h"
 #include "../common.h"
 #include "../crypto.h"
+#include "../currency.h"
 #include "finish_transaction.h"
 #include "../menus.h"
 #include "../mqs.h"

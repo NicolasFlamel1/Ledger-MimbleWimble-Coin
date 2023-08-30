@@ -1,6 +1,7 @@
 // Header files
 #include <string.h>
 #include "../common.h"
+#include "../currency.h"
 #include "../mqs.h"
 #include "start_transaction.h"
 #include "../tor.h"

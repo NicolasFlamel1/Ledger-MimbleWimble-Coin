@@ -4,6 +4,7 @@
 #include "../chacha20_poly1305.h"
 #include "../common.h"
 #include "../crypto.h"
+#include "../currency.h"
 #include "../mqs.h"
 #include "../slate.h"
 #include "../slatepack.h"
