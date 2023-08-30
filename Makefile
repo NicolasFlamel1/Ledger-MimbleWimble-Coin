@@ -49,34 +49,9 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,69\}
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=MWC_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=ASCII_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=\(MQS_PAYMENT_PROOF_ADDRESS\|TOR_PAYMENT_PROOF_ADDRESS\)
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=\(MQS_SLATE_ENCRYPTION\|TOR_SLATE_ENCRYPTION\)
-	DEFINES += CURRENCY_MQS_NAME=\"MQS\"
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-	endif
-
-	# Icon
-	ICON = MimbleWimble Coin
 
 # Otherwise check if currency is MimbleWimble Coin floonet
 else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
@@ -89,196 +64,28 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
 	DEFINES += CURRENCY_MQS_VERSION=\{1,121\}
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=MWC_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=ASCII_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=\(MQS_PAYMENT_PROOF_ADDRESS\|TOR_PAYMENT_PROOF_ADDRESS\)
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=\(MQS_SLATE_ENCRYPTION\|TOR_SLATE_ENCRYPTION\)
-	DEFINES += CURRENCY_MQS_NAME=\"MQS\"
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
-	endif
-
-	# Icon
-	ICON = MimbleWimble Coin
-
-# Otherwise check if currency is Grin
-else ifeq ($(CURRENCY),grin)
-
-	# Application name
-	APPNAME = "Grin"
-
-	# 44'/592' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/592'"
-
-	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
-	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"grin\"
-	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=SLATEPACK_PAYMENT_PROOF_ADDRESS
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=SLATEPACK_SLATE_ENCRYPTION
-	DEFINES += CURRENCY_NAME=\"Grin\"
-	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-	endif
-
-	# Icon
-	ICON = Grin
-
-# Otherwise check if currency is Grin testnet
-else ifeq ($(CURRENCY),grin_testnet)
-
-	# Application name
-	APPNAME = "Grin Testnet"
-
-	# 44'/1' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
-
-	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=9
-	DEFINES += CURRENCY_ENABLE_SLATEPACK_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS=true
-	DEFINES += CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART=\"tgrin\"
-	DEFINES += CURRENCY_MAXIMUM_FEE=0xFFFFFFFFFF
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=SLATEPACK_PAYMENT_PROOF_ADDRESS
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=SLATEPACK_SLATE_ENCRYPTION
-	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
-	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
-	endif
-
-	# Icon
-	ICON = Grin
-
-# Otherwise check if currency is Epic Cash
-else ifeq ($(CURRENCY),epic_cash)
-
-	# Application name
-	APPNAME = "Epic Cash"
-
-	# 44'/23000' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/23000'"
-
-	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=23000
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=8
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
-	DEFINES += CURRENCY_MQS_VERSION=\{1,0\}
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=TOR_PAYMENT_PROOF_ADDRESS
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=MQS_SLATE_ENCRYPTION
-	DEFINES += CURRENCY_MQS_NAME=\"Epicbox\"
-	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\"
-	DEFINES += CURRENCY_ABBREVIATION=\"EPIC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
-	endif
-
-	# Icon
-	ICON = Epic Cash
-
-# Otherwise check if currency is Epic Cash floonet
-else ifeq ($(CURRENCY),epic_cash_floonet)
-
-	# Application name
-	APPNAME = "Epic Cash Floonet"
-
-	# 44'/1' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
-
-	# Defines
-	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
-	DEFINES += CURRENCY_FRACTIONAL_DIGITS=8
-	DEFINES += CURRENCY_ENABLE_MQS_ADDRESS=true
-	DEFINES += CURRENCY_ENABLE_TOR_ADDRESS=true
-	DEFINES += CURRENCY_MQS_VERSION=\{1,136\}
-	DEFINES += CURRENCY_ADDRESS_DERIVATION_TYPE=GRIN_ADDRESS_DERIVATION
-	DEFINES += CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=BINARY_PAYMENT_PROOF_MESSAGE
-	DEFINES += CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=TOR_PAYMENT_PROOF_ADDRESS
-	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=MQS_SLATE_ENCRYPTION
-	DEFINES += CURRENCY_MQS_NAME=\"Epicbox\"
-	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\\x20\\x46loonet\"
-	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20\\x45PIC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
-	# Otherwise
-	else
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
-	endif
-
-	# Icon
-	ICON = Epic Cash
 
 # Otherwise
 else
 
 # Display error
-$(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, grin_testnet, epic_cash, or epic_cash_floonet)
+$(error Unsupported CURRENCY - use mimblewimble_coin or mimblewimble_coin_floonet)
+endif
+
+# Check if target is the Stax
+ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# Defines
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+
+# Otherwise
+else
+
+	# Defines
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 endif
 
 # Check if target is the Nano X
@@ -304,25 +111,25 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Icon name
-	ICONNAME="icons/$(ICON)/nanos_app.gif"
+	ICONNAME="icons/MimbleWimble Coin/nanos_app.gif"
 
 # Otherwise check if target is the Nano X
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 	# Icon name
-	ICONNAME="icons/$(ICON)/nanox_app.gif"
+	ICONNAME="icons/MimbleWimble Coin/nanox_app.gif"
 
 # Otherwise check if target is the Nano S Plus
 else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Icon name
-	ICONNAME="icons/$(ICON)/nanosplus_app.gif"
+	ICONNAME="icons/MimbleWimble Coin/nanosplus_app.gif"
 
 # Otherwise check if target is the Stax
 else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Icon name
-	ICONNAME="icons/$(ICON)/stax_app.gif"
+	ICONNAME="icons/MimbleWimble Coin/stax_app.gif"
 endif
 
 # Make command
@@ -521,4 +328,4 @@ dep/%.d: %.c Makefile
 
 # List variants
 listvariants:
-	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet epic_cash epic_cash_floonet
+	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet

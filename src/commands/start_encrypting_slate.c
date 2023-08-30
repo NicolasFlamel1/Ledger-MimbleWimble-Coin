@@ -4,6 +4,7 @@
 #include "../chacha20_poly1305.h"
 #include "../common.h"
 #include "../crypto.h"
+#include "../currency.h"
 #include "../mqs.h"
 #include "../slate.h"
 #include "../slatepack.h"
@@ -71,13 +72,6 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 		// MQS address size
 		case MQS_ADDRESS_SIZE:
 
-			// Check if currency doesn't allow MQS addresses or doesn't support MQS slate encryption
-			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & MQS_SLATE_ENCRYPTION)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
 			// Check if address has a domain
 			if(addressDomain) {
 
@@ -106,13 +100,6 @@ void processStartEncryptingSlateRequest(unsigned short *responseLength, __attrib
 
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
-
-			// Check if currency doesn't allow Tor addresses or doesn't support Tor slate encryption
-			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & TOR_SLATE_ENCRYPTION)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
 
 			// Check if address has a domain
 			if(addressDomain) {

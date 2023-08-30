@@ -1,11 +1,11 @@
 // Header files
 #include <string.h>
 #include "../common.h"
+#include "../currency.h"
 #include "../mqs.h"
 #include "start_transaction.h"
 #include "../tor.h"
 #include "../transaction.h"
-#include "../slatepack.h"
 #include "../storage.h"
 
 
@@ -83,13 +83,6 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			// MQS address size
 			case MQS_ADDRESS_SIZE:
 
-				// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-				if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
-
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-
 				// Check if address isn't a valid MQS address
 				if(!getPublicKeyFromMqsAddress(NULL, address, addressLength)) {
 
@@ -103,35 +96,8 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 			// Tor address size
 			case TOR_ADDRESS_SIZE:
 
-				// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-				if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
-
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-
 				// Check if address isn't a valid Tor address
 				if(!getPublicKeyFromTorAddress(NULL, address, addressLength)) {
-
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-
-				// Break
-				break;
-
-			// Slatepack address size
-			case SLATEPACK_ADDRESS_SIZE:
-
-				// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-				if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-
-					// Throw invalid parameters error
-					THROW(INVALID_PARAMETERS_ERROR);
-				}
-
-				// Check if address isn't a valid Slatepack address
-				if(!getPublicKeyFromSlatepackAddress(NULL, address, addressLength)) {
 
 					// Throw invalid parameters error
 					THROW(INVALID_PARAMETERS_ERROR);
@@ -162,7 +128,7 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 		}
 
 		// Check if fee is invalid or will overflow
-		if(!fee || fee > CURRENCY_MAXIMUM_FEE || UINT64_MAX - input < fee) {
+		if(!fee || UINT64_MAX - input < fee) {
 
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);

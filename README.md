@@ -1,16 +1,14 @@
-# MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) Ledger hardware wallet apps
+# MimbleWimble Coin (MWC) Ledger hardware wallet app
 
 ### Description
-MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
+MimbleWimble Coin (MWC) app for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
 
-These apps can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+This app can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
-Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC), Grin (GRIN), and Epic Cash (EPIC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
-
-[These video tutorials](https://youtube.com/playlist?list=PLb1nuT3sFYbD_sydCVCngbvATsm9RwWyF) go over how to start using Grin with Ledger Live Desktop/Mobile and how to send Grin to and receive Grin from popular wallets and exchanges with it.
+Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
 ### Building
-Building these apps requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, or Ledger Stax build environment. The following steps describe how to do this on Linux.
+Building this app requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, or Ledger Stax build environment. The following steps describe how to do this on Linux.
 
 Install dependencies:
 ```
@@ -67,26 +65,20 @@ echo "#export BOLOS_SDK=$PWD/nanosplus-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/stax-secure-sdk" >> ~/.bashrc
 echo "export BOLOS_ENV=$PWD/bolos-environment" >> ~/.bashrc
 ```
-The apps can then be built with the following commands:
+The app can then be built with the following commands:
 ```
 make CURRENCY=mimblewimble_coin
-make CURRENCY=grin
-make CURRENCY=epic_cash
 ```
-The apps can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets with the following commands:
+The app can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets with the following commands:
 ```
 make load CURRENCY=mimblewimble_coin
-make load CURRENCY=grin
-make load CURRENCY=epic_cash
 ```
 
 ### Testing
-Functional tests for the apps can be ran with the following commands:
+Functional tests for the app can be ran with the following commands:
 ```
 npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
 make functional_tests CURRENCY=mimblewimble_coin
-make functional_tests CURRENCY=grin
-make functional_tests CURRENCY=epic_cash
 ```
 Unit tests can be ran with the following commands:
 ```

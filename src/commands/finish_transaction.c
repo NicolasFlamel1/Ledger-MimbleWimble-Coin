@@ -6,11 +6,11 @@
 #include "../blake2b.h"
 #include "../common.h"
 #include "../crypto.h"
+#include "../currency.h"
 #include "finish_transaction.h"
 #include "../menus.h"
 #include "../mqs.h"
 #include "../transaction.h"
-#include "../slatepack.h"
 #include "../time.h"
 #include "../tor.h"
 
@@ -19,6 +19,9 @@
 
 // Maximum relative height
 #define MAXIMUM_RELATIVE_HEIGHT (DAYS_IN_A_WEEK * HOURS_IN_A_DAY * MINUTES_IN_AN_HOUR)
+
+// Number of fractional digits
+#define NUMBER_OF_FRACTIONAL_DIGITS 9
 
 
 // Constants
@@ -67,56 +70,11 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 	// Get address type from first parameter
 	const enum AddressType addressType = firstParameter;
 
-	// Check address type
-	switch(addressType) {
+	// Check if address type is invalid
+	if(addressType > TOR_ADDRESS_TYPE) {
 
-		// MQS address type
-		case MQS_ADDRESS_TYPE:
-
-			// Check if currency doesn't allow MQS addresses or doesn't support MQS payment proof addresses
-			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & MQS_PAYMENT_PROOF_ADDRESS)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
-			// Break
-			break;
-
-		// Tor address type
-		case TOR_ADDRESS_TYPE:
-
-			// Check if currency doesn't allow Tor addresses or doesn't support Tor payment proof addresses
-			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & TOR_PAYMENT_PROOF_ADDRESS)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
-			// Break
-			break;
-
-		// Slatepack address type
-		case SLATEPACK_ADDRESS_TYPE:
-
-			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack payment proof addresses
-			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES & SLATEPACK_PAYMENT_PROOF_ADDRESS)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
-			// Break
-			break;
-
-		// Default
-		default:
-
-			// Throw invalid parameters error
-			THROW(INVALID_PARAMETERS_ERROR);
-
-			// Break
-			break;
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
 	}
 
 	// Get public nonce from data
@@ -203,13 +161,6 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 
 		// No recent duplicate features
 		case NO_RECENT_DUPLICATE_FEATURES:
-
-			// Check if currency doesn't allow no recent duplicate kernels
-			if(!CURRENCY_ENABLE_NO_RECENT_DUPLICATE_KERNELS) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
 
 			// Set kernel features length
 			kernelFeaturesLength = sizeof(uint8_t) + sizeof(uint16_t);
@@ -315,21 +266,6 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 
 					// Break
 					break;
-
-				// Slatepack address type
-				case SLATEPACK_ADDRESS_TYPE:
-
-					// Set address length
-					addressLength = SLATEPACK_ADDRESS_SIZE;
-
-					// Allocate memory for the address
-					address = alloca(addressLength);
-
-					// Get Slatepack public key
-					getSlatepackAddress(address, transaction.account, transaction.index);
-
-					// Break
-					break;
 			}
 
 			// Get payment proof message length
@@ -409,7 +345,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 
 		// Copy transaction's input into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.send, CURRENCY_FRACTIONAL_DIGITS);
+		toString(amountLineBuffer, transaction.send, NUMBER_OF_FRACTIONAL_DIGITS);
 	}
 
 	// Otherwise
@@ -491,7 +427,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 
 		// Copy transaction's output into the amount line buffer
 		explicit_bzero(amountLineBuffer, sizeof(amountLineBuffer));
-		toString(amountLineBuffer, transaction.receive, CURRENCY_FRACTIONAL_DIGITS);
+		toString(amountLineBuffer, transaction.receive, NUMBER_OF_FRACTIONAL_DIGITS);
 	}
 
 	// Append currency abbreviation to amount line buffer
@@ -500,7 +436,7 @@ void processFinishTransactionRequest(__attribute__((unused)) const unsigned shor
 
 	// Copy transaction's fee into the fee line buffer
 	explicit_bzero(feeLineBuffer, sizeof(feeLineBuffer));
-	toString(feeLineBuffer, transaction.fee, CURRENCY_FRACTIONAL_DIGITS);
+	toString(feeLineBuffer, transaction.fee, NUMBER_OF_FRACTIONAL_DIGITS);
 
 	strncat(feeLineBuffer, " ", sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
 	strncat(feeLineBuffer, CURRENCY_ABBREVIATION, sizeof(feeLineBuffer) - strlen(feeLineBuffer) - sizeof((char)'\0'));
@@ -835,9 +771,8 @@ void processFinishTransactionUserInteraction(unsigned short *responseLength) {
 						// Break
 						break;
 
-					// Tor or Slatepack address type
+					// Tor address type
 					case TOR_ADDRESS_TYPE:
-					case SLATEPACK_ADDRESS_TYPE:
 
 						// Get address private key
 						getAddressPrivateKey(&addressPrivateKey, transaction.account, transaction.index, CX_CURVE_Ed25519);

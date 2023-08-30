@@ -63,10 +63,7 @@ enum AddressType {
 	MQS_ADDRESS_TYPE,
 
 	// Tor ddress type
-	TOR_ADDRESS_TYPE,
-
-	// Slatepack address type
-	SLATEPACK_ADDRESS_TYPE
+	TOR_ADDRESS_TYPE
 };
 
 
@@ -98,9 +95,6 @@ uint8_t map(const uint8_t value, const uint8_t from, const uint8_t to, const uin
 
 // Is zero array secure
 bool isZeroArraySecure(const uint8_t *value, const size_t length);
-
-// Upper case text
-void upperCaseText(char *text, const size_t length);
 
 // Is valid address
 bool isValidAddress(const char *address, const size_t length);

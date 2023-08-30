@@ -334,7 +334,7 @@ static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenOne, pnn, {&C_icon_warning,
 static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenTwo, pnn, {&C_icon_warning, "listen for the", "account's"});
 
 // Sign MQS challenge menu warning screen three
-static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenThree, pnn, {&C_icon_warning, CURRENCY_MQS_NAME, "transactions"});
+static UX_STEP_NOCB(signMqsChallengeMenuWarningScreenThree, pnn, {&C_icon_warning, "MQS", "transactions"});
 
 // Sign MQS challenge menu approve screen
 static UX_STEP_CB(signMqsChallengeMenuApproveScreen, pb, processUserInteraction(GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION, true, true), {&C_icon_validate_14, "Approve"});

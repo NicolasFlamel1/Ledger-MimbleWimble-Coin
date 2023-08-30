@@ -15,13 +15,6 @@
 // Process get MQS challenge signature request
 void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsigned short *responseLength, unsigned char *responseFlags) {
 
-	// Check if currency doesn't allow MQS addresses
-	if(!CURRENCY_ENABLE_MQS_ADDRESS) {
-
-		// Throw unknown instruction error
-		THROW(UNKNOWN_INSTRUCTION_ERROR);
-	}
-
 	// Get request's first parameter
 	const uint8_t firstParameter = G_io_apdu_buffer[APDU_OFF_P1];
 
@@ -121,48 +114,34 @@ void processGetMqsChallengeSignatureRequest(__attribute__((unused)) const unsign
 
 	// Set sign challenge line buffer
 	explicit_bzero(signChallengeLineBuffer, sizeof(signChallengeLineBuffer));
-	strncpy(signChallengeLineBuffer, "Sign ", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
-	strncat(signChallengeLineBuffer, CURRENCY_MQS_NAME, sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
+	strncpy(signChallengeLineBuffer, "Sign MQS", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
 
 // Otherwise check if has NBGL
 #elif defined HAVE_NBGL
 
 	// Set sign challenge line buffer
 	explicit_bzero(signChallengeLineBuffer, sizeof(signChallengeLineBuffer));
-	strncpy(signChallengeLineBuffer, "Sign ", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
-	strncat(signChallengeLineBuffer, CURRENCY_MQS_NAME, sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
-	strncat(signChallengeLineBuffer, "\nchallenge?", sizeof(signChallengeLineBuffer) - strlen(signChallengeLineBuffer) - sizeof((char)'\0'));
+	strncpy(signChallengeLineBuffer, "Sign MQS\nchallenge?", sizeof(signChallengeLineBuffer) - sizeof((char)'\0'));
 
 	// Set succeeded line buffer
 	explicit_bzero(succeededLineBuffer, sizeof(succeededLineBuffer));
-	strncpy(succeededLineBuffer, CURRENCY_MQS_NAME, sizeof(succeededLineBuffer) - sizeof((char)'\0'));
-	strncat(succeededLineBuffer, " CHALLENGE\nSIGNED", sizeof(succeededLineBuffer) - strlen(succeededLineBuffer) - sizeof((char)'\0'));
-
-	upperCaseText(succeededLineBuffer, strlen(succeededLineBuffer));
+	strncpy(succeededLineBuffer, "MQS CHALLENGE\nSIGNED", sizeof(succeededLineBuffer) - sizeof((char)'\0'));
 
 	// Set failed line buffer
 	explicit_bzero(failedLineBuffer, sizeof(failedLineBuffer));
-	strncpy(failedLineBuffer, "Signing ", sizeof(failedLineBuffer) - sizeof((char)'\0'));
-	strncat(failedLineBuffer, CURRENCY_MQS_NAME, sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
-	strncat(failedLineBuffer, "\nchallenge failed", sizeof(failedLineBuffer) - strlen(failedLineBuffer) - sizeof((char)'\0'));
+	strncpy(failedLineBuffer, "Signing MQS challenge\nfailed", sizeof(failedLineBuffer) - sizeof((char)'\0'));
 
 	// Set canceled line buffer
 	explicit_bzero(canceledLineBuffer, sizeof(canceledLineBuffer));
-	strncpy(canceledLineBuffer, "Signing ", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
-	strncat(canceledLineBuffer, CURRENCY_MQS_NAME, sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
-	strncat(canceledLineBuffer, "\nchallenge denied", sizeof(canceledLineBuffer) - strlen(canceledLineBuffer) - sizeof((char)'\0'));
+	strncpy(canceledLineBuffer, "Signing MQS challenge\ndenied", sizeof(canceledLineBuffer) - sizeof((char)'\0'));
 
 	// Set cancel prompt line buffer
 	explicit_bzero(cancelPromptLineBuffer, sizeof(cancelPromptLineBuffer));
-	strncpy(cancelPromptLineBuffer, "Deny signing\n", sizeof(cancelPromptLineBuffer) - sizeof((char)'\0'));
-	strncat(cancelPromptLineBuffer, CURRENCY_MQS_NAME, sizeof(cancelPromptLineBuffer) - strlen(cancelPromptLineBuffer) - sizeof((char)'\0'));
-	strncat(cancelPromptLineBuffer, " challenge?", sizeof(cancelPromptLineBuffer) - strlen(cancelPromptLineBuffer) - sizeof((char)'\0'));
+	strncpy(cancelPromptLineBuffer, "Deny signing MQS\nchallenge?", sizeof(cancelPromptLineBuffer) - sizeof((char)'\0'));
 
 	// Set warning line buffer
 	explicit_bzero(warningLineBuffer, sizeof(warningLineBuffer));
-	strncpy(warningLineBuffer, "*The host will be able to listen\nfor the account's ", sizeof(warningLineBuffer) - sizeof((char)'\0'));
-	strncat(warningLineBuffer, CURRENCY_MQS_NAME, sizeof(warningLineBuffer) - strlen(warningLineBuffer) - sizeof((char)'\0'));
-	strncat(warningLineBuffer, "\ntransactions", sizeof(warningLineBuffer) - strlen(warningLineBuffer) - sizeof((char)'\0'));
+	strncpy(warningLineBuffer, "*The host will be able to listen\nfor the account's MQS\ntransactions", sizeof(warningLineBuffer) - sizeof((char)'\0'));
 #endif
 
 	// Show sign MQS challenge menu

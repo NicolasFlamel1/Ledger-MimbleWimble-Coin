@@ -5,9 +5,9 @@
 
 // Header files
 #include "crypto.h"
+#include "currency.h"
 #include "mqs.h"
 #include "tor.h"
-#include "slatepack.h"
 
 
 // Definitions
@@ -22,38 +22,38 @@
 #define PUBLIC_KEY_LINE_BUFFER_SIZE (COMPRESSED_PUBLIC_KEY_SIZE * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0'))
 
 // Address line buffer size
-#define ADDRESS_LINE_BUFFER_SIZE (SLATEPACK_ADDRESS_SIZE + sizeof((char)'\0'))
+#define ADDRESS_LINE_BUFFER_SIZE (TOR_ADDRESS_SIZE + sizeof((char)'\0'))
 
 // Check if has NBGL
 #ifdef HAVE_NBGL
 
 	// Verify address line buffer size
-	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE MAX(sizeof("Verify Slatepack\naddress"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress") - sizeof((char)'\0'))
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Tor\naddress")
 
 	// Approve transaction line buffer size
 	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive transaction?")
 
 	// Sign challenge line buffer size
-	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\nchallenge?") - sizeof((char)'\0'))
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE sizeof("Sign MQS\nchallenge?")
 
 // Otherwise
 #else
 
 	// Verify address line buffer size
-	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE MAX(sizeof("Verify Slatepack"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Tor")
 
 	// Approve transaction line buffer size
 	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive")
 
 	// Sign challenge line buffer size
-	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE sizeof("Sign MQS")
 #endif
 
 // Amount line buffer size
 #define AMOUNT_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + sizeof(CURRENCY_ABBREVIATION))
 
 // Address type line buffer size
-#define ADDRESS_TYPE_LINE_BUFFER_SIZE MAX(sizeof("Slatepack Address"), sizeof(CURRENCY_MQS_NAME) + sizeof(" Address") - sizeof((char)'\0'))
+#define ADDRESS_TYPE_LINE_BUFFER_SIZE sizeof("Tor Address")
 
 // Fee line buffer size
 #define FEE_LINE_BUFFER_SIZE (UINT64_BUFFER_SIZE + sizeof((char)'.') + sizeof((char)' ') + sizeof(CURRENCY_ABBREVIATION))
@@ -77,22 +77,22 @@
 #ifdef HAVE_NBGL
 
 	// Succeeded line buffer size
-	#define SUCCEEDED_LINE_BUFFER_SIZE MAX(sizeof("SLATEPACK\nADDRESS VERIFIED"), sizeof(CURRENCY_MQS_NAME) + sizeof(" ADDRESS\nVERIFIED") - sizeof((char)'\0'))
+	#define SUCCEEDED_LINE_BUFFER_SIZE sizeof("TOR ADDRESS\nVERIFIED")
 
 	// Failed line buffer size
-	#define FAILED_LINE_BUFFER_SIZE MAX(sizeof("Verifying Slatepack\naddress failed"), sizeof("Verifying ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress failed") - sizeof((char)'\0'))
+	#define FAILED_LINE_BUFFER_SIZE sizeof("Verifying Tor\naddress failed")
 
 	// Canceled line buffer size
-	#define CANCELED_LINE_BUFFER_SIZE MAX(sizeof("Verifying Slatepack\naddress canceled"), sizeof("Verifying ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\naddress canceled") - sizeof((char)'\0'))
+	#define CANCELED_LINE_BUFFER_SIZE sizeof("Verifying Tor"\naddress canceled")
 
 	// Cancel prompt line buffer size
-	#define CANCEL_PROMPT_LINE_BUFFER_SIZE MAX(sizeof("Deny receiving\ntransaction?"), sizeof("Deny signing\n") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof(" challenge?") - sizeof((char)'\0'))
+	#define CANCEL_PROMPT_LINE_BUFFER_SIZE sizeof("Deny receiving\ntransaction?")
 
 	// Approve button line buffer
 	#define APPROVE_BUTTON_LINE_BUFFER_SIZE sizeof("Hold to receive")
 
 	// Warning line buffer
-	#define WARNING_LINE_BUFFER (sizeof("*The host will be able to listen\nfor the account's ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME) + sizeof("\ntransactions") - sizeof((char)'\0'))
+	#define WARNING_LINE_BUFFER sizeof("*The host will be able to listen\nfor the account's MQS\ntransactions")
 #endif
 
 

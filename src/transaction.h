@@ -6,7 +6,7 @@
 // Header files
 #include <stdbool.h>
 #include "crypto.h"
-#include "slatepack.h"
+#include "tor.h"
 
 
 // Structures
@@ -57,7 +57,7 @@ struct Transaction {
 	uint8_t secretNonceIndex;
 
 	// Address
-	char address[SLATEPACK_ADDRESS_SIZE];
+	char address[TOR_ADDRESS_SIZE];
 };
 
 

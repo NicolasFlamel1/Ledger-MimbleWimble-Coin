@@ -33,15 +33,9 @@ add_compile_definitions(HAVE_MATH)
 add_compile_definitions(HAVE_ECDH)
 add_compile_definitions(HAVE_PBKDF2)
 add_compile_definitions(CURRENCY_BIP44_COIN_TYPE=0)
-add_compile_definitions(CURRENCY_FRACTIONAL_DIGITS=0)
-add_compile_definitions(CURRENCY_ADDRESS_DERIVATION_TYPE=0)
-add_compile_definitions(CURRENCY_PAYMENT_PROOF_MESSAGE_TYPE=0)
-add_compile_definitions(CURRENCY_SUPPORTED_PAYMENT_PROOF_ADDRESS_TYPES=0)
-add_compile_definitions(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=0)
 add_compile_definitions(CURRENCY_NAME="")
 add_compile_definitions(CURRENCY_ABBREVIATION="")
 add_compile_definitions(CURRENCY_MQS_VERSION={1,69})
-add_compile_definitions(CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART="grin")
 
 # Include directories
 include_directories(./simulate ../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include $ENV{BOLOS_SDK}/lib_ux/include)
@@ -65,14 +59,6 @@ add_executable(test_base58
 add_library(base58 SHARED ../../src/base58.c)
 target_link_libraries(test_base58 PUBLIC cmocka crypto base58)
 add_test(test_base58 test_base58)
-
-# Bech32 test
-add_executable(test_bech32
-	test_bech32.c
-)
-add_library(bech32 SHARED ../../src/bech32.c)
-target_link_libraries(test_bech32 PUBLIC cmocka bech32)
-add_test(test_bech32 test_bech32)
 
 # ChaCha20 Poly1305 test
 add_executable(test_chacha20_poly1305
@@ -116,24 +102,6 @@ add_executable(test_mqs
 add_library(mqs SHARED ../../src/mqs.c)
 target_link_libraries(test_mqs PUBLIC cmocka crypto mqs)
 add_test(test_mqs test_mqs)
-
-# Slatepack test
-add_executable(test_slatepack
-	test_slatepack.c
-	simulate/simulate.c
-	../../src/common.c
-	../../src/slatepack.c
-	../../src/bech32.c
-	../../src/tor.c
-	../../src/base32.c
-	../../src/slate.c
-	../../src/state.c
-	../../src/transaction.c
-	../../src/storage.c
-)
-add_library(slatepack SHARED ../../src/slatepack.c)
-target_link_libraries(test_slatepack PUBLIC cmocka crypto slatepack)
-add_test(test_slatepack test_slatepack)
 
 # Time test
 add_executable(test_time

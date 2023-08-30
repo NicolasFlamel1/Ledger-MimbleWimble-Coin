@@ -266,21 +266,6 @@ bool isZeroArraySecure(const uint8_t *value, const size_t length) {
 	return !result;
 }
 
-// Upper case text
-void upperCaseText(char *text, const size_t length) {
-
-	// Go through all the characters in the string
-	for(size_t i = 0; i < length; ++i) {
-
-		// Check if character is lower case
-		if(text[i] >= 'a' && text[i] <= 'z') {
-
-			// Upper case character
-			text[i] -= 'a' - 'A';
-		}
-	}
-}
-
 // Is valid address
 bool isValidAddress(const char *address, const size_t length) {
 

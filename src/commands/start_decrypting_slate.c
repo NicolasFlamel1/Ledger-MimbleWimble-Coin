@@ -1,9 +1,9 @@
 // Header files
 #include <alloca.h>
 #include <string.h>
-#include "../age.h"
 #include "../common.h"
 #include "../crypto.h"
+#include "../currency.h"
 #include "../mqs.h"
 #include "../slate.h"
 #include "../slatepack.h"
@@ -66,20 +66,10 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 	// Check address length
 	size_t sharedPrivateKeyLength;
 	const uint8_t *salt = NULL;
-	const uint8_t *ephemeralX25519PublicKey = NULL;
-	const uint8_t *encryptedFileKey = NULL;
-	const uint8_t *payloadNonce = NULL;
 	switch(addressLength) {
 
 		// MQS address size
 		case MQS_ADDRESS_SIZE + MQS_SHARED_PRIVATE_KEY_SALT_SIZE:
-
-			// Check if currency doesn't allow MQS addresses or doesn't support MQS slate encryption
-			if(!CURRENCY_ENABLE_MQS_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & MQS_SLATE_ENCRYPTION)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
 
 			// Set shared private key length
 			sharedPrivateKeyLength = MQS_SHARED_PRIVATE_KEY_SIZE;
@@ -93,47 +83,8 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 		// Tor address size
 		case TOR_ADDRESS_SIZE:
 
-			// Check if currency doesn't allow Tor addresses or doesn't support Tor slate encryption
-			if(!CURRENCY_ENABLE_TOR_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & TOR_SLATE_ENCRYPTION)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
 			// Set shared private key length
 			sharedPrivateKeyLength = SLATEPACK_SHARED_PRIVATE_KEY_SIZE;
-
-			// Break
-			break;
-
-		// Slatepack address size
-		case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
-
-			// Check if currency doesn't allow Slatepack addresses or doesn't support Slatepack slate encryption
-			if(!CURRENCY_ENABLE_SLATEPACK_ADDRESS || !(CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES & SLATEPACK_SLATE_ENCRYPTION)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
-			// Set shared private key length
-			sharedPrivateKeyLength = AGE_PAYLOAD_KEY_SIZE;
-
-			// Get ephemeral X25519 public key from data
-			ephemeralX25519PublicKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce)];
-
-			// Check if ephemeral X25519 public key is invalid
-			if(!isValidX25519PublicKey(ephemeralX25519PublicKey, X25519_PUBLIC_KEY_SIZE)) {
-
-				// Throw invalid parameters error
-				THROW(INVALID_PARAMETERS_ERROR);
-			}
-
-			// Get encrypted file key from data
-			encryptedFileKey = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + X25519_PUBLIC_KEY_SIZE];
-
-			// Get payload nonce from data
-			payloadNonce = &data[sizeof(account) + sizeof(index) + sizeof(nonce) + X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE];
 
 			// Break
 			break;
@@ -174,15 +125,6 @@ void processStartDecryptingSlateRequest(__attribute__((unused)) const unsigned s
 
 					// Create Slatepack shared private key
 					createSlatepackSharedPrivateKey(sharedPrivateKey, account, index, address, addressLength);
-
-					// Break
-					break;
-
-				// Slatepack address size
-				case X25519_PUBLIC_KEY_SIZE + AGE_ENCRYPTED_FILE_KEY_SIZE + AGE_PAYLOAD_NONCE_SIZE:
-
-					// Get shared private key as the age payload key
-					getAgePayloadKey(sharedPrivateKey, account, index, ephemeralX25519PublicKey, encryptedFileKey, payloadNonce);
 
 					// Break
 					break;

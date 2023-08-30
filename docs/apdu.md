@@ -82,7 +82,7 @@ Returns an account's root public key after displaying a message on the device's 
 
 #### Description
 
-Returns an account's MQS, Tor, or Slatepack address at a provided index. This address is also the account's payment proof address at the provided index.
+Returns an account's MQS or Tor address at a provided index. This address is also the account's payment proof address at the provided index.
 
 #### Encoding
 
@@ -96,7 +96,7 @@ Returns an account's MQS, Tor, or Slatepack address at a provided index. This ad
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address |
+| P1        | `address_type` | 0x00 for MQS or 0x01 for Tor address |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
@@ -108,9 +108,9 @@ Returns an account's MQS, Tor, or Slatepack address at a provided index. This ad
 
 **Output Data**
 
-| Length                                                 | Name      | Description |
-|--------------------------------------------------------|-----------|-------------|
-| 52 for MQS, 56 for Tor, or >= 60 for Slatepack address | `address` | The account's MQS, Tor, or Slatepack address at the provided index |
+| Length                           | Name      | Description |
+|----------------------------------|-----------|-------------|
+| 52 for MQS or 56 for Tor address | `address` | The account's MQS or Tor address at the provided index |
 
 ### GET_SEED_COOKIE
 
@@ -258,7 +258,7 @@ Displays the account's root public key on the device and returns if the user ver
 
 #### Description
 
-Displays the account's MQS, Tor, or Slatepack address at a provided index on the device and returns if the user verifies if the address is valid.
+Displays the account's MQS or Tor address at a provided index on the device and returns if the user verifies if the address is valid.
 
 #### Encoding
 
@@ -272,7 +272,7 @@ Displays the account's MQS, Tor, or Slatepack address at a provided index on the
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address |
+| P1        | `address_type` | 0x00 for MQS or 0x01 for Tor address |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
@@ -395,7 +395,7 @@ Returns the tag for all the data that was encrypted.
 
 #### Description
 
-Prepares the app's internal slate state to be able to decrypt data that will be provided later as an account at a provided index using a provided nonce and optional salt, ephemeral X25519 public key, encrypted file key, and payload nonce that was encrypted by a provided address or payload key.
+Prepares the app's internal slate state to be able to decrypt data that will be provided later as an account at a provided index using a provided nonce and optional salt that was encrypted by a provided address.
 
 #### Encoding
 
@@ -414,14 +414,13 @@ Prepares the app's internal slate state to be able to decrypt data that will be 
 
 **Input Data**
 
-| Length                                      | Name                                            | Description |
-|---------------------------------------------|-------------------------------------------------|-------------|
-| 4                                           | `account`                                       | Account number (little endian, max 0x7FFFFFFF)) |
-| 4                                           | `index`                                         | Index number (little endian) |
-| 12                                          | `nonce`                                         | Nonce that was used to encrypt the data |
-| 52 for MQS, 56 for Tor, or 32 for Slatepack | `sender_address_or_ephemeral_x25519_public_key` | Address or ephemeral X25519 public key that will be able to decrypt the data |
-| 8 for MQS, 0 for Tor, or 32 for Slatepack   | `salt_or_encrypted_file_key`                    | Optional salt that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an MQS address or encrypted file key that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an ephemeral X25519 public key |
-| 0 for MQS, 0 for Tor, or 16 for Slatepack   | `payload_nonce`                                 | Optional payload nonce that was used to encrypt the data if the `sender_address_or_ephemeral_x25519_public_key` is an ephemeral X25519 public key |
+| Length                   | Name             | Description |
+|--------------------------|------------------|-------------|
+| 4                        | `account`        | Account number (little endian, max 0x7FFFFFFF)) |
+| 4                        | `index`          | Index number (little endian) |
+| 12                       | `nonce`          | Nonce that was used to encrypt the data |
+| 52 for MQS or 56 for Tor | `sender_address` | Address that will be able to decrypt the data |
+| 8 for MQS or 0 for Tor   | `salt`           | Optional salt that was used to encrypt the data if the `sender_address` is an MQS address |
 
 **Output Data**
 
@@ -518,15 +517,15 @@ Prepares the app's internal transaction state to be able to process a transactio
 
 **Input Data**
 
-| Length                                                    | Name                 | Description |
-|-----------------------------------------------------------|----------------------|-------------|
-| 4                                                         | `account`            | Account number (little endian, max 0x7FFFFFFF)) |
-| 4                                                         | `index`              | Index number (little endian) |
-| 8                                                         | `output`             | Output value (little endian) |
-| 8                                                         | `input`              | Input value (little endian) |
-| 8                                                         | `fee`                | Fee value (little endian) |
-| 1                                                         | `secret_nonce_index` | Index of the secret nonce to use or 0 to create secret nonce (max 20) |
-| 0, 52 for MQS, 56 for Tor, or >= 60 for Slatepack address | `address`            | Optional sender or recipient address of the transaction |
+| Length                               | Name                 | Description |
+|--------------------------------------|----------------------|-------------|
+| 4                                    | `account`            | Account number (little endian, max 0x7FFFFFFF)) |
+| 4                                    | `index`              | Index number (little endian) |
+| 8                                    | `output`             | Output value (little endian) |
+| 8                                    | `input`              | Input value (little endian) |
+| 8                                    | `fee`                | Fee value (little endian) |
+| 1                                    | `secret_nonce_index` | Index of the secret nonce to use or 0 to create secret nonce (max 20) |
+| 0, 52 for MQS, or 56 for Tor address | `address`            | Optional sender or recipient address of the transaction |
 
 **Output Data**
 
@@ -760,25 +759,25 @@ If a sent transaction needs to be finalized at a later time, then the app's inte
 
 | Parameter | Name           | Description |
 |-----------|----------------|-------------|
-| P1        | `address_type` | Optional 0x00 for MQS, 0x01 for Tor, or 0x02 for Slatepack address that will be used if verifying or creating a payment proof |
+| P1        | `address_type` | Optional 0x00 for MQS or 0x01 for Tor address that will be used if verifying or creating a payment proof |
 | P2        | N/A            | Unused (must be zero) |
 
 **Input Data**
 
-| Length                                                          | Name                      | Description |
-|-----------------------------------------------------------------|---------------------------|-------------|
-| 33                                                              | `public_nonce`            | Public nonce |
-| 33                                                              | `public_key`              | Public key |
-| 1, 3, or 9                                                      | `kernel_information`      | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
-| 0 or 33                                                         | `kernel_commitment`       | Optional kernel commitment that will be used for creating or verifying a payment proof |
-| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`           | Optional receiver's payment proof signature that will be used when verifying a payment proof
+| Length                                            | Name                      | Description |
+|---------------------------------------------------|---------------------------|-------------|
+| 33                                                | `public_nonce`            | Public nonce |
+| 33                                                | `public_key`              | Public key |
+| 1, 3, or 9                                        | `kernel_information`      | 0x00 for plain, 0x01 for coinbase, 0x02 and lock height (8 bytes, little endian) for height locked, or 0x03 and relative height (2 bytes, little endian, max 10080) |
+| 0 or 33                                           | `kernel_commitment`       | Optional kernel commitment that will be used for creating or verifying a payment proof |
+| 0, > 0 and <= 72 for MQS, or 64 for Tor signature | `payment_proof`           | Optional receiver's payment proof signature that will be used when verifying a payment proof
 
 **Output Data**
 
-| Length                                                          | Name                      | Description |
-|-----------------------------------------------------------------|---------------------------|-------------|
-| 64                                                              | `signature`               | Single-signer signature for the transaction and kernel information |
-| 0, > 0 and <= 72 for MQS, or 64 for Tor and Slatepack signature | `payment_proof`           | Optional receiver's payment proof signature |
+| Length                                            | Name                      | Description |
+|---------------------------------------------------|---------------------------|-------------|
+| 64                                                | `signature`               | Single-signer signature for the transaction and kernel information |
+| 0, > 0 and <= 72 for MQS, or 64 for Tor signature | `payment_proof`           | Optional receiver's payment proof signature |
 
 ### GET_MQS_CHALLENGE_SIGNATURE
 
