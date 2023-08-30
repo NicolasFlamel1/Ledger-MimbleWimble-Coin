@@ -779,7 +779,7 @@ void showMenu(enum Menu menu) {
 			break;
 
 		// Sign MQS challenge menu
-		case SIGN_MQS_CHALLENGE_MENU: {
+		case SIGN_MQS_CHALLENGE_MENU:
 
 			// Set sign MQS challenge menu to use notify screen
 			signMqsChallengeMenu[0] = &signMqsChallengeMenuNotifyScreen;
@@ -824,7 +824,6 @@ void showMenu(enum Menu menu) {
 
 			// Break
 			break;
-		}
 
 		// Approve transaction menu
 		case APPROVE_TRANSACTION_MENU: {
