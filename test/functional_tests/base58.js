@@ -3,7 +3,7 @@
 
 
 // Requires
-const sha256 = require("./js-sha256-0.9.0.js");
+const sha256 = require("./js-sha256-0.10.0.js");
 const Common = require("./common.js");
 
 
