@@ -8,6 +8,12 @@
 #include <stddef.h>
 
 
+// Definitions
+
+// Request class
+#define REQUEST_CLASS 0xC7
+
+
 // Constants
 
 // Instruction

@@ -86,3 +86,11 @@ cmake -Btests/unit_tests/build -Htests/unit_tests/
 make -C tests/unit_tests/build/
 make -C tests/unit_tests/build test
 ```
+
+### Fuzzing
+Fuzzing for the app's start transaction command can be ran with the following commands:
+```
+cmake -DCMAKE_C_COMPILER=/usr/bin/clang -Bfuzzing/build -Hfuzzing/
+make -C fuzzing/build/
+./fuzzing/build/fuzz_start_transaction -max_len=255
+```

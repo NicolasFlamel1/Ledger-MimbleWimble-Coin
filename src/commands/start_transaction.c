@@ -9,6 +9,17 @@
 #include "../storage.h"
 
 
+// Definitions
+
+// Check if fuzzing
+#ifdef FUZZING
+
+	// Definitions
+	#undef THROW
+	#define THROW return;//
+#endif
+
+
 // Supporting function implementation
 
 // Process start transaction request

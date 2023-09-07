@@ -6,11 +6,12 @@
 // Header files
 #include <libcxng.h>
 
-// Check if performing unit tests
-#ifdef UNIT_TESTS
+// Check if performing unit tests or fuzzing
+#if defined UNIT_TESTS || defined FUZZING
 
 	// Header files
 	#include <os_utils.h>
+	#include <os_apdu.h>
 
 	// Disable exception handling macros
 	#undef BEGIN_TRY

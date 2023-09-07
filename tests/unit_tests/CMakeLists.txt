@@ -24,13 +24,10 @@ add_compile_definitions(HAVE_SHA256)
 add_compile_definitions(HAVE_ECC)
 add_compile_definitions(HAVE_ECC_TWISTED_EDWARDS)
 add_compile_definitions(HAVE_ED_CURVES)
-add_compile_definitions(HAVE_ECC_MONTGOMERY)
-add_compile_definitions(HAVE_CV_CURVES)
 add_compile_definitions(HAVE_ECC_WEIERSTRASS)
 add_compile_definitions(HAVE_SECP_CURVES)
 add_compile_definitions(HAVE_SHA3)
 add_compile_definitions(HAVE_MATH)
-add_compile_definitions(HAVE_ECDH)
 add_compile_definitions(HAVE_PBKDF2)
 add_compile_definitions(CURRENCY_BIP44_COIN_TYPE=0)
 add_compile_definitions(CURRENCY_NAME="")
@@ -38,7 +35,7 @@ add_compile_definitions(CURRENCY_ABBREVIATION="")
 add_compile_definitions(CURRENCY_MQS_VERSION={1,69})
 
 # Include directories
-include_directories(./simulate ../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include $ENV{BOLOS_SDK}/lib_ux/include)
+include_directories(../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include)
 
 
 # Tests
