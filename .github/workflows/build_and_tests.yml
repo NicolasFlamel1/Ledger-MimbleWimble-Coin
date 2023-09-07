@@ -764,11 +764,11 @@ jobs:
 
       - name: Build unit tests
         run: |
-          cmake -Btest/unit_tests/build -Htest/unit_tests/ && make -C test/unit_tests/build/
+          cmake -Btests/unit_tests/build -Htests/unit_tests/ && make -C tests/unit_tests/build/
 
       - name: Run unit tests
         run: |
-          make -C test/unit_tests/build test
+          make -C tests/unit_tests/build test
 
   job_functional_test:
     name: Functional test
@@ -804,7 +804,7 @@ jobs:
 
       - name: Run tests with Nano S MimbleWimble Coin app
         run: |
-          node test/functional_tests/main.js mimblewimble_coin speculos nanos
+          node tests/functional_tests/main.js mimblewimble_coin speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -831,7 +831,7 @@ jobs:
 
       - name: Run tests with Nano S MimbleWimble Coin floonet app
         run: |
-          node test/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -858,7 +858,7 @@ jobs:
 
       - name: Run tests with Nano S Grin app
         run: |
-          node test/functional_tests/main.js grin speculos nanos
+          node tests/functional_tests/main.js grin speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -885,7 +885,7 @@ jobs:
 
       - name: Run tests with Nano S Grin testnet app
         run: |
-          node test/functional_tests/main.js grin_testnet speculos nanos
+          node tests/functional_tests/main.js grin_testnet speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -912,7 +912,7 @@ jobs:
 
       - name: Run tests with Nano S Epic Cash app
         run: |
-          node test/functional_tests/main.js epic_cash speculos nanos
+          node tests/functional_tests/main.js epic_cash speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -939,7 +939,7 @@ jobs:
 
       - name: Run tests with Nano S Epic Cash floonet app
         run: |
-          node test/functional_tests/main.js epic_cash_floonet speculos nanos
+          node tests/functional_tests/main.js epic_cash_floonet speculos nanos
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -967,7 +967,7 @@ jobs:
       #
       #- name: Run tests with Nano X MimbleWimble Coin app
       #  run: |
-      #    node test/functional_tests/main.js mimblewimble_coin speculos nanox
+      #    node tests/functional_tests/main.js mimblewimble_coin speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -994,7 +994,7 @@ jobs:
       #
       #- name: Run tests with Nano X MimbleWimble Coin floonet app
       #  run: |
-      #    node test/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
+      #    node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1021,7 +1021,7 @@ jobs:
       #
       #- name: Run tests with Nano X Grin app
       #  run: |
-      #    node test/functional_tests/main.js grin speculos nanox
+      #    node tests/functional_tests/main.js grin speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1048,7 +1048,7 @@ jobs:
       #
       #- name: Run tests with Nano X Grin testnet app
       #  run: |
-      #    node test/functional_tests/main.js grin_testnet speculos nanox
+      #    node tests/functional_tests/main.js grin_testnet speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1075,7 +1075,7 @@ jobs:
       #
       #- name: Run tests with Nano X Epic Cash app
       #  run: |
-      #    node test/functional_tests/main.js epic_cash speculos nanox
+      #    node tests/functional_tests/main.js epic_cash speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1102,7 +1102,7 @@ jobs:
       #
       #- name: Run tests with Nano X Epic Cash floonet app
       #  run: |
-      #    node test/functional_tests/main.js epic_cash_floonet speculos nanox
+      #    node tests/functional_tests/main.js epic_cash_floonet speculos nanox
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1129,7 +1129,7 @@ jobs:
 
       - name: Run tests with Nano S Plus MimbleWimble Coin app
         run: |
-          node test/functional_tests/main.js mimblewimble_coin speculos nanosp
+          node tests/functional_tests/main.js mimblewimble_coin speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1156,7 +1156,7 @@ jobs:
 
       - name: Run tests with Nano S Plus MimbleWimble Coin floonet app
         run: |
-          node test/functional_tests/main.js mimblewimble_coin_floonet speculos nanosp
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1183,7 +1183,7 @@ jobs:
 
       - name: Run tests with Nano S Plus Grin app
         run: |
-          node test/functional_tests/main.js grin speculos nanosp
+          node tests/functional_tests/main.js grin speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1210,7 +1210,7 @@ jobs:
 
       - name: Run tests with Nano S Plus Grin testnet app
         run: |
-          node test/functional_tests/main.js grin_testnet speculos nanosp
+          node tests/functional_tests/main.js grin_testnet speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1237,7 +1237,7 @@ jobs:
 
       - name: Run tests with Nano S Plus Epic Cash app
         run: |
-          node test/functional_tests/main.js epic_cash speculos nanosp
+          node tests/functional_tests/main.js epic_cash speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1264,7 +1264,7 @@ jobs:
 
       - name: Run tests with Nano S Plus Epic Cash floonet app
         run: |
-          node test/functional_tests/main.js epic_cash_floonet speculos nanosp
+          node tests/functional_tests/main.js epic_cash_floonet speculos nanosp
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v3
@@ -1292,7 +1292,7 @@ jobs:
       #
       #- name: Run tests with Stax MimbleWimble Coin app
       #  run: |
-      #    node test/functional_tests/main.js mimblewimble_coin speculos stax
+      #    node tests/functional_tests/main.js mimblewimble_coin speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1319,7 +1319,7 @@ jobs:
       #
       #- name: Run tests with Stax MimbleWimble Coin floonet app
       #  run: |
-      #    node test/functional_tests/main.js mimblewimble_coin_floonet speculos stax
+      #    node tests/functional_tests/main.js mimblewimble_coin_floonet speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1346,7 +1346,7 @@ jobs:
       #
       #- name: Run tests with Stax Grin app
       #  run: |
-      #    node test/functional_tests/main.js grin speculos stax
+      #    node tests/functional_tests/main.js grin speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1373,7 +1373,7 @@ jobs:
       #
       #- name: Run tests with Stax Grin testnet app
       #  run: |
-      #    node test/functional_tests/main.js grin_testnet speculos stax
+      #    node tests/functional_tests/main.js grin_testnet speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1400,7 +1400,7 @@ jobs:
       #
       #- name: Run tests with Stax Epic Cash app
       #  run: |
-      #    node test/functional_tests/main.js epic_cash speculos stax
+      #    node tests/functional_tests/main.js epic_cash speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3
@@ -1427,7 +1427,7 @@ jobs:
       #
       #- name: Run tests with Stax Epic Cash floonet app
       #  run: |
-      #    node test/functional_tests/main.js epic_cash_floonet speculos stax
+      #    node tests/functional_tests/main.js epic_cash_floonet speculos stax
       #
       #- name: Upload Speculos log
       #  uses: actions/upload-artifact@v3

@@ -309,7 +309,7 @@ bool isValidAddress(const char *address, const size_t length) {
 					// Check if character isn't a digit or a zero at the first character
 					if(!isDigit(address[j]) || (address[j] == '0' && j == i + 1)) {
 
-						// Return false;
+						// Return false
 						return false;
 					}
 
@@ -332,7 +332,7 @@ bool isValidAddress(const char *address, const size_t length) {
 			// Otherwise
 			else {
 
-				// Return false;
+				// Return false
 				return false;
 			}
 		}

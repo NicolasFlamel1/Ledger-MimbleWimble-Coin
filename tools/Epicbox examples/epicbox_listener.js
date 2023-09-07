@@ -8,8 +8,8 @@
 // Requires
 const WebSocket = require("ws");
 const TransportNodeHid = require("@ledgerhq/hw-transport-node-hid")["default"];
-const BigNumber = require("../../test/functional_tests/bignumber.js-9.1.1.js");
-const Common = require("../../test/functional_tests/common.js");
+const BigNumber = require("../../tests/functional_tests/bignumber.js-9.1.1.js");
+const Common = require("../../tests/functional_tests/common.js");
 
 
 // Constants

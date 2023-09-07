@@ -90,7 +90,7 @@ make functional_tests CURRENCY=epic_cash
 ```
 Unit tests can be ran with the following commands:
 ```
-cmake -Btest/unit_tests/build -Htest/unit_tests/
-make -C test/unit_tests/build/
-make -C test/unit_tests/build test
+cmake -Btests/unit_tests/build -Htests/unit_tests/
+make -C tests/unit_tests/build/
+make -C tests/unit_tests/build test
 ```
