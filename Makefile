@@ -318,7 +318,7 @@ run: all
 functional_tests: all
 
 	# Run functional tests
-	node test/functional_tests/main.js $(CURRENCY)
+	node tests/functional_tests/main.js $(CURRENCY)
 
 # Include BOLOS SDK Makefile rules
 include $(BOLOS_SDK)/Makefile.rules
