@@ -1,6 +1,5 @@
 // Header files
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <os_apdu.h>
 #include <os_io.h>
@@ -23,5 +22,5 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, const size_t size) {
 	processStartTransactionRequest(NULL, NULL);
 
 	// Return success
-	return EXIT_SUCCESS;
+	return 0;
 }
