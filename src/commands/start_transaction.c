@@ -16,7 +16,7 @@
 
 	// Definitions
 	#undef THROW
-	#define THROW return;//
+	#define THROW return;  //
 #endif
 
 

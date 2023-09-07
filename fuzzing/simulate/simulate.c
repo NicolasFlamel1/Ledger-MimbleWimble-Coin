@@ -1,4 +1,5 @@
 // Header files
+#include <sys/time.h>
 #include <openssl/evp.h>
 #include <libcxng.h>
 #include <os_io.h>
