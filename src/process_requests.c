@@ -30,12 +30,6 @@
 #include "commands/verify_root_public_key.h"
 
 
-// Definitions
-
-// Request class
-#define REQUEST_CLASS 0xC7
-
-
 // Supporting function implementation
 
 // Process request

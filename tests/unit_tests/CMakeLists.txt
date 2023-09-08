@@ -44,7 +44,7 @@ add_compile_definitions(CURRENCY_MQS_VERSION={1,69})
 add_compile_definitions(CURRENCY_SLATEPACK_ADDRESS_HUMAN_READABLE_PART="grin")
 
 # Include directories
-include_directories(./simulate ../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include $ENV{BOLOS_SDK}/lib_ux/include)
+include_directories(../../src $ENV{BOLOS_SDK}/include $ENV{BOLOS_SDK}/lib_cxng/include)
 
 
 # Tests
