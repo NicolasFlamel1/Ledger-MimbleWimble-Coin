@@ -224,7 +224,7 @@ bool isValidUtf8String(const char *text, const size_t length) {
 		}
 
 		// Otherwise check if UTF-8 code point is a plane sixteen character
-		else if(length >= 3 && i < length - 3 && text[i] == 0xF4 && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF && text[i + 3] >= 0x80 && text[i + 3] <= 0xBF) {
+		else if(length >= 3 && i < length - 3 && text[i] == 0xF4 && text[i + 1] >= 0x80 && text[i + 1] <= 0x8F && text[i + 2] >= 0x80 && text[i + 2] <= 0xBF && text[i + 3] >= 0x80 && text[i + 3] <= 0xBF) {
 
 			// Go to next UTF-8 code point
 			i += 4;
