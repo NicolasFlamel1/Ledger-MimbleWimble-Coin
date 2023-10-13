@@ -1443,7 +1443,7 @@ bool verifyPaymentProofMessage(const uint8_t *message, const size_t messageLengt
 				cx_hash_sha256(message, messageLength, hash, sizeof(hash));
 
 				// Check if verifying the hash with the receiver public key and signature failed
-				if(!cx_ecdsa_verify(&receiverPublicKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, hash, sizeof(hash), signature, signatureLength)) {
+				if(!cx_ecdsa_verify_no_throw(&receiverPublicKey, hash, sizeof(hash), signature, signatureLength)) {
 
 					// Return false
 					return false;

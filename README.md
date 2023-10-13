@@ -41,8 +41,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk stax-secure-sdk
 cd stax-secure-sdk
-git checkout stax_1.3.0-rc1
-git checkout API_LEVEL_12
+git checkout stax_1.3.0
+git checkout API_LEVEL_13
 git pull
 echo stax > .target
 cd ..
