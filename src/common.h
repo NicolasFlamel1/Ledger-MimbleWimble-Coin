@@ -25,6 +25,20 @@
 // Error type mask
 #define ERROR_TYPE_MASK 0xF000
 
+// Check if error APDU range isn't defined
+#ifndef ERR_APD_RANGE
+
+	// Error APDU range
+	#define ERR_APD_RANGE 0x6000
+#endif
+
+// Check if error APDU length isn't defined
+#ifndef ERR_APD_LEN
+
+	// Error APDU length
+	#define ERR_APD_LEN (ERR_APD_RANGE + ERR_GEN_SUB_07)
+#endif
+
 
 // Constants
 
