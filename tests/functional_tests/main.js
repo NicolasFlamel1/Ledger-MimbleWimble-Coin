@@ -1702,7 +1702,7 @@ async function encryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType) {
 
 	// Check if not using Speculos
-	if(hardwareWallet instanceof SpeculosTransport === false || addressType === MQS_ADDRESS_TYPE) {
+	if(hardwareWallet instanceof SpeculosTransport === false) {
 
 		// Log message
 		console.log("Running decrypt slate test");
