@@ -44,10 +44,13 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 	volatile uint8_t signature[MAXIMUM_DER_SIGNATURE_SIZE];
 
 	// Initialize signature length
-	volatile size_t signatureLength = sizeof(signature);
+	volatile size_t signatureLength = 0;
 
 	// Check if creating message hash
 	if(slate.messageHashState.header.info) {
+
+		// Set signature length
+		signatureLength = sizeof(signature);
 
 		// Get tag as a string
 		char tagString[sizeof(tag) * HEXADECIMAL_CHARACTER_SIZE];
