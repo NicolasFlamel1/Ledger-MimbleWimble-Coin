@@ -370,6 +370,7 @@ ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Target specific defines
 	DEFINES += NBGL_QRCODE
+	SDK_SOURCE_PATH += qrcode
 
 # Otherwise
 else
