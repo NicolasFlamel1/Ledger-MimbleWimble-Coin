@@ -17,6 +17,7 @@
 #include "commands/get_address.h"
 #include "commands/get_commitment.h"
 #include "commands/get_bulletproof_components.h"
+#include "commands/get_login_challenge_signature.h"
 #include "commands/get_mqs_challenge_signature.h"
 #include "commands/get_root_public_key.h"
 #include "commands/get_seed_cookie.h"
@@ -265,6 +266,15 @@ void processRequest(const unsigned short requestLength, volatile unsigned short 
 					// break
 					break;
 
+				// Get login challenge signature instruction
+				case GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION:
+
+					// Process get login challenge signature request
+					processGetLoginChallengeSignatureRequest((unsigned short *)responseLength, (unsigned char *)responseFlags);
+
+					// break
+					break;
+
 				// Default
 				default:
 
@@ -414,6 +424,15 @@ bool processUserInteraction(const enum Instruction instruction, const bool isApp
 
 						// Process get MQS challenge signature user interaction
 						processGetMqsChallengeSignatureUserInteraction((unsigned short *)&responseLength);
+
+						// break
+						break;
+
+					// Get login challenge signature instruction
+					case GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION:
+
+						// Process get login challenge signature user interaction
+						processGetLoginChallengeSignatureUserInteraction((unsigned short *)&responseLength);
 
 						// break
 						break;

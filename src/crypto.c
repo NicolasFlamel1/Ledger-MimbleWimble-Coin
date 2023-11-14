@@ -2226,6 +2226,60 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 	END_TRY;
 }
 
+// Get login private key
+void getLoginPrivateKey(volatile cx_ecfp_private_key_t *loginPrivateKey, const uint32_t account) {
+
+	// Initialize child path
+	const uint32_t childPath[] = {
+		0,
+		2,
+		0,
+	};
+
+	// Initialize blinding factor
+	volatile uint8_t blindingFactor[BLINDING_FACTOR_SIZE];
+
+	// Initialize hash
+	volatile uint8_t hash[SECP256K1_PRIVATE_KEY_SIZE];
+
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Derive blinding factor from the child path
+			deriveBlindingFactor(blindingFactor, account, 0, childPath, ARRAYLEN(childPath), NO_SWITCH_TYPE);
+
+			// Get hash from the blinding factor
+			getBlake2b((uint8_t *)hash, sizeof(hash), (uint8_t *)blindingFactor, sizeof(blindingFactor), NULL, 0);
+
+			// Check if hash isn't a valid private key
+			if(!isValidSecp256k1PrivateKey((uint8_t *)hash, sizeof(hash))) {
+
+				// Throw internal error error
+				THROW(INTERNAL_ERROR_ERROR);
+			}
+
+			// Get login private key from hash and throw error if it fails
+			CX_THROW(cx_ecfp_init_private_key_no_throw(CX_CURVE_SECP256K1, (uint8_t *)hash, sizeof(hash), (cx_ecfp_private_key_t *)loginPrivateKey));
+		}
+
+		// Finally
+		FINALLY {
+
+			// Clear the blinding factor
+			explicit_bzero((uint8_t *)blindingFactor, sizeof(blindingFactor));
+
+			// Clear the hash
+			explicit_bzero((uint8_t *)hash, sizeof(hash));
+		}
+	}
+
+	// End try
+	END_TRY;
+}
+
 // Derive child key
 void deriveChildKey(volatile cx_ecfp_private_key_t *privateKey, volatile uint8_t *chainCode, const uint32_t account, const uint32_t *path, const size_t pathLength, const bool useProvidedPrivateKeyAndChainCode) {
 

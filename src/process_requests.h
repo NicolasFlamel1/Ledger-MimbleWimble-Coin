@@ -83,7 +83,10 @@ enum Instruction {
 	FINISH_TRANSACTION_INSTRUCTION,
 
 	// Get MQS challenge signature instruction
-	GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION
+	GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION,
+
+	// Get login challenge signature instruction
+	GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION
 };
 
 

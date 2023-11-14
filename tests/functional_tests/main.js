@@ -100,6 +100,9 @@ const REQUEST_FINISH_TRANSACTION_INSTRUCTION = REQUEST_CONTINUE_TRANSACTION_GET_
 // Request get MQS challenge signature instruction
 const REQUEST_GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION = REQUEST_FINISH_TRANSACTION_INSTRUCTION + 1;
 
+// Request get login challenge signature instruction
+const REQUEST_GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION = REQUEST_GET_MQS_CHALLENGE_SIGNATURE_INSTRUCTION + 1;
+
 // No parameter
 const NO_PARAMETER = 0;
 
@@ -573,6 +576,9 @@ async function performTests(useSpeculos, target) {
 			// Run get MQS default challenge signature test
 			await getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPrivateKey);
 		}
+		
+		// Run get login signature test
+		await getLoginSignatureTest(hardwareWallet, extendedPrivateKey);
 		
 		// Log message
 		console.log("Passed running all functional tests");
@@ -3802,4 +3808,209 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 	
 	// Log message
 	console.log("Passed getting MQS default challenge signature test");
+}
+
+// Get login signature test
+async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
+
+	// Log message
+	console.log("Running get login signature test");
+	
+	// Timestamp
+	const TIMESTAMP = new BigNumber(Math.round(Math.random() * Common.UINT32_MAX_VALUE));
+	
+	// Log timestamp
+	console.log("Using timestamp: " + TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toFixed());
+	
+	// Get login private key from the extended private key
+	const loginPrivateKey = await Crypto.loginKey(extendedPrivateKey);
+	
+	// Get timestamp hash
+	const timestampHash = new Uint8Array(sha256.arrayBuffer((new TextEncoder()).encode(TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toFixed())));
+	
+	// Set expected login public key to the login private key's public key
+	const expectedLoginPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(loginPrivateKey);
+	
+	// Set expected login signature as the timestamp hash signed by the login private key
+	const expectedLoginSignature = Secp256k1Zkp.createMessageHashSignature(timestampHash, loginPrivateKey);
+	
+	// Get time zone offset
+	const timeZoneOffset = (new Date()).getTimezoneOffset();
+	
+	// Log time zone offset
+	console.log("Using time zone offset: " + timeZoneOffset.toFixed());
+	
+	// Get timestamp as a date
+	const date = new Date((TIMESTAMP.toNumber() - timeZoneOffset * Common.SECONDS_IN_A_MINUTE) * Common.MILLISECONDS_IN_A_SECOND);
+	
+	// Check if not using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+		// Log message
+		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+		
+		// Log message
+		console.log("Verify that the time and date on the device is: " + date.getUTCHours().toFixed().padStart(2, "0") + ":" + date.getUTCMinutes().toFixed().padStart(2, "0") + ":" + date.getUTCSeconds().toFixed().padStart(2, "0") + " on " + date.getUTCFullYear().toFixed() + "-" + (date.getUTCMonth() + 1).toFixed().padStart(2, "0") + "-" + date.getUTCDate().toFixed().padStart(2, "0") + " UTC" + ((timeZoneOffset > 0) ? "-" : "+") + Math.floor(Math.abs(timeZoneOffset) / Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0") + ":" + (Math.abs(timeZoneOffset) % Common.MINUTES_IN_AN_HOUR).toFixed().padStart(2, "0"));
+	}
+	
+	// Convert time zone offset to the correct format
+	const timeZoneOffsetBuffer = new ArrayBuffer(Uint16Array["BYTES_PER_ELEMENT"]);
+	const timeZoneOffsetBufferView = new DataView(timeZoneOffsetBuffer);
+	timeZoneOffsetBufferView.setUint16(0, timeZoneOffset, true);
+	
+	// Check if using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === true) {
+	
+		// Check if using a Nano hardware wallet
+		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "wallet?",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Account.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Time And Date.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "Approve",
+						"actions": [
+						
+							// Push both
+							["button", 1, true],
+							["button", 2, true],
+							["button", 1, false],
+							["button", 2, false]
+						]
+					}
+				]
+			});
+		}
+		
+		// Otherwise
+		else {
+		
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "Tap to continue",
+						"actions": [
+						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
+							// Touch
+							["finger", 200, 500, true],
+							["finger", 200, 500, false]
+						]
+					},
+					{
+						"text": "Deny",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
+						"actions": [
+						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
+							// Touch start
+							["finger", 200, 500, true]
+						]
+					},
+					{
+						"text": "WALLET",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
+						"actions": [
+						
+							// Touch end
+							["finger", 200, 500, false]
+						]
+					}
+				]
+			});
+		}
+	}
+	
+	// Get the login challenge signature from the hardware wallet
+	let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+				
+		// Account
+		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+		
+		// Timestamp
+		Buffer.from(TIMESTAMP.multipliedBy(Common.MILLISECONDS_IN_A_SECOND).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
+		
+		// Time zone offset
+		Buffer.from(new Uint8Array(timeZoneOffsetBuffer))
+	]));
+	
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Get login public key from response
+	const loginPublicKey = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Get login challenge signature from response
+	const loginChallengeSignature = response.subarray(Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Log login public key
+	console.log("Login public key: " + Common.toHexString(loginPublicKey));
+	
+	// Check if login public key is invalid
+	if(Common.arraysAreEqual(loginPublicKey, expectedLoginPublicKey) === false) {
+	
+		// Log message
+		console.log("Invalid login public key");
+		
+		// Throw error
+		throw "Failed running get login signature test";
+	}
+	
+	// Log login signature
+	console.log("Login signature: " + Common.toHexString(loginChallengeSignature));
+	
+	// Check if login signature is invalid
+	if(Common.arraysAreEqual(loginChallengeSignature, expectedLoginSignature) === false) {
+	
+		// Log message
+		console.log("Invalid login signature");
+		
+		// Throw error
+		throw "Failed running get login signature test";
+	}
+	
+	// Log message
+	console.log("Passed getting login signature test");
 }
