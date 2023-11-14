@@ -175,5 +175,8 @@ void getEd25519PublicKey(uint8_t *ed25519PublicKey, const uint32_t account, cons
 // Calculate bulletproof components
 void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tOne, volatile uint8_t *tTwo, const uint64_t value, const uint8_t *blindingFactor, const uint8_t *commitment, const uint8_t *rewindNonce, const uint8_t *privateNonce, const uint8_t *proofMessage);
 
+// Get login private key
+void getLoginPrivateKey(volatile cx_ecfp_private_key_t *loginPrivateKey, const uint32_t account);
+
 
 #endif

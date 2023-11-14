@@ -13,8 +13,8 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
 APPVERSION_M = 7
-APPVERSION_N = 2
-APPVERSION_P = 2
+APPVERSION_N = 3
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Add security review banner. To be removed once Ledger security review is done.

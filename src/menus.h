@@ -115,6 +115,9 @@ enum Menu {
 	// Sign MQS challenge menu,
 	SIGN_MQS_CHALLENGE_MENU,
 
+	// Sign login challenge menu,
+	SIGN_LOGIN_CHALLENGE_MENU,
+
 	// Approve transaction menu
 	APPROVE_TRANSACTION_MENU,
 

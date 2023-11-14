@@ -144,6 +144,15 @@ static nbgl_layoutTagValueList_t signMqsChallengeMenuTagValueList;
 // Sign MQS challenge menu info long press
 static nbgl_pageInfoLongPress_t signMqsChallengeMenuInfoLongPress;
 
+// Sign login challenge menu tag value pairs
+static nbgl_layoutTagValue_t signLoginChallengeMenuTagValuePairs[2];
+
+// Sign login challenge menu tag value list
+static nbgl_layoutTagValueList_t signLoginChallengeMenuTagValueList;
+
+// Sign login challenge menu info long press
+static nbgl_pageInfoLongPress_t signLoginChallengeMenuInfoLongPress;
+
 // Sign approve transaction menu tag value pairs
 static nbgl_layoutTagValue_t approveTransactionMenuTagValuePairs[6];
 
@@ -344,6 +353,35 @@ static UX_STEP_CB(signMqsChallengeMenuDenyScreen, pb, processUserInteraction(GET
 
 // Sign MQS challenge menu
 static const ux_flow_step_t *signMqsChallengeMenu[9];
+
+// Sign login challenge menu notify screen
+static UX_STEP_NOCB(signLoginChallengeMenuNotifyScreen, pnn, {&C_icon_eye, "Login with", "wallet?"});
+
+	// Sign login challenge menu account index screen
+	#define signLoginChallengeMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
+
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
+
+// Sign login challenge menu time and date screen
+static UX_STEP_NOCB(signLoginChallengeMenuTimeAndDateScreen, nb_paging, {.title = "Time And Date", .text = timeLineBuffer});
+
+	// Otherwise
+	#else
+
+// Sign login challenge menu time and date screen
+static UX_STEP_NOCB(signLoginChallengeMenuTimeAndDateScreen, bnnn_paging, {.title = "Time And Date", .text = timeLineBuffer});
+
+	#endif
+
+// Sign login challenge menu approve screen
+static UX_STEP_CB(signLoginChallengeMenuApproveScreen, pb, processUserInteraction(GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, true, true), {&C_icon_validate_14, "Approve"});
+
+// Sign login challenge menu deny screen
+static UX_STEP_CB(signLoginChallengeMenuDenyScreen, pb, processUserInteraction(GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, false, false), {&C_icon_crossmark, "Deny"});
+
+// Sign login challenge menu
+static UX_FLOW(signLoginChallengeMenu, &signLoginChallengeMenuNotifyScreen, &signLoginChallengeMenuAccountIndexScreen, &signLoginChallengeMenuTimeAndDateScreen, &signLoginChallengeMenuApproveScreen, &signLoginChallengeMenuDenyScreen);
 
 // Approve transaction menu notify screen
 static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {&C_icon_eye, approveTransactionLineBuffer, "transaction?"});
@@ -562,6 +600,18 @@ static void signMqsChallengeMenuConfirmRejectCallback(void);
 
 // Sign MQS challenge menu reject callback
 static void signMqsChallengeMenuRejectCallback(void);
+
+// Sign login challenge menu continue callback
+static void signLoginChallengeMenuContinueCallback(void);
+
+// Sign login challenge menu choice callback
+static void signLoginChallengeMenuChoiceCallback(const bool confirm);
+
+// Sign login challenge menu confirm reject callback
+static void signLoginChallengeMenuConfirmRejectCallback(void);
+
+// Sign login challenge menu reject callback
+static void signLoginChallengeMenuRejectCallback(void);
 
 // Sign approve transaction menu continue callback
 static void approveTransactionMenuContinueCallback(void);
@@ -825,6 +875,15 @@ void showMenu(enum Menu menu) {
 			// Break
 			break;
 
+		// Sign login challenge menu
+		case SIGN_LOGIN_CHALLENGE_MENU:
+
+			// Set menu steps to sign login challenge menu
+			menuSteps = signLoginChallengeMenu;
+
+			// Break
+			break;
+
 		// Approve transaction menu
 		case APPROVE_TRANSACTION_MENU: {
 
@@ -985,6 +1044,15 @@ void showMenu(enum Menu menu) {
 
 			// Show sign MQS challenge menu
 			nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, signChallengeLineBuffer, NULL, "Deny", signMqsChallengeMenuContinueCallback, signMqsChallengeMenuConfirmRejectCallback);
+
+			// Break
+			break;
+
+		// Sign login challenge menu
+		case SIGN_LOGIN_CHALLENGE_MENU:
+
+			// Show sign login challenge menu
+			nbgl_useCaseReviewStart(&CURRENCY_ICON_DETAILS, "Login with\nwallet?", NULL, "Deny", signLoginChallengeMenuContinueCallback, signLoginChallengeMenuConfirmRejectCallback);
 
 			// Break
 			break;
@@ -1430,6 +1498,77 @@ void signMqsChallengeMenuRejectCallback(void) {
 
 	// Show status
 	nbgl_useCaseStatus(canceledLineBuffer, false, showMainMenu);
+}
+
+// Sign login challenge menu continue callback
+void signLoginChallengeMenuContinueCallback(void) {
+
+	// Set sign login challenge menu tag value pairs
+	signLoginChallengeMenuTagValuePairs[0].item = "Account Index";
+	signLoginChallengeMenuTagValuePairs[0].value = accountIndexLineBuffer;
+
+	// Set sign login challenge menu tag value pairs
+	signLoginChallengeMenuTagValuePairs[1].item = "Time And Date";
+	signLoginChallengeMenuTagValuePairs[1].value = timeLineBuffer;
+
+	// Set sign login challenge menu tag value list
+	signLoginChallengeMenuTagValueList.nbPairs = ARRAYLEN(signLoginChallengeMenuTagValuePairs);
+	signLoginChallengeMenuTagValueList.pairs = signLoginChallengeMenuTagValuePairs;
+	signLoginChallengeMenuTagValueList.wrapping = true;
+
+	// Set sign login challenge menu info long press
+	signLoginChallengeMenuInfoLongPress.icon = &CURRENCY_ICON_DETAILS;
+	signLoginChallengeMenuInfoLongPress.text = "Login with\nwallet?";
+	signLoginChallengeMenuInfoLongPress.longPressText = "Hold to approve";
+
+	// Show static review
+	nbgl_useCaseStaticReview(&signLoginChallengeMenuTagValueList, &signLoginChallengeMenuInfoLongPress, "Deny", signLoginChallengeMenuChoiceCallback);
+}
+
+// Sign login challenge menu choice callback
+void signLoginChallengeMenuChoiceCallback(const bool confirm) {
+
+	// Check if confirmed
+	if(confirm) {
+
+		// Check if processing user interaction was successful
+		if(processUserInteraction(GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, true, true)) {
+
+			// Show status
+			nbgl_useCaseStatus("LOGGED IN\nWITH WALLET", true, showMainMenu);
+		}
+
+		// Otherwise
+		else {
+
+			// Show status
+			nbgl_useCaseStatus("Logging in with\nwallet failed", false, showMainMenu);
+		}
+	}
+
+	// Otherwise
+	else {
+
+		// Sign login challenge menu confirm reject callback
+		signLoginChallengeMenuConfirmRejectCallback();
+	}
+}
+
+// Sign login challenge menu confirm reject callback
+void signLoginChallengeMenuConfirmRejectCallback(void) {
+
+	// Show confirm
+	nbgl_useCaseConfirm("Deny logging in\nwith wallet?", NULL, "Yes, deny", "Go back", signLoginChallengeMenuRejectCallback);
+}
+
+// Sign login challenge menu reject callback
+void signLoginChallengeMenuRejectCallback(void) {
+
+	// Process user interaction
+	processUserInteraction(GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, false, false);
+
+	// Show status
+	nbgl_useCaseStatus("Logging in with\nwallet denied", false, showMainMenu);
 }
 
 // Sign approve transaction menu continue callback

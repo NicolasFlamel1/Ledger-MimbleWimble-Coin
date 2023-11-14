@@ -620,6 +620,64 @@ class Crypto {
 			});
 		}
 		
+		// Login key
+		static loginKey(extendedPrivateKey) {
+		
+			// Return promise
+			return new Promise(function(resolve, reject) {
+			
+				// Create child identifier
+				var childIdentifier = new Identifier().getChild();
+				childIdentifier.getPaths()[1] = 2;
+				
+				// Return deriving root key from extended private key, child identifier, and no switch type
+				return Crypto.deriveSecretKey(extendedPrivateKey, new BigNumber(0), childIdentifier, Crypto.SWITCH_TYPE_NONE).then(function(rootKey) {
+				
+					// Check if getting secret key from root key was successful
+					var secretKey = Blake2b.compute(Crypto.SECP256K1_SECRET_KEY_LENGTH, rootKey, new Uint8Array([]));
+					
+					if(secretKey !== Blake2b.OPERATION_FAILED) {
+					
+						// Securely clear root key
+						rootKey.fill(0);
+					
+						// Check if secret key is a valid secret key
+						if(Secp256k1Zkp.isValidSecretKey(secretKey) === true) {
+					
+							// Resolve the secret key
+							resolve(secretKey);
+						}
+						
+						// Otherwise
+						else {
+						
+							// Securely clear secret key
+							secretKey.fill(0);
+							
+							// Reject error
+							reject("Secret key is not a valid secret key.");
+						}
+					}
+					
+					// Otherwise
+					else {
+					
+						// Securely clear root key
+						rootKey.fill(0);
+					
+						// Reject error
+						reject("Getting secret key from root key failed.");
+					}
+				
+				// Catch errors
+				}).catch(function(error) {
+				
+					// Reject error
+					reject(error);
+				});
+			});
+		}
+		
 		// AES decrypt
 		static aesDecrypt(encryptedData, key) {
 		
