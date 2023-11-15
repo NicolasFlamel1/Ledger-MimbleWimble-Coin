@@ -9,6 +9,12 @@
 #include "../time.h"
 
 
+// Definitions
+
+// Maximum identifier size
+#define MAXIMUM_IDENTIFIER_SIZE 64
+
+
 // Supporting function implementation
 
 // Process get login challenge signature request
@@ -27,7 +33,7 @@ void processGetLoginChallengeSignatureRequest(__attribute__((unused)) const unsi
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
 	// Check if parameters or data are invalid
-	if(firstParameter || secondParameter || dataLength != sizeof(uint32_t) + sizeof(uint64_t) + sizeof(int16_t)) {
+	if(firstParameter || secondParameter || dataLength <= sizeof(uint32_t) + sizeof(uint64_t) + sizeof(int16_t) || dataLength > sizeof(uint32_t) + sizeof(uint64_t) + sizeof(int16_t) + MAXIMUM_IDENTIFIER_SIZE) {
 
 		// Throw invalid parameters error
 		THROW(INVALID_PARAMETERS_ERROR);
@@ -69,6 +75,23 @@ void processGetLoginChallengeSignatureRequest(__attribute__((unused)) const unsi
 		THROW(INVALID_PARAMETERS_ERROR);
 	}
 
+	// Get identifier from data
+	const char *identifier = (char *)&data[sizeof(account) + sizeof(timestamp) + sizeof(timeZoneOffset)];
+
+	// Get identifier length
+	const size_t identifierLength = dataLength - (sizeof(account) + sizeof(timestamp) + sizeof(timeZoneOffset));
+
+	// Go through all characters in the identifier
+	for(size_t i = 0; i < identifierLength; ++i) {
+
+		// Check if character isn't a printable ASCII character
+		if(identifier[i] < ' ' || identifier[i] > '~') {
+
+			// Throw invalid parameters error
+			THROW(INVALID_PARAMETERS_ERROR);
+		}
+	}
+
 	// Check if time zone offset will underflow the timestamp
 	if(timeZoneOffset * SECONDS_IN_A_MINUTE > (int64_t)timestamp) {
 
@@ -97,6 +120,10 @@ void processGetLoginChallengeSignatureRequest(__attribute__((unused)) const unsi
 	explicit_bzero(accountIndexLineBuffer, sizeof(accountIndexLineBuffer));
 	toString(accountIndexLineBuffer, account, 0);
 
+	// Copy identifier into the public keu line buffer
+	explicit_bzero((char *)publicKeyLineBuffer, sizeof(publicKeyLineBuffer));
+	memcpy((char *)publicKeyLineBuffer, identifier, identifierLength);
+
 	// Show sign login challenge menu
 	showMenu(SIGN_LOGIN_CHALLENGE_MENU);
 
@@ -107,6 +134,9 @@ void processGetLoginChallengeSignatureRequest(__attribute__((unused)) const unsi
 // Process get login challenge signature user interaction
 void processGetLoginChallengeSignatureUserInteraction(unsigned short *responseLength) {
 
+	// Get request's data length
+	const size_t dataLength = G_io_apdu_buffer[APDU_OFF_LC];
+
 	// Get request's data
 	const uint8_t *data = &G_io_apdu_buffer[APDU_OFF_DATA];
 
@@ -114,12 +144,15 @@ void processGetLoginChallengeSignatureUserInteraction(unsigned short *responseLe
 	uint32_t account;
 	memcpy(&account, data, sizeof(account));
 
-	// Initialize hash
-	uint8_t hash[CX_SHA256_SIZE];
-
 	// Get timestamp from data
 	uint64_t timestamp;
 	memcpy(&timestamp, &data[sizeof(account)], sizeof(timestamp));
+
+	// Get identifier from data
+	const char *identifier = (char *)&data[sizeof(account) + sizeof(timestamp) + sizeof(int16_t)];
+
+	// Get identifier length
+	const size_t identifierLength = dataLength - (sizeof(account) + sizeof(timestamp) + sizeof(int16_t));
 
 	// Get timestamp string length
 	const size_t timestampStringLength = getStringLength(timestamp);
@@ -128,8 +161,13 @@ void processGetLoginChallengeSignatureUserInteraction(unsigned short *responseLe
 	char *timestampString = alloca(timestampStringLength);
 	toString(timestampString, timestamp, 0);
 
-	// Get hash of the timestamp
-	cx_hash_sha256((uint8_t *)timestampString, timestampStringLength, hash, sizeof(hash));
+	// Get hash of the timestamp and identifier
+	cx_sha256_t hashContext;
+	cx_sha256_init(&hashContext);
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hashContext, 0, (uint8_t *)timestampString, timestampStringLength, NULL, 0));
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hashContext, 0, (const uint8_t *)" ", sizeof(" ") - sizeof((char)'\0'), NULL, 0));
+	uint8_t hash[CX_SHA256_SIZE];
+	CX_THROW(cx_hash_no_throw((cx_hash_t *)&hashContext, CX_LAST, (const uint8_t *)identifier, identifierLength, hash, sizeof(hash)));
 
 	// Initialize login private key
 	volatile cx_ecfp_private_key_t loginPrivateKey;

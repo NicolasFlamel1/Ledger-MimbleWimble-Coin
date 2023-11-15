@@ -145,7 +145,7 @@ static nbgl_layoutTagValueList_t signMqsChallengeMenuTagValueList;
 static nbgl_pageInfoLongPress_t signMqsChallengeMenuInfoLongPress;
 
 // Sign login challenge menu tag value pairs
-static nbgl_layoutTagValue_t signLoginChallengeMenuTagValuePairs[2];
+static nbgl_layoutTagValue_t signLoginChallengeMenuTagValuePairs[3];
 
 // Sign login challenge menu tag value list
 static nbgl_layoutTagValueList_t signLoginChallengeMenuTagValueList;
@@ -360,6 +360,28 @@ static UX_STEP_NOCB(signLoginChallengeMenuNotifyScreen, pnn, {&C_icon_eye, "Logi
 	// Sign login challenge menu account index screen
 	#define signLoginChallengeMenuAccountIndexScreen exportRootPublicKeyMenuAccountIndexScreen
 
+	// Check if device doesn't have low height
+	#if BAGL_HEIGHT >= 64
+
+// Sign login challenge menu identifier single line screen
+static UX_STEP_NOCB(signLoginChallengeMenuIdentifierSingleLineScreen, bn, {"Identifier", (char *)publicKeyLineBuffer});
+
+	#endif
+
+	// Check if device has low height
+	#if BAGL_HEIGHT < 64
+
+// Sign login challenge menu identifier  multiline screen
+static UX_STEP_NOCB(signLoginChallengeMenuIdentifierMultilineScreen, nb_paging, {.title = "Identifier", .text = (char *)publicKeyLineBuffer});
+
+	// Otherwise
+	#else
+
+// Sign login challenge menu identifier  multiline screen
+static UX_STEP_NOCB(signLoginChallengeMenuIdentifierMultilineScreen, bnnn_paging, {.title = "Identifier", .text = (char *)publicKeyLineBuffer});
+
+	#endif
+
 	// Check if device has low height
 	#if BAGL_HEIGHT < 64
 
@@ -381,7 +403,7 @@ static UX_STEP_CB(signLoginChallengeMenuApproveScreen, pb, processUserInteractio
 static UX_STEP_CB(signLoginChallengeMenuDenyScreen, pb, processUserInteraction(GET_LOGIN_CHALLENGE_SIGNATURE_INSTRUCTION, false, false), {&C_icon_crossmark, "Deny"});
 
 // Sign login challenge menu
-static UX_FLOW(signLoginChallengeMenu, &signLoginChallengeMenuNotifyScreen, &signLoginChallengeMenuAccountIndexScreen, &signLoginChallengeMenuTimeAndDateScreen, &signLoginChallengeMenuApproveScreen, &signLoginChallengeMenuDenyScreen);
+static const ux_flow_step_t *signLoginChallengeMenu[7];
 
 // Approve transaction menu notify screen
 static UX_STEP_NOCB(approveTransactionMenuNotifyScreen, pnn, {&C_icon_eye, approveTransactionLineBuffer, "transaction?"});
@@ -876,13 +898,52 @@ void showMenu(enum Menu menu) {
 			break;
 
 		// Sign login challenge menu
-		case SIGN_LOGIN_CHALLENGE_MENU:
+		case SIGN_LOGIN_CHALLENGE_MENU: {
+
+			// Initialize index
+			size_t index = 0;
+
+			// Set sign login challenge menu to use notify screen
+			signLoginChallengeMenu[index++] = &signLoginChallengeMenuNotifyScreen;
+
+			// Set sign login challenge menu to use account index screen
+			signLoginChallengeMenu[index++] = &signLoginChallengeMenuAccountIndexScreen;
+
+	// Check if device doesn't have low height
+	#if BAGL_HEIGHT >= 64
+
+			// Check if identifier can fit on one line
+			if(bagl_compute_line_width(BAGL_FONT_OPEN_SANS_REGULAR_11px, 0, (char *)publicKeyLineBuffer, strlen((char *)publicKeyLineBuffer), BAGL_ENCODING_LATIN1) <= PIXEL_PER_LINE) {
+
+				// Set sign login challenge menu to use identifier single line screen
+				signLoginChallengeMenu[index++] = &signLoginChallengeMenuIdentifierSingleLineScreen;
+
+			} else
+	#endif
+			{
+
+				// Set sign login challenge menu to use identifier multiline screen
+				signLoginChallengeMenu[index++] = &signLoginChallengeMenuIdentifierMultilineScreen;
+			}
+
+			// Set sign login challenge menu to use time and date screen
+			signLoginChallengeMenu[index++] = &signLoginChallengeMenuTimeAndDateScreen;
+
+			// Set sign login challenge menu to use approve screen
+			signLoginChallengeMenu[index++] = &signLoginChallengeMenuApproveScreen;
+
+			// Set sign login challenge menu to use deny screen
+			signLoginChallengeMenu[index++] = &signLoginChallengeMenuDenyScreen;
+
+			// End sign login challenge menu
+			signLoginChallengeMenu[index++] = FLOW_END_STEP;
 
 			// Set menu steps to sign login challenge menu
 			menuSteps = signLoginChallengeMenu;
 
 			// Break
 			break;
+		}
 
 		// Approve transaction menu
 		case APPROVE_TRANSACTION_MENU: {
@@ -1508,8 +1569,12 @@ void signLoginChallengeMenuContinueCallback(void) {
 	signLoginChallengeMenuTagValuePairs[0].value = accountIndexLineBuffer;
 
 	// Set sign login challenge menu tag value pairs
-	signLoginChallengeMenuTagValuePairs[1].item = "Time And Date";
-	signLoginChallengeMenuTagValuePairs[1].value = timeLineBuffer;
+	signLoginChallengeMenuTagValuePairs[1].item = "Identifier";
+	signLoginChallengeMenuTagValuePairs[1].value = (char *)publicKeyLineBuffer;
+
+	// Set sign login challenge menu tag value pairs
+	signLoginChallengeMenuTagValuePairs[2].item = "Time And Date";
+	signLoginChallengeMenuTagValuePairs[2].value = timeLineBuffer;
 
 	// Set sign login challenge menu tag value list
 	signLoginChallengeMenuTagValueList.nbPairs = ARRAYLEN(signLoginChallengeMenuTagValuePairs);
