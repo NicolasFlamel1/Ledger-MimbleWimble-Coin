@@ -820,7 +820,7 @@ Returns the signature for a provided timestamp or hardcoded challenge signed wit
 
 #### Description
 
-Returns the signature for a provided timestamp signed with an account's login private key after obtaining user's approval.
+Returns the signature for a provided timestamp and identifier signed with an account's login private key after obtaining user's approval.
 
 #### Encoding
 
@@ -839,11 +839,12 @@ Returns the signature for a provided timestamp signed with an account's login pr
 
 **Input Data**
 
-| Length | Name               | Description |
-|--------|--------------------|-------------|
-| 4      | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
-| 8      | `timestamp`        | Timestamp epoch in milliseconds to sign (little endian, max 0x36EE7FFFC91567) |
-| 2      | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -779, max 899) |
+| Length        | Name               | Description |
+|---------------|--------------------|-------------|
+| 4             | `account`          | Account number (little endian, max 0x7FFFFFFF)) |
+| 8             | `timestamp`        | Timestamp epoch in milliseconds to sign (little endian, max 0x36EE7FFFC91567) |
+| 2             | `time_zone_offset` | Time zone offset in minutes used when displaying the timestamp (little endian, signed, min -779, max 899) |
+| > 0 and <= 64 | `identifier`       | Identifier to sign |
 
 **Output Data**
 
