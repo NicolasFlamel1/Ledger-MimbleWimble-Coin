@@ -284,96 +284,95 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      # Stax debug build removed due to errors in Stax SDK
-      #- name: Build Stax MimbleWimble Coin app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
-      #
-      #- name: Upload Stax MimbleWimble Coin app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-mimblewimble-coin-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax MimbleWimble Coin floonet app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
-      #
-      #- name: Upload Stax MimbleWimble Coin floonet app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-mimblewimble-coin-floonet-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Grin app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin
-      #
-      #- name: Upload Stax Grin app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-grin-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Grin testnet app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet
-      #
-      #- name: Upload Stax Grin testnet app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-grin-testnet-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Epic Cash app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash
-      #
-      #- name: Upload Stax Epic Cash app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-epic-cash-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Epic Cash floonet app
-      #  run: |
-      #    make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash_floonet
-      #
-      #- name: Upload Stax Epic Cash floonet app
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: app-debug-epic-cash-floonet-stax
-      #    path: bin
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
+      - name: Build Stax MimbleWimble Coin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
+
+      - name: Upload Stax MimbleWimble Coin app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax MimbleWimble Coin floonet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
+
+      - name: Upload Stax MimbleWimble Coin floonet app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-floonet-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin
+
+      - name: Upload Stax Grin app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-grin-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin testnet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet
+
+      - name: Upload Stax Grin testnet app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-grin-testnet-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Epic Cash app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash
+
+      - name: Upload Stax Epic Cash app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-epic-cash-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Epic Cash floonet app
+        run: |
+          make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash_floonet
+
+      - name: Upload Stax Epic Cash floonet app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-epic-cash-floonet-stax
+          path: bin
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
 
   job_scan_build:
     name: Clang Static Analyzer
@@ -656,96 +655,95 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      # Stax Clang Static Analyzer build removed due to errors in Stax SDK
-      #- name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax MimbleWimble Coin floonet app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Grin app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=grin
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Grin testnet app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Epic Cash app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
-      #
-      #- name: Build Stax Epic Cash floonet app with Clang Static Analyzer
-      #  run: |
-      #    scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash_floonet
-      #
-      #- uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: scan-build
-      #    path: scan-build
-      #
-      #- name: Cleanup the repository
-      #  run: |
-      #    git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      #    git clean -dxf
+      - name: Build Stax MimbleWimble Coin app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax MimbleWimble Coin floonet app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=grin
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Grin testnet app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=grin_testnet
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Epic Cash app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
+
+      - name: Build Stax Epic Cash floonet app with Clang Static Analyzer
+        run: |
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=epic_cash_floonet
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: scan-build
+          path: scan-build
+
+      - name: Cleanup the repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git clean -dxf
 
   job_unit_test:
     name: Unit test
@@ -950,168 +948,167 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      # Nano X tests removed due to automation hanging on some tests
-      #- name: Download Nano X MimbleWimble Coin app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-mimblewimble-coin-nanox
-      #    path: bin-mimblewimble-coin-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X MimbleWimble Coin app
-      #  run: |
-      #    node tests/functional_tests/main.js mimblewimble_coin speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-mimblewimble-coin-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
-      #
-      #- name: Download Nano X MimbleWimble Coin floonet app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-mimblewimble-coin-floonet-nanox
-      #    path: bin-mimblewimble-coin-floonet-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X MimbleWimble Coin floonet app
-      #  run: |
-      #    node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-mimblewimble-coin-floonet-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
-      #
-      #- name: Download Nano X Grin app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-grin-nanox
-      #    path: bin-grin-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-grin-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X Grin app
-      #  run: |
-      #    node tests/functional_tests/main.js grin speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-grin-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
-      #
-      #- name: Download Nano X Grin testnet app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-grin-testnet-nanox
-      #    path: bin-grin-testnet-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-grin-testnet-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X Grin testnet app
-      #  run: |
-      #    node tests/functional_tests/main.js grin_testnet speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-grin-testnet-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
-      #
-      #- name: Download Nano X Epic Cash app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-epic-cash-nanox
-      #    path: bin-epic-cash-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-epic-cash-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X Epic Cash app
-      #  run: |
-      #    node tests/functional_tests/main.js epic_cash speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-epic-cash-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
-      #
-      #- name: Download Nano X Epic Cash floonet app
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: app-debug-epic-cash-floonet-nanox
-      #    path: bin-epic-cash-floonet-nanox
-      #
-      #- name: Run Speculos
-      #  run: |
-      #    /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-epic-cash-floonet-nanox/app.elf 2>speculos.log &
-      #    echo $! >/tmp/speculos.pid
-      #    timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-      #
-      #- name: Run tests with Nano X Epic Cash floonet app
-      #  run: |
-      #    node tests/functional_tests/main.js epic_cash_floonet speculos nanox
-      #
-      #- name: Upload Speculos log
-      #  uses: actions/upload-artifact@v3
-      #  if: failure()
-      #  with:
-      #    name: speculos-epic-cash-floonet-nanox-log
-      #    path: speculos.log
-      #
-      #- name: Kill Speculos
-      #  run: |
-      #    kill -9 $(cat /tmp/speculos.pid)
+      - name: Download Nano X MimbleWimble Coin app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-nanox
+          path: bin-mimblewimble-coin-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X MimbleWimble Coin app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X MimbleWimble Coin floonet app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-mimblewimble-coin-floonet-nanox
+          path: bin-mimblewimble-coin-floonet-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X MimbleWimble Coin floonet app
+        run: |
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-mimblewimble-coin-floonet-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Grin app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-grin-nanox
+          path: bin-grin-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-grin-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Grin app
+        run: |
+          node tests/functional_tests/main.js grin speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-grin-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Grin testnet app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-grin-testnet-nanox
+          path: bin-grin-testnet-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-grin-testnet-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Grin testnet app
+        run: |
+          node tests/functional_tests/main.js grin_testnet speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-grin-testnet-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Epic Cash app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-epic-cash-nanox
+          path: bin-epic-cash-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-epic-cash-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Epic Cash app
+        run: |
+          node tests/functional_tests/main.js epic_cash speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-epic-cash-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
+
+      - name: Download Nano X Epic Cash floonet app
+        uses: actions/download-artifact@v3
+        with:
+          name: app-debug-epic-cash-floonet-nanox
+          path: bin-epic-cash-floonet-nanox
+
+      - name: Run Speculos
+        run: |
+          /speculos/speculos.py --model nanox --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-epic-cash-floonet-nanox/app.elf 2>speculos.log &
+          echo $! >/tmp/speculos.pid
+          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+
+      - name: Run tests with Nano X Epic Cash floonet app
+        run: |
+          node tests/functional_tests/main.js epic_cash_floonet speculos nanox
+
+      - name: Upload Speculos log
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: speculos-epic-cash-floonet-nanox-log
+          path: speculos.log
+
+      - name: Kill Speculos
+        run: |
+          kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S Plus MimbleWimble Coin app
         uses: actions/download-artifact@v3
