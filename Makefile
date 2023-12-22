@@ -17,10 +17,6 @@ APPVERSION_N = 4
 APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
-# Add security review banner. To be removed once Ledger security review is done.
-APP_LOAD_PARAMS += --tlvraw 9F:01
-DEFINES += HAVE_PENDING_REVIEW_SCREEN
-
 # Emulator flags
 EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
@@ -417,6 +413,10 @@ else
 
 	# Define printf as nothing
 	DEFINES += PRINTF\(...\)=
+	
+	# Add security review banner. To be removed once Ledger security review is done.
+	APP_LOAD_PARAMS += --tlvraw 9F:01
+	DEFINES += HAVE_PENDING_REVIEW_SCREEN
 endif
 
 # Define stack canary
