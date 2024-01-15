@@ -32,8 +32,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanosplus-secure-sdk
 cd nanosplus-secure-sdk
-git checkout nanos+_1.1.0
-git checkout API_LEVEL_1
+git checkout nanos+_1.1.1
+git checkout API_LEVEL_5
 git pull
 echo nanos2 > .target
 cd ..
