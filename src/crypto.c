@@ -1553,22 +1553,22 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 // Check if target is Nano S
 #ifdef TARGET_NANOS
 
-					// Check if time to update progress
-					if(i % 4 == 4 - 1) {
+				// Check if time to update progress
+				if(i % 4 == 4 - 1) {
 
-						// Show progress bar
-						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16)));
-					}
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16)));
+				}
 
 // Otherwise
 #else
 
-					// Check if time to update progress
-					if(i % 4 == 4 - 1) {
+				// Check if time to update progress
+				if(i % 4 == 4 - 1) {
 
-						// Show progress bar
-						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8)));
-					}
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8)));
+				}
 #endif
 
 // Check if has NGBL
@@ -2181,22 +2181,22 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 // Check if target is Nano S
 #ifdef TARGET_NANOS
 
-					// Check if time to update progress
-					if(i % 4 == 4 - 1) {
+				// Check if time to update progress
+				if(i % 4 == 4 - 1) {
 
-						// Show progress bar
-						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16), MAXIMUM_PROGRESS_BAR_PERCENT));
-					}
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16), MAXIMUM_PROGRESS_BAR_PERCENT));
+				}
 
 // Otherwise
 #else
 
-					// Check if time to update progress
-					if(i % 8 == 8 - 1) {
+				// Check if time to update progress
+				if(i % 8 == 8 - 1) {
 
-						// Show progress bar
-						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8), MAXIMUM_PROGRESS_BAR_PERCENT));
-					}
+					// Show progress bar
+					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8), MAXIMUM_PROGRESS_BAR_PERCENT));
+				}
 #endif
 
 // Check if has NGBL
