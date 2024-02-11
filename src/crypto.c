@@ -1955,12 +1955,26 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 					THROW(INTERNAL_ERROR_ERROR);
 				}
 
-				// Check if time to update progress
-				if(!(i % 4)) {
+// Check if target is Nano S
+#ifdef TARGET_NANOS
 
-					// Show progress bar
-					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4));
-				}
+					// Check if time to update progress
+					if(i % 4 == 4 - 1) {
+
+						// Show progress bar
+						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16)));
+					}
+
+// Otherwise
+#else
+
+					// Check if time to update progress
+					if(i % 4 == 4 - 1) {
+
+						// Show progress bar
+						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, 0, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8)));
+					}
+#endif
 
 // Check if has NGBL
 #ifdef HAVE_NBGL
@@ -2013,9 +2027,6 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 			uint8_t *t0 = (uint8_t *)rho;
 			explicit_bzero(t0, SCALAR_SIZE);
 			useLrGenerator(t0, t1, t2, y, (uint8_t *)z, rewindNonce, value);
-
-			// Show progress bar
-			showProgressBar(MAXIMUM_PROGRESS_BAR_PERCENT);
 
 			// Get the difference of t1 and t2 and throw error if it fails
 			CX_THROW(cx_math_subm_no_throw((uint8_t *)t1, (uint8_t *)t1, (uint8_t *)t2, SECP256K1_CURVE_ORDER, sizeof(t1)));
@@ -2572,12 +2583,26 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 				CX_THROW(cx_math_multm_no_throw((uint8_t *)yn, (uint8_t *)yn, y, SECP256K1_CURVE_ORDER, sizeof(yn)));
 				CX_THROW(cx_math_addm_no_throw((uint8_t *)z22n, (uint8_t *)z22n, (uint8_t *)z22n, SECP256K1_CURVE_ORDER, sizeof(z22n)));
 
-				// Check if time to update progress
-				if(!(i % 16)) {
+// Check if target is Nano S
+#ifdef TARGET_NANOS
 
-					// Show progress bar
-					showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 3 / 4, MAXIMUM_PROGRESS_BAR_PERCENT));
-				}
+					// Check if time to update progress
+					if(i % 4 == 4 - 1) {
+
+						// Show progress bar
+						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 16), MAXIMUM_PROGRESS_BAR_PERCENT));
+					}
+
+// Otherwise
+#else
+
+					// Check if time to update progress
+					if(i % 8 == 8 - 1) {
+
+						// Show progress bar
+						showProgressBar(map(i, 0, BITS_TO_PROVE - 1, MAXIMUM_PROGRESS_BAR_PERCENT * 16 / (16 + 8), MAXIMUM_PROGRESS_BAR_PERCENT));
+					}
+#endif
 
 // Check if has NGBL
 #ifdef HAVE_NBGL
