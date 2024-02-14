@@ -1875,7 +1875,7 @@ class Slate {
 									}
 									
 									// Check if final signature doesn't verify the slate
-									if(Secp256k1Zkp.verifySingleSignerSignature(finalSignature, messageToSign, Secp256k1Zkp.NO_PUBLIC_NONCE, publicBlindExcessSum, publicBlindExcessSum, true) !== true) {
+									if(Secp256k1Zkp.verifySingleSignerSignature(finalSignature, messageToSign, Secp256k1Zkp.NO_PUBLIC_NONCE, publicBlindExcessSum, publicBlindExcessSum, false) !== true) {
 									
 										// Restore sender participant's old partial signature
 										senderParticipant.setPartialSignature(oldPartialSignature);
