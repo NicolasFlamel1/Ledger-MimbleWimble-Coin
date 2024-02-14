@@ -51,7 +51,7 @@ class Wallet {
 		}
 		
 		// Constructor
-		constructor(name, color, salt, initializationVector, numberOfIterations, encryptedSeed, addressSuffix, order, syncedHeight, spentAmount, unspentAmount, unconfirmedAmount, lockedAmount, pendingAmount, expiredAmount, walletType, networkType, lastIdentifier, hardwareType, encryptedRootPublicKey, useBip39, encryptedBip39Salt, keyPath) {
+		constructor(name, color, salt, initializationVector, numberOfIterations, encryptedSeed, addressSuffix, order, syncedHeight, spentAmount, unspentAmount, unconfirmedAmount, lockedAmount, pendingAmount, expiredAmount, walletType, networkType, lastIdentifier, hardwareType, encryptedRootPublicKey, useBip39, encryptedBip39Salt, accountNumber, paymentProofIndex, keyPath) {
 		
 			// Set performing address suffix operation
 			this.setPerformingAddressSuffixOperation(false);
@@ -155,6 +155,12 @@ class Wallet {
 				// Set encrypted BIP39 salt
 				this.setEncryptedBip39Salt(encryptedBip39Salt);
 				
+				// Set account number
+				this.setAccountNumber(accountNumber);
+				
+				// Set payment proof index
+				this.setPaymentProofIndex(paymentProofIndex);
+				
 				// Set key path
 				this.setKeyPath(keyPath);
 				
@@ -219,6 +225,12 @@ class Wallet {
 			
 			// Set hardware type
 			this.setHardwareType((hardwareWallet !== Wallet.NO_HARDWARE_WALLET) ? hardwareWallet.getHardwareType() : Wallet.NO_HARDWARE_TYPE);
+			
+			// Set account number
+			this.setAccountNumber(0);
+			
+			// Set payment proof index
+			this.setPaymentProofIndex(0);
 			
 			// Set key path to no key path
 			this.setKeyPath(Wallet.NO_KEY_PATH);
@@ -1228,7 +1240,7 @@ class Wallet {
 						var defaultIdentifier = new Identifier();
 						
 						// Set the current identifier to the default identifier's child identifier
-						var currentIdentifier = defaultIdentifier.getChild(height);
+						var currentIdentifier = defaultIdentifier.getChild();
 					}
 					
 					// Otherwise check if an identifier is provided and it was previously used
@@ -1241,7 +1253,7 @@ class Wallet {
 					else {
 					
 						// Set the current identifier to the last identifier's next identifier
-						var currentIdentifier = self.getLastIdentifier().getNext(height);
+						var currentIdentifier = self.getLastIdentifier().getNext();
 					}
 					
 					// Get reward from fees and height
@@ -1362,10 +1374,10 @@ class Wallet {
 						var defaultIdentifier = new Identifier();
 						
 						// Set the current identifier to the default identifier's child identifier
-						var currentIdentifier = defaultIdentifier.getChild(height);
+						var currentIdentifier = defaultIdentifier.getChild();
 						
 						// Set last identifier to the current identifier without the extras
-						self.setLastIdentifier(currentIdentifier.removeExtras());
+						self.setLastIdentifier(currentIdentifier);
 					}
 					
 					// Otherwise check if an identifier is provided and it was previously used
@@ -1378,10 +1390,10 @@ class Wallet {
 					else {
 					
 						// Set the current identifier to the last identifier's next identifier
-						var currentIdentifier = self.getLastIdentifier().getNext(height);
+						var currentIdentifier = self.getLastIdentifier().getNext();
 						
 						// Set last identifier to the current identifier without the extras
-						self.setLastIdentifier(currentIdentifier.removeExtras());
+						self.setLastIdentifier(currentIdentifier);
 					}
 					
 					// Get reward from fees and height
@@ -2874,6 +2886,34 @@ class Wallet {
 			this.encryptedBip39Salt = encryptedBip39Salt;
 		}
 		
+		// Get account number
+		getAccountNumber() {
+		
+			// Return account number
+			return this.accountNumber;
+		}
+		
+		// Set account number
+		setAccountNumber(accountNumber) {
+		
+			// Set account number
+			this.accountNumber = accountNumber;
+		}
+		
+		// Get payment proof index
+		getPaymentProofIndex() {
+		
+			// Return payment proof index
+			return this.paymentProofIndex;
+		}
+		
+		// Set payment proof index
+		setPaymentProofIndex(paymentProofIndex) {
+		
+			// Set payment proof index
+			this.paymentProofIndex = paymentProofIndex;
+		}
+		
 		// Get key path
 		getKeyPath() {
 		
@@ -4091,7 +4131,7 @@ class Wallet {
 		static get DEFAULT_NUMBER_OF_ITERATIONS() {
 		
 			// Return default number of iterations
-			return 100000;
+			return 200000;
 		}
 		
 		// Import algorithm
