@@ -15,7 +15,7 @@ const Common = require("../../tests/functional_tests/common.js");
 // Constants
 
 // Epicbox server
-const EPICBOX_SERVER = "wss://epicbox.epic.tech:443";
+const EPICBOX_SERVER = "wss://epicbox.epicnet.us:443";
 
 // Request class
 const REQUEST_CLASS = 0xC7;

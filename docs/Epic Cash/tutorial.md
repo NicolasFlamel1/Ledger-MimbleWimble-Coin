@@ -160,5 +160,5 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Support
 
-* Epic Cash Forum: [https://forum.epic.tech](https://forum.epic.tech)
+* Epic Cash Forum: [https://forum.epiccash.com](https://forum.epiccash.com)
 * Github: [https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues](https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues)
