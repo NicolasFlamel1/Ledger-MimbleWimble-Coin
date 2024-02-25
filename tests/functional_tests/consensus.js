@@ -812,7 +812,7 @@ class Consensus {
 						case Consensus.MAINNET_NETWORK_TYPE:
 						
 							// Return explorer output commitment URL
-							return "https://explorer.epic.tech/blockdetail/";
+							return "https://explorer.epiccash.com/blockdetail/";
 						
 						// Testnet network
 						case Consensus.TESTNET_NETWORK_TYPE:
