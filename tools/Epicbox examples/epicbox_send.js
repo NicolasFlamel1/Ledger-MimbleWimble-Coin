@@ -16,13 +16,13 @@ const Mqs = require("../../tests/functional_tests/mqs.js");
 // Constants
 
 // Destination
-const DESTINATION = "esZ1P3crbc2XCHaGf7fQCGEcbnpgTBngPcZwciZZBbbdmPryFNEA@epicbox.epicnet.us";
+const DESTINATION = "esZ1P3crbc2XCHaGf7fQCGEcbnpgTBngPcZwciZZBbbdmPryFNEA@epicbox.epiccash.com";
 
 // Data
 const DATA = "Hello, World!";
 
 // Epicbox server
-const EPICBOX_SERVER = "wss://epicbox.epicnet.us:443";
+const EPICBOX_SERVER = "wss://epicbox.epiccash.com:443";
 
 // Request class
 const REQUEST_CLASS = 0xC7;
