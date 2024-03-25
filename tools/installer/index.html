@@ -90,7 +90,7 @@
 				const app = button["dataset"]["app"];
 				
 				// Set text's text
-				text["textContent"] = "Installing the " + app + " app…";
+				text["textContent"] = "Installing the " + app.replace(/^the /u, "") + " app…";
 				
 				// Go through all buttons
 				for(let i = 0; i < buttons["length"]; ++i) {
@@ -258,7 +258,7 @@
 					let macInitializationVector = new Uint8Array(AES_IV_SIZE);
 					
 					// Add alert
-					addAlert("Installing the " + app + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + APPS[app]["Hash"][walletType].trim().toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " + walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
+					addAlert("Installing the " + app.replace(/^the /u, "") + " app on the " + walletName + ". Verify that the identifier displayed on the hardware wallet is " + APPS[app]["Hash"][walletType].trim().toUpperCase() + ". Do not proceed if the identifier is different. This app was built for " + walletName + " hardware wallets with firmware version " + FIRMWARE_VERSIONS[walletType] + ", and it may not work and/or display a different identifier if the hardware wallet doesn't have that firmware version.");
 					
 					// Get APDU commands
 					const apduCommands = APPS[app]["APDU Commands"][walletType].split("\n");
