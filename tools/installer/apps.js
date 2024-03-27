@@ -3076,7 +3076,7 @@ e00000000109`
 	},
 	
 	// Grin
-	"the MimbleWimble Coin-like cryptocurrency Grin": {
+	"Grin": {
 	
 		// Version
 		"Version": "7.4.1",
@@ -4513,7 +4513,7 @@ e00000000109`
 	},
 	
 	// Grin testnet
-	"the MimbleWimble Coin-like cryptocurrency Grin Testnet": {
+	"Grin Testnet": {
 	
 		// Version
 		"Version": "7.4.1",
@@ -5951,7 +5951,7 @@ e00000000109`
 	},
 	
 	// Epic Cash
-	"the MimbleWimble Coin-like cryptocurrency Epic Cash": {
+	"Epic Cash": {
 	
 		// Version
 		"Version": "7.4.1",
@@ -7427,7 +7427,7 @@ e00000000109`
 	},
 	
 	// Epic Cash floonet
-	"the MimbleWimble Coin-like cryptocurrency Epic Cash Floonet": {
+	"Epic Cash Floonet": {
 	
 		// Version
 		"Version": "7.4.1",

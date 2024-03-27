@@ -27,6 +27,7 @@
 			
 			// Go through all apps
 			let firstButton = true;
+			let dividerDisplayed = false;
 			for(const [app, information] of Object.entries(APPS)) {
 			
 				// Check if first button
@@ -34,6 +35,28 @@
 				
 					// Clear first button
 					firstButton = false;
+				}
+				
+				// Otherwise check if divider isn't displayed and at the MimbleWimble Coin-like cryptocurrencies
+				else if(dividerDisplayed === false && /^MimbleWimble Coin/u.test(app) === false) {
+				
+					// Set divider displayed
+					dividerDisplayed = true;
+					
+					// Add line breaks after the previous button
+					for(let i = 0; i < 2; ++i) {
+					
+						form.appendChild(document.createElement("br"));
+					}
+					
+					// Create divider
+					const divider = document.createElement("p");
+					
+					// Add divider to form
+					form.appendChild(divider);
+					
+					// Set divider's text
+					divider["textContent"] = "MimbleWimble Coin-like cryptocurrencies:"
 				}
 				
 				// Otherwise
