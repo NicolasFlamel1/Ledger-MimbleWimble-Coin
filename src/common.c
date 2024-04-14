@@ -259,7 +259,7 @@ bool isZeroArraySecure(const uint8_t *value, const size_t length) {
 	for(size_t i = 0; i < length; ++i) {
 
 		// Or byte with the result
-		result |= (bool)value[i];
+		result |= value[i];
 	}
 
 	// Return if result is zero

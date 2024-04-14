@@ -840,8 +840,9 @@ size_t decryptData(volatile uint8_t *result, const uint8_t *data, const size_t d
 			// Go through all decrypted bytes
 			for(size_t i = 0; i < dataLength; ++i) {
 
-				// Update invalid padding in a way that tries to mitigate timing attacks
-				invalidPadding |= (bool)(result[i] ^ ((i >= decryptedDataLength) ? result[dataLength - 1] : result[i]));
+				// Update invalid padding
+				const uint8_t mask = -(i >= decryptedDataLength);
+				invalidPadding |= result[i] ^ ((result[dataLength - 1] & mask) | (result[i] & ~mask));
 			}
 
 			// Check if padding is invalid
@@ -1504,10 +1505,13 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				// Set aterm to the generator
 				memcpy((uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE], bit ? GENERATORS_FIRST_HALF[i] : GENERATORS_SECOND_HALF[i], sizeof(aterm) - PUBLIC_KEY_PREFIX_SIZE);
 
-				// Negate the aterm's y component if the bit isn't set in a way that tries to mitigate timing attacks and throw error if it fails
-				uint8_t *atermY = (uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+				// Check if bit isn't set
+				if(!bit) {
 
-				CX_THROW(cx_math_subm_no_throw(bit ? (uint8_t *)alpha : atermY, SECP256K1_CURVE_PRIME, atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
+					// Negate the aterm's y component and throw error if it fails
+					uint8_t *atermY = (uint8_t *)&aterm[PUBLIC_KEY_PREFIX_SIZE + PUBLIC_KEY_COMPONENT_SIZE];
+					CX_THROW(cx_math_subm_no_throw(atermY, SECP256K1_CURVE_PRIME, atermY, SECP256K1_CURVE_PRIME, PUBLIC_KEY_COMPONENT_SIZE));
+				}
 
 				// Check if the sum of aterm to the alpha generator has an x component of zero and throw error if it fails
 				CX_THROW(cx_ecfp_add_point_no_throw(CX_CURVE_SECP256K1, (uint8_t *)alphaGenerator, (uint8_t *)alphaGenerator, (uint8_t *)aterm));
@@ -2002,7 +2006,7 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, (uint8_t *)commitment, CX_SHA256_SIZE, NULL, 0));
 
 			// Set parity to if the part's y components aren't quadratic residue
-			const uint8_t parity = ((bool)!isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) << 1) | (bool)!isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]);
+			const uint8_t parity = (!isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) << 1) | !isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]);
 
 			// Add parity to the hash and throw error if it fails
 			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0));
