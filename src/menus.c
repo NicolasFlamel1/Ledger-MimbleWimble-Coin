@@ -39,6 +39,20 @@
 	#define PROGRESS_BAR_HEIGHT 12
 #endif
 
+// Check if QR code image isn't defined
+#ifndef C_QRCode_32px
+
+	// Define QR code image
+	#define C_QRCode_32px C_QRcode32px
+#endif
+
+// Check if close image isn't defined
+#ifndef C_Close_32px
+
+	// Define close image
+	#define C_Close_32px C_cross32px
+#endif
+
 
 // Global variables
 
@@ -1363,7 +1377,7 @@ void verifyAddressMenuContinueCallback(void) {
 
 	// Set verify address menu content
 	verifyAddressMenuContent.type = TAG_VALUE_CONFIRM;
-	verifyAddressMenuContent.tagValueConfirm.detailsButtonIcon = &C_QRcode32px;
+	verifyAddressMenuContent.tagValueConfirm.detailsButtonIcon = &QRCODE_ICON;
 	verifyAddressMenuContent.tagValueConfirm.detailsButtonText = "Show as QR";
 	verifyAddressMenuContent.tagValueConfirm.detailsButtonToken = SHOW_QR_TOKEN;
 	verifyAddressMenuContent.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
@@ -1438,7 +1452,7 @@ void verifyAddressMenuChoiceCallback(const int token, __attribute__((unused)) co
 		nbgl_layoutAddQRCode(verifyAddressMenuModalLayout, &qrCode);
 
 		// Add bottom button to verify address menu modal layout
-		nbgl_layoutAddBottomButton(verifyAddressMenuModalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
+		nbgl_layoutAddBottomButton(verifyAddressMenuModalLayout, &CLOSE_ICON, 0, true, TUNE_TAP_CASUAL);
 
 		// Show verify address menu modal
 		nbgl_layoutDraw(verifyAddressMenuModalLayout);
@@ -1584,7 +1598,7 @@ void signLoginChallengeMenuContinueCallback(void) {
 	// Set sign login challenge menu info long press
 	signLoginChallengeMenuInfoLongPress.icon = &CURRENCY_ICON_DETAILS;
 	signLoginChallengeMenuInfoLongPress.text = "Login with\nwallet?";
-	signLoginChallengeMenuInfoLongPress.longPressText = "Hold to approve";
+	signLoginChallengeMenuInfoLongPress.longPressText = "Hold to login";
 
 	// Show static review
 	nbgl_useCaseStaticReview(&signLoginChallengeMenuTagValueList, &signLoginChallengeMenuInfoLongPress, "Deny", signLoginChallengeMenuChoiceCallback);

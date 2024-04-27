@@ -77,6 +77,12 @@ ifeq ($(TARGET_NAME),TARGET_STAX)
 	# Defines
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
 
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
+
+	# Defines
+	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+
 # Otherwise
 else
 
@@ -92,6 +98,12 @@ ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 # Otherwise check if target is the Stax
 else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
+	APP_LOAD_PARAMS += --appFlags 0x200
+
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
 
 	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
 	APP_LOAD_PARAMS += --appFlags 0x200
@@ -125,7 +137,13 @@ else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Icon name
-	ICONNAME="icons/stax_app.gif"
+	ICONNAME="icons/stax_app.png"
+
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
+
+	# Icon name
+	ICONNAME="icons/flex_app.png"
 endif
 
 # Make command
@@ -152,6 +170,12 @@ else ifeq ($(TARGET_NAME),TARGET_STAX)
 
 	# Target specific defines
 	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
+
+	# Target specific defines
+	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
 endif
 
 # Check if target is the Nano S
@@ -169,6 +193,13 @@ endif
 
 # Check if target is the Stax
 ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# Target specific defines
+	DEFINES += NBGL_QRCODE
+	SDK_SOURCE_PATH += qrcode
+
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
 
 	# Target specific defines
 	DEFINES += NBGL_QRCODE
@@ -275,8 +306,20 @@ include $(BOLOS_SDK)/Makefile.glyphs
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-# Check if target isn't the Stax
-ifneq ($(TARGET_NAME),TARGET_STAX)
+# Check if target is the Nano S
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+
+	# Target specific compiler settings
+	SDK_SOURCE_PATH += lib_ux
+
+# Otherwise check if target is the Nano X
+else ifeq ($(TARGET_NAME),TARGET_NANOX)
+
+	# Target specific compiler settings
+	SDK_SOURCE_PATH += lib_ux
+
+# Otherwise check if target is the Nano S Plus
+else ifeq ($(TARGET_NAME),TARGET_NANOS2)
 
 	# Target specific compiler settings
 	SDK_SOURCE_PATH += lib_ux
@@ -290,6 +333,12 @@ ifeq ($(TARGET_NAME),TARGET_NANOX)
 
 # Otherwise check if target is the Stax
 else ifeq ($(TARGET_NAME),TARGET_STAX)
+
+	# Target specific compiler settings
+	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
+
+# Otherwise check if target is the Flex
+else ifeq ($(TARGET_NAME),TARGET_FLEX)
 
 	# Target specific compiler settings
 	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl

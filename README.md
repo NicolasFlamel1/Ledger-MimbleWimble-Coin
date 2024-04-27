@@ -1,20 +1,20 @@
 # MimbleWimble Coin (MWC) Ledger hardware wallet app
 
 ### Description
-MimbleWimble Coin (MWC) app for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, and Ledger Stax hardware wallets.
+MimbleWimble Coin (MWC) app for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets.
 
-This app can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+This app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
 ### Building
-Building this app requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, or Ledger Stax build environment. The following steps describe how to do this on Linux.
+Building this app requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, or Ledger Flex build environment. The following steps describe how to do this on Linux.
 
 Install dependencies:
 ```
 sudo apt install libc6-dev gcc-multilib g++-multilib
 ```
-Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, and/or Ledger Stax SDK:
+Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, and/or Ledger Flex SDK:
 ```
 git clone https://github.com/LedgerHQ/nanos-secure-sdk.git
 
@@ -44,6 +44,15 @@ git checkout API_LEVEL_15
 git pull
 echo stax > .target
 cd ..
+
+git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
+mv ledger-secure-sdk flex-secure-sdk
+cd flex-secure-sdk
+git checkout flex_0.2.0-rc2
+git checkout API_LEVEL_18
+git pull
+echo flex > .target
+cd ..
 ```
 Download the ARM and Clang development tools:
 ```
@@ -63,13 +72,14 @@ echo "#export BOLOS_SDK=$PWD/nanos-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/nanox-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/nanosplus-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/stax-secure-sdk" >> ~/.bashrc
+echo "#export BOLOS_SDK=$PWD/flex-secure-sdk" >> ~/.bashrc
 echo "export BOLOS_ENV=$PWD/bolos-environment" >> ~/.bashrc
 ```
 The app can then be built with the following commands:
 ```
 make CURRENCY=mimblewimble_coin
 ```
-The app can be installed onto Ledger Nano S, Ledger Nano S Plus, and Ledger Stax hardware wallets with the following commands:
+The app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets with the following commands:
 ```
 make load CURRENCY=mimblewimble_coin
 ```

@@ -1579,7 +1579,7 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 #ifdef HAVE_NBGL
 
 				// Check if time to update display
-				// TODO Fine tune this number on a real Stax device
+				// TODO Fine tune this number on real Stax and Flex devices
 				if(!(i % 1)) {
 
 					// Process display events
@@ -2207,7 +2207,7 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 #ifdef HAVE_NBGL
 
 				// Check if time to update display
-				// TODO Fine tune this number on a real Stax device
+				// TODO Fine tune this number on real Stax and Flex devices
 				if(!(i % 4)) {
 
 					// Process display events
