@@ -1685,226 +1685,924 @@ async function decryptSlateTest(hardwareWallet, extendedPrivateKey, addressType)
 // Receive transaction test
 async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switchType, features, lockHeight, relativeHeight, senderAddressType, paymentProofType) {
 
-	// Check if not using Speculos with a Stax hardware wallet with a Tor payment proof type
-	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"].toLowerCase() !== "stax") {
-	
-		// Log message
-		console.log("Running receive transaction test");
+	// Log message
+	console.log("Running receive transaction test");
 
+	// Output
+	const OUTPUT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+	
+	// Input
+	const INPUT = new BigNumber(0);
+	
+	// Fee
+	const FEE = new BigNumber((features === SlateKernel.COINBASE_FEATURES) ? 0 : (Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE));
+	
+	// Identifier
+	const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
+	
+	// Message
+	const MESSAGE = "This is a message";
+	
+	// Log output
+	console.log("Using output: " + OUTPUT.toFixed());
+	
+	// Log identifier
+	console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
+	
+	// Log message
+	console.log("Using message: " + MESSAGE);
+	
+	// Check switch type
+	switch(switchType) {
+	
+		// Switch type none
+		case Crypto.SWITCH_TYPE_NONE:
+		
+			// Log switch type
+			console.log("Using switch type: none");
+		
+			// Break
+			break;
+		
+		// Regular switch type
+		case Crypto.SWITCH_TYPE_REGULAR:
+		
+			// Log switch type
+			console.log("Using switch type: regular");
+		
+			// Break
+			break;
+	}
+	
+	// Check features
+	switch(features) {
+	
+		// Coinbase features
+		case SlateKernel.COINBASE_FEATURES:
+		
+			// Log features
+			console.log("Using features: coinbase");
+		
+			// Break
+			break;
+		
+		// Plain features
+		case SlateKernel.PLAIN_FEATURES:
+		
+			// Log features
+			console.log("Using features: plain");
+			
+			// Log fee
+			console.log("Using fee: " + FEE.toFixed());
+		
+			// Break
+			break;
+		
+		// Height locked features
+		case SlateKernel.HEIGHT_LOCKED_FEATURES:
+		
+			// Log features
+			console.log("Using features: height locked");
+			
+			// Log fee
+			console.log("Using fee: " + FEE.toFixed());
+			
+			// Log lock height
+			console.log("Using lock height: " + lockHeight.toFixed());
+		
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Log features
+			console.log("Using features: no recent duplicate");
+			
+			// Log fee
+			console.log("Using fee: " + FEE.toFixed());
+			
+			// Log relative height
+			console.log("Using relative height: " + relativeHeight.toFixed());
+		
+			// Break
+			break;
+	}
+	
+	// Check sender address type
+	switch(senderAddressType) {
+	
+		// MQS address type
+		case MQS_ADDRESS_TYPE:
+		
+			// Log sender address type
+			console.log("Using sender address type: MQS");
+			
+			// Get MQS private key from the extended private key
+			const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.plus(1).toNumber());
+			
+			// Get MQS public key from the MQS private key
+			const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+			
+			// Get sender address from the MQS public key
+			var senderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+		
+			// Break
+			break;
+		
+		// Tor address type
+		case TOR_ADDRESS_TYPE:
+		
+			// Log sender address type
+			console.log("Using sender address type: Tor");
+			
+			// Get Tor private key from the extended private key
+			const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.plus(1).toNumber());
+			
+			// Get Tor public key from the Tor private key
+			const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Get sender address from the Tor public key
+			var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
+		
+			// Break
+			break;
+	}
+	
+	// Get random kernel commitment
+	const kernelCommit = await Crypto.commit(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
+	
+	// Check payment proof type
+	switch(paymentProofType) {
+	
+		// No payment proof type
+		case NO_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: none");
+			
+			// Set receiver address type
+			var receiverAddressType = senderAddressType;
+		
+			// Break
+			break;
+		
+		// MQS payment proof type
+		case MQS_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: MQS");
+			
+			// Set receiver address type
+			var receiverAddressType = MQS_ADDRESS_TYPE;
+		
+			// Get MQS private key from the extended private key
+			const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Set payment proof message
+			var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
+			
+			// Get payment proof message hash
+			const paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
+			
+			// Set expected payment proof as the payment proof message hash signed by the MQS private key
+			var expectedPaymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
+			
+			// Break
+			break;
+		
+		// Tor payment proof type
+		case TOR_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: Tor");
+			
+			// Set receiver address type
+			var receiverAddressType = TOR_ADDRESS_TYPE;
+		
+			// Get Tor private key from the extended private key
+			const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Set payment proof message
+			var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
+			
+			// Set expected payment proof as the payment proof message signed by the Tor private key
+			var expectedPaymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
+		
+			// Break
+			break;
+	}
+	
+	// Get the output's blinding factor
+	const outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
+	
+	// Get the sum of all the transaction's blinding factors
+	const transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], []);
+	
+	// Get the expected transaction public key from the transaction's blinding factor
+	const expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
+
+	// Start transaction on the hardware wallet
+	await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+	
+		// Account
+		Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+		
+		// Index
+		Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
+		
 		// Output
-		const OUTPUT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+		Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
 		// Input
-		const INPUT = new BigNumber(0);
+		Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
 		// Fee
-		const FEE = new BigNumber((features === SlateKernel.COINBASE_FEATURES) ? 0 : (Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE));
+		Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
+		// Secret nonce index
+		Buffer.from(new Uint8Array([0])),
+		
+		// Address
+		Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? senderAddress : [])
+	]));
+	
+	// Include output in the transaction on the hardware wallet
+	await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
+	
 		// Identifier
-		const IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
+		Buffer.from(IDENTIFIER.getValue()),
 		
-		// Message
-		const MESSAGE = "This is a message";
+		// Amount
+		Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 		
-		// Log output
-		console.log("Using output: " + OUTPUT.toFixed());
+		// Switch type
+		Buffer.from(new Uint8Array([switchType]))
+	]));
+	
+	// Get the transaction public key from the hardware wallet
+	let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log transaction public key
+	console.log("Transaction public key: " + Common.toHexString(response));
+	
+	// Check if transaction public key is invalid
+	if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
+	
+		// Log message
+		console.log("Invalid transaction public key");
 		
-		// Log identifier
-		console.log("Using identifier: " + Common.toHexString(IDENTIFIER.getValue()));
+		// Throw error
+		throw "Failed running receive transaction test";
+	}
+	
+	// Get the transaction public nonce from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+
+	// Get public nonce from response
+	const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Log transaction public nonce
+	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
+	
+	// Get the message signature from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
+
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log message signature
+	console.log("Message signature: " + Common.toHexString(response));
+	
+	// Check if features is coinbase
+	if(features === SlateKernel.COINBASE_FEATURES) {
+		
+		// Get excess from commit and over commit
+		const excess = Secp256k1Zkp.pedersenCommitSum([
+		
+			// Commit
+			await Crypto.commit(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType)
+		], [
+		
+			// Over commit
+			Crypto.commitAmount(OUTPUT)
+		]);
+		
+		// Get public key from excess
+		var publicKey = Secp256k1Zkp.pedersenCommitToPublicKey(excess);
+	}
+	
+	// Otherwise
+	else {
+	
+		// Get public key from transaction public key
+		var publicKey = expectedTransactionPublicKey;
+	}
+	
+	// Check if message signature is invalid
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
+	
+		// Log message
+		console.log("Invalid message signature");
+		
+		// Throw error
+		throw "Failed running receive transaction test";
+	}
+	
+	// Log message
+	console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+	
+	// Check features
+	switch(features) {
+	
+		// Plain features
+		case SlateKernel.PLAIN_FEATURES:
+		
+			// Set kernel information to features
+			var kernelInformation = new Uint8Array([features]);
+		
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Plain");
+			}
+			
+			// Break
+			break;
+	
+		// Coinbase features
+		case SlateKernel.COINBASE_FEATURES:
+		
+			// Set kernel information to features
+			var kernelInformation = new Uint8Array([features]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Coinbase");
+			}
+		
+			// Break
+			break;
+		
+		// Height locked features
+		case SlateKernel.HEIGHT_LOCKED_FEATURES:
+		
+			// Set kernel information to features followed by the lock height
+			var kernelInformation = Common.mergeArrays([
+			
+				// Features
+				new Uint8Array([features]),
+				
+				// Lock height
+				new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
+			]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: Height Locked");
+				
+				// Log message
+				console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
+			}
+		
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Set kernel features to features followed by the relative height
+			var kernelInformation = Common.mergeArrays([
+			
+				// Features
+				new Uint8Array([features]),
+				
+				// Relative height
+				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
+			]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
+				
+				// Log message
+				console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
+			}
+		
+			// Break
+			break;
+	}
+	
+	// Check if not using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+		// Log message
+		console.log("Verify that the transaction's amount on the device is: " + OUTPUT.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
 		
 		// Log message
-		console.log("Using message: " + MESSAGE);
+		console.log("Verify that the transaction's fee on the device is: " + FEE.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
+	}
+	
+	// Check if using a payment proof
+	if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+	
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
 		
-		// Check switch type
-		switch(switchType) {
-		
-			// Switch type none
-			case Crypto.SWITCH_TYPE_NONE:
-			
-				// Log switch type
-				console.log("Using switch type: none");
-			
-				// Break
-				break;
-			
-			// Regular switch type
-			case Crypto.SWITCH_TYPE_REGULAR:
-			
-				// Log switch type
-				console.log("Using switch type: regular");
-			
-				// Break
-				break;
+			// Log message
+			console.log("Verify that the transaction's sender payment proof address on the device is: " + senderAddress);
 		}
-		
-		// Check features
-		switch(features) {
-		
-			// Coinbase features
-			case SlateKernel.COINBASE_FEATURES:
-			
-				// Log features
-				console.log("Using features: coinbase");
-			
-				// Break
-				break;
-			
-			// Plain features
-			case SlateKernel.PLAIN_FEATURES:
-			
-				// Log features
-				console.log("Using features: plain");
-				
-				// Log fee
-				console.log("Using fee: " + FEE.toFixed());
-			
-				// Break
-				break;
-			
-			// Height locked features
-			case SlateKernel.HEIGHT_LOCKED_FEATURES:
-			
-				// Log features
-				console.log("Using features: height locked");
-				
-				// Log fee
-				console.log("Using fee: " + FEE.toFixed());
-				
-				// Log lock height
-				console.log("Using lock height: " + lockHeight.toFixed());
-			
-				// Break
-				break;
-			
-			// No recent duplicate features
-			case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
-			
-				// Log features
-				console.log("Using features: no recent duplicate");
-				
-				// Log fee
-				console.log("Using fee: " + FEE.toFixed());
-				
-				// Log relative height
-				console.log("Using relative height: " + relativeHeight.toFixed());
-			
-				// Break
-				break;
+	}
+	
+	// Otherwise
+	else {
+	
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+			// Log message
+			console.log("Verify that the transaction contains no payment proof on the device");
 		}
+	}
+	
+	// Check if using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === true) {
+	
+		// Check if using a Nano hardware wallet
+		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
 		
-		// Check sender address type
-		switch(senderAddressType) {
-		
-			// MQS address type
-			case MQS_ADDRESS_TYPE:
-			
-				// Log sender address type
-				console.log("Using sender address type: MQS");
-				
-				// Get MQS private key from the extended private key
-				const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.plus(1).toNumber());
-				
-				// Get MQS public key from the MQS private key
-				const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-				
-				// Get sender address from the MQS public key
-				var senderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-			
-				// Break
-				break;
-			
-			// Tor address type
-			case TOR_ADDRESS_TYPE:
-			
-				// Log sender address type
-				console.log("Using sender address type: Tor");
-				
-				// Get Tor private key from the extended private key
-				const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.plus(1).toNumber());
-				
-				// Get Tor public key from the Tor private key
-				const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-				
-				// Get sender address from the Tor public key
-				var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
-			
-				// Break
-				break;
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "Receive",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Account.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Amount.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Fee.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Kernel Features.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Lock Height.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Relative Height.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "No payment",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Proof Address.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "Approve",
+						"actions": [
+						
+							// Push both
+							["button", 1, true],
+							["button", 2, true],
+							["button", 1, false],
+							["button", 2, false]
+						]
+					}
+				]
+			});
 		}
+	
+		// Otherwise
+		else {
 		
-		// Get random kernel commitment
-		const kernelCommit = await Crypto.commit(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
-		
-		// Check payment proof type
-		switch(paymentProofType) {
-		
-			// No payment proof type
-			case NO_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: none");
-				
-				// Set receiver address type
-				var receiverAddressType = senderAddressType;
-			
-				// Break
-				break;
-			
-			// MQS payment proof type
-			case MQS_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: MQS");
-				
-				// Set receiver address type
-				var receiverAddressType = MQS_ADDRESS_TYPE;
-			
-				// Get MQS private key from the extended private key
-				const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Set payment proof message
-				var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
-				
-				// Get payment proof message hash
-				const paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
-				
-				// Set expected payment proof as the payment proof message hash signed by the MQS private key
-				var expectedPaymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
-				
-				// Break
-				break;
-			
-			// Tor payment proof type
-			case TOR_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: Tor");
-				
-				// Set receiver address type
-				var receiverAddressType = TOR_ADDRESS_TYPE;
-			
-				// Get Tor private key from the extended private key
-				const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Set payment proof message
-				var paymentProofMessage = Slate.getPaymentProofMessage(OUTPUT, kernelCommit, senderAddress);
-				
-				// Set expected payment proof as the payment proof message signed by the Tor private key
-				var expectedPaymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
-			
-				// Break
-				break;
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "Tap to continue",
+						"actions": [
+						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
+							// Touch
+							["finger", 200, 500, false],
+							["finger", 200, 500, true],
+							["finger", 200, 500, false]
+						]
+					},
+					{
+						"text": "Swipe to review",
+						"actions": [
+						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
+							// Touch
+							["finger", 100, 500, false],
+							["finger", 100, 500, true],
+							["finger", 400, 500, false]
+						]
+					},
+					{
+						"text": "Hold to receive",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
+						"actions": [
+						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
+							// Touch start
+							["finger", 250, 500, true]
+						]
+					},
+					{
+						"text": "Reject",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
+						"actions": [
+						
+							// Touch
+							["finger", 450, 570, false],
+							["finger", 450, 570, true],
+							["finger", 450, 570, false]
+						]
+					},
+					{
+						"text": "TRANSACTION",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
+						"actions": [
+						
+							// Touch end
+							["finger", 200, 500, false]
+						]
+					}
+				]
+			});
 		}
+	}
+	
+	// Get signature for the transaction from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, receiverAddressType, NO_PARAMETER, Buffer.concat([
+	
+		// Public nonce
+		Buffer.from(publicNonce),
 		
-		// Get the output's blinding factor
-		const outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType);
+		// Public key
+		Buffer.from(publicKey),
 		
-		// Get the sum of all the transaction's blinding factors
-		const transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], []);
+		// Kernel information
+		Buffer.from(kernelInformation),
 		
-		// Get the expected transaction public key from the transaction's blinding factor
-		const expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
+		// Kernel commitment
+		Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? kernelCommit : [])
+	]));
+	
+	// Get signature from response
+	const signature = response.subarray(0, Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH);
+	
+	// Get payment proof from response
+	const paymentProof = response.subarray(Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log transaction signature
+	console.log("Transaction signature: " + Common.toHexString(signature));
+	
+	// Check if signature is invalid
+	if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) !== true) {
+	
+		// Log message
+		console.log("Invalid transaction signature");
+		
+		// Throw error
+		throw "Failed running receive transaction test";
+	}
+	
+	// Check if using a payment proof
+	if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+	
+		// Log transaction payment proof
+		console.log("Transaction payment proof: " + Common.toHexString(paymentProof));
+		
+		// Check if payment proof is invalid
+		if(Common.arraysAreEqual(paymentProof, expectedPaymentProof) === false) {
+		
+			// Log message
+			console.log("Invalid payment proof");
+			
+			// Throw error
+			throw "Failed running receive transaction test";
+		}
+	}
+	
+	// Log message
+	console.log("Passed running receive transaction test");
+}
 
+// Send transaction test
+async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchType, features, lockHeight, relativeHeight, senderAddressType, paymentProofType) {
+
+	// Log message
+	console.log("Running send transaction test");
+
+	// Output
+	const OUTPUT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
+	
+	// Fee
+	const FEE = new BigNumber(Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE);
+	
+	// Input
+	const INPUT = (new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER))).plus(OUTPUT);
+	
+	// Output identifier
+	const OUTPUT_IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
+	
+	// Input identifier
+	const INPUT_IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
+	
+	// Input switch type
+	const INPUT_SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
+	
+	// Message
+	const MESSAGE = "This is a message";
+	
+	// Log output
+	console.log("Using output: " + OUTPUT.toFixed());
+	
+	// Log input
+	console.log("Using input: " + INPUT.toFixed());
+	
+	// Log fee
+	console.log("Using fee: " + FEE.toFixed());
+	
+	// Log output identifier
+	console.log("Using output identifier: " + Common.toHexString(OUTPUT_IDENTIFIER.getValue()));
+	
+	// Log input identifier
+	console.log("Using input identifier: " + Common.toHexString(INPUT_IDENTIFIER.getValue()));
+	
+	// Log message
+	console.log("Using message: " + MESSAGE);
+	
+	// Check switch type
+	switch(switchType) {
+	
+		// Switch type none
+		case Crypto.SWITCH_TYPE_NONE:
+		
+			// Log switch type
+			console.log("Using switch type: none");
+		
+			// Break
+			break;
+		
+		// Regular switch type
+		case Crypto.SWITCH_TYPE_REGULAR:
+		
+			// Log switch type
+			console.log("Using switch type: regular");
+		
+			// Break
+			break;
+	}
+	
+	// Check features
+	switch(features) {
+	
+		// Plain features
+		case SlateKernel.PLAIN_FEATURES:
+		
+			// Log features
+			console.log("Using features: plain");
+		
+			// Break
+			break;
+		
+		// Height locked features
+		case SlateKernel.HEIGHT_LOCKED_FEATURES:
+		
+			// Log features
+			console.log("Using features: height locked");
+			
+			// Log lock height
+			console.log("Using lock height: " + lockHeight.toFixed());
+		
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Log features
+			console.log("Using features: no recent duplicate");
+			
+			// Log relative height
+			console.log("Using relative height: " + relativeHeight.toFixed());
+		
+			// Break
+			break;
+	}
+	
+	// Check sender address type
+	switch(senderAddressType) {
+	
+		// MQS address type
+		case MQS_ADDRESS_TYPE:
+		
+			// Log sender address type
+			console.log("Using sender address type: MQS");
+			
+			// Get MQS private key from the extended private key
+			const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get MQS public key from the MQS private key
+			const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+			
+			// Get sender address from the MQS public key
+			var senderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+		
+			// Break
+			break;
+		
+		// Tor address type
+		case TOR_ADDRESS_TYPE:
+		
+			// Log sender address type
+			console.log("Using sender address type: Tor");
+			
+			// Get Tor private key from the extended private key
+			const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get Tor public key from the Tor private key
+			const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Get sender address from the Tor public key
+			var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
+		
+			// Break
+			break;
+	}
+	
+	// Get random kernel commitment
+	const kernelCommit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
+	
+	// Set payment proof message
+	const paymentProofMessage = Slate.getPaymentProofMessage(INPUT.minus(OUTPUT), kernelCommit, senderAddress);
+	
+	// Check payment proof type
+	switch(paymentProofType) {
+	
+		// No payment proof type
+		case NO_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: none");
+		
+			// Break
+			break;
+		
+		// MQS payment proof type
+		case MQS_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: MQS");
+		
+			// Get MQS private key from the extended private key
+			const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get MQS public key from the MQS private key
+			const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
+			
+			// Get receiver address from the MQS public key
+			var receiverAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
+			
+			// Get payment proof message hash
+			const paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
+			
+			// Set payment proof as the payment proof message hash signed by the MQS private key
+			var paymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
+			
+			// Break
+			break;
+		
+		// Tor payment proof type
+		case TOR_PAYMENT_PROOF_TYPE:
+		
+			// Log payment proof type
+			console.log("Using payment proof type: Tor");
+		
+			// Get Tor private key from the extended private key
+			const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
+			
+			// Get Tor public key from the Tor private key
+			const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
+			
+			// Get receiver address from the Tor public key
+			var receiverAddress = Tor.publicKeyToTorAddress(torPublicKey);
+			
+			// Set payment proof as the payment proof message signed by the Tor private key
+			var paymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
+		
+			// Break
+			break;
+	}
+	
+	// While offset isn't a valid secret key
+	const offset = new Uint8Array(Crypto.BLINDING_FACTOR_LENGTH);
+	do {
+	
+		// Fill offset with random values
+		crypto.getRandomValues(offset);
+		
+	} while(Secp256k1Zkp.isValidSecretKey(offset) !== true);
+	
+	// Log offset
+	console.log("Using offset: " + Common.toHexString(offset));
+	
+	// Start transaction twice to test secret nonce index
+	let secretNonceIndex = 0;
+	for(let i = 0; i < 2; ++i) {
+	
 		// Start transaction on the hardware wallet
 		await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 		
@@ -1924,17 +2622,17 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 			Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 			
 			// Secret nonce index
-			Buffer.from(new Uint8Array([0])),
+			Buffer.from(new Uint8Array([secretNonceIndex])),
 			
 			// Address
-			Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? senderAddress : [])
+			Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? receiverAddress : [])
 		]));
 		
 		// Include output in the transaction on the hardware wallet
 		await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 		
 			// Identifier
-			Buffer.from(IDENTIFIER.getValue()),
+			Buffer.from(OUTPUT_IDENTIFIER.getValue()),
 			
 			// Amount
 			Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
@@ -1943,1157 +2641,437 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 			Buffer.from(new Uint8Array([switchType]))
 		]));
 		
-		// Get the transaction public key from the hardware wallet
-		let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-
-		// Remove response code from response
-		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+		// Include input in the transaction on the hardware wallet
+		await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_INPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
 		
-		// Log transaction public key
-		console.log("Transaction public key: " + Common.toHexString(response));
-		
-		// Check if transaction public key is invalid
-		if(Common.arraysAreEqual(response, expectedTransactionPublicKey) === false) {
-		
-			// Log message
-			console.log("Invalid transaction public key");
+			// Identifier
+			Buffer.from(INPUT_IDENTIFIER.getValue()),
 			
-			// Throw error
-			throw "Failed running receive transaction test";
-		}
-		
-		// Get the transaction public nonce from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-
-		// Get public nonce from response
-		const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
-		
-		// Log transaction public nonce
-		console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
-		
-		// Get the message signature from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
-
-		// Remove response code from response
-		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-		
-		// Log message signature
-		console.log("Message signature: " + Common.toHexString(response));
-		
-		// Check if features is coinbase
-		if(features === SlateKernel.COINBASE_FEATURES) {
+			// Amount
+			Buffer.from((INPUT.plus(FEE)).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
 			
-			// Get excess from commit and over commit
-			const excess = Secp256k1Zkp.pedersenCommitSum([
-			
-				// Commit
-				await Crypto.commit(extendedPrivateKey, OUTPUT, IDENTIFIER, switchType)
-			], [
-			
-				// Over commit
-				Crypto.commitAmount(OUTPUT)
-			]);
-			
-			// Get public key from excess
-			var publicKey = Secp256k1Zkp.pedersenCommitToPublicKey(excess);
-		}
-		
-		// Otherwise
-		else {
-		
-			// Get public key from transaction public key
-			var publicKey = expectedTransactionPublicKey;
-		}
-		
-		// Check if message signature is invalid
-		if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
-		
-			// Log message
-			console.log("Invalid message signature");
-			
-			// Throw error
-			throw "Failed running receive transaction test";
-		}
-		
-		// Log message
-		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
-		
-		// Check features
-		switch(features) {
-		
-			// Plain features
-			case SlateKernel.PLAIN_FEATURES:
-			
-				// Set kernel information to features
-				var kernelInformation = new Uint8Array([features]);
-			
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: Plain");
-				}
-				
-				// Break
-				break;
-		
-			// Coinbase features
-			case SlateKernel.COINBASE_FEATURES:
-			
-				// Set kernel information to features
-				var kernelInformation = new Uint8Array([features]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: Coinbase");
-				}
-			
-				// Break
-				break;
-			
-			// Height locked features
-			case SlateKernel.HEIGHT_LOCKED_FEATURES:
-			
-				// Set kernel information to features followed by the lock height
-				var kernelInformation = Common.mergeArrays([
-				
-					// Features
-					new Uint8Array([features]),
-					
-					// Lock height
-					new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
-				]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: Height Locked");
-					
-					// Log message
-					console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
-				}
-			
-				// Break
-				break;
-			
-			// No recent duplicate features
-			case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
-			
-				// Set kernel features to features followed by the relative height
-				var kernelInformation = Common.mergeArrays([
-				
-					// Features
-					new Uint8Array([features]),
-					
-					// Relative height
-					new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
-				]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
-					
-					// Log message
-					console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
-				}
-			
-				// Break
-				break;
-		}
-		
-		// Check if not using Speculos
-		if(hardwareWallet instanceof SpeculosTransport === false) {
-		
-			// Log message
-			console.log("Verify that the transaction's amount on the device is: " + OUTPUT.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
-			
-			// Log message
-			console.log("Verify that the transaction's fee on the device is: " + FEE.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
-		}
-		
-		// Check if using a payment proof
-		if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
-		
-			// Check if not using Speculos
-			if(hardwareWallet instanceof SpeculosTransport === false) {
-			
-				// Log message
-				console.log("Verify that the transaction's sender payment proof address on the device is: " + senderAddress);
-			}
-		}
-		
-		// Otherwise
-		else {
-		
-			// Check if not using Speculos
-			if(hardwareWallet instanceof SpeculosTransport === false) {
-		
-				// Log message
-				console.log("Verify that the transaction contains no payment proof on the device");
-			}
-		}
-		
-		// Check if using Speculos
-		if(hardwareWallet instanceof SpeculosTransport === true) {
-		
-			// Check if using a Nano hardware wallet
-			if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
-			
-				// Set automation
-				await setAutomation({
-					"version": 1,
-					"rules": [
-						{
-							"text": "Receive",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Account.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Amount.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Fee.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Kernel Features.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Lock Height.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Relative Height.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"text": "No payment",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Proof Address.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"text": "Approve",
-							"actions": [
-							
-								// Push both
-								["button", 1, true],
-								["button", 2, true],
-								["button", 1, false],
-								["button", 2, false]
-							]
-						}
-					]
-				});
-			}
-		
-			// Otherwise
-			else {
-			
-				// Set automation
-				await setAutomation({
-					"version": 1,
-					"rules": [
-						{
-							"text": "Tap to continue",
-							"actions": [
-							
-								// Clear confirmed
-								["setbool", "confirmed", false],
-								
-								// Touch
-								["finger", 200, 500, false],
-								["finger", 200, 500, true],
-								["finger", 200, 500, false]
-							]
-						},
-						{
-							"text": "Swipe to review",
-							"actions": [
-							
-								// Clear confirmed
-								["setbool", "confirmed", false],
-								
-								// Touch
-								["finger", 100, 500, false],
-								["finger", 100, 500, true],
-								["finger", 400, 500, false]
-							]
-						},
-						{
-							"text": "Hold to receive",
-							"conditions": [
-							
-								// Not confirmed
-								["confirmed", false]
-							],
-							"actions": [
-							
-								// Set confirmed
-								["setbool", "confirmed", true],
-								
-								// Touch start
-								["finger", 250, 500, true]
-							]
-						},
-						{
-							"text": "Reject",
-							"conditions": [
-							
-								// Not confirmed
-								["confirmed", false]
-							],
-							"actions": [
-							
-								// Touch
-								["finger", 450, 570, false],
-								["finger", 450, 570, true],
-								["finger", 450, 570, false]
-							]
-						},
-						{
-							"text": "TRANSACTION",
-							"conditions": [
-							
-								// Is confirmed
-								["confirmed", true]
-							],
-							"actions": [
-							
-								// Touch end
-								["finger", 200, 500, false]
-							]
-						}
-					]
-				});
-			}
-		}
-		
-		// Get signature for the transaction from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, receiverAddressType, NO_PARAMETER, Buffer.concat([
-		
-			// Public nonce
-			Buffer.from(publicNonce),
-			
-			// Public key
-			Buffer.from(publicKey),
-			
-			// Kernel information
-			Buffer.from(kernelInformation),
-			
-			// Kernel commitment
-			Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? kernelCommit : [])
+			// Switch type
+			Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
 		]));
 		
-		// Get signature from response
-		const signature = response.subarray(0, Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH);
+		// Apply offset to the transaction on the hardware wallet
+		const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
 		
-		// Get payment proof from response
-		const paymentProof = response.subarray(Crypto.SINGLE_SIGNER_SIGNATURE_LENGTH, response["length"] - RESPONSE_DELIMITER_LENGTH);
+		// Check if response contains a secret nonce index
+		if(response["length"] > RESPONSE_DELIMITER_LENGTH) {
 		
-		// Log transaction signature
-		console.log("Transaction signature: " + Common.toHexString(signature));
-		
-		// Check if signature is invalid
-		if(Secp256k1Zkp.verifySingleSignerSignature(signature, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), publicNonce, publicKey, publicKey, true) !== true) {
-		
-			// Log message
-			console.log("Invalid transaction signature");
+			// Get secret nonce index from response
+			secretNonceIndex = response[0];
 			
-			// Throw error
-			throw "Failed running receive transaction test";
+			// Log secret nonce index
+			console.log("Secret nonce index: " + secretNonceIndex);
 		}
+	}
+	
+	// Get the output's blinding factor
+	const outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
+	
+	// Get the input's blinding factor
+	const inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
+	
+	// Get the sum of all the transaction's blinding factors
+	let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], [inputBlindingFactor]);
+	
+	// Update the transaction blinding factor to include the offset
+	transactionBlindingFactor = Secp256k1Zkp.blindSum([transactionBlindingFactor], [offset]);
+	
+	// Get the expected transaction public key from the transaction's blinding factor
+	const expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
+	
+	// Get the transaction public key from the hardware wallet
+	let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+	
+	// Get public key from response
+	const publicKey = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Log transaction public key after offset
+	console.log("Transaction public key after offset: " + Common.toHexString(publicKey));
+	
+	// Check if transaction public key is invalid
+	if(Common.arraysAreEqual(publicKey, expectedTransactionPublicKey) === false) {
+	
+		// Log message
+		console.log("Invalid transaction public key");
 		
-		// Check if using a payment proof
-		if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+		// Throw error
+		throw "Failed running send transaction test";
+	}
+	
+	// Get the transaction public nonce from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
+
+	// Get public nonce from response
+	const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
+	
+	// Log transaction public nonce
+	console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
+	
+	// Get the message signature from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
+
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log message signature
+	console.log("Message signature: " + Common.toHexString(response));
+	
+	// Check if message signature is invalid
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
+	
+		// Log message
+		console.log("Invalid message signature");
 		
-			// Log transaction payment proof
-			console.log("Transaction payment proof: " + Common.toHexString(paymentProof));
+		// Throw error
+		throw "Failed running send transaction test";
+	}
+	
+	// Log message
+	console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
+	
+	// Check features
+	switch(features) {
+	
+		// Plain features
+		case SlateKernel.PLAIN_FEATURES:
+		
+			// Set kernel information to features
+			var kernelInformation = new Uint8Array([features]);
 			
-			// Check if payment proof is invalid
-			if(Common.arraysAreEqual(paymentProof, expectedPaymentProof) === false) {
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
 			
 				// Log message
-				console.log("Invalid payment proof");
-				
-				// Throw error
-				throw "Failed running receive transaction test";
+				console.log("Verify that the transaction's kernel features on the device is: Plain");
 			}
-		}
-		
-		// Log message
-		console.log("Passed running receive transaction test");
-	}
-	
-	// Otherwise
-	else {
-
-		// Log message
-		console.log("Skipped running receive transaction test");
-	}
-}
-
-// Send transaction test
-async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchType, features, lockHeight, relativeHeight, senderAddressType, paymentProofType) {
-
-	// Check if not using Speculos with a Stax hardware wallet with a Tor payment proof type
-	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"].toLowerCase() !== "stax") {
-	
-		// Log message
-		console.log("Running send transaction test");
-
-		// Output
-		const OUTPUT = new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER));
-		
-		// Fee
-		const FEE = new BigNumber(Math.floor(Math.random() * (((Slate.MAXIMUM_FEE === Number.POSITIVE_INFINITY) ? Number.MAX_SAFE_INTEGER : Slate.MAXIMUM_FEE) - Slate.MINIMUM_FEE + 1)) + Slate.MINIMUM_FEE);
-		
-		// Input
-		const INPUT = (new BigNumber(Math.round(Math.random() * Number.MAX_SAFE_INTEGER))).plus(OUTPUT);
-		
-		// Output identifier
-		const OUTPUT_IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-		
-		// Input identifier
-		const INPUT_IDENTIFIER = new Identifier(Common.toHexString(Common.mergeArrays([new Uint8Array([Math.round(Math.random() * Identifier.MAX_DEPTH)]), crypto.getRandomValues(new Uint8Array(Identifier.MAX_DEPTH * Uint32Array["BYTES_PER_ELEMENT"]))])));
-		
-		// Input switch type
-		const INPUT_SWITCH_TYPE = Crypto.SWITCH_TYPE_REGULAR;
-		
-		// Message
-		const MESSAGE = "This is a message";
-		
-		// Log output
-		console.log("Using output: " + OUTPUT.toFixed());
-		
-		// Log input
-		console.log("Using input: " + INPUT.toFixed());
-		
-		// Log fee
-		console.log("Using fee: " + FEE.toFixed());
-		
-		// Log output identifier
-		console.log("Using output identifier: " + Common.toHexString(OUTPUT_IDENTIFIER.getValue()));
-		
-		// Log input identifier
-		console.log("Using input identifier: " + Common.toHexString(INPUT_IDENTIFIER.getValue()));
-		
-		// Log message
-		console.log("Using message: " + MESSAGE);
-		
-		// Check switch type
-		switch(switchType) {
-		
-			// Switch type none
-			case Crypto.SWITCH_TYPE_NONE:
 			
-				// Log switch type
-				console.log("Using switch type: none");
-			
-				// Break
-				break;
-			
-			// Regular switch type
-			case Crypto.SWITCH_TYPE_REGULAR:
-			
-				// Log switch type
-				console.log("Using switch type: regular");
-			
-				// Break
-				break;
-		}
+			// Break
+			break;
 		
-		// Check features
-		switch(features) {
+		// Height locked features
+		case SlateKernel.HEIGHT_LOCKED_FEATURES:
 		
-			// Plain features
-			case SlateKernel.PLAIN_FEATURES:
+			// Set kernel information to features followed by the lock height
+			var kernelInformation = Common.mergeArrays([
 			
-				// Log features
-				console.log("Using features: plain");
-			
-				// Break
-				break;
-			
-			// Height locked features
-			case SlateKernel.HEIGHT_LOCKED_FEATURES:
-			
-				// Log features
-				console.log("Using features: height locked");
+				// Features
+				new Uint8Array([features]),
 				
-				// Log lock height
-				console.log("Using lock height: " + lockHeight.toFixed());
-			
-				// Break
-				break;
-			
-			// No recent duplicate features
-			case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
-			
-				// Log features
-				console.log("Using features: no recent duplicate");
-				
-				// Log relative height
-				console.log("Using relative height: " + relativeHeight.toFixed());
-			
-				// Break
-				break;
-		}
-		
-		// Check sender address type
-		switch(senderAddressType) {
-		
-			// MQS address type
-			case MQS_ADDRESS_TYPE:
-			
-				// Log sender address type
-				console.log("Using sender address type: MQS");
-				
-				// Get MQS private key from the extended private key
-				const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Get MQS public key from the MQS private key
-				const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-				
-				// Get sender address from the MQS public key
-				var senderAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-			
-				// Break
-				break;
-			
-			// Tor address type
-			case TOR_ADDRESS_TYPE:
-			
-				// Log sender address type
-				console.log("Using sender address type: Tor");
-				
-				// Get Tor private key from the extended private key
-				const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Get Tor public key from the Tor private key
-				const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-				
-				// Get sender address from the Tor public key
-				var senderAddress = Tor.publicKeyToTorAddress(torPublicKey);
-			
-				// Break
-				break;
-		}
-		
-		// Get random kernel commitment
-		const kernelCommit = await Crypto.commit(extendedPrivateKey, INPUT.minus(OUTPUT), OUTPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
-		
-		// Set payment proof message
-		const paymentProofMessage = Slate.getPaymentProofMessage(INPUT.minus(OUTPUT), kernelCommit, senderAddress);
-		
-		// Check payment proof type
-		switch(paymentProofType) {
-		
-			// No payment proof type
-			case NO_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: none");
-			
-				// Break
-				break;
-			
-			// MQS payment proof type
-			case MQS_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: MQS");
-			
-				// Get MQS private key from the extended private key
-				const mqsPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Get MQS public key from the MQS private key
-				const mqsPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(mqsPrivateKey);
-				
-				// Get receiver address from the MQS public key
-				var receiverAddress = Mqs.publicKeyToMqsAddress(mqsPublicKey, Consensus.getNetworkType() === Consensus.MAINNET_NETWORK_TYPE);
-				
-				// Get payment proof message hash
-				const paymentProofMessageHash = new Uint8Array(sha256.arrayBuffer(paymentProofMessage));
-				
-				// Set payment proof as the payment proof message hash signed by the MQS private key
-				var paymentProof = Secp256k1Zkp.createMessageHashSignature(paymentProofMessageHash, mqsPrivateKey);
-				
-				// Break
-				break;
-			
-			// Tor payment proof type
-			case TOR_PAYMENT_PROOF_TYPE:
-			
-				// Log payment proof type
-				console.log("Using payment proof type: Tor");
-			
-				// Get Tor private key from the extended private key
-				const torPrivateKey = await Crypto.addressKey(extendedPrivateKey, INDEX.toNumber());
-				
-				// Get Tor public key from the Tor private key
-				const torPublicKey = Ed25519.publicKeyFromSecretKey(torPrivateKey);
-				
-				// Get receiver address from the Tor public key
-				var receiverAddress = Tor.publicKeyToTorAddress(torPublicKey);
-				
-				// Set payment proof as the payment proof message signed by the Tor private key
-				var paymentProof = Ed25519.sign(paymentProofMessage, torPrivateKey);
-			
-				// Break
-				break;
-		}
-		
-		// While offset isn't a valid secret key
-		const offset = new Uint8Array(Crypto.BLINDING_FACTOR_LENGTH);
-		do {
-		
-			// Fill offset with random values
-			crypto.getRandomValues(offset);
-			
-		} while(Secp256k1Zkp.isValidSecretKey(offset) !== true);
-		
-		// Log offset
-		console.log("Using offset: " + Common.toHexString(offset));
-		
-		// Start transaction twice to test secret nonce index
-		let secretNonceIndex = 0;
-		for(let i = 0; i < 2; ++i) {
-		
-			// Start transaction on the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_START_TRANSACTION_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-			
-				// Account
-				Buffer.from(ACCOUNT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Index
-				Buffer.from(INDEX.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT32)),
-				
-				// Output
-				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Input
-				Buffer.from(INPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Fee
-				Buffer.from(FEE.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Secret nonce index
-				Buffer.from(new Uint8Array([secretNonceIndex])),
-				
-				// Address
-				Buffer.from((paymentProofType !== NO_PAYMENT_PROOF_TYPE) ? receiverAddress : [])
-			]));
-			
-			// Include output in the transaction on the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_OUTPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-			
-				// Identifier
-				Buffer.from(OUTPUT_IDENTIFIER.getValue()),
-				
-				// Amount
-				Buffer.from(OUTPUT.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Switch type
-				Buffer.from(new Uint8Array([switchType]))
-			]));
-			
-			// Include input in the transaction on the hardware wallet
-			await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_INCLUDE_INPUT_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.concat([
-			
-				// Identifier
-				Buffer.from(INPUT_IDENTIFIER.getValue()),
-				
-				// Amount
-				Buffer.from((INPUT.plus(FEE)).toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64)),
-				
-				// Switch type
-				Buffer.from(new Uint8Array([INPUT_SWITCH_TYPE]))
-			]));
-			
-			// Apply offset to the transaction on the hardware wallet
-			const response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_APPLY_OFFSET_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from(offset));
-			
-			// Check if response contains a secret nonce index
-			if(response["length"] > RESPONSE_DELIMITER_LENGTH) {
-			
-				// Get secret nonce index from response
-				secretNonceIndex = response[0];
-				
-				// Log secret nonce index
-				console.log("Secret nonce index: " + secretNonceIndex);
-			}
-		}
-		
-		// Get the output's blinding factor
-		const outputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, OUTPUT, OUTPUT_IDENTIFIER, switchType);
-		
-		// Get the input's blinding factor
-		const inputBlindingFactor = await Crypto.deriveSecretKey(extendedPrivateKey, INPUT.plus(FEE), INPUT_IDENTIFIER, INPUT_SWITCH_TYPE);
-		
-		// Get the sum of all the transaction's blinding factors
-		let transactionBlindingFactor = Secp256k1Zkp.blindSum([outputBlindingFactor], [inputBlindingFactor]);
-		
-		// Update the transaction blinding factor to include the offset
-		transactionBlindingFactor = Secp256k1Zkp.blindSum([transactionBlindingFactor], [offset]);
-		
-		// Get the expected transaction public key from the transaction's blinding factor
-		const expectedTransactionPublicKey = Secp256k1Zkp.publicKeyFromSecretKey(transactionBlindingFactor);
-		
-		// Get the transaction public key from the hardware wallet
-		let response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_KEY_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-		
-		// Get public key from response
-		const publicKey = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
-		
-		// Log transaction public key after offset
-		console.log("Transaction public key after offset: " + Common.toHexString(publicKey));
-		
-		// Check if transaction public key is invalid
-		if(Common.arraysAreEqual(publicKey, expectedTransactionPublicKey) === false) {
-		
-			// Log message
-			console.log("Invalid transaction public key");
-			
-			// Throw error
-			throw "Failed running send transaction test";
-		}
-		
-		// Get the transaction public nonce from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_PUBLIC_NONCE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER);
-
-		// Get public nonce from response
-		const publicNonce = response.subarray(0, Crypto.SECP256K1_PUBLIC_KEY_LENGTH);
-		
-		// Log transaction public nonce
-		console.log("Transaction public nonce: " + Common.toHexString(publicNonce));
-		
-		// Get the message signature from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_CONTINUE_TRANSACTION_GET_MESSAGE_SIGNATURE_INSTRUCTION, NO_PARAMETER, NO_PARAMETER, Buffer.from((new TextEncoder()).encode(MESSAGE)));
-
-		// Remove response code from response
-		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-		
-		// Log message signature
-		console.log("Message signature: " + Common.toHexString(response));
-		
-		// Check if message signature is invalid
-		if(Secp256k1Zkp.verifySingleSignerSignature(response, Blake2b.compute(Crypto.SINGLE_SIGNER_MESSAGE_LENGTH, (new TextEncoder()).encode(MESSAGE), new Uint8Array([])), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, false) !== true) {
-		
-			// Log message
-			console.log("Invalid message signature");
-			
-			// Throw error
-			throw "Failed running send transaction test";
-		}
-		
-		// Log message
-		console.log("Verify that the account index on the device is: " + ACCOUNT.toFixed());
-		
-		// Check features
-		switch(features) {
-		
-			// Plain features
-			case SlateKernel.PLAIN_FEATURES:
-			
-				// Set kernel information to features
-				var kernelInformation = new Uint8Array([features]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: Plain");
-				}
-				
-				// Break
-				break;
-			
-			// Height locked features
-			case SlateKernel.HEIGHT_LOCKED_FEATURES:
-			
-				// Set kernel information to features followed by the lock height
-				var kernelInformation = Common.mergeArrays([
-				
-					// Features
-					new Uint8Array([features]),
-					
-					// Lock height
-					new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
-				]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: Height Locked");
-					
-					// Log message
-					console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
-				}
-				
-				// Break
-				break;
-			
-			// No recent duplicate features
-			case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
-			
-				// Set kernel features to features followed by the relative height
-				var kernelInformation = Common.mergeArrays([
-				
-					// Features
-					new Uint8Array([features]),
-					
-					// Relative height
-					new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
-				]);
-				
-				// Check if not using Speculos
-				if(hardwareWallet instanceof SpeculosTransport === false) {
-				
-					// Log message
-					console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
-					
-					// Log message
-					console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
-				}
-				
-				// Break
-				break;
-		}
-		
-		// Check if not using Speculos
-		if(hardwareWallet instanceof SpeculosTransport === false) {
-		
-			// Log message
-			console.log("Verify that the transaction's amount on the device is: " + INPUT.minus(OUTPUT).dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
-			
-			// Log message
-			console.log("Verify that the transaction's fee on the device is: " + FEE.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
-		}
-		
-		// Initialize payment proof information
-		let paymentProofInformation = [];
-		
-		// Check if using a payment proof
-		if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
-		
-			// Set payment proof information
-			paymentProofInformation = Buffer.concat([
-			
-				// Kernel commit
-				Buffer.from(kernelCommit),
-				
-				// Payment proof
-				Buffer.from(paymentProof)
+				// Lock height
+				new Uint8Array(lockHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT64))
 			]);
 			
 			// Check if not using Speculos
 			if(hardwareWallet instanceof SpeculosTransport === false) {
 			
 				// Log message
-				console.log("Verify that the transaction's recipient payment proof address on the device is: " + receiverAddress);
+				console.log("Verify that the transaction's kernel features on the device is: Height Locked");
+				
+				// Log message
+				console.log("Verify that the transaction's lock height on the device is: " + lockHeight.toFixed());
 			}
+			
+			// Break
+			break;
+		
+		// No recent duplicate features
+		case SlateKernel.NO_RECENT_DUPLICATE_FEATURES:
+		
+			// Set kernel features to features followed by the relative height
+			var kernelInformation = Common.mergeArrays([
+			
+				// Features
+				new Uint8Array([features]),
+				
+				// Relative height
+				new Uint8Array(relativeHeight.toBytes(BigNumber.LITTLE_ENDIAN, Common.BYTES_IN_A_UINT16))
+			]);
+			
+			// Check if not using Speculos
+			if(hardwareWallet instanceof SpeculosTransport === false) {
+			
+				// Log message
+				console.log("Verify that the transaction's kernel features on the device is: No Recent Duplicate");
+				
+				// Log message
+				console.log("Verify that the transaction's relative height on the device is: " + relativeHeight.toFixed());
+			}
+			
+			// Break
+			break;
+	}
+	
+	// Check if not using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+		// Log message
+		console.log("Verify that the transaction's amount on the device is: " + INPUT.minus(OUTPUT).dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
+		
+		// Log message
+		console.log("Verify that the transaction's fee on the device is: " + FEE.dividedBy(Consensus.VALUE_NUMBER_BASE).toFixed() + ((Consensus.getNetworkType() !== Consensus.MAINNET_NETWORK_TYPE) ? " " + Consensus.networkTypeToText(Consensus.getNetworkType()) : "") + " " + Consensus.CURRENCY_NAME);
+	}
+	
+	// Initialize payment proof information
+	let paymentProofInformation = [];
+	
+	// Check if using a payment proof
+	if(paymentProofType !== NO_PAYMENT_PROOF_TYPE) {
+	
+		// Set payment proof information
+		paymentProofInformation = Buffer.concat([
+		
+			// Kernel commit
+			Buffer.from(kernelCommit),
+			
+			// Payment proof
+			Buffer.from(paymentProof)
+		]);
+		
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+		
+			// Log message
+			console.log("Verify that the transaction's recipient payment proof address on the device is: " + receiverAddress);
+		}
+	}
+	
+	// Otherwise
+	else {
+	
+		// Check if not using Speculos
+		if(hardwareWallet instanceof SpeculosTransport === false) {
+	
+			// Log message
+			console.log("Verify that the transaction contains no payment proof on the device");
+		}
+	}
+	
+	// Check if using Speculos
+	if(hardwareWallet instanceof SpeculosTransport === true) {
+	
+		// Check if using a Nano hardware wallet
+		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"regexp": "^.*end$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Account.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Amount.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Fee.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Kernel Features.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Lock Height.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Relative Height.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "No payment",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"regexp": "^Proof Address.*$",
+						"actions": [
+						
+							// Push right
+							["button", 2, true],
+							["button", 2, false]
+						]
+					},
+					{
+						"text": "Approve",
+						"actions": [
+						
+							// Push both
+							["button", 1, true],
+							["button", 2, true],
+							["button", 1, false],
+							["button", 2, false]
+						]
+					}
+				]
+			});
 		}
 		
 		// Otherwise
 		else {
 		
-			// Check if not using Speculos
-			if(hardwareWallet instanceof SpeculosTransport === false) {
-		
-				// Log message
-				console.log("Verify that the transaction contains no payment proof on the device");
-			}
+			// Set automation
+			await setAutomation({
+				"version": 1,
+				"rules": [
+					{
+						"text": "Tap to continue",
+						"actions": [
+						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
+							// Touch
+							["finger", 200, 500, false],
+							["finger", 200, 500, true],
+							["finger", 200, 500, false]
+						]
+					},
+					{
+						"text": "Swipe to review",
+						"actions": [
+						
+							// Clear confirmed
+							["setbool", "confirmed", false],
+							
+							// Touch
+							["finger", 100, 500, false],
+							["finger", 100, 500, true],
+							["finger", 400, 500, false]
+						]
+					},
+					{
+						"text": "Hold to send",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
+						"actions": [
+						
+							// Set confirmed
+							["setbool", "confirmed", true],
+							
+							// Touch start
+							["finger", 250, 500, true]
+						]
+					},
+					{
+						"text": "Reject",
+						"conditions": [
+						
+							// Not confirmed
+							["confirmed", false]
+						],
+						"actions": [
+						
+							// Touch
+							["finger", 450, 570, false],
+							["finger", 450, 570, true],
+							["finger", 450, 570, false]
+						]
+					},
+					{
+						"text": "TRANSACTION",
+						"conditions": [
+						
+							// Is confirmed
+							["confirmed", true]
+						],
+						"actions": [
+						
+							// Touch end
+							["finger", 200, 500, false]
+						]
+					}
+				]
+			});
 		}
-		
-		// Check if using Speculos
-		if(hardwareWallet instanceof SpeculosTransport === true) {
-		
-			// Check if using a Nano hardware wallet
-			if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
-			
-				// Set automation
-				await setAutomation({
-					"version": 1,
-					"rules": [
-						{
-							"regexp": "^.*end$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Account.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Amount.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Fee.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Kernel Features.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Lock Height.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Relative Height.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"text": "No payment",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"regexp": "^Proof Address.*$",
-							"actions": [
-							
-								// Push right
-								["button", 2, true],
-								["button", 2, false]
-							]
-						},
-						{
-							"text": "Approve",
-							"actions": [
-							
-								// Push both
-								["button", 1, true],
-								["button", 2, true],
-								["button", 1, false],
-								["button", 2, false]
-							]
-						}
-					]
-				});
-			}
-			
-			// Otherwise
-			else {
-			
-				// Set automation
-				await setAutomation({
-					"version": 1,
-					"rules": [
-						{
-							"text": "Tap to continue",
-							"actions": [
-							
-								// Clear confirmed
-								["setbool", "confirmed", false],
-								
-								// Touch
-								["finger", 200, 500, false],
-								["finger", 200, 500, true],
-								["finger", 200, 500, false]
-							]
-						},
-						{
-							"text": "Swipe to review",
-							"actions": [
-							
-								// Clear confirmed
-								["setbool", "confirmed", false],
-								
-								// Touch
-								["finger", 100, 500, false],
-								["finger", 100, 500, true],
-								["finger", 400, 500, false]
-							]
-						},
-						{
-							"text": "Hold to send",
-							"conditions": [
-							
-								// Not confirmed
-								["confirmed", false]
-							],
-							"actions": [
-							
-								// Set confirmed
-								["setbool", "confirmed", true],
-								
-								// Touch start
-								["finger", 250, 500, true]
-							]
-						},
-						{
-							"text": "Reject",
-							"conditions": [
-							
-								// Not confirmed
-								["confirmed", false]
-							],
-							"actions": [
-							
-								// Touch
-								["finger", 450, 570, false],
-								["finger", 450, 570, true],
-								["finger", 450, 570, false]
-							]
-						},
-						{
-							"text": "TRANSACTION",
-							"conditions": [
-							
-								// Is confirmed
-								["confirmed", true]
-							],
-							"actions": [
-							
-								// Touch end
-								["finger", 200, 500, false]
-							]
-						}
-					]
-				});
-			}
-		}
-		
-		// Get signature for the transaction from the hardware wallet
-		response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, senderAddressType, NO_PARAMETER, Buffer.concat([
-		
-			// Public nonce
-			Buffer.from(publicNonce),
-			
-			// Public key
-			Buffer.from(publicKey),
-			
-			// Kernel information
-			Buffer.from(kernelInformation),
-			
-			// Payment proof information
-			Buffer.from(paymentProofInformation)
-		]));
-		
-		// Remove response code from response
-		response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
-		
-		// Log transaction signature
-		console.log("Transaction signature: " + Common.toHexString(response));
-		
-		// Check if signature is invalid
-		if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) !== true) {
-		
-			// Log message
-			console.log("Invalid transaction signature");
-			
-			// Throw error
-			throw "Failed running send transaction test";
-		}
-		
-		// Log message
-		console.log("Passed running send transaction test");
 	}
 	
-	// Otherwise
-	else {
-
+	// Get signature for the transaction from the hardware wallet
+	response = await hardwareWallet.send(REQUEST_CLASS, REQUEST_FINISH_TRANSACTION_INSTRUCTION, senderAddressType, NO_PARAMETER, Buffer.concat([
+	
+		// Public nonce
+		Buffer.from(publicNonce),
+		
+		// Public key
+		Buffer.from(publicKey),
+		
+		// Kernel information
+		Buffer.from(kernelInformation),
+		
+		// Payment proof information
+		Buffer.from(paymentProofInformation)
+	]));
+	
+	// Remove response code from response
+	response = response.subarray(0, response["length"] - RESPONSE_DELIMITER_LENGTH);
+	
+	// Log transaction signature
+	console.log("Transaction signature: " + Common.toHexString(response));
+	
+	// Check if signature is invalid
+	if(Secp256k1Zkp.verifySingleSignerSignature(response, SlateKernel.signatureMessage(features, FEE, lockHeight, relativeHeight), Secp256k1Zkp.NO_PUBLIC_NONCE, publicKey, publicKey, true) !== true) {
+	
 		// Log message
-		console.log("Skipped running send transaction test");
+		console.log("Invalid transaction signature");
+		
+		// Throw error
+		throw "Failed running send transaction test";
 	}
+	
+	// Log message
+	console.log("Passed running send transaction test");
 }
 
 // Get MQS timestamp signature test
