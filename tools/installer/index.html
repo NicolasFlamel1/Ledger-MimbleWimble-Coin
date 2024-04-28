@@ -3,7 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 
-	<script src="LedgerJS_Browser-0.0.4.js"></script>
 	<script src="secp256k1-zkp-0.0.29.js"></script>
 	<script src="apps.js"></script>
 	
@@ -136,7 +135,7 @@
 				try {
 				
 					// Connect to the hardware wallet using USB
-					const hardwareWallet = await TransportWebUSB.request();
+					const hardwareWallet = await UsbTransport.request();
 					
 					// Get wallet's type
 					const walletType = hardwareWallet["device"]["productName"];
@@ -152,13 +151,13 @@
 					}
 					
 					// Verify that device has the correct target ID
-					await hardwareWallet.send(0xE0, 0x04, 0x00, 0x00, Buffer.from(fromHexString(TARGET_IDS[walletType])));
+					await hardwareWallet.send(0xE0, 0x04, 0x00, 0x00, fromHexString(TARGET_IDS[walletType]));
 					
 					// Create nonce
 					const nonce = crypto.getRandomValues(new Uint8Array(NONCE_LENGTH));
 					
 					// Exchange nonce's with the device
-					let response = await hardwareWallet.send(0xE0, 0x50, 0x00, 0x00, Buffer.from(nonce));
+					let response = await hardwareWallet.send(0xE0, 0x50, 0x00, 0x00, nonce);
 					
 					// Get device's nonce from the response
 					const deviceNonce = response.subarray(BATCH_SIGNER_SERIAL_LENGTH, BATCH_SIGNER_SERIAL_LENGTH + NONCE_LENGTH);
@@ -205,7 +204,7 @@
 					addAlert("Requesting authority on the " + walletName + ". Verify that the public key displayed on the hardware wallet is " + toHexString(Secp256k1Zkp.uncompressPublicKey(publicKey)).toUpperCase() + ". Do not proceed if the public key is different.");
 					
 					// Request authority to the device
-					await hardwareWallet.send(0xE0, 0x51, 0x00, 0x00, Buffer.from(certificate));
+					await hardwareWallet.send(0xE0, 0x51, 0x00, 0x00, certificate);
 					
 					// Create ephemeral private key
 					const ephemeralPrivateKey = crypto.getRandomValues(new Uint8Array(SECP256K1_SECRET_KEY_LENGTH));
@@ -252,7 +251,7 @@
 					]);
 					
 					// Send ephemeral certificate to the device
-					await hardwareWallet.send(0xE0, 0x51, 0x80, 0x00, Buffer.from(certificate));
+					await hardwareWallet.send(0xE0, 0x51, 0x80, 0x00, certificate);
 					
 					// Get ephemeral certificate from the device
 					await hardwareWallet.send(0xE0, 0x52, 0x00, 0x00);
@@ -320,7 +319,7 @@
 							macInitializationVector = encryptedData[2];
 							
 							// Send encrypted data to device
-							await hardwareWallet.send(commandClass, commandInstruction, commandParameterOne, commandParameterTwo, Buffer.from(encryptedData[0]));
+							await hardwareWallet.send(commandClass, commandInstruction, commandParameterOne, commandParameterTwo, encryptedData[0]);
 						}
 					}
 					
@@ -366,6 +365,220 @@
 			// Set text's text
 			text["textContent"] = "Ready.";
 		});
+		
+		
+		// Classes
+		
+		// USB transport class
+		class UsbTransport {
+
+			// Constructor
+			constructor(device) {
+			
+				// Set device
+				this.device = device;
+			}
+			
+			// Send
+			async send(classType, messageType, parameterOne, parameterTwo, data = new Uint8Array()) {
+			
+				// Create header
+				const header = new Uint8Array([classType, messageType, parameterOne, parameterTwo, data["length"]]);
+				
+				// Create payload
+				const payload = new Uint8Array(header["length"] + data["length"]);
+				payload.set(header);
+				payload.set(data, header["length"]);
+				
+				// Create padded payload
+				const numberOfPackets = Math.ceil((Uint16Array["BYTES_PER_ELEMENT"] + payload["length"]) / (UsbTransport.PACKET_SIZE - UsbTransport.PACKET_HEADER_SIZE));
+				const paddedPayload = new Uint8Array(numberOfPackets * (UsbTransport.PACKET_SIZE - UsbTransport.PACKET_HEADER_SIZE));
+				paddedPayload.set(new Uint8Array([payload["length"] >>> UsbTransport.BITS_IN_A_BYTE, payload["length"]]));
+				paddedPayload.set(payload, Uint16Array["BYTES_PER_ELEMENT"]);
+				
+				// Initialize packets
+				const packets = [];
+				
+				// Initialize offset
+				let offset = 0;
+				
+				// Go through all packets required to send the padded payload
+				for(let i = 0; offset !== paddedPayload["length"]; ++i) {
+				
+					// Create packet header
+					const packetHeader = new Uint8Array([0, 0, 5, i >>> UsbTransport.BITS_IN_A_BYTE, i]);
+					
+					// Get part length
+					const partLength = UsbTransport.PACKET_SIZE - packetHeader["length"];
+					
+					// Create packet
+					const packet = new Uint8Array(packetHeader["length"] + partLength);
+					packet.set(packetHeader);
+					packet.set(paddedPayload.subarray(offset, offset + partLength), packetHeader["length"]);
+					
+					// Append packet to list
+					packets.push(packet);
+					
+					// Update offset
+					offset += partLength;
+				}
+				
+				// Go through all packets
+				for(let i = 0; i < packets["length"]; ++i) {
+				
+					// Send packet
+					await this.device.transferOut(3, packets[i]);
+				}
+				
+				// Receive first response packet
+				const firstResponsePacket = new Uint8Array((await this.device.transferIn(3, UsbTransport.PACKET_SIZE))["data"]["buffer"]);
+				
+				// Get response size
+				const responseSize = (firstResponsePacket[UsbTransport.PACKET_HEADER_SIZE] << UsbTransport.BITS_IN_A_BYTE) | firstResponsePacket[UsbTransport.PACKET_HEADER_SIZE + 1];
+				
+				// Set response
+				let response = firstResponsePacket.subarray(UsbTransport.PACKET_HEADER_SIZE + Uint16Array["BYTES_PER_ELEMENT"]);
+				
+				// Go through all packets to receive
+				while(response["length"] < responseSize) {
+				
+					// Receive packet
+					const packet = new Uint8Array((await this.device.transferIn(3, UsbTransport.PACKET_SIZE))["data"]["buffer"]);
+					
+					// Append packet's response to response
+					const currentResponse = new Uint8Array(response["length"] + packet["length"] - UsbTransport.PACKET_HEADER_SIZE);
+					currentResponse.set(response);
+					currentResponse.set(packet.subarray(UsbTransport.PACKET_HEADER_SIZE), response["length"]);
+					response = currentResponse;
+				}
+				
+				// Get response status code
+				const responseStatusCode = (response[responseSize - Uint16Array["BYTES_PER_ELEMENT"]] << UsbTransport.BITS_IN_A_BYTE) | response[responseSize - Uint16Array["BYTES_PER_ELEMENT"] + 1];
+				
+				// Check if response isn't success
+				if(responseStatusCode !== UsbTransport.SUCCESS_STATUS_CODE) {
+				
+					// Throw error
+					throw new UsbTransportErrorClass(responseStatusCode);
+				}
+				
+				// Return response
+				return response.subarray(0, responseSize);
+			}
+			
+			// Request
+			static async request() {
+			
+				// Get device
+				const device = await navigator["usb"].requestDevice({
+								
+					// Filters
+					"filters": [
+						{
+					
+							// Vendor ID
+							"vendorId": UsbTransport.VENDOR_ID,
+						}
+					]
+				});
+				
+				// Open device
+				await device.open();
+				
+				// Select device's configuration
+				await device.selectConfiguration(1);
+				
+				// Try
+				try {
+				
+					// Reset device
+					await device.reset();
+				}
+				
+				// Catch errors
+				catch(error) {
+				
+				}
+				
+				// Claim interface
+				await device.claimInterface(1);
+				
+				// Return USB transport for the device
+				return new UsbTransport(device);
+			}
+			
+			// Vendor ID
+			static get VENDOR_ID() {
+			
+				// Return vendor ID
+				return 0x2C97;
+			}
+			
+			// Packet size
+			static get PACKET_SIZE() {
+			
+				// Return packet size
+				return 64;
+			}
+			
+			// Packet header size
+			static get PACKET_HEADER_SIZE() {
+			
+				// Return packet header size
+				return 5;
+			}
+			
+			// Bits in a byte
+			static get BITS_IN_A_BYTE() {
+			
+				// Return bits in a byte
+				return 8;
+			}
+			
+			// Success status code
+			static get SUCCESS_STATUS_CODE() {
+			
+				// Return success status code
+				return 0x9000;
+			}
+		}
+		
+		// Usb transport error class
+		class UsbTransportErrorClass {
+		
+			// Constructor
+			constructor(statusCode) {
+			
+				// Set status code
+				this.statusCode = statusCode;
+			}
+			
+			// To string
+			toString() {
+			
+				// Check status code
+				switch(this.statusCode) {
+				
+					// User denied status code
+					case 0x5501:
+					
+						// Return message
+						return "User denied action on hardware wallet";
+					
+					// Device locked status code
+					case 0x5515:
+					
+						// Return message
+						return "Hardware wallet is locked";
+						
+					// Default
+					default:
+					
+						// Return message
+						return "Unknown error occurred";
+				}
+			}
+		}
 		
 		
 		// Supporting function implementation
