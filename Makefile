@@ -305,6 +305,8 @@ include $(BOLOS_SDK)/Makefile.glyphs
 # Compiler settings
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
+APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c
 
 # Check if target is the Nano S
 ifeq ($(TARGET_NAME),TARGET_NANOS)
