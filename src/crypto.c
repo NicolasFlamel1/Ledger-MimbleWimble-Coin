@@ -2041,10 +2041,10 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 	};
 
 	// Initialize ChaCha20 Poly1305 state
-	volatile struct ChaCha20Poly1305State chaCha20Poly1305State;
+	volatile ChaCha20Poly1305State chaCha20Poly1305State;
 
 	// Initialize ChaCha20 current state
-	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State.chaCha20OriginalState)];
+	volatile uint32_t chaCha20CurrentState[CHACHA20_STATE_SIZE];
 
 	// Begin try
 	BEGIN_TRY {
@@ -2075,7 +2075,7 @@ void createScalarsFromChaCha20(volatile uint8_t *firstScalar, volatile uint8_t *
 			explicit_bzero((uint32_t *)chaCha20CurrentState, sizeof(chaCha20CurrentState));
 
 			// Clear the ChaCha20 Poly1305 state
-			explicit_bzero((struct ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
+			explicit_bzero((ChaCha20Poly1305State *)&chaCha20Poly1305State, sizeof(chaCha20Poly1305State));
 		}
 	}
 

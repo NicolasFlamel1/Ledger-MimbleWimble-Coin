@@ -308,6 +308,14 @@ SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
 APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c
 
+# Check if target isn't the Nano S (The Ledger Nano S SDK doesn't include support for ChaCha20 Poly1305)
+ifneq ($(TARGET_NAME),TARGET_NANOS)
+
+	# Target specific compiler settings
+	APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_chacha.c $(BOLOS_SDK)/lib_cxng/src/cx_poly1305.c $(BOLOS_SDK)/lib_cxng/src/cx_chacha_poly.c
+	DEFINES += HAVE_CHACHA HAVE_POLY1305 HAVE_CHACHA_POLY
+endif
+
 # Check if target is the Nano S
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 

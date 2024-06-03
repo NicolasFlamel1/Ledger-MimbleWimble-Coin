@@ -55,7 +55,7 @@ void processContinueDecryptingSlateRequest(unsigned short *responseLength, __att
 		TRY {
 
 			// Decrypt ChaCha20 Poly1305 data
-			decryptChaCha20Poly1305Data((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, decryptedData, data, dataLength);
+			decryptChaCha20Poly1305Data((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, decryptedData, data, dataLength);
 
 			// Encrypt the decrypted data
 			encryptData(encryptedData, (uint8_t *)decryptedData, dataLength, slate.sessionKey, sizeof(slate.sessionKey));

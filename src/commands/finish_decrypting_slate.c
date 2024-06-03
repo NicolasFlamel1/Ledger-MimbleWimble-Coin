@@ -50,7 +50,7 @@ void processFinishDecryptingSlateRequest(unsigned short *responseLength, __attri
 		TRY {
 
 			// Get ChaCha20 Poly1305 expected tag
-			getChaCha20Poly1305Tag((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, expectedTag);
+			getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, expectedTag);
 
 			// Check if tag isn't equal to the expected tag
 			if(os_secure_memcmp((uint8_t *)tag, (uint8_t *)expectedTag, sizeof(expectedTag))) {

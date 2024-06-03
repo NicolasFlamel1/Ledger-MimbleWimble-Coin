@@ -57,7 +57,7 @@ struct Slate {
 	cx_sha256_t messageHashState;
 
 	// ChaCha20 Poly1305 state
-	volatile struct ChaCha20Poly1305State chaCha20Poly1305State;
+	volatile ChaCha20Poly1305State chaCha20Poly1305State;
 };
 
 

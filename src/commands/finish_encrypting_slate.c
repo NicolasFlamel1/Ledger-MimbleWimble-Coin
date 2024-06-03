@@ -38,7 +38,7 @@ void processFinishEncryptingSlateRequest(unsigned short *responseLength, __attri
 
 	// Get ChaCha20 Poly1305 tag
 	uint8_t tag[POLY1305_TAG_SIZE];
-	getChaCha20Poly1305Tag((struct ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, tag);
+	getChaCha20Poly1305Tag((ChaCha20Poly1305State *)&slate.chaCha20Poly1305State, tag);
 
 	// Initialize signature
 	volatile uint8_t signature[MAXIMUM_DER_SIGNATURE_SIZE];

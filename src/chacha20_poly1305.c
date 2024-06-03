@@ -13,8 +13,14 @@
 // Poly1305 block size size
 #define POLY1305_BLOCK_SIZE 16
 
+// ChaCha20 key size
+#define CHACHA20_KEY_SIZE 32
+
 
 // Constants
+
+// Check if not using SDK's version of ChaCha20 Poly1305
+#ifndef HAVE_CHACHA_POLY
 
 // ChaCha20 state constant
 static const char CHACHA20_STATE_CONSTANT[] = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'};
@@ -22,8 +28,13 @@ static const char CHACHA20_STATE_CONSTANT[] = {'e', 'x', 'p', 'a', 'n', 'd', ' '
 // Poly1305 p
 static const uint8_t POLY1305_P[] = {0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFB};
 
+#endif
+
 
 // Function prototypes
+
+// Check if not using SDK's version of ChaCha20 Poly1305
+#ifndef HAVE_CHACHA_POLY
 
 // Quarter round
 static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
@@ -32,16 +43,55 @@ static void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d);
 static void rotateLeft(uint32_t *value, const size_t bits);
 
 // Initialize ChaCha20 current state
-static void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
+static void initializeChaCha20CurrentState(const ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState);
 
 // Update Poly1305 accumulator
-static void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength);
+static void updatePoly1305Accumulator(ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength);
+
+#endif
 
 
 // Supporting function implementation
 
 // Initialize ChaCha20 Poly1305
-void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, const size_t additionalAuthenticatedDataLength, const uint32_t counter, uint32_t *chaCha20ResultingState) {
+void initializeChaCha20Poly1305(volatile ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *key, const uint8_t *nonce, const uint8_t *additionalAuthenticatedData, const size_t additionalAuthenticatedDataLength, const uint32_t counter, uint32_t *chaCha20ResultingState) {
+
+// Check if using SDK's version of ChaCha20 Poly1305
+#ifdef HAVE_CHACHA_POLY
+
+	// Initialize ChaCha20 Poly1305 state
+	cx_chachapoly_init((ChaCha20Poly1305State *)chaCha20Poly1305State);
+
+	// Set ChaCha20 Poly1305 state's key and throw error if it fails
+	CX_THROW(cx_chachapoly_set_key((ChaCha20Poly1305State *)chaCha20Poly1305State, key, CHACHA20_KEY_SIZE));
+
+	// Combine counter and nonce
+	uint8_t counterAndNonce[sizeof(counter) + CHACHA20_NONCE_SIZE];
+	memcpy(counterAndNonce, &counter, sizeof(counter));
+	memcpy(&counterAndNonce[sizeof(counter)], nonce, CHACHA20_NONCE_SIZE);
+
+	// Convert counter in counter and nonce to big endian
+	swapEndianness(counterAndNonce, sizeof(counter));
+
+	// Configure ChaCha20 Poly1305 state to use the counter and nonce and throw error if it fails
+	CX_THROW(cx_chachapoly_start((ChaCha20Poly1305State *)chaCha20Poly1305State, CX_ENCRYPT, counterAndNonce, sizeof(counterAndNonce)));
+
+	// Check if not exporting the ChaCha20 resulting state
+	if(!chaCha20ResultingState) {
+
+		// Update ChaCha20 Poly1305 state with the additional authenticated data and throw error if it fails
+		CX_THROW(cx_chachapoly_update_aad((ChaCha20Poly1305State *)chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength));
+	}
+
+	// Otherwise
+	else {
+
+		// Initialize resulting ChaCha20 current state with the ChaCha20 Poly1305 state
+		memcpy(chaCha20ResultingState, (uint32_t *)&chaCha20Poly1305State->chacha20_ctx.block, sizeof(chaCha20Poly1305State->chacha20_ctx.block));
+	}
+
+// Otherwise
+#else
 
 	// Set additional authenticated data length
 	chaCha20Poly1305State->additionalAuthenticatedDataLength = additionalAuthenticatedDataLength;
@@ -71,7 +121,7 @@ void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20P
 	if(!chaCha20ResultingState) {
 
 		// Initialize ChaCha20 current state
-		volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+		volatile uint32_t chaCha20CurrentState[CHACHA20_STATE_SIZE];
 
 		// Begin try
 		BEGIN_TRY {
@@ -80,7 +130,7 @@ void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20P
 			TRY {
 
 				// Initialize ChaCha20 current state with the ChaCha20 Poly1305 state
-				initializeChaCha20CurrentState((struct ChaCha20Poly1305State *)chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
+				initializeChaCha20CurrentState((ChaCha20Poly1305State *)chaCha20Poly1305State, (uint32_t *)chaCha20CurrentState);
 
 				// Get the Poly1305 key from the ChaCha20 current state
 				const uint8_t *poly1305Key = (uint8_t *)chaCha20CurrentState;
@@ -124,19 +174,37 @@ void initializeChaCha20Poly1305(volatile struct ChaCha20Poly1305State *chaCha20P
 		explicit_bzero((uint8_t *)chaCha20Poly1305State->poly1305Accumulator, sizeof(chaCha20Poly1305State->poly1305Accumulator));
 
 		// Update Poly1305 accumulator with the additional authenticated data
-		updatePoly1305Accumulator((struct ChaCha20Poly1305State *)chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
+		updatePoly1305Accumulator((ChaCha20Poly1305State *)chaCha20Poly1305State, additionalAuthenticatedData, additionalAuthenticatedDataLength);
 	}
 
 	// Otherwise
 	else {
 
 		// Initialize resulting ChaCha20 current state with the ChaCha20 Poly1305 state
-		initializeChaCha20CurrentState((struct ChaCha20Poly1305State *)chaCha20Poly1305State, chaCha20ResultingState);
+		initializeChaCha20CurrentState((ChaCha20Poly1305State *)chaCha20Poly1305State, chaCha20ResultingState);
 	}
+#endif
 }
 
 // Encrypt ChaCha20 Poly1305 data
-void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *encryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
+void encryptChaCha20Poly1305Data(ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *encryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
+
+// Check if using SDK's version of ChaCha20 Poly1305
+#ifdef HAVE_CHACHA_POLY
+
+	// Check if data length or block counter will overflow
+	if(SIZE_MAX - chaCha20Poly1305State->ciphertext_len < dataBlockLength || chaCha20Poly1305State->chacha20_ctx.state[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
+
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+
+	// Encrypt the data block with the ChaCha20 Poly1305 state and throw error if it fails
+	chaCha20Poly1305State->mode = CX_ENCRYPT;
+	CX_THROW(cx_chachapoly_update(chaCha20Poly1305State, dataBlock, (uint8_t *)encryptedDataBlock, dataBlockLength));
+
+// Otherwise
+#else
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -149,7 +217,7 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 
 	// Initialize ChaCha20 current state
-	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	volatile uint32_t chaCha20CurrentState[CHACHA20_STATE_SIZE];
 
 	// Begin try
 	BEGIN_TRY {
@@ -184,10 +252,28 @@ void encryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 
 	// Update the data length
 	chaCha20Poly1305State->dataLength += dataBlockLength;
+#endif
 }
 
 // Decrypt ChaCha20 Poly1305 data
-void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *decryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
+void decryptChaCha20Poly1305Data(ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *decryptedDataBlock, const uint8_t *dataBlock, const size_t dataBlockLength) {
+
+// Check if using SDK's version of ChaCha20 Poly1305
+#ifdef HAVE_CHACHA_POLY
+
+	// Check if data length or block counter will overflow
+	if(SIZE_MAX - chaCha20Poly1305State->ciphertext_len < dataBlockLength || chaCha20Poly1305State->chacha20_ctx.state[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
+
+		// Throw invalid parameters error
+		THROW(INVALID_PARAMETERS_ERROR);
+	}
+
+	// Decrypt the data block with the ChaCha20 Poly1305 state and throw error if it fails
+	chaCha20Poly1305State->mode = CX_DECRYPT;
+	CX_THROW(cx_chachapoly_update(chaCha20Poly1305State, dataBlock, (uint8_t *)decryptedDataBlock, dataBlockLength));
+
+// Otherwise
+#else
 
 	// Check if data length or block counter will overflow
 	if(UINT64_MAX - chaCha20Poly1305State->dataLength < dataBlockLength || chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX] == UINT32_MAX) {
@@ -200,7 +286,7 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 	++chaCha20Poly1305State->chaCha20OriginalState[CHACHA20_STATE_BLOCK_COUNTER_INDEX];
 
 	// Initialize ChaCha20 current state
-	volatile uint32_t chaCha20CurrentState[ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState)];
+	volatile uint32_t chaCha20CurrentState[CHACHA20_STATE_SIZE];
 
 	// Begin try
 	BEGIN_TRY {
@@ -235,13 +321,14 @@ void decryptChaCha20Poly1305Data(struct ChaCha20Poly1305State *chaCha20Poly1305S
 
 	// Update the data length
 	chaCha20Poly1305State->dataLength += dataBlockLength;
+#endif
 }
 
 // Get ChaCha20 Poly1305 tag
-void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *tag) {
+void getChaCha20Poly1305Tag(const ChaCha20Poly1305State *chaCha20Poly1305State, volatile uint8_t *tag) {
 
 	// Initialize copy
-	volatile struct ChaCha20Poly1305State copy;
+	volatile ChaCha20Poly1305State copy;
 
 	// Begin try
 	BEGIN_TRY {
@@ -250,7 +337,16 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 		TRY {
 
 			// Copy the ChaCha20 Poly1305 state
-			memcpy((struct ChaCha20Poly1305State *)&copy, chaCha20Poly1305State, sizeof(copy));
+			memcpy((ChaCha20Poly1305State *)&copy, chaCha20Poly1305State, sizeof(copy));
+
+// Check if using SDK's version of ChaCha20 Poly1305
+#ifdef HAVE_CHACHA_POLY
+
+			// Get the ChaCha20 Poly1305 state's tag and throw error if it fails
+			CX_THROW(cx_chachapoly_finish((ChaCha20Poly1305State *)&copy, (uint8_t *)tag, POLY1305_TAG_SIZE));
+
+// Otherwise
+#else
 
 			// Append additional authenticated data length and encrypted data length
 			uint8_t lengths[sizeof(copy.additionalAuthenticatedDataLength) + sizeof(copy.dataLength)];
@@ -258,7 +354,7 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 			memcpy(&lengths[sizeof(copy.additionalAuthenticatedDataLength)], (uint8_t *)&copy.dataLength, sizeof(copy.dataLength));
 
 			// Update Poly1305 accumulator with the lengths
-			updatePoly1305Accumulator((struct ChaCha20Poly1305State *)&copy, lengths, sizeof(lengths));
+			updatePoly1305Accumulator((ChaCha20Poly1305State *)&copy, lengths, sizeof(lengths));
 
 			// Add Poly1305 s to the Poly1305 accumulator
 			cx_math_add((uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305Accumulator, (uint8_t *)copy.poly1305S, sizeof(copy.poly1305Accumulator));
@@ -268,19 +364,23 @@ void getChaCha20Poly1305Tag(const struct ChaCha20Poly1305State *chaCha20Poly1305
 
 			// Set tag to the Poly1305 accumulator
 			memcpy((uint8_t *)tag, (uint8_t *)copy.poly1305Accumulator, POLY1305_TAG_SIZE);
+#endif
 		}
 
 		// Finally
 		FINALLY {
 
 			// Clear the copy
-			explicit_bzero((struct ChaCha20Poly1305State *)&copy, sizeof(copy));
+			explicit_bzero((ChaCha20Poly1305State *)&copy, sizeof(copy));
 		}
 	}
 
 	// End try
 	END_TRY;
 }
+
+// Check if not using SDK's version of ChaCha20 Poly1305
+#ifndef HAVE_CHACHA_POLY
 
 // Quarter round
 void quarterRound(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d) {
@@ -311,7 +411,7 @@ void rotateLeft(uint32_t *value, const size_t bits) {
 }
 
 // Initialize ChaCha20 current state
-void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState) {
+void initializeChaCha20CurrentState(const ChaCha20Poly1305State *chaCha20Poly1305State, uint32_t *chaCha20CurrentState) {
 
 	// Set ChaCha20 current state as the ChaCha20 original state
 	memcpy(chaCha20CurrentState, chaCha20Poly1305State->chaCha20OriginalState, sizeof(chaCha20Poly1305State->chaCha20OriginalState));
@@ -331,7 +431,7 @@ void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20
 	}
 
 	// Go through all parts of the ChaCha20 current state
-	for(size_t i = 0; i < ARRAYLEN(chaCha20Poly1305State->chaCha20OriginalState); ++i) {
+	for(size_t i = 0; i < CHACHA20_STATE_SIZE; ++i) {
 
 		// Add ChaCha20 original state part to the ChaCha20 current state part
 		chaCha20CurrentState[i] += chaCha20Poly1305State->chaCha20OriginalState[i];
@@ -339,7 +439,7 @@ void initializeChaCha20CurrentState(const struct ChaCha20Poly1305State *chaCha20
 }
 
 // Update Poly1305 accumulator
-void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength) {
+void updatePoly1305Accumulator(ChaCha20Poly1305State *chaCha20Poly1305State, const uint8_t *value, const size_t valueLength) {
 
 	// Go through all blocks in the value
 	for(size_t i = 0; i <= valueLength / POLY1305_BLOCK_SIZE; ++i) {
@@ -368,3 +468,5 @@ void updatePoly1305Accumulator(struct ChaCha20Poly1305State *chaCha20Poly1305Sta
 		}
 	}
 }
+
+#endif
