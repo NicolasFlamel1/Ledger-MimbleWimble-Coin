@@ -2006,7 +2006,7 @@ void bulletproofUpdateCommitment(volatile uint8_t *commitment, const uint8_t *le
 			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, (uint8_t *)commitment, CX_SHA256_SIZE, NULL, 0));
 
 			// Set parity to if the part's y components aren't quadratic residue
-			const uint8_t parity = (!isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) << 1) | !isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]);
+			const uint8_t parity = (isQuadraticResidue(&leftPart[PUBLIC_KEY_COMPONENT_SIZE]) ? 0b00000000 : 0b00000010) | (isQuadraticResidue(&rightPart[PUBLIC_KEY_COMPONENT_SIZE]) ? 0b00000000 : 0b00000001);
 
 			// Add parity to the hash and throw error if it fails
 			CX_THROW(cx_hash_no_throw((cx_hash_t *)&hash, 0, &parity, sizeof(parity), NULL, 0));
