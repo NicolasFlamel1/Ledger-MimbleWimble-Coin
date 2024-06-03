@@ -182,7 +182,7 @@ bool isValidUtf8String(const char *text, const size_t length) {
 		}
 
 		// Otherwise check if UTF-8 code point is a non-overlong two byte character
-		else if(length >= 1 && i < length - 1 && text[i] >= 0xC2 && text[i] <= 0xDF && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF) {
+		else if(i < length - 1 && text[i] >= 0xC2 && text[i] <= 0xDF && text[i + 1] >= 0x80 && text[i + 1] <= 0xBF) {
 
 			// Go to next UTF-8 code point
 			i += 2;
