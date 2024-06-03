@@ -577,8 +577,13 @@ enum ResultTokens {
 
 // Global variables
 
+// Check if has BAGL
+#ifdef HAVE_BAGL
+
 // Progress bar
 static bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR) + 1];
+
+#endif
 
 
 // Function prototypes
