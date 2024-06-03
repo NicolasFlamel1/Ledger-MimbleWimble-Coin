@@ -575,6 +575,12 @@ enum ResultTokens {
 #endif
 
 
+// Global variables
+
+// Progress bar
+static bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR) + 1];
+
+
 // Function prototypes
 
 // Check if has BAGL
@@ -1159,32 +1165,25 @@ void showMenu(enum Menu menu) {
 // Show progress bar
 void showProgressBar(const uint8_t percent) {
 
+	// Clear the progress bar
+	explicit_bzero(progressBar, sizeof(progressBar));
+
+	// Include progress bar outline and text in the progress bar
+	memcpy(progressBar, PROGRESS_BAR, sizeof(PROGRESS_BAR));
+
 	// Get percent width
 	const short percentWidth = (BAGL_WIDTH - ((PROGRESS_BAR_PADDING + 1) * 2)) * percent / MAXIMUM_PROGRESS_BAR_PERCENT;
 
 	// Check if percent width exists
 	if(percentWidth) {
 
-		// Create progress bar with percent
-		bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR) + 1];
-		memcpy(progressBar, PROGRESS_BAR, sizeof(PROGRESS_BAR));
+		// Include progress bar percent in the progress bar
 		bagl_element_t progressBarPercent = {{BAGL_RECTANGLE, 0x00, PROGRESS_BAR_PADDING + 1, (BAGL_HEIGHT / 2) + 5 + ((percentWidth == 1) ? 1 : 0), percentWidth, PROGRESS_BAR_HEIGHT - ((percentWidth == 1) ? 2 : 0), 0, 1, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0}, NULL};
 		memcpy(&progressBar[ARRAYLEN(PROGRESS_BAR)], &progressBarPercent, sizeof(progressBarPercent));
-
-		// Display progress bar
-		UX_DISPLAY(progressBar, NULL);
 	}
 
-	// Otherwise
-	else {
-
-		// Display progress bar
-		bagl_element_t progressBar[ARRAYLEN(PROGRESS_BAR)];
-		memcpy(progressBar, PROGRESS_BAR, sizeof(PROGRESS_BAR));
-
-		// Display progress bar
-		UX_DISPLAY(progressBar, NULL);
-	}
+	// Display the progress bar
+	UX_DISPLAY(progressBar, NULL);
 
 	// Wait for display to update
 	UX_WAIT_DISPLAYED();
