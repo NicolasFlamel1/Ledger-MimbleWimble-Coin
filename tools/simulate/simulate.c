@@ -1,6 +1,7 @@
 // This file is used by the unit tests and fuzzers to provide replacement functions for those accessed by syscalls to the hardware wallet's operating system
 
 // Header files
+#include <sys/time.h>
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
