@@ -1,5 +1,5 @@
 // Header files
-#include "commands/start_transaction.h"
+#include "commands/get_address.h"
 #include "common.h"
 #include "menus.h"
 #include "process_requests.h"
@@ -18,7 +18,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, const size_t size) {
 	
 	// Copy data into APDU buffer
 	G_io_apdu_buffer[APDU_OFF_CLA] = REQUEST_CLASS;
-	G_io_apdu_buffer[APDU_OFF_INS] = START_TRANSACTION_INSTRUCTION;
+	G_io_apdu_buffer[APDU_OFF_INS] = GET_ADDRESS_INSTRUCTION;
 	G_io_apdu_buffer[APDU_OFF_P1] = (size > 0) ? data[0] : 0;
 	G_io_apdu_buffer[APDU_OFF_P2] = (size > 1) ? data[1] : 0;
 	G_io_apdu_buffer[APDU_OFF_LC] = MIN(sizeof(G_io_apdu_buffer) - APDU_OFF_DATA, (size > 2) ? size - 2 : 0);
@@ -30,10 +30,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, const size_t size) {
 		// Try
 		TRY {
 			
-			// Process start transaction request
+			// Process get address request
 			unsigned short responseLength = 0;
 			unsigned char responseFlags = 0;
-			processStartTransactionRequest(&responseLength, &responseFlags);
+			processGetAddressRequest(&responseLength, &responseFlags);
 		}
 
 		// Catch all errors

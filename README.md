@@ -105,9 +105,31 @@ make -C tests/unit_tests/build test
 ```
 
 ### Fuzzing
-Fuzzing for the app's start transaction command can be ran with the following commands:
+Fuzzers for all of the app's APDU commands can be ran with the following commands:
 ```
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -Bfuzzing/build -Hfuzzing/
 make -C fuzzing/build/
-./fuzzing/build/fuzz_start_transaction -max_len=255
+./fuzzing/build/fuzz_get_root_public_key -max_len=257
+./fuzzing/build/fuzz_get_address -max_len=257
+./fuzzing/build/fuzz_get_seed_cookie -max_len=257
+./fuzzing/build/fuzz_get_commitment -max_len=257
+./fuzzing/build/fuzz_get_bulletproof_components -max_len=257
+./fuzzing/build/fuzz_verify_root_public_key -max_len=257
+./fuzzing/build/fuzz_verify_address -max_len=257
+./fuzzing/build/fuzz_start_encrypting_slate -max_len=257
+./fuzzing/build/fuzz_continue_encrypting_slate -max_len=257
+./fuzzing/build/fuzz_finish_encrypting_slate -max_len=257
+./fuzzing/build/fuzz_start_decrypting_slate -max_len=257
+./fuzzing/build/fuzz_continue_decrypting_slate -max_len=257
+./fuzzing/build/fuzz_finish_decrypting_slate -max_len=257
+./fuzzing/build/fuzz_start_transaction -max_len=257
+./fuzzing/build/fuzz_continue_transaction_include_output -max_len=257
+./fuzzing/build/fuzz_continue_transaction_include_input -max_len=257
+./fuzzing/build/fuzz_continue_transaction_apply_offset -max_len=257
+./fuzzing/build/fuzz_continue_transaction_get_public_key -max_len=257
+./fuzzing/build/fuzz_continue_transaction_get_public_nonce -max_len=257
+./fuzzing/build/fuzz_continue_transaction_get_message_signature -max_len=257
+./fuzzing/build/fuzz_finish_transaction -max_len=257
+./fuzzing/build/fuzz_get_mqs_challenge_signature -max_len=257
+./fuzzing/build/fuzz_get_login_challenge_signature -max_len=257
 ```

@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <cmocka.h>
 #include "tor.h"
+#include "common.h"
 
 
 // Constants
@@ -41,11 +42,36 @@ int main(void) {
 // Test get Tor address from public key
 void testGetTorAddressFromPublicKey(void **state) {
 
-	// Get address from the public key
-	char address[TOR_ADDRESS_SIZE + sizeof((char)'\0')];
-	getTorAddressFromPublicKey(address, PUBLIC_KEY);
-	address[TOR_ADDRESS_SIZE] = '\0';
-	
-	// Assert address is correct
-	assert_string_equal(address, ADDRESS);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get address from the public key
+			char address[TOR_ADDRESS_SIZE + sizeof((char)'\0')];
+			getTorAddressFromPublicKey(address, PUBLIC_KEY);
+			address[TOR_ADDRESS_SIZE] = '\0';
+			
+			// Assert address is correct
+			assert_string_equal(address, ADDRESS);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }

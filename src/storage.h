@@ -31,8 +31,19 @@ struct PersistentStorage {
 
 // Constants
 
+// Check if fuzzing
+#ifdef FUZZING
+
+// Persistent storage
+extern struct PersistentStorage N_PERSISTENTSTORAGE;
+
+// Otherwise
+#else
+
 // Persistent storage
 extern const struct PersistentStorage N_PERSISTENTSTORAGE;
+
+#endif
 
 
 // Function prototypes

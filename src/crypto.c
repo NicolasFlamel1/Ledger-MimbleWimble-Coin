@@ -122,9 +122,6 @@ static void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile 
 // Is quadratic residue
 static bool isQuadraticResidue(const uint8_t *component);
 
-// Generator double point scalar multiply
-static void generatorDoublePointScalarMultiply(uint8_t *result, const size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
-
 // Compare big numbers
 static int compareBigNumbers(const uint8_t *firstValue, const uint8_t *secondValue, const size_t valueLength);
 

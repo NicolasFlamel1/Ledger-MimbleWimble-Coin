@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <cmocka.h>
 #include "base32.h"
+#include "common.h"
 
 
 // Constants
@@ -47,34 +48,84 @@ int main(void) {
 // Test encode
 void testEncode(void **state) {
 
-	// Get output length
-	const size_t outputLength = getBase32EncodedLength(sizeof(INPUT));
-	
-	// Assert output length is correct
-	assert_int_equal(outputLength, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Get output by encoding input
-	char output[outputLength + sizeof((char)'\0')];
-	base32Encode(output, INPUT, sizeof(INPUT));
-	output[outputLength] = '\0';
-	
-	// Assert output is correct
-	assert_string_equal(output, OUTPUT);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get output length
+			const size_t outputLength = getBase32EncodedLength(sizeof(INPUT));
+			
+			// Assert output length is correct
+			assert_int_equal(outputLength, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Get output by encoding input
+			char output[outputLength + sizeof((char)'\0')];
+			base32Encode(output, INPUT, sizeof(INPUT));
+			output[outputLength] = '\0';
+			
+			// Assert output is correct
+			assert_string_equal(output, OUTPUT);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test decode
 void testDecode(void **state) {
 
-	// Get input length
-	const size_t inputLength = getBase32DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Assert input length is correct
-	assert_int_equal(inputLength, sizeof(INPUT));
-	
-	// Get input by decoding output
-	uint8_t input[inputLength];
-	base32Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Assert input is correct
-	assert_memory_equal(input, INPUT, sizeof(INPUT));
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get input length
+			const size_t inputLength = getBase32DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Assert input length is correct
+			assert_int_equal(inputLength, sizeof(INPUT));
+			
+			// Get input by decoding output
+			uint8_t input[inputLength];
+			base32Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Assert input is correct
+			assert_memory_equal(input, INPUT, sizeof(INPUT));
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }

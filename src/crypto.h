@@ -178,5 +178,8 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 // Get login private key
 void getLoginPrivateKey(volatile cx_ecfp_private_key_t *loginPrivateKey, const uint32_t account);
 
+// Generator double point scalar multiply
+void generatorDoublePointScalarMultiply(uint8_t *result, const size_t index, const uint8_t *scalarOne, const uint8_t *scalarTwo);
+
 
 #endif

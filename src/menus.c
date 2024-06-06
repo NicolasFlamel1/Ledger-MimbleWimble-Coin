@@ -1194,8 +1194,8 @@ void showProgressBar(const uint8_t percent) {
 	UX_WAIT_DISPLAYED();
 }
 
-// Otherwise check if has NBGL
-#elif defined HAVE_NBGL
+// Otherwise
+#else
 
 // Show progress bar
 void showProgressBar(__attribute__((unused)) const uint8_t percent) {

@@ -2,7 +2,6 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <string.h>
 #include <cmocka.h>
 #include "common.h"
 
@@ -114,99 +113,274 @@ int main(void) {
 // Test swap endianness
 void testSwapEndianness(void **state) {
 
-	// Get big endian value by swapping little endian value
-	uint8_t bigEndianValue[sizeof(LITTLE_ENDIAN_VALUE)];
-	memcpy(bigEndianValue, LITTLE_ENDIAN_VALUE, sizeof(LITTLE_ENDIAN_VALUE));
-	swapEndianness(bigEndianValue, sizeof(bigEndianValue));
-	
-	// Assert big endian value is correct
-	assert_memory_equal(bigEndianValue, BIG_ENDIAN_VALUE, sizeof(BIG_ENDIAN_VALUE));
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get big endian value by swapping little endian value
+			uint8_t bigEndianValue[sizeof(LITTLE_ENDIAN_VALUE)];
+			memcpy(bigEndianValue, LITTLE_ENDIAN_VALUE, sizeof(LITTLE_ENDIAN_VALUE));
+			swapEndianness(bigEndianValue, sizeof(bigEndianValue));
+			
+			// Assert big endian value is correct
+			assert_memory_equal(bigEndianValue, BIG_ENDIAN_VALUE, sizeof(BIG_ENDIAN_VALUE));
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test to hex string
 void testToHexString(void **state) {
 
-	// Get hex string value by converting hex value to a string
-	char hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0')];
-	toHexString(hexStringValue, HEX_VALUE, sizeof(HEX_VALUE));
-	hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
-	
-	// Assert hex string value is correct
-	assert_string_equal(hexStringValue, HEX_STRING_VALUE);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get hex string value by converting hex value to a string
+			char hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE + sizeof((char)'\0')];
+			toHexString(hexStringValue, HEX_VALUE, sizeof(HEX_VALUE));
+			hexStringValue[sizeof(HEX_VALUE) * HEXADECIMAL_CHARACTER_SIZE] = '\0';
+			
+			// Assert hex string value is correct
+			assert_string_equal(hexStringValue, HEX_STRING_VALUE);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test to string
 void testToString(void **state) {
 
-	// Get string length
-	const size_t stringLength = getStringLength(NUMBER_VALUE);
-	
-	// Assert string length is correct
-	assert_int_equal(stringLength, sizeof(STRING_VALUE) - sizeof((char)'\0'));
+	// Begin try
+	BEGIN_TRY {
 
-	// Get string value by converting number value to a string
-	char stringValue[stringLength + sizeof((char)'\0')];
-	toString(stringValue, NUMBER_VALUE, 0);
-	stringValue[stringLength] = '\0';
-	
-	// Assert string value is correct
-	assert_string_equal(stringValue, STRING_VALUE);
+		// Try
+		TRY {
+
+			// Get string length
+			const size_t stringLength = getStringLength(NUMBER_VALUE);
+			
+			// Assert string length is correct
+			assert_int_equal(stringLength, sizeof(STRING_VALUE) - sizeof((char)'\0'));
+
+			// Get string value by converting number value to a string
+			char stringValue[stringLength + sizeof((char)'\0')];
+			toString(stringValue, NUMBER_VALUE, 0);
+			stringValue[stringLength] = '\0';
+			
+			// Assert string value is correct
+			assert_string_equal(stringValue, STRING_VALUE);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test is valid UTF-8 string
 void testIsValidUtf8String(void **state) {
 
-	// Get valid by checking if valid UTF-8 string is valid
-	const bool valid = isValidUtf8String(VALID_UTF8_STRING, sizeof(VALID_UTF8_STRING) - sizeof((char)'\0'));
-	
-	// Assert valid is correct
-	assert_true(valid);
-	
-	// Get invalid by checking if invalid UTF-8 string is valid
-	const bool invalid = isValidUtf8String(INVALID_UTF8_STRING, sizeof(INVALID_UTF8_STRING) - sizeof((char)'\0'));
-	
-	// Assert invalid is correct
-	assert_false(invalid);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get valid by checking if valid UTF-8 string is valid
+			const bool valid = isValidUtf8String(VALID_UTF8_STRING, sizeof(VALID_UTF8_STRING) - sizeof((char)'\0'));
+			
+			// Assert valid is correct
+			assert_true(valid);
+			
+			// Get invalid by checking if invalid UTF-8 string is valid
+			const bool invalid = isValidUtf8String(INVALID_UTF8_STRING, sizeof(INVALID_UTF8_STRING) - sizeof((char)'\0'));
+			
+			// Assert invalid is correct
+			assert_false(invalid);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test map
 void testMap(void **state) {
 
-	// Get mapped value
-	const uint8_t mappedValue = map(UNMAPPED_VALUE, 0, UNMAPPED_VALUE * 2, 0, UINT8_MAX);
-	
-	// Assert mapped value is correct
-	assert_int_equal(mappedValue, MAPPED_VALUE);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get mapped value
+			const uint8_t mappedValue = map(UNMAPPED_VALUE, 0, UNMAPPED_VALUE * 2, 0, UINT8_MAX);
+			
+			// Assert mapped value is correct
+			assert_int_equal(mappedValue, MAPPED_VALUE);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test is zero array secure
 void testIsZeroArraySecure(void **state) {
 
-	// Get is zero by checking if zero array is zero
-	const bool isZero = isZeroArraySecure(ZERO_ARRAY, sizeof(ZERO_ARRAY));
-	
-	// Assert is zero is correct
-	assert_true(isZero);
-	
-	// Get is not zero by checking if not zero array is zero
-	const bool isNotZero = isZeroArraySecure(NOT_ZERO_ARRAY, sizeof(NOT_ZERO_ARRAY));
-	
-	// Assert is not zero is correct
-	assert_false(isNotZero);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get is zero by checking if zero array is zero
+			const bool isZero = isZeroArraySecure(ZERO_ARRAY, sizeof(ZERO_ARRAY));
+			
+			// Assert is zero is correct
+			assert_true(isZero);
+			
+			// Get is not zero by checking if not zero array is zero
+			const bool isNotZero = isZeroArraySecure(NOT_ZERO_ARRAY, sizeof(NOT_ZERO_ARRAY));
+			
+			// Assert is not zero is correct
+			assert_false(isNotZero);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test is valid address
 void testIsValidAddress(void **state) {
 
-	// Get valid by checking if valid address is valid
-	const bool valid = isValidAddress(VALID_ADDRESS, sizeof(VALID_ADDRESS) - sizeof((char)'\0'));
-	
-	// Assert valid is correct
-	assert_true(valid);
-	
-	// Get invalid by checking if invalid address is valid
-	const bool invalid = isValidAddress(INVALID_ADDRESS, sizeof(INVALID_ADDRESS) - sizeof((char)'\0'));
-	
-	// Assert invalid is correct
-	assert_false(invalid);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get valid by checking if valid address is valid
+			const bool valid = isValidAddress(VALID_ADDRESS, sizeof(VALID_ADDRESS) - sizeof((char)'\0'));
+			
+			// Assert valid is correct
+			assert_true(valid);
+			
+			// Get invalid by checking if invalid address is valid
+			const bool invalid = isValidAddress(INVALID_ADDRESS, sizeof(INVALID_ADDRESS) - sizeof((char)'\0'));
+			
+			// Assert invalid is correct
+			assert_false(invalid);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }

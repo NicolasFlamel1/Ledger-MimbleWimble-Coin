@@ -5,8 +5,19 @@
 
 // Constants
 
+// Check if fuzzing
+#ifdef FUZZING
+
+// Persistent storage
+struct PersistentStorage N_PERSISTENTSTORAGE;
+
+// Otherwise
+#else
+
 // Persistent storage
 const struct PersistentStorage N_PERSISTENTSTORAGE;
+
+#endif
 
 
 // Supporting function implementation

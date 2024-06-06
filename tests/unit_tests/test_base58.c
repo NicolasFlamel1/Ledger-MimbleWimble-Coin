@@ -2,9 +2,9 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <string.h>
 #include <cmocka.h>
 #include "base58.h"
+#include "common.h"
 
 
 // Constants
@@ -66,74 +66,174 @@ int main(void) {
 // Test encode
 void testEncode(void **state) {
 
-	// Get output length
-	const size_t outputLength = getBase58EncodedLength(INPUT, sizeof(INPUT));
-	
-	// Assert output length is correct
-	assert_int_equal(outputLength, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Get output by encoding input
-	char output[outputLength + sizeof((char)'\0')];
-	base58Encode(output, INPUT, sizeof(INPUT));
-	output[outputLength] = '\0';
-	
-	// Assert output is correct
-	assert_string_equal(output, OUTPUT);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get output length
+			const size_t outputLength = getBase58EncodedLength(INPUT, sizeof(INPUT));
+			
+			// Assert output length is correct
+			assert_int_equal(outputLength, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Get output by encoding input
+			char output[outputLength + sizeof((char)'\0')];
+			base58Encode(output, INPUT, sizeof(INPUT));
+			output[outputLength] = '\0';
+			
+			// Assert output is correct
+			assert_string_equal(output, OUTPUT);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test decode
 void testDecode(void **state) {
 
-	// Get input length
-	const size_t inputLength = getBase58DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Assert input length is correct
-	assert_int_equal(inputLength, sizeof(INPUT));
-	
-	// Get input by decoding output
-	uint8_t input[inputLength];
-	base58Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
-	
-	// Assert input is correct
-	assert_memory_equal(input, INPUT, sizeof(INPUT));
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get input length
+			const size_t inputLength = getBase58DecodedLength(OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Assert input length is correct
+			assert_int_equal(inputLength, sizeof(INPUT));
+			
+			// Get input by decoding output
+			uint8_t input[inputLength];
+			base58Decode(input, OUTPUT, sizeof(OUTPUT) - sizeof((char)'\0'));
+			
+			// Assert input is correct
+			assert_memory_equal(input, INPUT, sizeof(INPUT));
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test encode with checksum
 void testEncodeWithChecksum(void **state) {
 
-	// Get output length
-	uint8_t temp[sizeof(INPUT) + BASE58_CHECKSUM_SIZE];
-	memcpy(temp, INPUT, sizeof(INPUT));
-	const size_t outputLength = getBase58EncodedLengthWithChecksum(temp, sizeof(INPUT));
-	
-	// Assert output length is correct
-	assert_int_equal(outputLength, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
-	
-	// Get output by encoding input
-	char output[outputLength + sizeof((char)'\0')];
-	base58EncodeWithChecksum(output, temp, sizeof(temp));
-	output[outputLength] = '\0';
-	
-	// Assert output is correct
-	assert_string_equal(output, OUTPUT_WITH_CHECKSUM);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get output length
+			uint8_t temp[sizeof(INPUT) + BASE58_CHECKSUM_SIZE];
+			memcpy(temp, INPUT, sizeof(INPUT));
+			const size_t outputLength = getBase58EncodedLengthWithChecksum(temp, sizeof(INPUT));
+			
+			// Assert output length is correct
+			assert_int_equal(outputLength, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
+			
+			// Get output by encoding input
+			char output[outputLength + sizeof((char)'\0')];
+			base58EncodeWithChecksum(output, temp, sizeof(temp));
+			output[outputLength] = '\0';
+			
+			// Assert output is correct
+			assert_string_equal(output, OUTPUT_WITH_CHECKSUM);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
 
 // Test decode with checksum
 void testDecodeWithChecksum(void **state) {
 
-	// Get input length
-	const size_t inputLength = getBase58DecodedLengthWithChecksum(OUTPUT_WITH_CHECKSUM, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
-	
-	// Assert input length is correct
-	assert_int_equal(inputLength - BASE58_CHECKSUM_SIZE, sizeof(INPUT));
-	
-	// Get input by decoding output
-	uint8_t input[inputLength];
-	base58DecodeWithChecksum(input, OUTPUT_WITH_CHECKSUM, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
-	
-	// Assert input is correct
-	assert_memory_equal(input, INPUT, sizeof(INPUT));
-	
-	// Assert input's checksum is correct
-	assert_memory_equal(&input[inputLength - BASE58_CHECKSUM_SIZE], CHECKSUM, sizeof(CHECKSUM));
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get input length
+			const size_t inputLength = getBase58DecodedLengthWithChecksum(OUTPUT_WITH_CHECKSUM, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
+			
+			// Assert input length is correct
+			assert_int_equal(inputLength - BASE58_CHECKSUM_SIZE, sizeof(INPUT));
+			
+			// Get input by decoding output
+			uint8_t input[inputLength];
+			base58DecodeWithChecksum(input, OUTPUT_WITH_CHECKSUM, sizeof(OUTPUT_WITH_CHECKSUM) - sizeof((char)'\0'));
+			
+			// Assert input is correct
+			assert_memory_equal(input, INPUT, sizeof(INPUT));
+			
+			// Assert input's checksum is correct
+			assert_memory_equal(&input[inputLength - BASE58_CHECKSUM_SIZE], CHECKSUM, sizeof(CHECKSUM));
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }

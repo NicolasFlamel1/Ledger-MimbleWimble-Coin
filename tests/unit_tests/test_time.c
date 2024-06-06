@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <cmocka.h>
 #include "time.h"
+#include "common.h"
 
 
 // Constants
@@ -60,15 +61,40 @@ int main(void) {
 // Test epoch to time
 void testEpochToTime(void **state) {
 
-	// Get time by converting epoch to time
-	struct Time time;
-	epochToTime(&time, EPOCH);
-	
-	// Assert time is correct
-	assert_int_equal(time.second, TIME.second);
-	assert_int_equal(time.minute, TIME.minute);
-	assert_int_equal(time.hour, TIME.hour);
-	assert_int_equal(time.day, TIME.day);
-	assert_int_equal(time.month, TIME.month);
-	assert_int_equal(time.year, TIME.year);
+	// Begin try
+	BEGIN_TRY {
+
+		// Try
+		TRY {
+
+			// Get time by converting epoch to time
+			struct Time time;
+			epochToTime(&time, EPOCH);
+			
+			// Assert time is correct
+			assert_int_equal(time.second, TIME.second);
+			assert_int_equal(time.minute, TIME.minute);
+			assert_int_equal(time.hour, TIME.hour);
+			assert_int_equal(time.day, TIME.day);
+			assert_int_equal(time.month, TIME.month);
+			assert_int_equal(time.year, TIME.year);
+		}
+
+		// Catch all errors
+		CATCH_ALL {
+
+			// Close try
+			CLOSE_TRY;
+
+			// Fail test
+			assert_true(false);
+		}
+
+		// Finally
+		FINALLY {
+		}
+	}
+
+	// End try
+	END_TRY;
 }
