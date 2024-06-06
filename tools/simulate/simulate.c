@@ -4,6 +4,7 @@
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
+#include <openssl/hmac.h>
 #include "common.h"
 #include "crypto.h"
 
@@ -812,7 +813,7 @@ cx_err_t cx_ecfp_scalar_mult_no_throw(cx_curve_t curve, uint8_t *P, const uint8_
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -920,7 +921,7 @@ cx_err_t cx_ecfp_add_point_no_throw(cx_curve_t curve, uint8_t *R, const uint8_t 
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -1069,7 +1070,7 @@ cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t curve, cx_ecfp_public_key_t *
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -1209,8 +1210,15 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type, const uint8_t *password, size_t pas
 	// Otherwise
 	#else
 	
-		// Return not ok
-		return !CX_OK;
+		// Check if deriving out failed
+		if(!PKCS5_PBKDF2_HMAC((const char *)password, passwordlen, salt, saltlen, iterations, EVP_sha512(), outLength, out)) {
+		
+			// Return not ok
+			return !CX_OK;
+		}
+		
+		// Return ok
+		return CX_OK;
 	#endif
 }
 
@@ -1395,7 +1403,7 @@ cx_err_t cx_ecpoint_init(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)), const u
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -1514,7 +1522,7 @@ cx_err_t cx_ecpoint_double_scalarmul(cx_ecpoint_t *R  PLENGTH(sizeof(cx_ecpoint_
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -1623,7 +1631,7 @@ cx_err_t cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), 
 	}
 	
 	// Check if creating group failed
-	EC_GROUP *group = EC_GROUP_new_by_curve_name_ex(NULL, NULL, NID_secp256k1);
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 	if(!group) {
 	
 		// Free memory
@@ -1725,7 +1733,7 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
 	}
 	
 	// Check if initializing context failed
-	if(!EVP_CipherInit_ex2(context, EVP_aes_256_cbc(), key->keys, NULL, (mode & CX_ENCRYPT) ? 1 : 0, NULL)) {
+	if(!EVP_CipherInit(context, EVP_aes_256_cbc(), key->keys, NULL, (mode & CX_ENCRYPT) ? 1 : 0)) {
 	
 		// Free context
 		EVP_CIPHER_CTX_free(context);
@@ -1830,9 +1838,49 @@ size_t cx_hmac_sha512(const uint8_t *key, size_t key_len, const uint8_t *in, siz
 	// Otherwise
 	#else
 	
-		// Return zero
-		return 0;
-	
+		// Check if creating context failed
+		HMAC_CTX *context = HMAC_CTX_new();
+		if(!context) {
+		
+			// Return zero
+			return 0;
+		}
+		
+		// Check if initializing context to use SHA-512 failed
+		if(!HMAC_Init_ex(context, key, key_len, EVP_sha512(), NULL)) {
+		
+			// Free memory
+			HMAC_CTX_free(context);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Check if including in to the MAC failed
+		if(!HMAC_Update(context, in, len)) {
+		
+			// Free memory
+			HMAC_CTX_free(context);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Check if setting MAC to the result failed
+		if(!HMAC_Final(context, mac, NULL)) {
+		
+			// Free memory
+			HMAC_CTX_free(context);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Free memory
+		HMAC_CTX_free(context);
+		
+		// Return length
+		return CX_SHA512_SIZE;
 	#endif
 }
 
