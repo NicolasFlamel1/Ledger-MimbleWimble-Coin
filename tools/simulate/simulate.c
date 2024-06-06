@@ -1,12 +1,18 @@
 // This file is used by the unit tests and fuzzers to provide replacement functions for those accessed by syscalls to the hardware wallet's operating system
 
 // Header files
-#include <openssl/core_names.h>
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
 #include "common.h"
 #include "crypto.h"
+
+// Check if using OpenSSL 3 or newer
+#if OPENSSL_VERSION_MAJOR >= 3
+
+	// Header files
+	#include <openssl/core_names.h>
+#endif
 
 
 // Global variables
@@ -1152,50 +1158,60 @@ cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t curve, cx_ecfp_public_key_t *
 // CX PBKDF2 no throw
 cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type, const uint8_t *password, size_t passwordlen, uint8_t *salt, size_t saltlen, uint32_t iterations, uint8_t *out, size_t outLength) {
 
-	// Check if creating key derivation failed
-	EVP_KDF *keyDerivation = EVP_KDF_fetch(NULL, "PBKDF2", NULL);
-	if(!keyDerivation) {
+	// Check if using OpenSSL 3 or newer
+	#if OPENSSL_VERSION_MAJOR >= 3
 	
-		// Return not ok
-		return !CX_OK;	
-	}
-	
-	// Check if creating context failed
-	EVP_KDF_CTX *context = EVP_KDF_CTX_new(keyDerivation);
-	if(!context) {
-	
-		// Free memory
-		EVP_KDF_free(keyDerivation);
+		// Check if creating key derivation failed
+		EVP_KDF *keyDerivation = EVP_KDF_fetch(NULL, "PBKDF2", NULL);
+		if(!keyDerivation) {
 		
-		// Return not ok
-		return !CX_OK;	
-	}
-	
-	// Check if deriving out failed
-	unsigned int iterationsInteger = iterations;
-	const OSSL_PARAM parameters[] = {
-		OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (uint8_t *)password, passwordlen),
-		OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, salt, saltlen),
-		OSSL_PARAM_construct_uint(OSSL_KDF_PARAM_ITER, &iterationsInteger),
-		OSSL_PARAM_utf8_string(OSSL_KDF_PARAM_DIGEST, "SHA-512", 0),
-		OSSL_PARAM_END
-	};
-	if(!EVP_KDF_derive(context, out, outLength, parameters)) {
-	
+			// Return not ok
+			return !CX_OK;	
+		}
+		
+		// Check if creating context failed
+		EVP_KDF_CTX *context = EVP_KDF_CTX_new(keyDerivation);
+		if(!context) {
+		
+			// Free memory
+			EVP_KDF_free(keyDerivation);
+			
+			// Return not ok
+			return !CX_OK;	
+		}
+		
+		// Check if deriving out failed
+		unsigned int iterationsInteger = iterations;
+		const OSSL_PARAM parameters[] = {
+			OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (uint8_t *)password, passwordlen),
+			OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, salt, saltlen),
+			OSSL_PARAM_construct_uint(OSSL_KDF_PARAM_ITER, &iterationsInteger),
+			OSSL_PARAM_utf8_string(OSSL_KDF_PARAM_DIGEST, "SHA-512", 0),
+			OSSL_PARAM_END
+		};
+		if(!EVP_KDF_derive(context, out, outLength, parameters)) {
+		
+			// Free memory
+			EVP_KDF_free(keyDerivation);
+			EVP_KDF_CTX_free(context);
+			
+			// Return not ok
+			return !CX_OK;
+		}
+		
 		// Free memory
 		EVP_KDF_free(keyDerivation);
 		EVP_KDF_CTX_free(context);
 		
+		// Return ok
+		return CX_OK;
+	
+	// Otherwise
+	#else
+	
 		// Return not ok
 		return !CX_OK;
-	}
-	
-	// Free memory
-	EVP_KDF_free(keyDerivation);
-	EVP_KDF_CTX_free(context);
-	
-	// Return ok
-	return CX_OK;
+	#endif
 }
 
 // CX Edwards compress point no throw
@@ -1745,68 +1761,79 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
 // CX HMAC SHA-512
 size_t cx_hmac_sha512(const uint8_t *key, size_t key_len, const uint8_t *in, size_t len, uint8_t *mac, size_t mac_len) {
 
-	// Check if creating MAC provider failed
-	EVP_MAC *macProvider = EVP_MAC_fetch(NULL, "HMAC", NULL);
-	if(!macProvider) {
+	// Check if using OpenSSL 3 or newer
+	#if OPENSSL_VERSION_MAJOR >= 3
 	
-		// Return zero
-		return 0;
-	}
-	
-	// Check if creating MAC context failed
-	EVP_MAC_CTX *macContext = EVP_MAC_CTX_new(macProvider);
-	if(!macContext) {
-	
-		// Free memory
-		EVP_MAC_free(macProvider);
+		// Check if creating MAC provider failed
+		EVP_MAC *macProvider = EVP_MAC_fetch(NULL, "HMAC", NULL);
+		if(!macProvider) {
 		
-		// Return zero
-		return 0;
-	}
-	
-	// Check if configuring MAC to use SHA-512 failed
-	const OSSL_PARAM macParameters[] = {
-		OSSL_PARAM_utf8_string(OSSL_MAC_PARAM_DIGEST, "SHA-512", 0),
-		OSSL_PARAM_END
-	};
-	if(!EVP_MAC_init(macContext, key, key_len, macParameters)) {
-	
-		// Free memory
+			// Return zero
+			return 0;
+		}
+		
+		// Check if creating MAC context failed
+		EVP_MAC_CTX *macContext = EVP_MAC_CTX_new(macProvider);
+		if(!macContext) {
+		
+			// Free memory
+			EVP_MAC_free(macProvider);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Check if configuring MAC to use SHA-512 failed
+		const OSSL_PARAM macParameters[] = {
+			OSSL_PARAM_utf8_string(OSSL_MAC_PARAM_DIGEST, "SHA-512", 0),
+			OSSL_PARAM_END
+		};
+		if(!EVP_MAC_init(macContext, key, key_len, macParameters)) {
+		
+			// Free memory
+			EVP_MAC_CTX_free(macContext);
+			EVP_MAC_free(macProvider);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Check if including in to the MAC failed
+		if(!EVP_MAC_update(macContext, in, len)) {
+		
+			// Free memory
+			EVP_MAC_CTX_free(macContext);
+			EVP_MAC_free(macProvider);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Check if setting MAC to the result failed
+		if(!EVP_MAC_final(macContext, mac, NULL, CX_SHA512_SIZE)) {
+		
+			// Free memory
+			EVP_MAC_CTX_free(macContext);
+			EVP_MAC_free(macProvider);
+			
+			// Return zero
+			return 0;
+		}
+		
+		// Free MAC context
 		EVP_MAC_CTX_free(macContext);
 		EVP_MAC_free(macProvider);
 		
+		// Return length
+		return CX_SHA512_SIZE;
+	
+	// Otherwise
+	#else
+	
 		// Return zero
 		return 0;
-	}
 	
-	// Check if including in to the MAC failed
-	if(!EVP_MAC_update(macContext, in, len)) {
-	
-		// Free memory
-		EVP_MAC_CTX_free(macContext);
-		EVP_MAC_free(macProvider);
-		
-		// Return zero
-		return 0;
-	}
-	
-	// Check if setting MAC to the result failed
-	if(!EVP_MAC_final(macContext, mac, NULL, CX_SHA512_SIZE)) {
-	
-		// Free memory
-		EVP_MAC_CTX_free(macContext);
-		EVP_MAC_free(macProvider);
-		
-		// Return zero
-		return 0;
-	}
-	
-	// Free MAC context
-	EVP_MAC_CTX_free(macContext);
-	EVP_MAC_free(macProvider);
-	
-	// Return length
-	return CX_SHA512_SIZE;
+	#endif
 }
 
 // CX RNG no throw
