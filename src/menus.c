@@ -39,20 +39,6 @@
 	#define PROGRESS_BAR_HEIGHT 12
 #endif
 
-// Check if QR code image isn't defined
-#ifndef C_QRCode_32px
-
-	// Define QR code image
-	#define C_QRCode_32px C_QRcode32px
-#endif
-
-// Check if close image isn't defined
-#ifndef C_Close_32px
-
-	// Define close image
-	#define C_Close_32px C_cross32px
-#endif
-
 
 // Global variables
 
