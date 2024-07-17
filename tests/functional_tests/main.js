@@ -589,7 +589,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -618,9 +618,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
@@ -1038,7 +1038,7 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -1193,7 +1193,7 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 								// Touch
 								["finger", 100, 500, false],
 								["finger", 100, 500, true],
-								["finger", 400, 500, false]
+								["finger", 200, 500, false]
 							]
 						},
 						{
@@ -2282,7 +2282,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -2311,9 +2311,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
@@ -2997,7 +2997,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -3026,9 +3026,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
@@ -3239,7 +3239,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -3268,9 +3268,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
@@ -3458,7 +3458,7 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -3487,9 +3487,9 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
@@ -3688,7 +3688,7 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 							// Touch
 							["finger", 100, 500, false],
 							["finger", 100, 500, true],
-							["finger", 400, 500, false]
+							["finger", 200, 500, false]
 						]
 					},
 					{
@@ -3717,9 +3717,9 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 450, 570, false],
-							["finger", 450, 570, true],
-							["finger", 450, 570, false]
+							["finger", 399, 586, false],
+							["finger", 399, 586, true],
+							["finger", 399, 586, false]
 						]
 					},
 					{
