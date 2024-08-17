@@ -16,12 +16,19 @@ sudo apt install libc6-dev gcc-multilib g++-multilib
 ```
 Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, and/or Ledger Flex SDK:
 ```
-git clone https://github.com/LedgerHQ/nanos-secure-sdk.git
+git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
+mv ledger-secure-sdk nanos-secure-sdk
+cd nanos-secure-sdk
+git checkout nanos_2.1.0
+git checkout API_LEVEL_LNS
+git pull
+echo nanos > .target
+cd ..
 
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanox-secure-sdk
 cd nanox-secure-sdk
-git checkout nanox_2.2.3
+git checkout nanox_2.2.4
 git checkout API_LEVEL_5
 git pull
 echo nanox > .target
@@ -30,7 +37,7 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanosplus-secure-sdk
 cd nanosplus-secure-sdk
-git checkout nanos+_1.1.1
+git checkout nanos+_1.1.2
 git checkout API_LEVEL_5
 git pull
 echo nanos2 > .target
@@ -39,8 +46,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk stax-secure-sdk
 cd stax-secure-sdk
-git checkout stax_1.4.0-rc2
-git checkout API_LEVEL_15
+git checkout stax_1.5.0
+git checkout API_LEVEL_21
 git pull
 echo stax > .target
 cd ..
@@ -48,8 +55,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk flex-secure-sdk
 cd flex-secure-sdk
-git checkout flex_0.2.0-rc2
-git checkout API_LEVEL_18
+git checkout flex_1.1.1
+git checkout API_LEVEL_21
 git pull
 echo flex > .target
 cd ..

@@ -13,8 +13,8 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Application version
 APPVERSION_M = 7
-APPVERSION_N = 4
-APPVERSION_P = 1
+APPVERSION_N = 5
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Emulator flags
@@ -528,6 +528,8 @@ include $(BOLOS_SDK)/Makefile.glyphs
 # Compiler settings
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
+APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c $(BOLOS_SDK)/lib_cxng/src/cx_hkdf.c
 
 # Check if target is the Nano S
 ifeq ($(TARGET_NAME),TARGET_NANOS)

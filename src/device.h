@@ -5,7 +5,8 @@
 
 // Header files
 #include <libcxng.h>
-#include <../src/cx_hkdf.h>
+#include <cx_blake2.h>
+#include <cx_hkdf.h>
 
 // Check if performing unit tests or fuzzing
 #if defined UNIT_TESTS || defined FUZZING
