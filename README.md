@@ -3,7 +3,7 @@
 ### Description
 MimbleWimble Coin (MWC) app for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets.
 
-This app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+Ledger's signed and approved version of this app can be installed onto all Ledger hardware wallets from within [Ledger Live](https://www.ledger.com/ledger-live). Otherwise this app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, and Ledger Flex hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
@@ -55,7 +55,7 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk flex-secure-sdk
 cd flex-secure-sdk
-git checkout flex_1.1.0
+git checkout flex_1.1.1
 git checkout API_LEVEL_21
 git pull
 echo flex > .target
