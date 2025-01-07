@@ -330,6 +330,22 @@
 				// Catch errors
 				catch(error) {
 				
+					// Log stack trace
+					console.trace();
+					
+					// Log error
+					console.log(error);
+					
+					// Check if capture stack trace exists
+					if(typeof Error.captureStackTrace === "function") {
+					
+						// Captrue stack trace
+						Error.captureStackTrace(error);
+					}
+					
+					// Log stack
+					console.log(error.stack);
+					
 					// Add alert
 					addAlert(error);
 					
@@ -346,6 +362,9 @@
 						// Add alert
 						addAlert("There's not enough space available on the " + walletName + ". Uninstall one or more apps from the hardware wallet to install this app.");
 					}
+					
+					// Add alert
+					addAlert(error.stack);
 					
 					// Add alert
 					addAlert("Installing the app failed.");
