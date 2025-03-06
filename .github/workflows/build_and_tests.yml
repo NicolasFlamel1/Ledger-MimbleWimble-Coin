@@ -19,7 +19,7 @@ jobs:
           make DEBUG=1 CURRENCY=mimblewimble_coin
 
       - name: Upload Nano S MimbleWimble Coin app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanos
           path: bin
@@ -34,7 +34,7 @@ jobs:
           make DEBUG=1 CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano S MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanos
           path: bin
@@ -49,7 +49,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Nano X MimbleWimble Coin app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanox
           path: bin
@@ -64,7 +64,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano X MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanox
           path: bin
@@ -79,7 +79,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Nano S Plus MimbleWimble Coin app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanosplus
           path: bin
@@ -94,7 +94,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano S Plus MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanosplus
           path: bin
@@ -109,7 +109,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Stax MimbleWimble Coin app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-stax
           path: bin
@@ -124,7 +124,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Stax MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-stax
           path: bin
@@ -139,7 +139,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$FLEX_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Flex MimbleWimble Coin app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-flex
           path: bin
@@ -154,7 +154,7 @@ jobs:
           make DEBUG=1 BOLOS_SDK=$FLEX_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Flex MimbleWimble Coin floonet app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-flex
           path: bin
@@ -179,7 +179,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -194,7 +194,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -209,7 +209,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -224,7 +224,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$NANOX_SDK CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -239,7 +239,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -254,7 +254,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$NANOSP_SDK CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -269,7 +269,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -284,7 +284,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$STAX_SDK CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -299,7 +299,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$FLEX_SDK CURRENCY=mimblewimble_coin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -314,7 +314,7 @@ jobs:
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$FLEX_SDK CURRENCY=mimblewimble_coin_floonet
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: scan-build
@@ -367,7 +367,7 @@ jobs:
           npm i @ledgerhq/hw-transport-node-speculos
 
       - name: Download Nano S MimbleWimble Coin app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanos
           path: bin-mimblewimble-coin-nanos
@@ -383,7 +383,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin speculos nanos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-nanos-log
@@ -394,7 +394,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanos
           path: bin-mimblewimble-coin-floonet-nanos
@@ -410,7 +410,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-nanos-log
@@ -421,7 +421,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X MimbleWimble Coin app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanox
           path: bin-mimblewimble-coin-nanox
@@ -437,7 +437,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin speculos nanox
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-nanox-log
@@ -448,7 +448,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanox
           path: bin-mimblewimble-coin-floonet-nanox
@@ -464,7 +464,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-nanox-log
@@ -475,7 +475,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S Plus MimbleWimble Coin app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-nanosplus
           path: bin-mimblewimble-coin-nanosplus
@@ -491,7 +491,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin speculos nanosp
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-nanosplus-log
@@ -502,7 +502,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano S Plus MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-nanosplus
           path: bin-mimblewimble-coin-floonet-nanosplus
@@ -518,7 +518,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanosp
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-nanosplus-log
@@ -529,7 +529,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Stax MimbleWimble Coin app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-stax
           path: bin-mimblewimble-coin-stax
@@ -545,7 +545,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin speculos stax
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-stax-log
@@ -556,7 +556,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Stax MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-stax
           path: bin-mimblewimble-coin-floonet-stax
@@ -572,7 +572,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos stax
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-stax-log
@@ -583,7 +583,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Flex MimbleWimble Coin app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-flex
           path: bin-mimblewimble-coin-flex
@@ -599,7 +599,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin speculos flex
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-flex-log
@@ -610,7 +610,7 @@ jobs:
           kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Flex MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-flex
           path: bin-mimblewimble-coin-floonet-flex
@@ -626,7 +626,7 @@ jobs:
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos flex
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: speculos-mimblewimble-coin-floonet-flex-log
