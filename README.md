@@ -28,8 +28,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanox-secure-sdk
 cd nanox-secure-sdk
-git checkout nanox_2.4.2
-git checkout API_LEVEL_22
+git checkout nanox_2.5.0
+git checkout API_LEVEL_24
 git pull
 echo nanox > .target
 cd ..
@@ -37,8 +37,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanosplus-secure-sdk
 cd nanosplus-secure-sdk
-git checkout nanos+_1.3.2
-git checkout API_LEVEL_22
+git checkout nanos+_1.4.0
+git checkout API_LEVEL_24
 git pull
 echo nanos2 > .target
 cd ..
@@ -46,8 +46,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk stax-secure-sdk
 cd stax-secure-sdk
-git checkout stax_1.6.2
-git checkout API_LEVEL_22
+git checkout stax_1.8.0
+git checkout API_LEVEL_24
 git pull
 echo stax > .target
 cd ..
@@ -55,8 +55,8 @@ cd ..
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk flex-secure-sdk
 cd flex-secure-sdk
-git checkout flex_1.2.2
-git checkout API_LEVEL_22
+git checkout flex_1.4.0
+git checkout API_LEVEL_24
 git pull
 echo flex > .target
 cd ..
