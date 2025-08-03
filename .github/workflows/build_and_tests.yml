@@ -338,7 +338,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apk add --update-cache openssl-dev
+          apt update -q && apt install -qy libssl-dev
 
       - name: Build unit tests
         run: |
