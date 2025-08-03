@@ -16,7 +16,7 @@ jobs:
 
       - name: Build Nano S MimbleWimble Coin app
         run: |
-          make DEBUG=1 CURRENCY=mimblewimble_coin
+          make DEBUG=1 BOLOS_SDK=$NANOS_SDK CURRENCY=mimblewimble_coin
 
       - name: Upload Nano S MimbleWimble Coin app
         uses: actions/upload-artifact@v4
@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Nano S MimbleWimble Coin floonet app
         run: |
-          make DEBUG=1 CURRENCY=mimblewimble_coin_floonet
+          make DEBUG=1 BOLOS_SDK=$NANOS_SDK CURRENCY=mimblewimble_coin_floonet
 
       - name: Upload Nano S MimbleWimble Coin floonet app
         uses: actions/upload-artifact@v4
@@ -342,7 +342,7 @@ jobs:
 
       - name: Build unit tests
         run: |
-          cmake -Btests/unit_tests/build -Htests/unit_tests/ && make -C tests/unit_tests/build/
+          BOLOS_SDK=$NANOS_SDK cmake -Btests/unit_tests/build -Htests/unit_tests/ && make -C tests/unit_tests/build/
 
       - name: Run unit tests
         run: |
