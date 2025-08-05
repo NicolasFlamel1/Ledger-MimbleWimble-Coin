@@ -39,13 +39,13 @@
 #else
 
 	// Verify address line buffer size
-	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE sizeof("Verify Tor")
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE		 sizeof("Verify Tor")
 
 	// Approve transaction line buffer size
 	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive")
 
 	// Sign challenge line buffer size
-	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE sizeof("Sign MQS")
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE		 sizeof("Sign MQS")
 #endif
 
 // Amount line buffer size
