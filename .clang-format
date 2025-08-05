@@ -6,7 +6,7 @@ Language: Cpp
 ColumnLimit: 0
 PointerAlignment: Right
 AlignAfterOpenBracket: Align
-AlignConsecutiveMacros: true
+AlignConsecutiveMacros: false
 SortIncludes: false
 SpaceAfterCStyleCast: false
 AllowShortCaseLabelsOnASingleLine: false
