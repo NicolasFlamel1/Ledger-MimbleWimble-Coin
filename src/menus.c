@@ -545,6 +545,19 @@ static const char *const ABOUT_MENU_INFO_TYPES[] = {"Version"};
 // About menu info contents
 static const char *const ABOUT_MENU_INFO_CONTENTS[] = {APPVERSION};
 
+// About menu info list
+static const nbgl_contentInfoList_t ABOUT_MENU_INFO_LIST = {
+
+	// Number of infos
+	.nbInfos = ARRAYLEN(ABOUT_MENU_INFO_TYPES),
+
+	// Info types
+	.infoTypes = ABOUT_MENU_INFO_TYPES,
+
+	// Info contents
+	.infoContents = ABOUT_MENU_INFO_CONTENTS
+};
+
 // Result tokens
 enum ResultTokens {
 
@@ -582,12 +595,6 @@ static unsigned int progressBar_button(const unsigned int buttonMask, const unsi
 
 // Otherwise check if has NBGL
 #elif defined HAVE_NBGL
-
-// Show about menu
-static void showAboutMenu(void);
-
-// About menu display callback
-static bool aboutMenuDisplayCallback(const uint8_t page, nbgl_pageContent_t *content);
 
 // Export root public key menu continue callback
 static void exportRootPublicKeyMenuContinueCallback(void);
@@ -1079,7 +1086,7 @@ void showMenu(enum Menu menu) {
 		case MAIN_MENU:
 
 			// Show main menu
-			nbgl_useCaseHome(CURRENCY_NAME, &CURRENCY_ICON_DETAILS, "Application is ready", false, showAboutMenu, exitApplication);
+			nbgl_useCaseHomeAndSettings(CURRENCY_NAME, &CURRENCY_ICON_DETAILS, "Application is ready", INIT_HOME_PAGE, NULL, &ABOUT_MENU_INFO_LIST, NULL, exitApplication);
 
 			// Break
 			break;
@@ -1201,26 +1208,6 @@ unsigned int progressBar_button(__attribute__((unused)) const unsigned int butto
 
 // Otherwise check if has NBGL
 #elif defined HAVE_NBGL
-
-// Show about menu
-void showAboutMenu(void) {
-
-	// Show about menu
-	nbgl_useCaseSettings(CURRENCY_NAME, 0, 1, false, showMainMenu, aboutMenuDisplayCallback, NULL);
-}
-
-// About menu display callback
-bool aboutMenuDisplayCallback(__attribute__((unused)) const uint8_t page, nbgl_pageContent_t *content) {
-
-	// Set content to use about menu info
-	content->type = INFOS_LIST;
-	content->infosList.nbInfos = ARRAYLEN(ABOUT_MENU_INFO_TYPES);
-	content->infosList.infoTypes = (const char **)ABOUT_MENU_INFO_TYPES;
-	content->infosList.infoContents = (const char **)ABOUT_MENU_INFO_CONTENTS;
-
-	// Return true
-	return true;
-}
 
 // Export root public key menu continue callback
 void exportRootPublicKeyMenuContinueCallback(void) {
