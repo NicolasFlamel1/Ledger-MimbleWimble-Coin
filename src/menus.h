@@ -40,13 +40,13 @@
 #else
 
 	// Verify address line buffer size
-	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE MAX(sizeof("Verify Slatepack"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
+	#define VERIFY_ADDRESS_LINE_BUFFER_SIZE		 MAX(sizeof("Verify Slatepack"), sizeof("Verify ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
 
 	// Approve transaction line buffer size
 	#define APPROVE_TRANSACTION_LINE_BUFFER_SIZE sizeof("Receive")
 
 	// Sign challenge line buffer size
-	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
+	#define SIGN_CHALLENGE_LINE_BUFFER_SIZE		 (sizeof("Sign ") - sizeof((char)'\0') + sizeof(CURRENCY_MQS_NAME))
 #endif
 
 // Amount line buffer size
