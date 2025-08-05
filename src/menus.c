@@ -555,8 +555,7 @@ static const nbgl_contentInfoList_t ABOUT_MENU_INFO_LIST = {
 	.infoTypes = ABOUT_MENU_INFO_TYPES,
 
 	// Info contents
-	.infoContents = ABOUT_MENU_INFO_CONTENTS
-};
+	.infoContents = ABOUT_MENU_INFO_CONTENTS};
 
 // Result tokens
 enum ResultTokens {
