@@ -7,7 +7,6 @@ ColumnLimit: 0
 PointerAlignment: Right
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: true
-AllowAllParametersOfDeclarationOnNextLine: false
 SortIncludes: false
 SpaceAfterCStyleCast: false
 AllowShortCaseLabelsOnASingleLine: false
@@ -23,5 +22,4 @@ MaxEmptyLinesToKeep: 2
 SpaceBeforeParens: Never
 KeepEmptyLinesAtTheStartOfBlocks: true
 IndentPPDirectives: BeforeHash
-AlignConsecutiveMacros: false
 ---
