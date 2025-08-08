@@ -88,6 +88,14 @@ APP_SOURCE_PATH += src
 INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
 APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c
 
+# Check if target isn't the Nano S (The Ledger Nano S SDK doesn't include support for ChaCha20 Poly1305)
+ifneq ($(TARGET_NAME),TARGET_NANOS)
+
+	# Application source files
+	APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_chacha.c $(BOLOS_SDK)/lib_cxng/src/cx_poly1305.c $(BOLOS_SDK)/lib_cxng/src/cx_chacha_poly.c
+	DEFINES += HAVE_CHACHA HAVE_POLY1305 HAVE_CHACHA_POLY
+endif
+
 # Variants
 VARIANT_PARAM = CURRENCY
 VARIANT_VALUES = mimblewimble_coin mimblewimble_coin_floonet
@@ -113,6 +121,9 @@ ifneq ($(TARGET_VERSION),)
 	# SDK emulator flag
 	EMULATOR_FLAGS += --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION))))
 endif
+
+# Make command
+all: default
 
 # Run command
 run: all
