@@ -5,27 +5,14 @@ ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
 
-# Include BOLOS SDK Makefile defines
-include $(BOLOS_SDK)/Makefile.defines
-
-# Application parameters
-APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
+# Include BOLOS SDK Makefile target
+include $(BOLOS_SDK)/Makefile.target
 
 # Application version
 APPVERSION_M = 7
 APPVERSION_N = 5
 APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
-
-# Emulator flags
-EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-
-# Check if target version is defined
-ifneq ($(TARGET_VERSION),)
-
-	# SDK emulator flag
-	EMULATOR_FLAGS += --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION))))
-endif
 
 # Check if currency isn't defined
 ifndef CURRENCY
@@ -41,7 +28,8 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	APPNAME = "MimbleWimble Coin"
 
 	# 44'/593' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/593'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/593'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=593
@@ -57,22 +45,16 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_MQS_NAME=\"MQS\"
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_FLEX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	endif
@@ -87,7 +69,8 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	APPNAME = "MimbleWimble Coin Floonet"
 
 	# 44'/1' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/1'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
@@ -103,22 +86,16 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_MQS_NAME=\"MQS\"
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_FLEX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin
 	endif
@@ -133,7 +110,8 @@ else ifeq ($(CURRENCY),grin)
 	APPNAME = "Grin"
 
 	# 44'/592' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/592'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/592'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=592
@@ -148,22 +126,16 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=SLATEPACK_SLATE_ENCRYPTION
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_FLEX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
 	endif
@@ -178,7 +150,8 @@ else ifeq ($(CURRENCY),grin_testnet)
 	APPNAME = "Grin Testnet"
 
 	# 44'/1' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/1'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
@@ -193,22 +166,16 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_SUPPORTED_SLATE_ENCRYPTION_TYPES=SLATEPACK_SLATE_ENCRYPTION
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_Flex)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin
 	endif
@@ -223,7 +190,8 @@ else ifeq ($(CURRENCY),epic_cash)
 	APPNAME = "Epic Cash"
 
 	# 44'/23000' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/23000'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/23000'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=23000
@@ -238,22 +206,16 @@ else ifeq ($(CURRENCY),epic_cash)
 	DEFINES += CURRENCY_MQS_NAME=\"Epicbox\"
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\"
 	DEFINES += CURRENCY_ABBREVIATION=\"EPIC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_FLEX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
 	endif
@@ -268,7 +230,8 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	APPNAME = "Epic Cash Floonet"
 
 	# 44'/1' path on secp256k1 curve
-	APP_LOAD_PARAMS += --curve secp256k1 --path "44'/1'"
+	CURVE_APP_LOAD_PARAMS = secp256k1
+	PATH_APP_LOAD_PARAMS = "44'/1'"
 
 	# Defines
 	DEFINES += CURRENCY_BIP44_COIN_TYPE=1
@@ -283,22 +246,16 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	DEFINES += CURRENCY_MQS_NAME=\"Epicbox\"
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20\\x45PIC\"
-	
-	# Check if target is the Stax
-	ifeq ($(TARGET_NAME),TARGET_STAX)
-	
+
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
-	# Otherwise check if target is the Flex
-	else ifeq ($(TARGET_NAME),TARGET_FLEX)
-	
-		# Defines
-		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
-	
+
 	# Otherwise
 	else
-	
+
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash
 	endif
@@ -313,273 +270,56 @@ else
 $(error Unsupported CURRENCY - use mimblewimble_coin, mimblewimble_coin_floonet, grin, grin_testnet, epic_cash, or epic_cash_floonet)
 endif
 
-# Check if target is the Nano X
-ifeq ($(TARGET_NAME),TARGET_NANOX)
+# Defines
+DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
-	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-	APP_LOAD_PARAMS += --appFlags 0x200
+# Icons
+ICON_NANOS = "icons/$(ICON)/nanos_app.gif"
+ICON_NANOX = "icons/$(ICON)/nanox_app.gif"
+ICON_NANOSP = "icons/$(ICON)/nanosplus_app.gif"
+ICON_STAX = "icons/$(ICON)/stax_app.png"
+ICON_FLEX = "icons/$(ICON)/flex_app.png"
 
-# Otherwise check if target is the Stax
-else ifeq ($(TARGET_NAME),TARGET_STAX)
+# Application source files
+APP_SOURCE_PATH += src
+INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
+APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c $(BOLOS_SDK)/lib_cxng/src/cx_hkdf.c
 
-	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-	APP_LOAD_PARAMS += --appFlags 0x200
+# Variants
+VARIANT_PARAM = CURRENCY
+VARIANT_VALUES = mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet epic_cash epic_cash_floonet
 
-# Otherwise check if target is the Flex
-else ifeq ($(TARGET_NAME),TARGET_FLEX)
+# Enable features
+ENABLE_BLUETOOTH = 1
+ENABLE_NBGL_QRCODE = 1
 
-	# APPLICATION_FLAG_BOLOS_SETTINGS application flags for Bluetooth
-	APP_LOAD_PARAMS += --appFlags 0x200
+# Check if debug isn't set
+ifneq ($(DEBUG),1)
 
-# Otherwise
-else
-
-	# No application flags
-	APP_LOAD_PARAMS += --appFlags 0x000
+	# Enable features
+	ENABLE_PENDING_REVIEW_SCREEN = 1
 endif
 
-# Check if target is the Nano S
-ifeq ($(TARGET_NAME),TARGET_NANOS)
+# Check if BOLOS ENV is defined
+ifneq ($(BOLOS_ENV),)
 
-	# Icon name
-	ICONNAME="icons/$(ICON)/nanos_app.gif"
+	# Set compiler paths
+	CLANGPATH = $(BOLOS_ENV)/clang-arm-fropi/bin/
+	GCCPATH = $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
+endif
 
-# Otherwise check if target is the Nano X
-else ifeq ($(TARGET_NAME),TARGET_NANOX)
+# Emulator flags
+EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
-	# Icon name
-	ICONNAME="icons/$(ICON)/nanox_app.gif"
+# Check if target version is defined
+ifneq ($(TARGET_VERSION),)
 
-# Otherwise check if target is the Nano S Plus
-else ifeq ($(TARGET_NAME),TARGET_NANOS2)
-
-	# Icon name
-	ICONNAME="icons/$(ICON)/nanosplus_app.gif"
-
-# Otherwise check if target is the Stax
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-	# Icon name
-	ICONNAME="icons/$(ICON)/stax_app.png"
-
-# Otherwise check if target is the Flex
-else ifeq ($(TARGET_NAME),TARGET_FLEX)
-
-	# Icon name
-	ICONNAME="icons/$(ICON)/flex_app.png"
+	# SDK emulator flag
+	EMULATOR_FLAGS += --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION))))
 endif
 
 # Make command
 all: default
-
-# Defines
-DEFINES += APPVERSION=\"$(APPVERSION)\"
-DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
-DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_SPRINTF
-DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-DEFINES += USB_SEGMENT_SIZE=64
-DEFINES += BLE_SEGMENT_SIZE=32
-DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-
-# Check if target is the Nano X
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-	# Target specific defines
-	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-
-# Otherwise check if target is the Stax
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-	# Target specific defines
-	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-
-# Otherwise check if target is the Flex
-else ifeq ($(TARGET_NAME),TARGET_FLEX)
-
-	# Target specific defines
-	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-endif
-
-# Check if target is the Nano S
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-
-	# Target specific defines
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-
-# Otherwise
-else
-
-	# Target specific defines
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-endif
-
-# Check if target is the Stax
-ifeq ($(TARGET_NAME),TARGET_STAX)
-
-	# Target specific defines
-	DEFINES += NBGL_QRCODE
-	SDK_SOURCE_PATH += qrcode
-
-# Otherwise check if target is the Flex
-else ifeq ($(TARGET_NAME),TARGET_FLEX)
-
-	# Target specific defines
-	DEFINES += NBGL_QRCODE
-	SDK_SOURCE_PATH += qrcode
-
-# Otherwise
-else
-
-	# Target specific defines
-	DEFINES += HAVE_BAGL HAVE_UX_FLOW
-	
-	# Check if target isn't the nano S
-	ifneq ($(TARGET_NAME),TARGET_NANOS)
-	
-		# Target specific defines
-		DEFINES += HAVE_GLO096
-		DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
-		DEFINES += HAVE_BAGL_ELLIPSIS
-		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-	endif
-endif
-
-# Set debug
-DEBUG = 0
-
-# Check if debug is set
-ifneq ($(DEBUG),0)
-
-	# Define printf
-	DEFINES += HAVE_PRINTF
-
-	# Check if target is the Nano S
-	ifeq ($(TARGET_NAME),TARGET_NANOS)
-
-		# Define target specific printf
-		DEFINES += PRINTF=screen_printf
-
-	# Otherwise
-	else
-
-		# Define target specific printf
-		DEFINES += PRINTF=mcu_usb_printf
-	endif
-
-# Otherwise
-else
-
-	# Define printf as nothing
-	DEFINES += PRINTF\(...\)=
-	
-	# Add security review banner. To be removed once Ledger security review is done.
-	APP_LOAD_PARAMS += --tlvraw 9F:01
-	DEFINES += HAVE_PENDING_REVIEW_SCREEN
-endif
-
-# Define stack canary
-DEFINES += HAVE_BOLOS_APP_STACK_CANARY
-
-# Check if BOLOS environment is defined
-ifneq ($(BOLOS_ENV),)
-
-# Display message
-$(info BOLOS_ENV=$(BOLOS_ENV))
-
-	# Set compiler paths
-	CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-	GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi/bin/
-
-# Otherwise
-else
-
-# Display message
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
-endif
-
-# Check if Clang path isn't defined
-ifeq ($(CLANGPATH),)
-
-# Display message
-$(info CLANGPATH is not set: clang will be used from PATH)
-endif
-
-# Check if GCC path isn't degined
-ifeq ($(GCCPATH),)
-
-# Display message
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
-endif
-
-# Compiler settings
-CC := $(CLANGPATH)clang
-CFLAGS += -Oz -Wall -Wextra
-AS := $(GCCPATH)arm-none-eabi-gcc
-LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS +=
-LDLIBS += -lgcc -lc
-
-# Include BOLOS SDK Makefile glyphs
-include $(BOLOS_SDK)/Makefile.glyphs
-
-# Compiler settings
-APP_SOURCE_PATH += src
-SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
-INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
-APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c $(BOLOS_SDK)/lib_cxng/src/cx_hkdf.c
-
-# Check if target is the Nano S
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_ux
-
-# Otherwise check if target is the Nano X
-else ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_ux
-
-# Otherwise check if target is the Nano S Plus
-else ifeq ($(TARGET_NAME),TARGET_NANOS2)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_ux
-endif
-
-# Check if target is the Nano X
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
-
-# Otherwise check if target is the Stax
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
-
-# Otherwise check if target is the Flex
-else ifeq ($(TARGET_NAME),TARGET_FLEX)
-
-	# Target specific compiler settings
-	SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
-endif
-
-# Load command
-load: all
-
-	# Load application on device
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
-
-# Delete command
-delete:
-
-	# Delete application from device
-	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
 # Run command
 run: all
@@ -593,12 +333,5 @@ functional_tests: all
 	# Run functional tests
 	node tests/functional_tests/main.js $(CURRENCY)
 
-# Include BOLOS SDK Makefile rules
-include $(BOLOS_SDK)/Makefile.rules
-
-# Source files
-dep/%.d: %.c Makefile
-
-# List variants
-listvariants:
-	@echo VARIANTS CURRENCY mimblewimble_coin mimblewimble_coin_floonet grin grin_testnet epic_cash epic_cash_floonet
+# Include BOLOS SDK Makefile standard app
+include $(BOLOS_SDK)/Makefile.standard_app

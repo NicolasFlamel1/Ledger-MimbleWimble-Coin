@@ -71,7 +71,7 @@ rm clang.tar.xz
 mv bolos-environment/clang+llvm-13.0.1-x86_64-linux-gnu-ubuntu-18.04 bolos-environment/clang-arm-fropi
 tar -xjf gcc.tar.bz2 --directory bolos-environment
 rm gcc.tar.bz2
-mv bolos-environment/gcc-arm-none-eabi-10.3-2021.10 bolos-environment/gcc-arm-none-eabi
+mv bolos-environment/gcc-arm-none-eabi-10.3-2021.10 bolos-environment/gcc-arm-none-eabi-5_3-2016q1
 ```
 Add environmental variables (Remove the starting # from the line in your ~/.bashrc file for the device that you want to build for):
 ```
