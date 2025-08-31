@@ -138,7 +138,7 @@
 					const hardwareWallet = await UsbTransport.request();
 					
 					// Get wallet's type
-					const walletType = hardwareWallet["device"]["productName"];
+					let walletType = hardwareWallet["device"]["productName"];
 					
 					// Get wallet's name
 					walletName = hardwareWallet["device"]["manufacturerName"] + " " + hardwareWallet["device"]["productName"];
@@ -148,6 +148,13 @@
 					
 						// Throw error
 						throw "Side loading apps isn't possible on " + walletName + " hardware wallets.";
+					}
+					
+					// Otherwise check if wallet is a Ledger Nano S Plus with a newer wallet type
+					else if(walletType === "Nano S+") {
+					
+						// Set wallet type to the older wallet type
+						walletType = "Nano S Plus";
 					}
 					
 					// Verify that device has the correct target ID
@@ -330,22 +337,6 @@
 				// Catch errors
 				catch(error) {
 				
-					// Log stack trace
-					console.trace();
-					
-					// Log error
-					console.log(error);
-					
-					// Check if capture stack trace exists
-					if(typeof Error.captureStackTrace === "function") {
-					
-						// Captrue stack trace
-						Error.captureStackTrace(error);
-					}
-					
-					// Log stack
-					console.log(error.stack);
-					
 					// Add alert
 					addAlert(error);
 					
@@ -362,9 +353,6 @@
 						// Add alert
 						addAlert("There's not enough space available on the " + walletName + ". Uninstall one or more apps from the hardware wallet to install this app.");
 					}
-					
-					// Add alert
-					addAlert(error.stack);
 					
 					// Add alert
 					addAlert("Installing the app failed.");
@@ -519,11 +507,26 @@
 				
 				}
 				
-				// Claim interface
-				await device.claimInterface(1);
+				// Go through all the configuration's interfaces
+				for(let i = 0; i < device["configurations"][0]["interfaces"]["length"]; ++i) {
 				
-				// Return USB transport for the device
-				return new UsbTransport(device);
+					// Go through all of the interface's alternates
+					for(let j = 0; j < device["configurations"][0]["interfaces"][i]["alternates"]["length"]; ++j) {
+					
+						// Check if alternates is for WebUSB
+						if(device["configurations"][0]["interfaces"][i]["alternates"][j]["interfaceClass"] === 0xFF) {
+						
+							// Claim interface
+							await device.claimInterface(device["configurations"][0]["interfaces"][i]["interfaceNumber"]);
+							
+							// Return USB transport for the device
+							return new UsbTransport(device);
+						}
+					}
+				}
+				
+				// Throw error
+				throw "No WebUSB interface found for that hardware wallet.";
 			}
 			
 			// Vendor ID
