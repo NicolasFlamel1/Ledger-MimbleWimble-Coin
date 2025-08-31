@@ -1984,7 +1984,6 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 #ifdef HAVE_NBGL
 
 				// Check if time to update display
-				// TODO Fine tune this number on real Stax and Flex devices
 				if(!(i % 1)) {
 
 					// Process display events
@@ -1992,13 +1991,6 @@ void calculateBulletproofComponents(volatile uint8_t *tauX, volatile uint8_t *tO
 				}
 #endif
 			}
-
-// Check if has NGBL
-#ifdef HAVE_NBGL
-
-			// Process display events
-			os_io_seph_recv_and_process(0);
-#endif
 
 			// Update running commitment with the alpha generator and rho generator
 			bulletproofUpdateCommitment(runningCommitment, (uint8_t *)&alphaGenerator[PUBLIC_KEY_PREFIX_SIZE], (uint8_t *)&rhoGenerator[PUBLIC_KEY_PREFIX_SIZE]);
@@ -2612,21 +2604,13 @@ void useLrGenerator(volatile uint8_t *t0, volatile uint8_t *t1, volatile uint8_t
 #ifdef HAVE_NBGL
 
 				// Check if time to update display
-				// TODO Fine tune this number on real Stax and Flex devices
-				if(!(i % 4)) {
+				if(!(i % 3)) {
 
 					// Process display events
 					os_io_seph_recv_and_process(0);
 				}
 #endif
 			}
-
-// Check if has NGBL
-#ifdef HAVE_NBGL
-
-			// Process display events
-			os_io_seph_recv_and_process(0);
-#endif
 		}
 
 		// Finally
