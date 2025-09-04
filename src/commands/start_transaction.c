@@ -9,6 +9,12 @@
 #include "../storage.h"
 
 
+// Definitions
+
+// Maximum fee
+#define MAXIMUM_FEE 0xFFFFFFFFFF
+
+
 // Supporting function implementation
 
 // Process start transaction request
@@ -128,7 +134,7 @@ void processStartTransactionRequest(__attribute__((unused)) const unsigned short
 		}
 
 		// Check if fee is invalid or will overflow
-		if(!fee || UINT64_MAX - input < fee) {
+		if(!fee || fee > MAXIMUM_FEE || UINT64_MAX - input < fee) {
 
 			// Throw invalid parameters error
 			THROW(INVALID_PARAMETERS_ERROR);
