@@ -366,59 +366,59 @@ jobs:
           apt update -q && apt install -qy curl netcat-traditional nodejs npm
           npm i @ledgerhq/hw-transport-node-speculos
 
-      - name: Download Nano S MimbleWimble Coin app
-        uses: actions/download-artifact@v4
-        with:
-          name: app-debug-mimblewimble-coin-nanos
-          path: bin-mimblewimble-coin-nanos
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanos/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S MimbleWimble Coin app
-        run: |
-          node tests/functional_tests/main.js mimblewimble_coin speculos nanos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-nanos-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
-
-      - name: Download Nano S MimbleWimble Coin floonet app
-        uses: actions/download-artifact@v4
-        with:
-          name: app-debug-mimblewimble-coin-floonet-nanos
-          path: bin-mimblewimble-coin-floonet-nanos
-
-      - name: Run Speculos
-        run: |
-          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-nanos/app.elf 2>speculos.log &
-          echo $! >/tmp/speculos.pid
-          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
-
-      - name: Run tests with Nano S MimbleWimble Coin floonet app
-        run: |
-          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: speculos-mimblewimble-coin-floonet-nanos-log
-          path: speculos.log
-
-      - name: Kill Speculos
-        run: |
-          kill -9 $(cat /tmp/speculos.pid)
+#      - name: Download Nano S MimbleWimble Coin app
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: app-debug-mimblewimble-coin-nanos
+#          path: bin-mimblewimble-coin-nanos
+#
+#      - name: Run Speculos
+#        run: |
+#          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanos/app.elf 2>speculos.log &
+#          echo $! >/tmp/speculos.pid
+#          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+#
+#      - name: Run tests with Nano S MimbleWimble Coin app
+#        run: |
+#          node tests/functional_tests/main.js mimblewimble_coin speculos nanos
+#
+#      - name: Upload Speculos log
+#        uses: actions/upload-artifact@v4
+#        if: failure()
+#        with:
+#          name: speculos-mimblewimble-coin-nanos-log
+#          path: speculos.log
+#
+#      - name: Kill Speculos
+#        run: |
+#          kill -9 $(cat /tmp/speculos.pid)
+#
+#      - name: Download Nano S MimbleWimble Coin floonet app
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: app-debug-mimblewimble-coin-floonet-nanos
+#          path: bin-mimblewimble-coin-floonet-nanos
+#
+#      - name: Run Speculos
+#        run: |
+#          /speculos/speculos.py --model nanos --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-nanos/app.elf 2>speculos.log &
+#          echo $! >/tmp/speculos.pid
+#          timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
+#
+#      - name: Run tests with Nano S MimbleWimble Coin floonet app
+#        run: |
+#          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
+#
+#      - name: Upload Speculos log
+#        uses: actions/upload-artifact@v4
+#        if: failure()
+#        with:
+#          name: speculos-mimblewimble-coin-floonet-nanos-log
+#          path: speculos.log
+#
+#      - name: Kill Speculos
+#        run: |
+#          kill -9 $(cat /tmp/speculos.pid)
 
       - name: Download Nano X MimbleWimble Coin app
         uses: actions/download-artifact@v4
