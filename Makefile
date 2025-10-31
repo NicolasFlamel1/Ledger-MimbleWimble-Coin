@@ -47,8 +47,8 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
@@ -89,8 +89,8 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
@@ -129,8 +129,8 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
@@ -169,8 +169,8 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
@@ -209,8 +209,8 @@ else ifeq ($(CURRENCY),epic_cash)
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\"
 	DEFINES += CURRENCY_ABBREVIATION=\"EPIC\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
@@ -249,8 +249,8 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20\\x45PIC\"
 
-	# Check if target is the Stax or Flex
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+	# Check if target is the Stax, Flex, or Apex P
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
@@ -281,6 +281,7 @@ ICON_NANOX = "icons/$(ICON)/nanox_app.gif"
 ICON_NANOSP = "icons/$(ICON)/nanosplus_app.gif"
 ICON_STAX = "icons/$(ICON)/stax_app.png"
 ICON_FLEX = "icons/$(ICON)/flex_app.png"
+ICON_APEX_P = "icons/$(ICON)/apexp_app.png"
 
 # Application source files
 APP_SOURCE_PATH += src
@@ -298,8 +299,12 @@ ENABLE_NBGL_QRCODE = 1
 # Check if debug isn't set
 ifneq ($(DEBUG),1)
 
-	# Enable features
-	ENABLE_PENDING_REVIEW_SCREEN = 1
+	# Check if target isn't the Apex P (TODO remove this check since its a workaround for a the Apex P SDK not including C_Warning_64px)
+	ifneq ($(TARGET_NAME),TARGET_APEX_P)
+	
+		# Enable features
+		ENABLE_PENDING_REVIEW_SCREEN = 1
+	endif
 endif
 
 # Check if BOLOS ENV is defined
@@ -311,7 +316,7 @@ ifneq ($(BOLOS_ENV),)
 endif
 
 # Emulator flags
-EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+EMULATOR_FLAGS = --model `echo $(subst TARGET_, ,$(TARGET_NAME)) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 # Check if target version is defined
 ifneq ($(TARGET_VERSION),)
