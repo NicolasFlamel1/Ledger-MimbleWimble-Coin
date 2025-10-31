@@ -63,8 +63,8 @@ endif
 # Defines
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
-# Check if target is the Stax or Flex
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+# Check if target is the Stax, Flex, or Apex P
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 	# Defines
 	DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
@@ -82,6 +82,7 @@ ICON_NANOX = "icons/nanox_app.gif"
 ICON_NANOSP = "icons/nanosplus_app.gif"
 ICON_STAX = "icons/stax_app.png"
 ICON_FLEX = "icons/flex_app.png"
+ICON_APEX_P = "icons/apexp_app.png"
 
 # Application source files
 APP_SOURCE_PATH += src
@@ -113,7 +114,7 @@ ifneq ($(BOLOS_ENV),)
 endif
 
 # Emulator flags
-EMULATOR_FLAGS = --model `echo $(lastword $(subst _, ,$(TARGET_NAME))) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+EMULATOR_FLAGS = --model `echo $(subst TARGET_, ,$(TARGET_NAME)) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 # Check if target version is defined
 ifneq ($(TARGET_VERSION),)

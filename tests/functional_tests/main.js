@@ -574,9 +574,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -587,9 +587,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -605,7 +605,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -618,9 +618,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -633,7 +633,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
@@ -1026,9 +1026,9 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -1036,9 +1036,9 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -1046,9 +1046,9 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, false],
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, true],
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, false]
+							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false],
+							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), true],
+							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false]
 						]
 					}
 				]
@@ -1181,9 +1181,9 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 							"actions": [
 							
 								// Touch
-								["finger", 200, 500, false],
-								["finger", 200, 500, true],
-								["finger", 200, 500, false]
+								["finger", 200, 325, false],
+								["finger", 200, 325, true],
+								["finger", 200, 325, false]
 							]
 						},
 						{
@@ -1191,9 +1191,9 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 							"actions": [
 							
 								// Touch
-								["finger", 100, 500, false],
-								["finger", 100, 500, true],
-								["finger", 200, 500, false]
+								["finger", 100, 325, false],
+								["finger", 100, 325, true],
+								["finger", 200, 325, false]
 							]
 						},
 						{
@@ -1201,9 +1201,9 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 							"actions": [
 							
 								// Touch
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, false],
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, true],
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : 500, false]
+								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false],
+								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), true],
+								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false]
 							]
 						}
 					]
@@ -2267,9 +2267,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -2280,9 +2280,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -2298,7 +2298,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -2311,9 +2311,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -2326,7 +2326,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
@@ -2982,9 +2982,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -2995,9 +2995,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3013,7 +3013,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3026,9 +3026,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3041,7 +3041,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
@@ -3224,9 +3224,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3237,9 +3237,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3255,7 +3255,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3268,9 +3268,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3283,7 +3283,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
@@ -3443,9 +3443,9 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3456,9 +3456,9 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3474,7 +3474,7 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3487,9 +3487,9 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3502,7 +3502,7 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
@@ -3673,9 +3673,9 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 200, 500, false],
-							["finger", 200, 500, true],
-							["finger", 200, 500, false]
+							["finger", 200, 325, false],
+							["finger", 200, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3686,9 +3686,9 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", false],
 							
 							// Touch
-							["finger", 100, 500, false],
-							["finger", 100, 500, true],
-							["finger", 200, 500, false]
+							["finger", 100, 325, false],
+							["finger", 100, 325, true],
+							["finger", 200, 325, false]
 						]
 					},
 					{
@@ -3704,7 +3704,7 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3717,9 +3717,9 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 399, 586, false],
-							["finger", 399, 586, true],
-							["finger", 399, 586, false]
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3732,7 +3732,7 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch end
-							["finger", 200, 500, false]
+							["finger", 200, 325, false]
 						]
 					}
 				]
