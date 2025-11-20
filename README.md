@@ -1,20 +1,20 @@
 # MimbleWimble Coin (MWC) and MimbleWimble Coin-like cryptocurrencies Ledger hardware wallet apps
 
 ### Description
-MimbleWimble Coin (MWC) and MimbleWimble Coin-like cryptocurrencies apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Apex P hardware wallets.
+MimbleWimble Coin (MWC) and MimbleWimble Coin-like cryptocurrencies apps for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets.
 
-These apps can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Apex P hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+These apps can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) and MimbleWimble Coin-like cryptocurrencies support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
 ### Building
-Building these apps requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, Ledger Flex, or Ledger Apex P build environment. The following steps describe how to do this on Linux.
+Building these apps requires setting up a Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, Ledger Flex, or Ledger Nano Gen5 build environment. The following steps describe how to do this on Linux.
 
 Install dependencies:
 ```
 sudo apt install libc6-dev gcc-multilib g++-multilib
 ```
-Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, Ledger Flex SDK, and/or Ledger Apex P SDK:
+Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, Ledger Flex SDK, and/or Ledger Apex P (Nano Gen5) SDK:
 ```
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanos-secure-sdk
@@ -98,7 +98,7 @@ make CURRENCY=mimblewimble_coin
 make CURRENCY=grin
 make CURRENCY=epic_cash
 ```
-The MimbleWimble Coin and MimbleWimble Coin-like cryptocurrencies apps can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Apex P hardware wallets with the following commands:
+The MimbleWimble Coin and MimbleWimble Coin-like cryptocurrencies apps can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets with the following commands:
 ```
 make load CURRENCY=mimblewimble_coin
 make load CURRENCY=grin

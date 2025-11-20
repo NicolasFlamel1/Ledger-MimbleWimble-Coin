@@ -464,11 +464,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P MimbleWimble Coin app
+      - name: Build Nano Gen5 MimbleWimble Coin app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=mimblewimble_coin
 
-      - name: Upload Apex P MimbleWimble Coin app
+      - name: Upload Nano Gen5 MimbleWimble Coin app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-apexp
@@ -479,11 +479,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P MimbleWimble Coin floonet app
+      - name: Build Nano Gen5 MimbleWimble Coin floonet app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=mimblewimble_coin_floonet
 
-      - name: Upload Apex P MimbleWimble Coin floonet app
+      - name: Upload Nano Gen5 MimbleWimble Coin floonet app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-apexp
@@ -494,11 +494,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Grin app
+      - name: Build Nano Gen5 Grin app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=grin
 
-      - name: Upload Apex P Grin app
+      - name: Upload Nano Gen5 Grin app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-grin-apexp
@@ -509,11 +509,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Grin testnet app
+      - name: Build Nano Gen5 Grin testnet app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=grin_testnet
 
-      - name: Upload Apex P Grin testnet app
+      - name: Upload Nano Gen5 Grin testnet app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-grin-testnet-apexp
@@ -524,11 +524,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Epic Cash app
+      - name: Build Nano Gen5 Epic Cash app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=epic_cash
 
-      - name: Upload Apex P Epic Cash app
+      - name: Upload Nano Gen5 Epic Cash app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-epic-cash-apexp
@@ -539,11 +539,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Epic Cash floonet app
+      - name: Build Nano Gen5 Epic Cash floonet app
         run: |
           make DEBUG=1 BOLOS_SDK=$APEX_P_SDK CURRENCY=epic_cash_floonet
 
-      - name: Upload Apex P Epic Cash floonet app
+      - name: Upload Nano Gen5 Epic Cash floonet app
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-epic-cash-floonet-apexp
@@ -1015,7 +1015,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P MimbleWimble Coin app with Clang Static Analyzer
+      - name: Build Nano Gen5 MimbleWimble Coin app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=mimblewimble_coin
 
@@ -1030,7 +1030,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P MimbleWimble Coin floonet app with Clang Static Analyzer
+      - name: Build Nano Gen5 MimbleWimble Coin floonet app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=mimblewimble_coin_floonet
 
@@ -1045,7 +1045,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Grin app with Clang Static Analyzer
+      - name: Build Nano Gen5 Grin app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=grin
 
@@ -1060,7 +1060,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Grin testnet app with Clang Static Analyzer
+      - name: Build Nano Gen5 Grin testnet app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=grin_testnet
 
@@ -1075,7 +1075,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Epic Cash app with Clang Static Analyzer
+      - name: Build Nano Gen5 Epic Cash app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=epic_cash
 
@@ -1090,7 +1090,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git clean -dxf
 
-      - name: Build Apex P Epic Cash floonet app with Clang Static Analyzer
+      - name: Build Nano Gen5 Epic Cash floonet app with Clang Static Analyzer
         run: |
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=$APEX_P_SDK CURRENCY=epic_cash_floonet
 
@@ -1956,7 +1956,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P MimbleWimble Coin app
+      - name: Download Nano Gen5 MimbleWimble Coin app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-apexp
@@ -1968,7 +1968,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P MimbleWimble Coin app
+      - name: Run tests with Nano Gen5 MimbleWimble Coin app
         run: |
           node tests/functional_tests/main.js mimblewimble_coin speculos apexp
 
@@ -1983,7 +1983,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P MimbleWimble Coin floonet app
+      - name: Download Nano Gen5 MimbleWimble Coin floonet app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-mimblewimble-coin-floonet-apexp
@@ -1995,7 +1995,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P MimbleWimble Coin floonet app
+      - name: Run tests with Nano Gen5 MimbleWimble Coin floonet app
         run: |
           node tests/functional_tests/main.js mimblewimble_coin_floonet speculos apexp
 
@@ -2010,7 +2010,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P Grin app
+      - name: Download Nano Gen5 Grin app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-grin-apexp
@@ -2022,7 +2022,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P Grin app
+      - name: Run tests with Nano Gen5 Grin app
         run: |
           node tests/functional_tests/main.js grin speculos apexp
 
@@ -2037,7 +2037,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P Grin testnet app
+      - name: Download Nano Gen5 Grin testnet app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-grin-testnet-apexp
@@ -2049,7 +2049,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P Grin testnet app
+      - name: Run tests with Nano Gen5 Grin testnet app
         run: |
           node tests/functional_tests/main.js grin_testnet speculos apexp
 
@@ -2064,7 +2064,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P Epic Cash app
+      - name: Download Nano Gen5 Epic Cash app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-epic-cash-apexp
@@ -2076,7 +2076,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P Epic Cash app
+      - name: Run tests with Nano Gen5 Epic Cash app
         run: |
           node tests/functional_tests/main.js epic_cash speculos apexp
 
@@ -2091,7 +2091,7 @@ jobs:
         run: |
           kill -9 $(cat /tmp/speculos.pid)
 
-      - name: Download Apex P Epic Cash floonet app
+      - name: Download Nano Gen5 Epic Cash floonet app
         uses: actions/download-artifact@v4
         with:
           name: app-debug-epic-cash-floonet-apexp
@@ -2103,7 +2103,7 @@ jobs:
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
-      - name: Run tests with Apex P Epic Cash floonet app
+      - name: Run tests with Nano Gen5 Epic Cash floonet app
         run: |
           node tests/functional_tests/main.js epic_cash_floonet speculos apexp
 
