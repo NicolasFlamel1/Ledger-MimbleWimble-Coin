@@ -171,7 +171,7 @@ jobs:
       - name: Upload Nano Gen5 MimbleWimble Coin app
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-mimblewimble-coin-apexp
+          name: app-debug-mimblewimble-coin-nanogen5
           path: bin
 
       - name: Cleanup the repository
@@ -186,7 +186,7 @@ jobs:
       - name: Upload Nano Gen5 MimbleWimble Coin floonet app
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-mimblewimble-coin-floonet-apexp
+          name: app-debug-mimblewimble-coin-floonet-nanogen5
           path: bin
 
       - name: Cleanup the repository
@@ -440,7 +440,7 @@ jobs:
 #
 #      - name: Run tests with Nano S MimbleWimble Coin app
 #        run: |
-#          node tests/functional_tests/main.js mimblewimble_coin speculos nanos
+#          node tests/functional_tests/main.js mimblewimble_coin speculos nanoS
 #
 #      - name: Upload Speculos log
 #        uses: actions/upload-artifact@v4
@@ -467,7 +467,7 @@ jobs:
 #
 #      - name: Run tests with Nano S MimbleWimble Coin floonet app
 #        run: |
-#          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanos
+#          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanoS
 #
 #      - name: Upload Speculos log
 #        uses: actions/upload-artifact@v4
@@ -494,7 +494,7 @@ jobs:
 
       - name: Run tests with Nano X MimbleWimble Coin app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin speculos nanox
+          node tests/functional_tests/main.js mimblewimble_coin speculos nanoX
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -521,7 +521,7 @@ jobs:
 
       - name: Run tests with Nano X MimbleWimble Coin floonet app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanox
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanoX
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -548,7 +548,7 @@ jobs:
 
       - name: Run tests with Nano S Plus MimbleWimble Coin app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin speculos nanosp
+          node tests/functional_tests/main.js mimblewimble_coin speculos nanoSP
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -575,7 +575,7 @@ jobs:
 
       - name: Run tests with Nano S Plus MimbleWimble Coin floonet app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanosp
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos nanoSP
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -656,7 +656,7 @@ jobs:
 
       - name: Run tests with Flex MimbleWimble Coin app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin speculos flex
+          node tests/functional_tests/main.js mimblewimble_coin speculos europa
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -683,7 +683,7 @@ jobs:
 
       - name: Run tests with Flex MimbleWimble Coin floonet app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos flex
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos europa
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
@@ -699,24 +699,24 @@ jobs:
       - name: Download Nano Gen5 MimbleWimble Coin app
         uses: actions/download-artifact@v4
         with:
-          name: app-debug-mimblewimble-coin-apexp
-          path: bin-mimblewimble-coin-apexp
+          name: app-debug-mimblewimble-coin-nanogen5
+          path: bin-mimblewimble-coin-nanogen5
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model apex_p --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-apexp/app.elf 2>speculos.log &
+          /speculos/speculos.py --model apex_p --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-nanogen5/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
       - name: Run tests with Nano Gen5 MimbleWimble Coin app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin speculos apexp
+          node tests/functional_tests/main.js mimblewimble_coin speculos apex
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: speculos-mimblewimble-coin-apexp-log
+          name: speculos-mimblewimble-coin-nanogen5-log
           path: speculos.log
 
       - name: Kill Speculos
@@ -726,24 +726,24 @@ jobs:
       - name: Download Nano Gen5 MimbleWimble Coin floonet app
         uses: actions/download-artifact@v4
         with:
-          name: app-debug-mimblewimble-coin-floonet-apexp
-          path: bin-mimblewimble-coin-floonet-apexp
+          name: app-debug-mimblewimble-coin-floonet-nanogen5
+          path: bin-mimblewimble-coin-floonet-nanogen5
 
       - name: Run Speculos
         run: |
-          /speculos/speculos.py --model apex_p --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-apexp/app.elf 2>speculos.log &
+          /speculos/speculos.py --model apex_p --display headless --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" bin-mimblewimble-coin-floonet-nanogen5/app.elf 2>speculos.log &
           echo $! >/tmp/speculos.pid
           timeout 10 sh -c 'until nc -z 127.0.0.1 9999; do sleep 1; done'
 
       - name: Run tests with Nano Gen5 MimbleWimble Coin floonet app
         run: |
-          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos apexp
+          node tests/functional_tests/main.js mimblewimble_coin_floonet speculos apex
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: speculos-mimblewimble-coin-floonet-apexp-log
+          name: speculos-mimblewimble-coin-floonet-nanogen5-log
           path: speculos.log
 
       - name: Kill Speculos

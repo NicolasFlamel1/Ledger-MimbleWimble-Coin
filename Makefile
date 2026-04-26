@@ -63,7 +63,7 @@ endif
 # Defines
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
-# Check if target is the Stax, Flex, or Apex P
+# Check if target is the Stax, Flex, or Nano Gen5
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
 
 	# Defines
@@ -82,14 +82,14 @@ ICON_NANOX = "icons/nanox_app.gif"
 ICON_NANOSP = "icons/nanosplus_app.gif"
 ICON_STAX = "icons/stax_app.png"
 ICON_FLEX = "icons/flex_app.png"
-ICON_APEX_P = "icons/apexp_app.png"
+ICON_APEX_P = "icons/nanogen5_app.png"
 
 # Application source files
 APP_SOURCE_PATH += src
 INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/src
 APP_SOURCE_FILES += $(BOLOS_SDK)/lib_cxng/src/cx_ram.c $(BOLOS_SDK)/lib_cxng/src/cx_blake2b.c
 
-# Check if target isn't the Nano S (The Ledger Nano S SDK doesn't include support for ChaCha20 Poly1305)
+# Check if target isn't the Nano S (The Nano S SDK doesn't include support for ChaCha20 Poly1305)
 ifneq ($(TARGET_NAME),TARGET_NANOS)
 
 	# Application source files
