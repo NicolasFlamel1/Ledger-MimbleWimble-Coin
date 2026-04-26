@@ -14,7 +14,7 @@ Install dependencies:
 ```
 sudo apt install libc6-dev gcc-multilib g++-multilib
 ```
-Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, Ledger Flex SDK, and/or Ledger Apex P (Nano Gen5) SDK:
+Download the Ledger Nano S SDK, Ledger Nano X SDK, Ledger Nano S Plus SDK, Ledger Stax SDK, Ledger Flex SDK, and/or Ledger Nano Gen5 SDK:
 ```
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
 mv ledger-secure-sdk nanos-secure-sdk
@@ -62,8 +62,8 @@ echo flex > .target
 cd ..
 
 git clone https://github.com/LedgerHQ/ledger-secure-sdk.git
-mv ledger-secure-sdk apexp-secure-sdk
-cd apexp-secure-sdk
+mv ledger-secure-sdk nanogen5-secure-sdk
+cd nanogen5-secure-sdk
 git checkout apex_p_1.1.0
 git checkout API_LEVEL_26
 git pull
@@ -89,7 +89,7 @@ echo "#export BOLOS_SDK=$PWD/nanox-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/nanosplus-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/stax-secure-sdk" >> ~/.bashrc
 echo "#export BOLOS_SDK=$PWD/flex-secure-sdk" >> ~/.bashrc
-echo "#export BOLOS_SDK=$PWD/apexp-secure-sdk" >> ~/.bashrc
+echo "#export BOLOS_SDK=$PWD/nanogen5-secure-sdk" >> ~/.bashrc
 echo "export BOLOS_ENV=$PWD/bolos-environment" >> ~/.bashrc
 ```
 The MimbleWimble Coin and MimbleWimble Coin-like cryptocurrencies apps can then be built with the following commands:

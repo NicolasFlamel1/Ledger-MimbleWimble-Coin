@@ -1,5 +1,5 @@
 // Install dependencies: npm i @ledgerhq/hw-transport-node-speculos @ledgerhq/hw-transport-node-hid
-// Run: node main.js mimblewimble_coin speculos nanos
+// Run: node main.js mimblewimble_coin speculos nanoS
 
 // Use strict
 "use strict";
@@ -718,7 +718,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 	else {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -821,7 +821,7 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -834,9 +834,9 @@ async function getRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
@@ -1209,7 +1209,7 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 	else {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -1280,9 +1280,9 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false],
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), true],
-							["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false]
+							["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), false],
+							["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), true],
+							["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), false]
 						]
 					}
 				]
@@ -1301,7 +1301,7 @@ async function verifyRootPublicKeyTest(hardwareWallet, extendedPrivateKey) {
 async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType) {
 
 	// Check if not using Speculos or using a Nano hardware wallet
-	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+	if(hardwareWallet instanceof SpeculosTransport === false || hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 	
 		// Log message
 		console.log("Running verify address test");
@@ -1400,7 +1400,7 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 		if(hardwareWallet instanceof SpeculosTransport === true) {
 		
 			// Check if using a Nano hardware wallet
-			if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+			if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 			
 				// Set automation
 				await setAutomation({
@@ -1471,9 +1471,9 @@ async function verifyAddressTest(hardwareWallet, extendedPrivateKey, addressType
 							"actions": [
 							
 								// Touch
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false],
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), true],
-								["finger", 200, (hardwareWallet["deviceModel"].toLowerCase() === "flex") ? 450 : ((hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500), false]
+								["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), false],
+								["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), true],
+								["finger", 200, (hardwareWallet["deviceModel"] === "europa") ? 450 : ((hardwareWallet["deviceModel"] === "apex") ? 300 : 500), false]
 							]
 						}
 					]
@@ -2539,7 +2539,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 	if(hardwareWallet instanceof SpeculosTransport === true) {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -2687,7 +2687,7 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -2700,9 +2700,9 @@ async function receiveTransactionTest(hardwareWallet, extendedPrivateKey, switch
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3293,7 +3293,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 	if(hardwareWallet instanceof SpeculosTransport === true) {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -3441,7 +3441,7 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3454,9 +3454,9 @@ async function sendTransactionTest(hardwareWallet, extendedPrivateKey, switchTyp
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3562,7 +3562,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 	if(hardwareWallet instanceof SpeculosTransport === true) {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -3683,7 +3683,7 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3696,9 +3696,9 @@ async function getMqsTimestampSignatureTest(hardwareWallet, extendedPrivateKey) 
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
@@ -3781,7 +3781,7 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 	if(hardwareWallet instanceof SpeculosTransport === true) {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -3902,7 +3902,7 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -3915,9 +3915,9 @@ async function getMqsDefaultChallengeSignatureTest(hardwareWallet, extendedPriva
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
@@ -4029,7 +4029,7 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 	if(hardwareWallet instanceof SpeculosTransport === true) {
 	
 		// Check if using a Nano hardware wallet
-		if(hardwareWallet["deviceModel"].toLowerCase().startsWith("nano") === true) {
+		if(hardwareWallet["deviceModel"] === "nanoS" || hardwareWallet["deviceModel"] === "nanoX" || hardwareWallet["deviceModel"] === "nanoSP") {
 		
 			// Set automation
 			await setAutomation({
@@ -4132,7 +4132,7 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 							["setbool", "confirmed", true],
 							
 							// Touch start
-							["finger", 250, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 300 : 500, true]
+							["finger", 250, (hardwareWallet["deviceModel"] === "apex") ? 300 : 500, true]
 						]
 					},
 					{
@@ -4145,9 +4145,9 @@ async function getLoginSignatureTest(hardwareWallet, extendedPrivateKey) {
 						"actions": [
 						
 							// Touch
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, true],
-							["finger", (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 299 : 399, (hardwareWallet["deviceModel"].toLowerCase() === "apexp") ? 386 : 586, false]
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, true],
+							["finger", (hardwareWallet["deviceModel"] === "apex") ? 299 : 399, (hardwareWallet["deviceModel"] === "apex") ? 386 : 586, false]
 						]
 					},
 					{
