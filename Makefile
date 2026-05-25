@@ -47,11 +47,17 @@ ifeq ($(CURRENCY),mimblewimble_coin)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"MWC\"
 
-	# Check if target is the Stax, Flex, or Nano Gen5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big_monochrome
 
 	# Otherwise
 	else
@@ -89,11 +95,17 @@ else ifeq ($(CURRENCY),mimblewimble_coin_floonet)
 	DEFINES += CURRENCY_NAME=\"MimbleWimble\\x20\\x43oin\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20MWC\"
 
-	# Check if target is the Stax, Flex, or Nano Gen5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_mimblewimble_coin_big_monochrome
 
 	# Otherwise
 	else
@@ -129,11 +141,17 @@ else ifeq ($(CURRENCY),grin)
 	DEFINES += CURRENCY_NAME=\"Grin\"
 	DEFINES += CURRENCY_ABBREVIATION=\"GRIN\"
 
-	# Check if target is the Stax, Flex, or Nano Gen5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big_monochrome
 
 	# Otherwise
 	else
@@ -169,11 +187,17 @@ else ifeq ($(CURRENCY),grin_testnet)
 	DEFINES += CURRENCY_NAME=\"Grin\\x20Testnet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Testnet\\x20GRIN\"
 
-	# Check if target is the Stax, Flex, or Nano Gen 5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_grin_big_monochrome
 
 	# Otherwise
 	else
@@ -209,11 +233,17 @@ else ifeq ($(CURRENCY),epic_cash)
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\"
 	DEFINES += CURRENCY_ABBREVIATION=\"EPIC\"
 
-	# Check if target is the Stax, Flex, or Nano Gen 5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big_monochrome
 
 	# Otherwise
 	else
@@ -249,11 +279,17 @@ else ifeq ($(CURRENCY),epic_cash_floonet)
 	DEFINES += CURRENCY_NAME=\"Epic\\x20\\x43\\x61sh\\x20\\x46loonet\"
 	DEFINES += CURRENCY_ABBREVIATION=\"Floonet\\x20\\x45PIC\"
 
-	# Check if target is the Stax, Flex, or Nano Gen 5
-	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
+	# Check if target is the Stax or Flex
+	ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
 
 		# Defines
 		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big
+
+	# Otherwise check if target is the Nano Gen5
+	else ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_APEX_P))
+
+		# Defines
+		DEFINES += CURRENCY_ICON_DETAILS=C_icon_epic_cash_big_monochrome
 
 	# Otherwise
 	else
@@ -303,24 +339,6 @@ ifneq ($(DEBUG),1)
 	ENABLE_PENDING_REVIEW_SCREEN = 1
 endif
 
-# Check if BOLOS ENV is defined
-ifneq ($(BOLOS_ENV),)
-
-	# Set compiler paths
-	CLANGPATH = $(BOLOS_ENV)/clang-arm-fropi/bin/
-	GCCPATH = $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
-endif
-
-# Emulator flags
-EMULATOR_FLAGS = --model `echo $(subst TARGET_, ,$(TARGET_NAME)) | tr 2 P | tr A-Z a-z` --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-
-# Check if target version is defined
-ifneq ($(TARGET_VERSION),)
-
-	# SDK emulator flag
-	EMULATOR_FLAGS += --sdk $(subst $(eval) ,.,$(wordlist 1,2,$(subst ., ,$(TARGET_VERSION))))
-endif
-
 # Make command
 all: default
 
@@ -328,7 +346,7 @@ all: default
 run: all
 
 	# Run application in emulator
-	SPECULOS_APPNAME=$(APPNAME):$(APPVERSION) $(BOLOS_EMU)/speculos.py bin/app.elf $(EMULATOR_FLAGS)
+	$(BOLOS_EMU)/speculos.py bin/app.elf --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 # Functional tests
 functional_tests: all
