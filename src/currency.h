@@ -56,8 +56,7 @@
 #ifndef CURRENCY_MQS_VERSION
 
 	// Define default currency MQS version
-	#define CURRENCY_MQS_VERSION \
-		{ 0, 0 }
+	#define CURRENCY_MQS_VERSION {0, 0}
 #endif
 
 // Check if currency Slatepack address human readable part isn't defined

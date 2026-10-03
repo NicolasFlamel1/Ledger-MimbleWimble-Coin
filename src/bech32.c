@@ -4,6 +4,7 @@
 #undef _GNU_SOURCE
 #include "bech32.h"
 #include "common.h"
+#include "crypto.h"
 
 
 // Definitions
@@ -307,6 +308,7 @@ void bech32Decode(uint8_t *result, const char *data, const size_t length) {
 		const size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER + startOfData;
 
 		// Get first quantum
+		__builtin_assume(numberOfBytes == ED25519_PUBLIC_KEY_SIZE);
 		const char firstQuantum = (char *)memchr(CHARACTERS, data[position], sizeof(CHARACTERS)) - CHARACTERS;
 
 		// Get second quantum
