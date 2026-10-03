@@ -3,7 +3,7 @@
 ### Description
 MimbleWimble Coin (MWC) app for Ledger Nano S, Ledger Nano X, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets.
 
-Ledger's signed and approved version of this app can be installed onto all Ledger hardware wallets from within [Ledger Live](https://www.ledger.com/ledger-live). Otherwise this app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
+This app can be installed onto Ledger Nano S, Ledger Nano S Plus, Ledger Stax, Ledger Flex, and Ledger Nano Gen5 hardware wallets by going [here](https://htmlpreview.github.io/?https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/blob/master/tools/installer/index.html) with a web browser that supports [WebUSB](https://caniuse.com/webusb).
 
 Ledger Live Desktop and Ledger Live Mobile with MimbleWimble Coin (MWC) support can be downloaded [here](https://github.com/NicolasFlamel1/ledger-live/releases).
 
