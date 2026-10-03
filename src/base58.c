@@ -104,7 +104,9 @@ bool base58DecodeWithChecksum(uint8_t *result, const char *data, const size_t le
 	getChecksum(checksum, result, resultLength - BASE58_CHECKSUM_SIZE);
 
 	// Return if the checksum matches the expected result
+#if defined __has_builtin && __has_builtin(__builtin_assume)
 	__builtin_assume(resultLength == sizeof((uint8_t[])CURRENCY_MQS_VERSION) + COMPRESSED_PUBLIC_KEY_SIZE + BASE58_CHECKSUM_SIZE);
+#endif
 	return !memcmp(&result[resultLength - BASE58_CHECKSUM_SIZE], checksum, sizeof(checksum));
 }
 
