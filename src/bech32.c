@@ -308,7 +308,9 @@ void bech32Decode(uint8_t *result, const char *data, const size_t length) {
 		const size_t position = i * BITS_IN_A_BYTE / BITS_PER_CHARACTER + startOfData;
 
 		// Get first quantum
+#if defined __has_builtin && __has_builtin(__builtin_assume)
 		__builtin_assume(numberOfBytes == ED25519_PUBLIC_KEY_SIZE);
+#endif
 		const char firstQuantum = (char *)memchr(CHARACTERS, data[position], sizeof(CHARACTERS)) - CHARACTERS;
 
 		// Get second quantum
