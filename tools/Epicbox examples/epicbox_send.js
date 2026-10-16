@@ -22,7 +22,7 @@ const DESTINATION = "esZ1P3crbc2XCHaGf7fQCGEcbnpgTBngPcZwciZZBbbdmPryFNEA@epicbo
 const DATA = "Hello, World!";
 
 // Epicbox server
-const EPICBOX_SERVER = "wss://epicbox.epiccash.com:443";
+const EPICBOX_SERVER = "epicbox.epiccash.com:443";
 
 // Request class
 const REQUEST_CLASS = 0xC7;
@@ -87,7 +87,7 @@ const INDEX = new BigNumber(0);
 	console.log("Connecting to server");
 	
 	// Connect to the server
-	const connection = new WebSocket(EPICBOX_SERVER);
+	const connection = new WebSocket("wss://" + EPICBOX_SERVER);
 	
 	// Connection on message
 	connection.on("open", async function() {
@@ -159,7 +159,7 @@ const INDEX = new BigNumber(0);
 		// Send message to the server
 		connection.send(JSON.stringify({
 			"type": "PostSlate",
-			"from": epicboxAddress,
+			"from": epicboxAddress + "@" + EPICBOX_SERVER,
 			"to": DESTINATION.split("@")[0],
 			"str": message,
 			"signature": Common.toHexString(signature)
