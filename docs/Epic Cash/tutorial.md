@@ -14,9 +14,9 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Requirements
 
-1. [You've initialized your Ledger hardware wallet.](https://support.ledger.com/hc/en-us/articles/360000613793-Set-up-your-Ledger-Nano-S?docs=true)
-2. [The latest firmware is installed on your Ledger hardware wallet.](https://support.ledger.com/hc/en-us/articles/360002731113-Update-Ledger-Nano-S-firmware?docs=true)
-3. [You have Ledger Live Desktop installed.](https://support.ledger.com/hc/en-us/articles/4404389606417-Download-and-install-Ledger-Live?docs=true)
+1. [You've initialized your Ledger hardware wallet.](https://support.ledger.com/article/360000613793-zd)
+2. [The latest firmware is installed on your Ledger hardware wallet.](https://support.ledger.com/article/360002731113-zd)
+3. [You have Ledger Live Desktop installed.](https://support.ledger.com/article/4404389606417-zd)
 
 ## Installation Instructions
 
@@ -160,5 +160,4 @@ Hardware wallets provide a secure way to manage your crypto assets by keeping yo
 
 ## Support
 
-* Epic Cash Forum: [https://forum.epiccash.com](https://forum.epiccash.com)
 * Github: [https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues](https://github.com/NicolasFlamel1/Ledger-MimbleWimble-Coin/issues)
